@@ -53,6 +53,14 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
 
+
+app.use((req, res, next) => {
+  console.log('📦 Received cookies:', req.cookies);
+  console.log('📦 Received headers:', req.headers.cookie);
+  next();
+});
+
+
 // 404 handler - use a specific path instead of '*'
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
@@ -63,6 +71,9 @@ app.use((error, req, res, next) => {
   console.error('Error:', error);
   res.status(500).json({ error: 'Internal server error' });
 });
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode`);
