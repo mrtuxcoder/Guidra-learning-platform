@@ -3,7 +3,13 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 
-dotenv.config();
+const dotenv = require('dotenv');
+dotenv.config({
+  path: process.env.NODE_ENV === 'production' 
+    ? '.env.production' 
+    : '.env.development'
+});
+
 const passport = require('./configs/passport');
 const connectDB = require('./configs/db');
 const userRoute = require('./routes/user-route');
@@ -60,6 +66,7 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV} mode`);
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌐 Health check`);
 });
