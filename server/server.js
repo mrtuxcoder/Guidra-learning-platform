@@ -1,5 +1,4 @@
 const express = require('express');
-app.set('trust proxy', 1)
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
@@ -18,6 +17,7 @@ const progressRoute = require('./routes/progress-route')
 const PORT = process.env.PORT || 5000;
 
 const app = express();
+app.set('trust proxy', 1)
 app.use(passport.initialize());
 // Connect to database
 connectDB();
