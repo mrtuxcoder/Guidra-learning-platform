@@ -2,11 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
-dotenv.config({
-  path: process.env.NODE_ENV === 'production' 
-    ? '.env.production' 
-    : '.env.development'
-});
+dotenv.config({});
 
 const passport = require('./configs/passport');
 const connectDB = require('./configs/db');
