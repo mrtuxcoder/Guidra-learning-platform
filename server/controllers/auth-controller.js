@@ -10,8 +10,7 @@ const setTokenCookie = (res, user) => {
     secure: false,
     sameSite: 'none',
      path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-     domain: 'https://guidra-learning-platform.onrender.com'
+    maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
   console.log('✅ [SET TOKEN COOKIE] Cookie set for user:', user.email);
