@@ -2,8 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
-
-const dotenv = require('dotenv');
 dotenv.config({
   path: process.env.NODE_ENV === 'production' 
     ? '.env.production' 
