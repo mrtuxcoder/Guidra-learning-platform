@@ -4,13 +4,13 @@ const passport = require('../configs/passport');
 
 const setTokenCookie = (res, user) => {
   const token = signJwt({ id: user._id, email: user.email, name: user.name });
-
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: true,
-     path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
+res.cookie('token', token, {
+  httpOnly: true,
+  secure: true, // true for HTTPS
+  sameSite: 'none', // Required for cross-origin (different Render domains)
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60 * 1000
+});
 
   console.log('✅ [SET TOKEN COOKIE] Cookie set for user:', user.email);
   return token;
