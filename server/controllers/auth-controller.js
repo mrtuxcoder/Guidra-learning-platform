@@ -8,9 +8,10 @@ const setTokenCookie = (res, user) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: false,
-    sameSite: 'lax',
+    sameSite: 'none',
      path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000,
+     domain: 'http://localhost:5173/'
   });
 
   console.log('✅ [SET TOKEN COOKIE] Cookie set for user:', user.email);
