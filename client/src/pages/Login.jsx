@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import {
   TextField,
@@ -28,7 +26,7 @@ import {
 } from "@mui/icons-material";
 import { loginUser, googleAuth } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-import { isAuthenticated } from "../utils/auth";
+import { hasAuthCookie } from "../utils/auth"; // Use sync check instead of async
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -40,23 +38,23 @@ export default function Login() {
   const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect if already authenticated - FIXED
+  // FIXED: Only check for existing auth cookie, don't make API calls
   useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      try {
-        const authenticated = await isAuthenticated();
-        if (authenticated) {
-          console.log('✅ [LOGIN] User already authenticated, redirecting to profile');
-          navigate('/profile');
-        }
-      } catch (error) {
-        console.error('❌ [LOGIN] Auth check failed:', error);
-      } finally {
+    const checkInitialAuth = () => {
+      // Only redirect if we have an auth cookie AND we're not coming from an OAuth flow
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasOAuthError = urlParams.get('error');
+      
+      if (hasAuthCookie() && !hasOAuthError) {
+        console.log('🔐 [LOGIN] Auth cookie found, redirecting to profile');
+        navigate('/profile');
+      } else {
+        console.log('🔐 [LOGIN] No auth cookie or OAuth error, showing login form');
         setAuthChecked(true);
       }
     };
 
-    checkAuthAndRedirect();
+    checkInitialAuth();
   }, [navigate]);
 
   const handleSubmit = async (e) => {
@@ -71,16 +69,9 @@ export default function Login() {
       
       setError("");
       
-      // Test if we can access profile immediately after login
-      try {
-        console.log("🔐 [FRONTEND] Testing profile access after login...");
-        // Give a small delay for cookie to be processed
-        await new Promise(resolve => setTimeout(resolve, 500));
-        window.location.href = "/profile";
-      } catch (profileError) {
-        console.error("❌ [FRONTEND] Profile test failed:", profileError);
-        setError("Login successful but cannot access profile. Please try again.");
-      }
+      // Use navigate instead of window.location to avoid race conditions
+      console.log("🔐 [FRONTEND] Login successful, redirecting to profile...");
+      navigate('/profile', { replace: true });
       
     } catch (err) {
       console.error("❌ [FRONTEND] Login error:", err);
@@ -104,11 +95,17 @@ export default function Login() {
     setError("");
     
     console.log("🔐 [FRONTEND] Initiating Google OAuth...");
+    
+    // Clear any existing errors from URL first
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+    
     googleAuth();
     
+    // Fallback in case the redirect doesn't happen
     setTimeout(() => {
       setGoogleLoading(false);
-    }, 3000);
+    }, 5000);
   };
 
   // Check if we're returning from OAuth with an error
@@ -117,6 +114,8 @@ export default function Login() {
     const error = urlParams.get('error');
     
     if (error) {
+      setAuthChecked(true); // Make sure form is shown even with errors
+      
       switch (error) {
         case 'auth_failed':
           setError('Google authentication failed. Please try again.');
@@ -127,16 +126,20 @@ export default function Login() {
         case 'server_error':
           setError('Server error during authentication. Please try again.');
           break;
+        case 'oauth_cancelled':
+          setError('Google sign-in was cancelled. Please try again.');
+          break;
         default:
           setError('Authentication failed. Please try again.');
       }
       
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Clean up URL but keep the form visible
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
     }
   }, []);
 
-  // Show loading while checking auth
+  // Show loading while checking initial auth
   if (!authChecked) {
     return (
       <Box
@@ -172,7 +175,7 @@ export default function Login() {
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "center", md: "flex-start" }, mb: 3 }}>
                 <School sx={{ fontSize: 40, mr: 2 }} />
                 <Typography variant="h4" fontWeight="700">
-           Guidra
+                  Guidra
                 </Typography>
               </Box>
               
@@ -197,7 +200,7 @@ export default function Login() {
                   fontWeight: 400
                 }}
               >
-               Learn with structure. Practice with clarity. Grow with Guidra.
+                Learn with structure. Practice with clarity. Grow with Guidra.
               </Typography>
 
               <Box sx={{ display: "flex", gap: 3, mt: 4, justifyContent: { xs: "center", md: "flex-start" } }}>

@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+// App.js
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useState, useEffect } from 'react';
@@ -43,16 +44,21 @@ const LoadingSpinner = () => (
 export default function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
+  const location = useLocation();
 
+  // Check auth on initial load AND when location changes
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [location]); // Re-check auth when route changes
 
   const checkAuth = async () => {
     try {
+      console.log('🔐 [APP] Checking authentication status...');
       const authenticated = await isAuthenticated();
+      console.log('🔐 [APP] Authentication result:', authenticated);
       setIsAuth(authenticated);
     } catch (error) {
+      console.error('🔐 [APP] Auth check error:', error);
       setIsAuth(false);
     } finally {
       setAuthChecked(true);
@@ -110,4 +116,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-

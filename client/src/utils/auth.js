@@ -1,24 +1,89 @@
 // Token management utilities - HTTP-ONLY COOKIE VERSION
-import API from '../api/api'; // Import your configured axios instance
+import API from '../api/api';
 
 /**
- * Check if user is authenticated by trying to access profile
- * This is async because we need to make an API call to verify the cookie
+ * Check authentication by making API call - this is the ONLY reliable way
+ * for HTTP-only cookies since they can't be read by JavaScript
  */
 export const isAuthenticated = async () => {
   try {
-    // Use your configured API instance that has withCredentials: true
-    const response = await API.get("/user/profile");
+    // Make a lightweight request to check auth status
+    const response = await API.get("/user/profile", {
+      timeout: 3000,
+      validateStatus: (status) => status < 500 // Don't throw on 401/403
+    });
+    
+    console.log('🔐 [AUTH] Auth check response status:', response.status);
     return response.status === 200;
   } catch (error) {
-    console.log('🔐 [AUTH] Authentication check failed:', error.response?.status);
+    console.log('🔐 [AUTH] Authentication check failed:', error.response?.status || error.message);
+    
+    // If it's a network error or timeout, we can't determine auth status
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+      console.log('🔐 [AUTH] Network issue - assuming not authenticated for safety');
+      return false;
+    }
+    
     return false;
   }
 };
 
 /**
+ * Quick synchronous check - THIS CANNOT DETECT HTTP-ONLY COOKIES
+ * Only use this for non-critical UI decisions, not for authentication
+ */
+export const hasAuthCookie = () => {
+  if (typeof document === 'undefined') return false;
+  
+  console.log('🔐 [AUTH] Available cookies:', document.cookie);
+  
+  // This will only find NON-HTTP-ONLY cookies
+  // HTTP-only cookies are invisible to JavaScript
+  const hasCookie = document.cookie.includes('token=') || 
+                   document.cookie.includes('auth=') ||
+                   document.cookie.includes('session=');
+  
+  console.log('🔐 [AUTH] Has visible auth cookie:', hasCookie);
+  return hasCookie;
+};
+
+/**
+ * Enhanced authentication check with caching
+ */
+let authCache = {
+  timestamp: 0,
+  value: null,
+  TTL: 60000 // 1 minute cache
+};
+
+export const checkAuthWithCache = async () => {
+  const now = Date.now();
+  
+  // Return cached result if still valid
+  if (authCache.value !== null && (now - authCache.timestamp) < authCache.TTL) {
+    return authCache.value;
+  }
+  
+  const isAuth = await isAuthenticated();
+  
+  // Cache the result
+  authCache = {
+    timestamp: now,
+    value: isAuth
+  };
+  
+  return isAuth;
+};
+
+/**
+ * Clear authentication cache
+ */
+export const clearAuthCache = () => {
+  authCache = { timestamp: 0, value: null, TTL: 60000 };
+};
+
+/**
  * Get cookie value by name (only works for non-HTTP-only cookies)
- * Note: HTTP-only cookies cannot be read by JavaScript
  */
 export const getCookie = (name) => {
   if (typeof document === 'undefined') return null;
@@ -33,35 +98,39 @@ export const getCookie = (name) => {
 };
 
 /**
- * Clear authentication token from cookie - COMPREHENSIVE VERSION
+ * Clear authentication token from cookie
  */
 export const clearAllTokens = () => {
   console.log('🔐 [AUTH] Clearing all tokens...');
   
-  // Clear HTTP-only cookie from all possible paths and domains
+  // Clear auth cache immediately
+  clearAuthCache();
+  
+  // Clear any potential cookies (both HTTP-only and regular)
+  // Note: This only clears cookies that are accessible to JavaScript
   const domains = [
     window.location.hostname,
-    '.' + window.location.hostname, // subdomains
-    'localhost',
-    '.localhost'
+    '.' + window.location.hostname,
   ];
   
-  const paths = ['/', '/api', '/user'];
+  // Add localhost variants if needed
+  if (window.location.hostname === 'localhost') {
+    domains.push('localhost', '.localhost');
+  }
   
   domains.forEach(domain => {
-    paths.forEach(path => {
-      // Expire the cookie
-      document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=${domain};`;
-      // Also try without domain for localhost
-      document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
-    });
+    // Clear with domain
+    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
+    // Clear without domain
+    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   });
   
-  // Additional cleanup for any residual tokens
-  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  // Clear any other potential auth cookies
+  ['auth', 'session', 'refreshToken'].forEach(cookieName => {
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  });
   
-  console.log('🔐 [AUTH] All tokens cleared from cookies');
-  console.log('🔐 [AUTH] Remaining cookies:', document.cookie);
+  console.log('🔐 [AUTH] Client-side tokens cleared');
 };
 
 /**
@@ -70,12 +139,15 @@ export const clearAllTokens = () => {
 export const logoutBackend = async () => {
   try {
     console.log('🔐 [AUTH] Calling backend logout endpoint...');
-    const response = await API.get("/user/logout");
+    const response = await API.get("/user/logout", {
+      timeout: 5000
+    });
     console.log('✅ [AUTH] Backend logout successful');
     return response;
   } catch (error) {
     console.error('❌ [AUTH] Backend logout failed:', error);
-    throw error;
+    // Don't throw - we still want to clear client-side tokens
+    return null;
   }
 };
 
@@ -84,28 +156,34 @@ export const logoutBackend = async () => {
  */
 export const completeLogout = async () => {
   try {
-    // 1. Call backend logout first
-    await logoutBackend();
+    // Clear cache first
+    clearAuthCache();
+    
+    // Try backend logout but don't wait too long
+    const logoutPromise = logoutBackend();
+    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2000));
+    
+    await Promise.race([logoutPromise, timeoutPromise]);
   } catch (error) {
-    console.log('🔐 [AUTH] Continuing with client-side logout despite backend error');
+    console.log('🔐 [AUTH] Logout completed with minor issues');
   } finally {
-    // 2. Always clear client-side tokens
+    // Always clear client-side tokens
     clearAllTokens();
     
-    // 3. Force reload to ensure clean state
-    setTimeout(() => {
-      window.location.href = '/login';
-    }, 100);
+    // Redirect to login
+    window.location.href = '/login';
   }
 };
 
 /**
- * Redirect to login if not authenticated
+ * IMPORTANT: For HTTP-only cookies, we CANNOT rely on sync checks
+ * Always use async isAuthenticated() for actual auth decisions
  */
 export const requireAuth = async (redirectPath = '/login') => {
+  // For HTTP-only cookies, we MUST make an API call
   const authenticated = await isAuthenticated();
   if (!authenticated) {
-    console.log('🔐 [AUTH] Authentication required, redirecting to login');
+    console.log('🔐 [AUTH] Authentication failed, redirecting to login');
     window.location.href = redirectPath;
     return false;
   }
@@ -129,16 +207,26 @@ export const requireGuest = async (redirectPath = '/profile') => {
  * Debug function to check auth status
  */
 export const debugAuth = async () => {
-  const authenticated = await isAuthenticated();
+  const [hasCookie, isAuth] = await Promise.all([
+    Promise.resolve(hasAuthCookie()),
+    isAuthenticated()
+  ]);
+  
   console.group('🔐 Authentication Debug (HTTP-Only Cookie)');
-  console.log('Authenticated:', authenticated);
-  console.log('All Cookies:', document.cookie);
-  console.log('Has token cookie:', document.cookie.includes('token='));
+  console.log('Has Visible Auth Cookie:', hasCookie);
+  console.log('Is Actually Authenticated (API check):', isAuth);
+  console.log('All Visible Cookies:', document.cookie);
+  console.log('Auth Cache:', authCache);
   console.groupEnd();
-  return { isAuthenticated: authenticated };
+  
+  return { 
+    hasVisibleAuthCookie: hasCookie, 
+    isAuthenticated: isAuth,
+    visibleCookies: document.cookie 
+  };
 };
 
-// These functions are not needed for HTTP-only cookie approach
+// Legacy functions for compatibility
 export const getToken = () => {
   console.log('⚠️ [AUTH] getToken called - HTTP-only cookies cannot be read');
   return null;
@@ -153,12 +241,14 @@ export const setUserData = () => {};
 export const isTokenExpiring = () => true;
 
 export const getAuthStatus = async () => {
-  const isAuthenticated = await isAuthenticated();
+  const isAuth = await isAuthenticated();
+  
   return { 
-    isAuthenticated, 
+    isAuthenticated: isAuth, 
+    hasVisibleAuthCookie: hasAuthCookie(),
     token: null, 
     user: null, 
-    tokenSource: 'cookie',
+    tokenSource: 'http-only-cookie',
     isExpiring: false 
   };
 };
@@ -166,6 +256,9 @@ export const getAuthStatus = async () => {
 export default {
   getToken,
   isAuthenticated,
+  checkAuthWithCache,
+  hasAuthCookie,
+  clearAuthCache,
   getCookie,
   clearAllTokens,
   logoutBackend,

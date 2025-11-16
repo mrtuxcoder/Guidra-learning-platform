@@ -14,7 +14,7 @@ import ProfileHeader from "../components/profile/ProfileHeader";
 import ProgressStats from "../components/profile/ProgressStats";
 import PersonalInfo from "../components/profile/PersonalInfo";
 import TopicsProgress from "../components/profile/TopicsProgress";
-import { clearAllTokens } from "../utils/auth";
+import { clearAllTokens, debugAuth } from "../utils/auth";
 import { learningStyles, understandingLevels } from "../components/profile/constants";
 
 export default function Profile() {
@@ -25,12 +25,22 @@ export default function Profile() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Debug auth status first
+    const debugAuthStatus = async () => {
+      console.log("🔐 [PROFILE] Debugging auth status...");
+      const authStatus = await debugAuth();
+      console.log("🔐 [PROFILE] Auth debug result:", authStatus);
+    };
+    
+    debugAuthStatus();
     fetchProfile();
   }, []);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
+      console.log("🔐 [PROFILE] Starting profile fetch...");
+      
       const response = await getProfile();
       console.log("✅ [PROFILE] API Response:", response);
       
@@ -48,9 +58,20 @@ export default function Profile() {
       setError("");
     } catch (err) {
       console.error("❌ [PROFILE] Fetch error:", err);
+      console.error("❌ [PROFILE] Error details:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+        code: err.code
+      });
+      
       if (err.response?.status === 401) {
         clearAllTokens();
         setError("Session expired. Please login again.");
+        // Auto-redirect after showing message
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       } else {
         setError(err.response?.data?.error || err.message || "Failed to load profile");
       }
@@ -59,8 +80,9 @@ export default function Profile() {
     }
   };
 
+  // ... rest of your component remains the same
   const handleLogout = async () => {
-   await logoutUser()
+    await logoutUser()
     window.location.href = "/login";
   };
 
@@ -213,7 +235,7 @@ export default function Profile() {
     );
   }
 
-  if (error && error.includes("login") && !user) {
+  if (error && error.includes("Session expired") && !user) {
     return (
       <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <Alert severity="warning" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
@@ -235,6 +257,13 @@ export default function Profile() {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Alert severity="error">{error}</Alert>
+        <Button 
+          variant="contained" 
+          onClick={fetchProfile}
+          sx={{ mt: 2 }}
+        >
+          Retry
+        </Button>
       </Container>
     );
   }
@@ -312,7 +341,7 @@ export default function Profile() {
             px: { xs: 2, sm: 3, md: 4 },
             maxWidth: '100% !important'
           }}>
-            {error && !error.includes("login") && (
+            {error && !error.includes("Session expired") && (
               <Alert severity="error" sx={{ 
                 mb: 3, 
                 borderRadius: 2,

@@ -48,38 +48,34 @@ export default function Register() {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
-
-  if (formData.password !== formData.confirmPassword) {
-    setError("Passwords do not match");
-    setLoading(false);
-    return;
-  }
-
-  try {
-    console.log("🚀 [REGISTER] Sending registration request...");
-    const { data } = await registerUser(formData);
-    console.log("✅ [REGISTER] Registration successful:", data);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     setError("");
-    
-    // Add more explicit logging
-    console.log("🔄 [REGISTER] Redirecting to /personalize in 1 second...");
-    
-    setTimeout(() => {
-      console.log("🎯 [REGISTER] Executing redirect to /personalize");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log("🚀 [REGISTER] Sending registration request...");
+      const { data } = await registerUser(formData);
+      console.log("✅ [REGISTER] Registration successful:", data);
+      setError("");
+      
+      // Use window.location.href for hard redirect like in Login
+      console.log("🎯 [REGISTER] Redirecting to /personalize");
       window.location.href = "/personalize";
-    }, 1000);
-    
-  } catch (err) {
-    console.error("❌ [REGISTER] Registration failed:", err);
-    setError(err.response?.data?.error || err.response?.data?.message || "Registration failed. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+      
+    } catch (err) {
+      console.error("❌ [REGISTER] Registration failed:", err);
+      setError(err.response?.data?.error || err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword);
@@ -98,11 +94,17 @@ const handleSubmit = async (e) => {
     setError("");
     
     console.log("🔐 [FRONTEND] Initiating Google OAuth for registration...");
+    
+    // Clear any existing errors from URL first
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+    
     googleAuth();
     
+    // Fallback in case the redirect doesn't happen
     setTimeout(() => {
       setGoogleLoading(false);
-    }, 3000);
+    }, 5000);
   };
 
   // Check if we're returning from OAuth with an error
@@ -121,11 +123,16 @@ const handleSubmit = async (e) => {
         case 'server_error':
           setError('Server error during authentication. Please try again.');
           break;
+        case 'oauth_cancelled':
+          setError('Google sign-in was cancelled. Please try again.');
+          break;
         default:
           setError('Authentication failed. Please try again.');
       }
       
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Clean up URL
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
     }
   }, []);
 
@@ -146,7 +153,7 @@ const handleSubmit = async (e) => {
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
             <School sx={{ fontSize: 40, mr: 2, color: "white" }} />
             <Typography variant="h4" fontWeight="700" color="white">
-             Guidra
+              Guidra
             </Typography>
           </Box>
           
@@ -173,7 +180,7 @@ const handleSubmit = async (e) => {
               fontWeight: 400
             }}
           >
-           Start your step-by-step learning path, guided by AI.
+            Start your step-by-step learning path, guided by AI.
           </Typography>
         </Box>
 
