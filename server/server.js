@@ -20,13 +20,32 @@ connectDB();
 
 
 // Simple CORS setup - NO app.options('*')
+// Fix your CORS configuration:
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.CLIENT_URL,
+      'http://localhost:5173', // Vite default
+    ];
+    
+    // Allow requests with no origin (like mobile apps, Postman, or server requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // Allow any Vercel preview deployment
+      if (origin.includes('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With']
 }));
-
 
 // Body parsing middleware
 app.use(express.json());
