@@ -228,7 +228,9 @@ const setTokenCookie = (res, user) => {
     secure: true,
     sameSite: 'none',
     path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+     domain: "https://guidra.vercel.app"
+
   };
 
   console.log('🍪 [SET TOKEN COOKIE] Setting cookie for:', user.email);
@@ -304,7 +306,8 @@ exports.logoutController = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
-      path: '/'
+      path: '/',
+        domain: "https://guidra.vercel.app"
     };
 
     res.clearCookie('token', cookieOptions);
