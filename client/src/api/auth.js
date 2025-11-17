@@ -37,5 +37,5 @@ export const googleAuthSuccess = async () => {
 
 // LOGOUT
 export const logoutUser = async () => {
-  return await API.get("/user/logout");
+  return await API.post("/user/logout");
 };

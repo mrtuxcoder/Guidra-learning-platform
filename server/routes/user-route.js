@@ -7,7 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware')
 
 router.post('/login',loginController)
 router.post('/register',registerController)
-router.get('/logout',logoutController)
+router.post('/logout',logoutController)
 router.get('/profile',authMiddleware, profileController)
 
 

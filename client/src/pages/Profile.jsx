@@ -30,8 +30,8 @@ export default function Profile() {
       console.log("🔐 [PROFILE] Debugging auth status...");
       const authStatus = await debugAuth();
       console.log("🔐 [PROFILE] Auth debug result:", authStatus);
+      
     };
-    
     debugAuthStatus();
     fetchProfile();
   }, []);
@@ -80,11 +80,17 @@ export default function Profile() {
     }
   };
 
-  // ... rest of your component remains the same
-  const handleLogout = async () => {
-    await logoutUser()
+
+const handleLogout = async () => {
+  try {
+    await logoutUser(); // This will now work with POST
     window.location.href = "/login";
-  };
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Fallback: redirect anyway
+    window.location.href = "/login";
+  }
+};
 
   const handleLoginRedirect = () => {
     navigate('/login');
