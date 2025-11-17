@@ -18,6 +18,7 @@ router.get('/google', googleAuthController);
 router.get('/google/callback', googleCallbackController);
 router.get('/google/success', googleSuccessController);
 
+
 // Utility route
 router.get('/check-user', checkUserExists);
 
