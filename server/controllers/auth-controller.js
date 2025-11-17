@@ -16,58 +16,58 @@ res.cookie('token', token, {
   return token;
 };
 
-exports.registerController = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+// exports.registerController = async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
 
-    if (!name || !email || !password)
-      return res.status(400).json({ error: 'Name, email and password are required' });
+//     if (!name || !email || !password)
+//       return res.status(400).json({ error: 'Name, email and password are required' });
 
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(409).json({ error: 'Email already registered' });
+//     const existing = await User.findOne({ email });
+//     if (existing) return res.status(409).json({ error: 'Email already registered' });
 
-    const user = await User.create({ name, email, password });
-    setTokenCookie(res, user);
+//     const user = await User.create({ name, email, password });
+//     setTokenCookie(res, user);
 
-    const userObj = user.toObject();
-    delete userObj.password;
+//     const userObj = user.toObject();
+//     delete userObj.password;
 
-    return res.status(201).json({
-      message: 'Registration successful',
-      user: userObj,
-    });
-  } catch (err) {
-    console.error('error in registerController:', err);
+//     return res.status(201).json({
+//       message: 'Registration successful',
+//       user: userObj,
+//     });
+//   } catch (err) {
+//     console.error('error in registerController:', err);
 
-    if (err.code === 11000)
-      return res.status(409).json({ error: 'Duplicate email detected' });
+//     if (err.code === 11000)
+//       return res.status(409).json({ error: 'Duplicate email detected' });
 
-    if (err.name === 'ValidationError') {
-      const messages = Object.values(err.errors).map((e) => e.message);
-      return res.status(400).json({ error: 'Validation error', details: messages });
-    }
+//     if (err.name === 'ValidationError') {
+//       const messages = Object.values(err.errors).map((e) => e.message);
+//       return res.status(400).json({ error: 'Validation error', details: messages });
+//     }
 
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
+//     return res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 
-exports.logoutController = async (req, res) => {
-  try {
-    console.log("logging out");
+// exports.logoutController = async (req, res) => {
+//   try {
+//     console.log("logging out");
     
-    res.clearCookie('token', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/'
-    });
+//     res.clearCookie('token', {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: 'none',
+//       path: '/'
+//     });
     
-    return res.status(200).json({ message: 'Logout successful' });
-  } catch (err) {
-    console.error('error in logoutController:', err);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
+//     return res.status(200).json({ message: 'Logout successful' });
+//   } catch (err) {
+//     console.error('error in logoutController:', err);
+//     return res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 
 exports.profileController = async (req, res) => {
   try {
@@ -84,46 +84,46 @@ exports.profileController = async (req, res) => {
   }
 };
 
-exports.loginController = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// exports.loginController = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
     
-    console.log("🔐 [BACKEND LOGIN] Request received for email:", email);
+//     console.log("🔐 [BACKEND LOGIN] Request received for email:", email);
     
-    if (!email || !password) {
-      console.log("❌ [BACKEND LOGIN] Missing email or password");
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
+//     if (!email || !password) {
+//       console.log("❌ [BACKEND LOGIN] Missing email or password");
+//       return res.status(400).json({ error: 'Email and password are required' });
+//     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log("❌ [BACKEND LOGIN] User not found for email:", email);
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       console.log("❌ [BACKEND LOGIN] User not found for email:", email);
+//       return res.status(401).json({ error: 'Invalid credentials' });
+//     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      console.log("❌ [BACKEND LOGIN] Password mismatch for user:", user._id);
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+//     const isMatch = await user.comparePassword(password);
+//     if (!isMatch) {
+//       console.log("❌ [BACKEND LOGIN] Password mismatch for user:", user._id);
+//       return res.status(401).json({ error: 'Invalid credentials' });
+//     }
 
-    setTokenCookie(res, user);
+//     setTokenCookie(res, user);
 
-    const userObj = user.toObject();
-    delete userObj.password;
+//     const userObj = user.toObject();
+//     delete userObj.password;
 
-    console.log("✅ [BACKEND LOGIN] Login successful for user:", user.email);
+//     console.log("✅ [BACKEND LOGIN] Login successful for user:", user.email);
 
-    res.status(200).json({
-      message: 'Login successful',
-      user: userObj
-    });
+//     res.status(200).json({
+//       message: 'Login successful',
+//       user: userObj
+//     });
 
-  } catch (err) {
-    console.error('❌ [BACKEND LOGIN] Error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+//   } catch (err) {
+//     console.error('❌ [BACKEND LOGIN] Error:', err);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 
 exports.googleAuthController = (req, res, next) => {
   console.log('🔐 [GOOGLE AUTH] Initiating OAuth...');
@@ -164,26 +164,26 @@ exports.googleCallbackController = (req, res, next) => {
   })(req, res, next);
 };
 
-exports.googleSuccessController = async (req, res) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
+// exports.googleSuccessController = async (req, res) => {
+//   try {
+//     if (!req.user) {
+//       return res.status(401).json({ error: 'Not authenticated' });
+//     }
 
-    setTokenCookie(res, req.user);
+//     setTokenCookie(res, req.user);
     
-    const userObj = req.user.toObject();
-    delete userObj.password;
+//     const userObj = req.user.toObject();
+//     delete userObj.password;
     
-    res.status(200).json({
-      message: 'Google authentication successful',
-      user: userObj
-    });
-  } catch (error) {
-    console.error('❌ [GOOGLE SUCCESS] Error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
-  }
-};
+//     res.status(200).json({
+//       message: 'Google authentication successful',
+//       user: userObj
+//     });
+//   } catch (error) {
+//     console.error('❌ [GOOGLE SUCCESS] Error:', error);
+//     res.status(500).json({ error: 'Authentication failed' });
+//   }
+// };
 
 exports.checkUserExists = async (req, res) => {
   try {
@@ -215,3 +215,129 @@ exports.checkUserExists = async (req, res) => {
   }
 };
 
+
+exports.googleSuccessController = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const token = setTokenCookie(res, req.user);
+    
+    const userObj = req.user.toObject();
+    delete userObj.password;
+    
+    res.status(200).json({
+      message: 'Google authentication successful',
+      user: userObj,
+      token: token // Send token to frontend
+    });
+  } catch (error) {
+    console.error('❌ [GOOGLE SUCCESS] Error:', error);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+};
+
+exports.logoutController = async (req, res) => {
+  try {
+    console.log("logging out");
+    
+    // Clear backend cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/'
+    });
+    
+    return res.status(200).json({ 
+      message: 'Logout successful',
+      clearFrontendCookie: true // Signal frontend to clear its cookie too
+    });
+  } catch (err) {
+    console.error('error in logoutController:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.loginController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    console.log("🔐 [BACKEND LOGIN] Request received for email:", email);
+    
+    if (!email || !password) {
+      console.log("❌ [BACKEND LOGIN] Missing email or password");
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log("❌ [BACKEND LOGIN] User not found for email:", email);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      console.log("❌ [BACKEND LOGIN] Password mismatch for user:", user._id);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = signJwt({ id: user._id, email: user.email, name: user.name });
+    
+    // Option 1: Set cookie for backend domain (might work with proper CORS)
+    setTokenCookie(res, user);
+    
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    console.log("✅ [BACKEND LOGIN] Login successful for user:", user.email);
+
+    // Option 2: ALSO return token in response for frontend to set its own cookie
+    res.status(200).json({
+      message: 'Login successful',
+      user: userObj,
+      token: token // Send token to frontend
+    });
+
+  } catch (err) {
+    console.error('❌ [BACKEND LOGIN] Error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.registerController = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password)
+      return res.status(400).json({ error: 'Name, email and password are required' });
+
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(409).json({ error: 'Email already registered' });
+
+    const user = await User.create({ name, email, password });
+    const token = setTokenCookie(res, user); // This returns the token
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(201).json({
+      message: 'Registration successful',
+      user: userObj,
+      token: token // Send token to frontend
+    });
+  } catch (err) {
+    console.error('error in registerController:', err);
+
+    if (err.code === 11000)
+      return res.status(409).json({ error: 'Duplicate email detected' });
+
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return res.status(400).json({ error: 'Validation error', details: messages });
+    }
+
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
