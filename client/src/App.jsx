@@ -1,4 +1,4 @@
-// App.js
+// App.js - UPDATED
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,7 +9,7 @@ import Profile from "./pages/Profile";
 import Learn from "./pages/Learn";
 import Personalize from "./pages/Personalize";
 import Layout from "./components/Layout";
-import { isAuthenticated } from "./utils/auth";
+import { checkAuthQuick, isAuthenticated } from "./utils/auth";
 
 const theme = createTheme({
   palette: {
@@ -35,9 +35,12 @@ const LoadingSpinner = () => (
     display: 'flex', 
     justifyContent: 'center', 
     alignItems: 'center', 
-    height: '100vh' 
+    height: '100vh',
+    flexDirection: 'column',
+    gap: '10px'
   }}>
-    <div>Loading...</div>
+    <div>Checking authentication...</div>
+    <div style={{ fontSize: '12px', color: '#666' }}>Please wait</div>
   </div>
 );
 
@@ -46,15 +49,32 @@ export default function App() {
   const [isAuth, setIsAuth] = useState(false);
   const location = useLocation();
 
-  // Check auth on initial load AND when location changes
+  // Check auth on initial load
   useEffect(() => {
     checkAuth();
-  }, [location]); // Re-check auth when route changes
+  }, []);
+
+  // Re-check auth only when moving between auth/non-auth routes
+  useEffect(() => {
+    const isAuthRoute = ['/profile', '/personalize', '/learn'].includes(location.pathname);
+    const isNonAuthRoute = ['/', '/login', '/register'].includes(location.pathname);
+    
+    if ((isAuth && isNonAuthRoute) || (!isAuth && isAuthRoute)) {
+      console.log('🔄 [APP] Route change detected, re-checking auth...');
+      checkAuth();
+    }
+  }, [location.pathname]);
 
   const checkAuth = async () => {
     try {
       console.log('🔐 [APP] Checking authentication status...');
-      const authenticated = await isAuthenticated();
+      
+      // Use quick check for initial load, full check for auth routes
+      const shouldFullCheck = ['/profile', '/personalize', '/learn'].includes(location.pathname);
+      const authenticated = shouldFullCheck 
+        ? await isAuthenticated() 
+        : await checkAuthQuick();
+      
       console.log('🔐 [APP] Authentication result:', authenticated);
       setIsAuth(authenticated);
     } catch (error) {
