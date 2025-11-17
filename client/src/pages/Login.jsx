@@ -26,7 +26,7 @@ import {
 } from "@mui/icons-material";
 import { loginUser, googleAuth } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-import { debugAuth } from "../utils/auth";
+import { hasAuthCookie } from "../utils/auth"; // Use sync check instead of async
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -38,29 +38,18 @@ export default function Login() {
   const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
 
-  // FIXED: Enhanced auth check with debugAuth
+  // FIXED: Only check for existing auth cookie, don't make API calls
   useEffect(() => {
-    const checkInitialAuth = async () => {
-      console.log('🔐 [LOGIN] Starting auth check...');
-      
-      // Use debugAuth to get comprehensive auth status
-      const authStatus = await debugAuth();
-      console.log('🔐 [LOGIN] Auth debug result:', authStatus);
-      
+    const checkInitialAuth = () => {
+      // Only redirect if we have an auth cookie AND we're not coming from an OAuth flow
       const urlParams = new URLSearchParams(window.location.search);
       const hasOAuthError = urlParams.get('error');
       
-      // Only redirect if we're actually authenticated (API check)
-      if (authStatus.isAuthenticated && !hasOAuthError) {
-        console.log('🔐 [LOGIN] User is authenticated, redirecting to profile');
+      if (hasAuthCookie() && !hasOAuthError) {
+        console.log('🔐 [LOGIN] Auth cookie found, redirecting to profile');
         navigate('/profile');
       } else {
-        console.log('🔐 [LOGIN] User not authenticated, showing login form');
-        console.log('🔐 [LOGIN] Details:', {
-          hasVisibleCookie: authStatus.hasVisibleAuthCookie,
-          isAuthenticated: authStatus.isAuthenticated,
-          visibleCookies: authStatus.visibleCookies
-        });
+        console.log('🔐 [LOGIN] No auth cookie or OAuth error, showing login form');
         setAuthChecked(true);
       }
     };
@@ -99,16 +88,6 @@ export default function Login() {
 
   const handleRegisterClick = () => {
     navigate('/register');
-  };
-
-  // Add this temporary debug function
-  const handleDebugAuth = async () => {
-    console.clear();
-    console.log('🔐 [MANUAL DEBUG] Testing authentication...');
-    const authStatus = await debugAuth();
-    
-    // Show results in UI too
-    setError(`Debug: ${authStatus.isAuthenticated ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'} - Check console for details`);
   };
 
   const handleGoogleSignIn = () => {
@@ -277,17 +256,6 @@ export default function Login() {
                   Enter your credentials to continue
                 </Typography>
               </Box>
-
-              {/* Temporary Debug Button */}
-              <Button 
-                onClick={handleDebugAuth} 
-                variant="outlined" 
-                color="secondary"
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                Debug Auth Status
-              </Button>
 
               {/* Google Sign In Button */}
               <Button
