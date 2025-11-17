@@ -204,25 +204,58 @@ export const requireGuest = async (redirectPath = '/profile') => {
 };
 
 /**
- * Debug function to check auth status
+ * Enhanced debug function to check auth status
  */
 export const debugAuth = async () => {
-  const [hasCookie, isAuth] = await Promise.all([
-    Promise.resolve(hasAuthCookie()),
-    isAuthenticated()
-  ]);
+  console.group('🔐 [AUTH DEBUG] Starting comprehensive auth check...');
   
-  console.group('🔐 Authentication Debug (HTTP-Only Cookie)');
-  console.log('Has Visible Auth Cookie:', hasCookie);
-  console.log('Is Actually Authenticated (API check):', isAuth);
-  console.log('All Visible Cookies:', document.cookie);
-  console.log('Auth Cache:', authCache);
+  // Check visible cookies first
+  const hasCookie = hasAuthCookie();
+  console.log('🍪 Visible Auth Cookie:', hasCookie);
+  console.log('📋 All Visible Cookies:', document.cookie);
+  
+  // Check API authentication
+  let isAuth = false;
+  let apiError = null;
+  
+  try {
+    const response = await API.get("/user/profile", {
+      timeout: 3000,
+      validateStatus: (status) => status < 500
+    });
+    
+    isAuth = response.status === 200;
+    console.log('✅ API Auth Check:', isAuth, 'Status:', response.status);
+    
+    if (isAuth) {
+      console.log('👤 User data available:', !!response.data?.user);
+    }
+    
+  } catch (error) {
+    apiError = error;
+    console.log('❌ API Auth Check Failed:', {
+      status: error.response?.status,
+      message: error.message,
+      code: error.code
+    });
+  }
+  
+  // Check if we're in cross-origin scenario
+  const isCrossOrigin = window.location.origin !== API.defaults.baseURL?.replace('/api', '');
+  console.log('🌐 Cross-Origin Scenario:', isCrossOrigin);
+  console.log('🏠 Frontend Origin:', window.location.origin);
+  console.log('🔗 Backend Origin:', API.defaults.baseURL?.replace('/api', ''));
+  
   console.groupEnd();
   
   return { 
     hasVisibleAuthCookie: hasCookie, 
     isAuthenticated: isAuth,
-    visibleCookies: document.cookie 
+    apiError: apiError,
+    isCrossOrigin: isCrossOrigin,
+    visibleCookies: document.cookie,
+    frontendOrigin: window.location.origin,
+    backendOrigin: API.defaults.baseURL?.replace('/api', '')
   };
 };
 
