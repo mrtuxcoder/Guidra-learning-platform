@@ -25,6 +25,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getProfile, logoutUser } from '../api/auth';
 import { clearAllTokens } from '../utils/auth';
+import { completeLogout } from '../utils/auth';
 
 function HideOnScroll(props) {
   const { children } = props;
@@ -104,19 +105,9 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    try {
-      console.log('🚪 [PROFILE] Logging out...');
-      await logoutUser();
-    } catch (error) {
-      console.error('❌ [PROFILE] Backend logout failed:', error);
-    } finally {
-      // Always clear client-side tokens
-      clearAllTokens();
-      
-      // Force redirect to login
-      window.location.href = '/login';
-    }
-  };
+  // Use instant logout - no waiting
+  completeLogout(); // or use instantLogout() for even faster
+};
 
   const isActive = (path) => {
     return location.pathname === path;

@@ -1,47 +1,10 @@
-// // api.js
-// import axios from "axios";
-
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-// const API = axios.create({
-//   baseURL: API_BASE_URL,
-//   withCredentials: true,
-//   timeout: 10000,
-// });
-
-// // Request interceptor
-// API.interceptors.request.use(
-//   (config) => {
-//     console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`);
-//     return config;
-//   },
-//   (error) => {
-//     console.error('Request error:', error);
-//     return Promise.reject(error);
-//   }
-// );
-
-// // Response interceptor
-// API.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   (error) => {
-//     console.error('Response error:', error.response?.data || error.message);
-//     return Promise.reject(error);
-//   }
-// );
-
-// export default API;
-
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const API = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // Keep for backend cookies if they work
-  timeout: 10000,
+  withCredentials: true,
 });
 
 // Frontend cookie helpers
@@ -66,8 +29,8 @@ const getFrontendCookie = () => {
 };
 
 const getStoredToken = () => {
-  // Check frontend cookie first, then localStorage
-  return getFrontendCookie() || localStorage.getItem('authToken');
+  // Only check frontend cookie (no localStorage)
+  return getFrontendCookie();
 };
 
 // Request interceptor
@@ -75,7 +38,7 @@ API.interceptors.request.use(
   (config) => {
     console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`);
     
-    // Add Authorization header if we have a token
+    // Add Authorization header if we have a token from frontend cookie
     const token = getStoredToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -97,17 +60,14 @@ API.interceptors.response.use(
     if (response.data?.token) {
       const token = response.data.token;
       
-      // Store token in frontend cookie and localStorage
+      // Store token ONLY in frontend cookie (no localStorage)
       setFrontendCookie(token);
-      localStorage.setItem('authToken', token);
-      
-      console.log('✅ [API] Token stored in frontend cookie and localStorage');
+      console.log('✅ [API] Token stored in frontend cookie');
     }
     
     // Check if logout response - clear frontend tokens
     if (response.data?.message?.includes('logout') || response.data?.clearFrontendCookie) {
       removeFrontendCookie();
-      localStorage.removeItem('authToken');
       console.log('✅ [API] Frontend tokens cleared after logout');
     }
     
@@ -120,13 +80,10 @@ API.interceptors.response.use(
     if (error.response?.status === 401) {
       console.log('🔐 [API] 401 Unauthorized - clearing tokens');
       removeFrontendCookie();
-      localStorage.removeItem('authToken');
       
       // Redirect to login if not already there
       if (!window.location.pathname.includes('/login')) {
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 100);
+        window.location.href = '/login';
       }
     }
     

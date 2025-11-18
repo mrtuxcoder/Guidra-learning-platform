@@ -39,3 +39,8 @@ export const googleAuthSuccess = async () => {
 export const logoutUser = async () => {
   return await API.post("/user/logout");
 };
+
+// Add this to your /api/auth.js file
+export const googleSuccess = async () => {
+  return await API.get("/user/google/success");
+};

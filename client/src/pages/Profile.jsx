@@ -14,8 +14,12 @@ import ProfileHeader from "../components/profile/ProfileHeader";
 import ProgressStats from "../components/profile/ProgressStats";
 import PersonalInfo from "../components/profile/PersonalInfo";
 import TopicsProgress from "../components/profile/TopicsProgress";
-import { clearAllTokens, debugAuth, completeLogout } from "../utils/auth"; // Import completeLogout
+import { clearAllTokens, debugAuth, completeLogout } from "../utils/auth";
 import { learningStyles, understandingLevels } from "../components/profile/constants";
+import { authHelpers } from "../api/api";
+
+const { setFrontendCookie } = authHelpers;
+
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -25,6 +29,21 @@ export default function Profile() {
   const navigate = useNavigate();
 
   useEffect(() => {
+
+     const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('token');
+  const source = urlParams.get('source');
+  
+  if (tokenFromUrl && source === 'google') {
+    console.log("✅ [PROFILE] Google OAuth token found in URL, storing as authToken cookie");
+    
+    // Store the token in frontend cookie for persistence
+    setFrontendCookie(tokenFromUrl);
+    console.log("🍪 [PROFILE] authToken cookie set for persistence");
+    
+    // Clean URL - remove token from address bar
+    window.history.replaceState({}, '', '/profile');
+  }
     // Debug auth status first
     const debugAuthStatus = async () => {
       console.log("🔐 [PROFILE] Debugging auth status...");
@@ -66,10 +85,8 @@ export default function Profile() {
       
       if (err.response?.status === 401) {
         setError("Session expired. Please login again.");
-        // Auto-redirect after showing message
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        // Auto-redirect immediately without timeout
+        navigate('/login');
       } else {
         setError(err.response?.data?.error || err.message || "Failed to load profile");
       }
@@ -78,7 +95,7 @@ export default function Profile() {
     }
   };
 
-  // FIXED: Better logout handler
+  // Better logout handler - NO TIMEOUTS
   const handleLogout = async () => {
     try {
       console.log("🔐 [PROFILE] Starting logout...");
@@ -86,21 +103,18 @@ export default function Profile() {
       // Use completeLogout which handles both backend and frontend cleanup
       await completeLogout();
       
-      // completeLogout already redirects, but just in case:
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 100);
+      // completeLogout should handle redirect internally
       
     } catch (error) {
       console.error('❌ [PROFILE] Logout error:', error);
-      // Fallback: clear frontend tokens and redirect anyway
+      // Fallback: clear frontend tokens and redirect immediately
       clearAllTokens();
       localStorage.removeItem('authToken');
       window.location.href = "/login";
     }
   };
 
-  // Alternative simple logout (if completeLogout has issues)
+  // Alternative simple logout - NO TIMEOUTS
   const handleSimpleLogout = async () => {
     try {
       // Clear all frontend storage immediately
@@ -135,7 +149,7 @@ export default function Profile() {
     return learningStyles.find(style => style.value === learningStyle) || learningStyles[0];
   };
 
-  // FIXED: Progress stats calculation using topic.completed field
+  // Progress stats calculation using topic.completed field
   const getProgressStats = (user) => {
     if (!user || !user.progress) {
       console.log("❌ getProgressStats: No user or progress data");
@@ -153,7 +167,7 @@ export default function Profile() {
     
     console.log("📊 Raw progress data from API:", progress);
     
-    // FIXED: Use topic.completed field instead of overallUnderstanding
+    // Use topic.completed field instead of overallUnderstanding
     const completed = progress.filter(p => p.completed === true).length;
     const total = progress.length;
     
@@ -203,7 +217,7 @@ export default function Profile() {
     return calculatedStats;
   };
 
-  // FIXED: Transform your MongoDB data for TopicsProgress component
+  // Transform your MongoDB data for TopicsProgress component
   const transformProgressData = (progress) => {
     if (!progress || !Array.isArray(progress)) return [];
 
@@ -220,7 +234,7 @@ export default function Profile() {
         understandingLevel: topic.overallUnderstanding || 1,
         completionPercentage: calculateTopicCompletion(topic),
         score: Math.round((topic.overallUnderstanding || 1) * 20),
-        completed: topic.completed || false, // FIXED: Use topic.completed field
+        completed: topic.completed || false,
         lastUpdated: topic.lastAccessed || new Date().toISOString().split('T')[0],
         subtopics: subtopics.map((subtopic, subIndex) => {
           console.log(`   📝 Subtopic "${subtopic.name}" completed: ${subtopic.completed}`);

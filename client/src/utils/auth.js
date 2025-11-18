@@ -26,8 +26,7 @@ export const isAuthenticated = async () => {
     
     // Make a direct API call to check auth status
     const response = await API.get("/user/profile", {
-      timeout: 5000,
-      validateStatus: (status) => status < 500 // Don't throw on 401/403
+      validateStatus: (status) => status < 500
     });
     
     const isAuth = response.status === 200;
@@ -37,9 +36,8 @@ export const isAuthenticated = async () => {
       // If auth successful, ensure frontend cookie exists
       const token = getStoredToken();
       if (!token && response.data.token) {
-        // If we got a new token, store it
+        // If we got a new token, store it in frontend cookie only
         setFrontendCookie(response.data.token);
-        localStorage.setItem('authToken', response.data.token);
       }
       return true;
     }
@@ -52,9 +50,8 @@ export const isAuthenticated = async () => {
     console.log('🔐 [AUTH] Auth check failed:', error.message);
     
     // Clear tokens on network errors or auth failures
-    if (error.response?.status === 401 || error.code === 'NETWORK_ERROR') {
+    if (error.response?.status === 401) {
       removeFrontendCookie();
-      localStorage.removeItem('authToken');
     }
     
     return false;
@@ -64,28 +61,25 @@ export const isAuthenticated = async () => {
 /**
  * Complete logout process - FIXED
  */
+/**
+ * FAST logout process - Instant frontend cleanup
+ */
 export const completeLogout = async () => {
-  try {
-    console.log('🔐 [AUTH] Starting complete logout...');
-    
-    // Clear frontend tokens FIRST
-    removeFrontendCookie();
-    localStorage.removeItem('authToken');
-    sessionStorage.removeItem('authToken');
-    clearAuthCache();
-    
-    // Then call backend logout (but don't block on it)
-    await API.post("/user/logout").catch(err => {
-      console.log('🔐 [AUTH] Backend logout failed (non-critical):', err.message);
-    });
-    
-    console.log('✅ [AUTH] Logout completed');
-  } catch (error) {
-    console.log('🔐 [AUTH] Logout error (non-critical):', error);
-  } finally {
-    // Always redirect
-    window.location.href = '/login';
-  }
+  console.log('🚀 [AUTH] Starting instant logout...');
+  
+  // IMMEDIATELY clear frontend tokens and redirect
+  removeFrontendCookie();
+  clearAuthCache();
+  
+  // Redirect immediately without waiting for backend
+  window.location.href = '/login';
+  
+  // Call backend logout in background (fire and forget)
+  API.post("/user/logout").catch(err => {
+    console.log('🔐 [AUTH] Backend logout completed (background)');
+  });
+  
+  console.log('✅ [AUTH] Instant logout completed');
 };
 
 /**
@@ -93,18 +87,13 @@ export const completeLogout = async () => {
  */
 export const checkAuthQuick = async () => {
   // If we have a frontend cookie, assume we're authenticated temporarily
-  // The full check will happen in the profile page
   return hasAuthCookie();
 };
 
 // Your existing functions
 export const handleManualLogin = (token, userData = null) => {
   setFrontendCookie(token);
-  localStorage.setItem('authToken', token);
-  if (userData) {
-    localStorage.setItem('userData', JSON.stringify(userData));
-  }
-  console.log('✅ [AUTH] Manual login - tokens stored');
+  console.log('✅ [AUTH] Manual login - token stored in frontend cookie');
 };
 
 export const loginUser = async (credentials) => {
@@ -140,8 +129,6 @@ export const clearAuthCache = () => {
 export const clearAllTokens = () => {
   console.log('🔐 [AUTH] Clearing all tokens...');
   removeFrontendCookie();
-  localStorage.removeItem('authToken');
-  sessionStorage.removeItem('authToken');
   clearAuthCache();
   
   // Clear all possible cookie variations
@@ -180,7 +167,6 @@ export const requireGuest = async (redirectPath = '/profile') => {
 export const debugAuth = async () => {
   console.group('🔐 [AUTH DEBUG]');
   console.log('🍪 Frontend Cookie:', getFrontendCookie() ? 'Exists' : 'Missing');
-  console.log('💾 LocalStorage Token:', localStorage.getItem('authToken') ? 'Exists' : 'Missing');
   console.log('📋 All Cookies:', document.cookie);
   
   try {

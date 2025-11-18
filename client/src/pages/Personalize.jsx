@@ -250,10 +250,7 @@
 //   );
 // }
 
-
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -270,7 +267,8 @@ import {
   useTheme,
   alpha,
   Tabs,
-  Tab
+  Tab,
+  CircularProgress
 } from "@mui/material";
 import {
   Code,
@@ -311,10 +309,14 @@ import {
   Psychology as MindIcon
 } from "@mui/icons-material";
 import { personalizeAndGenerate } from "../api/learning";
+import { getProfile } from "../api/auth";
+import { authHelpers } from "../api/api";
+import { useNavigate } from "react-router-dom";
+
+const { setFrontendCookie } = authHelpers;
 
 // Topic icons mapping
 const topicIcons = {
-  // 💻 Programming & CS
   "python-basics": <Code sx={{ fontSize: 40 }} />,
   "javascript-fundamentals": <Javascript sx={{ fontSize: 40 }} />,
   "data-structures-algorithms": <Storage sx={{ fontSize: 40 }} />,
@@ -325,8 +327,6 @@ const topicIcons = {
   "cybersecurity-essentials": <SecurityIcon sx={{ fontSize: 40 }} />,
   "blockchain-web3": <AccountBalance sx={{ fontSize: 40 }} />,
   "api-design": <DataObject sx={{ fontSize: 40 }} />,
-
-  // 🔬 Science & Tech
   "quantum-computing": <Calculate sx={{ fontSize: 40 }} />,
   "biotechnology": <Biotech sx={{ fontSize: 40 }} />,
   "neuroscience-basics": <Psychology sx={{ fontSize: 40 }} />,
@@ -335,8 +335,6 @@ const topicIcons = {
   "scientific-method": <Science sx={{ fontSize: 40 }} />,
   "physics-concepts": <Science sx={{ fontSize: 40 }} />,
   "chemistry-foundations": <Biotech sx={{ fontSize: 40 }} />,
-
-  // 💼 Finance & Business
   "personal-finance": <ShowChart sx={{ fontSize: 40 }} />,
   "investing-basics": <TrendingUp sx={{ fontSize: 40 }} />,
   "entrepreneurship": <Business sx={{ fontSize: 40 }} />,
@@ -344,8 +342,6 @@ const topicIcons = {
   "economics-principles": <AccountBalance sx={{ fontSize: 40 }} />,
   "cryptocurrency": <AccountBalance sx={{ fontSize: 40 }} />,
   "financial-literacy": <ShowChart sx={{ fontSize: 40 }} />,
-
-  // 🧠 Self Development
   "critical-thinking": <EmojiObjects sx={{ fontSize: 40 }} />,
   "emotional-intelligence": <PsychologyIcon sx={{ fontSize: 40 }} />,
   "productivity-systems": <SelfImprovement sx={{ fontSize: 40 }} />,
@@ -356,8 +352,6 @@ const topicIcons = {
   "communication-skills": <Language sx={{ fontSize: 40 }} />,
   "leadership-basics": <Group sx={{ fontSize: 40 }} />,
   "future-careers": <Rocket sx={{ fontSize: 40 }} />,
-
-  // 🌐 Future Skills
   "data-literacy": <DataThresholding sx={{ fontSize: 40 }} />,
   "ux-design-principles": <DesignServices sx={{ fontSize: 40 }} />,
   "project-management": <Analytics sx={{ fontSize: 40 }} />,
@@ -367,357 +361,44 @@ const topicIcons = {
 
 // All predefined topics organized by field
 const PREDEFINED_TOPICS = [
-  // 💻 Programming & Computer Science (10 topics)
-  { 
-    id: "python-basics", 
-    name: "Python Programming", 
-    description: "Fundamental programming concepts and syntax", 
-    level: "Beginner", 
-    duration: "4-5 weeks", 
-    color: "#3776AB", 
-    category: "programming" 
-  },
-  { 
-    id: "javascript-fundamentals", 
-    name: "JavaScript Fundamentals", 
-    description: "Core concepts of web programming language", 
-    level: "Beginner", 
-    duration: "4-5 weeks", 
-    color: "#F7DF1E", 
-    category: "programming" 
-  },
-  { 
-    id: "data-structures-algorithms", 
-    name: "Data Structures & Algorithms", 
-    description: "Essential computer science foundations", 
-    level: "Intermediate", 
-    duration: "6-8 weeks", 
-    color: "#00BCD4", 
-    category: "programming" 
-  },
-  { 
-    id: "web-development", 
-    name: "Modern Web Development", 
-    description: "Full-stack development principles", 
-    level: "Beginner", 
-    duration: "5-6 weeks", 
-    color: "#E44D26", 
-    category: "programming" 
-  },
-  { 
-    id: "ai-ml-basics", 
-    name: "AI & Machine Learning", 
-    description: "Introduction to artificial intelligence", 
-    level: "Intermediate", 
-    duration: "4-5 weeks", 
-    color: "#FF6B6B", 
-    category: "programming" 
-  },
-  { 
-    id: "cloud-computing", 
-    name: "Cloud Computing", 
-    description: "Understanding cloud services and architecture", 
-    level: "Intermediate", 
-    duration: "3-4 weeks", 
-    color: "#4285F4", 
-    category: "programming" 
-  },
-  { 
-    id: "cybersecurity-essentials", 
-    name: "Cybersecurity", 
-    description: "Digital security principles and practices", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#228B22", 
-    category: "programming" 
-  },
-  { 
-    id: "blockchain-web3", 
-    name: "Blockchain & Web3", 
-    description: "Decentralized technology fundamentals", 
-    level: "Intermediate", 
-    duration: "4-5 weeks", 
-    color: "#3D3D3D", 
-    category: "programming" 
-  },
-  { 
-    id: "api-design", 
-    name: "API Design", 
-    description: "Building and consuming web APIs", 
-    level: "Intermediate", 
-    duration: "3-4 weeks", 
-    color: "#FF5722", 
-    category: "programming" 
-  },
-
-  // 🔬 Science & Technology (8 topics)
-  { 
-    id: "quantum-computing", 
-    name: "Quantum Computing", 
-    description: "Principles of quantum information science", 
-    level: "Advanced", 
-    duration: "4-5 weeks", 
-    color: "#9C27B0", 
-    category: "science" 
-  },
-  { 
-    id: "biotechnology", 
-    name: "Biotechnology", 
-    description: "Biological technology applications", 
-    level: "Intermediate", 
-    duration: "4-5 weeks", 
-    color: "#4CAF50", 
-    category: "science" 
-  },
-  { 
-    id: "neuroscience-basics", 
-    name: "Neuroscience", 
-    description: "Understanding brain and cognition", 
-    level: "Intermediate", 
-    duration: "4-5 weeks", 
-    color: "#2196F3", 
-    category: "science" 
-  },
-  { 
-    id: "space-technology", 
-    name: "Space Technology", 
-    description: "Space exploration and satellite systems", 
-    level: "Intermediate", 
-    duration: "3-4 weeks", 
-    color: "#3F51B5", 
-    category: "science" 
-  },
-  { 
-    id: "climate-science", 
-    name: "Climate Science", 
-    description: "Climate systems and sustainability", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#009688", 
-    category: "science" 
-  },
-  { 
-    id: "scientific-method", 
-    name: "Scientific Thinking", 
-    description: "Critical analysis and research methods", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#FF9800", 
-    category: "science" 
-  },
-  { 
-    id: "physics-concepts", 
-    name: "Modern Physics", 
-    description: "Key concepts in contemporary physics", 
-    level: "Intermediate", 
-    duration: "4-5 weeks", 
-    color: "#795548", 
-    category: "science" 
-  },
-
-  // 💼 Finance & Business (7 topics)
-  { 
-    id: "personal-finance", 
-    name: "Personal Finance", 
-    description: "Budgeting, saving, and financial planning", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#2196F3", 
-    category: "finance" 
-  },
-  { 
-    id: "investing-basics", 
-    name: "Investment Principles", 
-    description: "Stock market and investment strategies", 
-    level: "Beginner", 
-    duration: "4-5 weeks", 
-    color: "#4CAF50", 
-    category: "finance" 
-  },
-  { 
-    id: "entrepreneurship", 
-    name: "Entrepreneurship", 
-    description: "Starting and scaling businesses", 
-    level: "Beginner", 
-    duration: "4-5 weeks", 
-    color: "#FF9800", 
-    category: "finance" 
-  },
-  { 
-    id: "digital-marketing", 
-    name: "Digital Marketing", 
-    description: "Online marketing strategies and analytics", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#E91E63", 
-    category: "finance" 
-  },
-  { 
-    id: "economics-principles", 
-    name: "Economics", 
-    description: "Market systems and economic theory", 
-    level: "Beginner", 
-    duration: "4-5 weeks", 
-    color: "#607D8B", 
-    category: "finance" 
-  },
-  { 
-    id: "cryptocurrency", 
-    name: "Cryptocurrency", 
-    description: "Digital currencies and blockchain economics", 
-    level: "Intermediate", 
-    duration: "3-4 weeks", 
-    color: "#FF5722", 
-    category: "finance" 
-  },
-  { 
-    id: "financial-literacy", 
-    name: "Financial Literacy", 
-    description: "Essential money management skills", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#009688", 
-    category: "finance" 
-  },
-
-  // 🧠 Self Development (10 topics)
-  { 
-    id: "critical-thinking", 
-    name: "Critical Thinking", 
-    description: "Analytical reasoning and problem solving", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#9C27B0", 
-    category: "self-dev" 
-  },
-  { 
-    id: "emotional-intelligence", 
-    name: "Emotional Intelligence", 
-    description: "Self-awareness and relationship management", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#FF5722", 
-    category: "self-dev" 
-  },
-  { 
-    id: "productivity-systems", 
-    name: "Productivity Systems", 
-    description: "Time management and workflow optimization", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#4CAF50", 
-    category: "self-dev" 
-  },
-  { 
-    id: "decision-making", 
-    name: "Decision Making", 
-    description: "Strategic thinking and choice architecture", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#2196F3", 
-    category: "self-dev" 
-  },
-  { 
-    id: "mindfulness-meditation", 
-    name: "Mindfulness", 
-    description: "Mental focus and stress management", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#795548", 
-    category: "self-dev" 
-  },
-  { 
-    id: "learning-how-to-learn", 
-    name: "Learning How to Learn", 
-    description: "Meta-learning and skill acquisition", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#FF9800", 
-    category: "self-dev" 
-  },
-  { 
-    id: "growth-mindset", 
-    name: "Growth Mindset", 
-    description: "Developing resilience and adaptability", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#E91E63", 
-    category: "self-dev" 
-  },
-  { 
-    id: "communication-skills", 
-    name: "Communication Skills", 
-    description: "Effective speaking and listening techniques", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#00BCD4", 
-    category: "self-dev" 
-  },
-  { 
-    id: "leadership-basics", 
-    name: "Leadership Fundamentals", 
-    description: "Team management and influence skills", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#3F51B5", 
-    category: "self-dev" 
-  },
-  { 
-    id: "future-careers", 
-    name: "Future Careers", 
-    description: "Emerging job markets and skills", 
-    level: "Beginner", 
-    duration: "2-3 weeks", 
-    color: "#FF6B6B", 
-    category: "self-dev" 
-  },
-
-  // 🌐 Future Skills (5 topics)
-  { 
-    id: "data-literacy", 
-    name: "Data Literacy", 
-    description: "Understanding and interpreting data", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#4285F4", 
-    category: "future-skills" 
-  },
-  { 
-    id: "ux-design-principles", 
-    name: "UX Design", 
-    description: "User experience design fundamentals", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#E91E63", 
-    category: "future-skills" 
-  },
-  { 
-    id: "project-management", 
-    name: "Project Management", 
-    description: "Agile and traditional project methodologies", 
-    level: "Beginner", 
-    duration: "3-4 weeks", 
-    color: "#4CAF50", 
-    category: "future-skills" 
-  },
-  { 
-    id: "ethical-technology", 
-    name: "Ethical Technology", 
-    description: "AI ethics and responsible innovation", 
-    level: "Intermediate", 
-    duration: "2-3 weeks", 
-    color: "#607D8B", 
-    category: "future-skills" 
-  },
-  { 
-    id: "systems-thinking", 
-    name: "Systems Thinking", 
-    description: "Understanding complex interconnected systems", 
-    level: "Intermediate", 
-    duration: "3-4 weeks", 
-    color: "#9C27B0", 
-    category: "future-skills" 
-  }
+  { id: "python-basics", name: "Python Programming", description: "Fundamental programming concepts and syntax", level: "Beginner", duration: "4-5 weeks", color: "#3776AB", category: "programming" },
+  { id: "javascript-fundamentals", name: "JavaScript Fundamentals", description: "Core concepts of web programming language", level: "Beginner", duration: "4-5 weeks", color: "#F7DF1E", category: "programming" },
+  { id: "data-structures-algorithms", name: "Data Structures & Algorithms", description: "Essential computer science foundations", level: "Intermediate", duration: "6-8 weeks", color: "#00BCD4", category: "programming" },
+  { id: "web-development", name: "Modern Web Development", description: "Full-stack development principles", level: "Beginner", duration: "5-6 weeks", color: "#E44D26", category: "programming" },
+  { id: "ai-ml-basics", name: "AI & Machine Learning", description: "Introduction to artificial intelligence", level: "Intermediate", duration: "4-5 weeks", color: "#FF6B6B", category: "programming" },
+  { id: "cloud-computing", name: "Cloud Computing", description: "Understanding cloud services and architecture", level: "Intermediate", duration: "3-4 weeks", color: "#4285F4", category: "programming" },
+  { id: "cybersecurity-essentials", name: "Cybersecurity", description: "Digital security principles and practices", level: "Beginner", duration: "3-4 weeks", color: "#228B22", category: "programming" },
+  { id: "blockchain-web3", name: "Blockchain & Web3", description: "Decentralized technology fundamentals", level: "Intermediate", duration: "4-5 weeks", color: "#3D3D3D", category: "programming" },
+  { id: "api-design", name: "API Design", description: "Building and consuming web APIs", level: "Intermediate", duration: "3-4 weeks", color: "#FF5722", category: "programming" },
+  { id: "quantum-computing", name: "Quantum Computing", description: "Principles of quantum information science", level: "Advanced", duration: "4-5 weeks", color: "#9C27B0", category: "science" },
+  { id: "biotechnology", name: "Biotechnology", description: "Biological technology applications", level: "Intermediate", duration: "4-5 weeks", color: "#4CAF50", category: "science" },
+  { id: "neuroscience-basics", name: "Neuroscience", description: "Understanding brain and cognition", level: "Intermediate", duration: "4-5 weeks", color: "#2196F3", category: "science" },
+  { id: "space-technology", name: "Space Technology", description: "Space exploration and satellite systems", level: "Intermediate", duration: "3-4 weeks", color: "#3F51B5", category: "science" },
+  { id: "climate-science", name: "Climate Science", description: "Climate systems and sustainability", level: "Beginner", duration: "3-4 weeks", color: "#009688", category: "science" },
+  { id: "scientific-method", name: "Scientific Thinking", description: "Critical analysis and research methods", level: "Beginner", duration: "2-3 weeks", color: "#FF9800", category: "science" },
+  { id: "physics-concepts", name: "Modern Physics", description: "Key concepts in contemporary physics", level: "Intermediate", duration: "4-5 weeks", color: "#795548", category: "science" },
+  { id: "personal-finance", name: "Personal Finance", description: "Budgeting, saving, and financial planning", level: "Beginner", duration: "3-4 weeks", color: "#2196F3", category: "finance" },
+  { id: "investing-basics", name: "Investment Principles", description: "Stock market and investment strategies", level: "Beginner", duration: "4-5 weeks", color: "#4CAF50", category: "finance" },
+  { id: "entrepreneurship", name: "Entrepreneurship", description: "Starting and scaling businesses", level: "Beginner", duration: "4-5 weeks", color: "#FF9800", category: "finance" },
+  { id: "digital-marketing", name: "Digital Marketing", description: "Online marketing strategies and analytics", level: "Beginner", duration: "3-4 weeks", color: "#E91E63", category: "finance" },
+  { id: "economics-principles", name: "Economics", description: "Market systems and economic theory", level: "Beginner", duration: "4-5 weeks", color: "#607D8B", category: "finance" },
+  { id: "cryptocurrency", name: "Cryptocurrency", description: "Digital currencies and blockchain economics", level: "Intermediate", duration: "3-4 weeks", color: "#FF5722", category: "finance" },
+  { id: "financial-literacy", name: "Financial Literacy", description: "Essential money management skills", level: "Beginner", duration: "2-3 weeks", color: "#009688", category: "finance" },
+  { id: "critical-thinking", name: "Critical Thinking", description: "Analytical reasoning and problem solving", level: "Beginner", duration: "3-4 weeks", color: "#9C27B0", category: "self-dev" },
+  { id: "emotional-intelligence", name: "Emotional Intelligence", description: "Self-awareness and relationship management", level: "Beginner", duration: "3-4 weeks", color: "#FF5722", category: "self-dev" },
+  { id: "productivity-systems", name: "Productivity Systems", description: "Time management and workflow optimization", level: "Beginner", duration: "2-3 weeks", color: "#4CAF50", category: "self-dev" },
+  { id: "decision-making", name: "Decision Making", description: "Strategic thinking and choice architecture", level: "Beginner", duration: "2-3 weeks", color: "#2196F3", category: "self-dev" },
+  { id: "mindfulness-meditation", name: "Mindfulness", description: "Mental focus and stress management", level: "Beginner", duration: "2-3 weeks", color: "#795548", category: "self-dev" },
+  { id: "learning-how-to-learn", name: "Learning How to Learn", description: "Meta-learning and skill acquisition", level: "Beginner", duration: "2-3 weeks", color: "#FF9800", category: "self-dev" },
+  { id: "growth-mindset", name: "Growth Mindset", description: "Developing resilience and adaptability", level: "Beginner", duration: "2-3 weeks", color: "#E91E63", category: "self-dev" },
+  { id: "communication-skills", name: "Communication Skills", description: "Effective speaking and listening techniques", level: "Beginner", duration: "3-4 weeks", color: "#00BCD4", category: "self-dev" },
+  { id: "leadership-basics", name: "Leadership Fundamentals", description: "Team management and influence skills", level: "Beginner", duration: "3-4 weeks", color: "#3F51B5", category: "self-dev" },
+  { id: "future-careers", name: "Future Careers", description: "Emerging job markets and skills", level: "Beginner", duration: "2-3 weeks", color: "#FF6B6B", category: "self-dev" },
+  { id: "data-literacy", name: "Data Literacy", description: "Understanding and interpreting data", level: "Beginner", duration: "3-4 weeks", color: "#4285F4", category: "future-skills" },
+  { id: "ux-design-principles", name: "UX Design", description: "User experience design fundamentals", level: "Beginner", duration: "3-4 weeks", color: "#E91E63", category: "future-skills" },
+  { id: "project-management", name: "Project Management", description: "Agile and traditional project methodologies", level: "Beginner", duration: "3-4 weeks", color: "#4CAF50", category: "future-skills" },
+  { id: "ethical-technology", name: "Ethical Technology", description: "AI ethics and responsible innovation", level: "Intermediate", duration: "2-3 weeks", color: "#607D8B", category: "future-skills" },
+  { id: "systems-thinking", name: "Systems Thinking", description: "Understanding complex interconnected systems", level: "Intermediate", duration: "3-4 weeks", color: "#9C27B0", category: "future-skills" }
 ];
 
 // Categories for tabs
@@ -732,12 +413,57 @@ const CATEGORIES = [
 
 export default function TopicSelection() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
   const [hoveredTopic, setHoveredTopic] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [user, setUser] = useState(null);
 
+useEffect(() => {
+  // Handle Google OAuth token from URL and store as authToken cookie
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('token');
+  const source = urlParams.get('source');
+  
+  if (tokenFromUrl && source === 'google') {
+    console.log("✅ [PERSONALIZE] Google OAuth token found in URL, storing as authToken cookie");
+    
+    // Store the token in frontend cookie for persistence
+    setFrontendCookie(tokenFromUrl);
+    console.log("🍪 [PERSONALIZE] authToken cookie set for persistence");
+    
+    // Clean URL - remove token from address bar
+    window.history.replaceState({}, '', '/personalize');
+    
+    // Optional: Redirect to profile if user doesn't need personalization
+    const checkUserProfile = async () => {
+      try {
+        const profileResponse = await getProfile();
+        const userData = profileResponse.data?.user || profileResponse.data;
+        
+        if (userData) {
+          // Check if user needs personalization
+          const needsPersonalization = !userData.learningStyle || 
+                                     userData.learningStyle === 'visual' || 
+                                     !userData.progress || 
+                                     userData.progress.length === 0;
+          
+          if (!needsPersonalization) {
+            console.log("🔄 [PERSONALIZE] User already personalized, redirecting to profile...");
+            navigate('/profile');
+          }
+        }
+      } catch (error) {
+        console.log("ℹ️ [PERSONALIZE] Could not check user profile, staying on personalize page");
+      }
+    };
+    
+    checkUserProfile();
+  }
+}, []);
   const handleTopicSelect = (topicId) => {
     setSelectedTopic(topicId);
     setError("");
@@ -763,7 +489,8 @@ export default function TopicSelection() {
         topic: topic.name
       });
       
-      window.location.href = `/profile`;
+      // Redirect to profile after successful personalization
+      navigate('/profile');
       
     } catch (err) {
       console.error("API Error:", err);
@@ -779,6 +506,7 @@ export default function TopicSelection() {
     ? PREDEFINED_TOPICS 
     : PREDEFINED_TOPICS.filter(topic => topic.category === selectedCategory);
 
+ 
   return (
     <Container maxWidth="xl" sx={{ 
       py: { xs: 2, md: 4 },
