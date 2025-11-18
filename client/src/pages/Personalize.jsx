@@ -250,7 +250,7 @@
 //   );
 // }
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Paper,
@@ -261,217 +261,139 @@ import {
   Card,
   CardContent,
   Grid,
-  Chip,
   Fade,
-  Zoom,
+  CircularProgress,
+  InputBase,
+  Chip,
+  IconButton,
   useTheme,
   alpha,
-  Tabs,
-  Tab,
-  CircularProgress
+  useMediaQuery,
+  Tooltip
 } from "@mui/material";
 import {
-  Code,
-  Palette,
-  Javascript,
-  Build,
-  DataObject,
-  Terminal,
-  Web,
-  Science,
-  Calculate,
-  Biotech,
-  Psychology,
-  Business,
+  Search,
+  FilterList,
+  Star,
   School,
-  HealthAndSafety,
-  Public,
-  Analytics,
-  Security as SecurityIcon,
+  Code,
+  Science,
   TrendingUp,
-  Psychology as PsychologyIcon,
-  Computer,
-  DesignServices,
-  Storage,
-  Cloud,
-  Language,
-  Group,
-  EmojiObjects,
-  SelfImprovement,
-  AccountBalance,
-  ShowChart,
-  Rocket,
-  PsychologyAlt,
-  VolunteerActivism,
-  SmartToy,
-  DataThresholding,
-  Architecture,
-  Psychology as MindIcon
+  Psychology,
+  Rocket
 } from "@mui/icons-material";
 import { personalizeAndGenerate } from "../api/learning";
-import { getProfile } from "../api/auth";
-import { authHelpers } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
-const { setFrontendCookie } = authHelpers;
-
-// Topic icons mapping
-const topicIcons = {
-  "python-basics": <Code sx={{ fontSize: 40 }} />,
-  "javascript-fundamentals": <Javascript sx={{ fontSize: 40 }} />,
-  "data-structures-algorithms": <Storage sx={{ fontSize: 40 }} />,
-  "web-development": <Web sx={{ fontSize: 40 }} />,
-  "mobile-app-dev": <Web sx={{ fontSize: 40 }} />,
-  "ai-ml-basics": <SmartToy sx={{ fontSize: 40 }} />,
-  "cloud-computing": <Cloud sx={{ fontSize: 40 }} />,
-  "cybersecurity-essentials": <SecurityIcon sx={{ fontSize: 40 }} />,
-  "blockchain-web3": <AccountBalance sx={{ fontSize: 40 }} />,
-  "api-design": <DataObject sx={{ fontSize: 40 }} />,
-  "quantum-computing": <Calculate sx={{ fontSize: 40 }} />,
-  "biotechnology": <Biotech sx={{ fontSize: 40 }} />,
-  "neuroscience-basics": <Psychology sx={{ fontSize: 40 }} />,
-  "space-technology": <Public sx={{ fontSize: 40 }} />,
-  "climate-science": <Public sx={{ fontSize: 40 }} />,
-  "scientific-method": <Science sx={{ fontSize: 40 }} />,
-  "physics-concepts": <Science sx={{ fontSize: 40 }} />,
-  "chemistry-foundations": <Biotech sx={{ fontSize: 40 }} />,
-  "personal-finance": <ShowChart sx={{ fontSize: 40 }} />,
-  "investing-basics": <TrendingUp sx={{ fontSize: 40 }} />,
-  "entrepreneurship": <Business sx={{ fontSize: 40 }} />,
-  "digital-marketing": <Analytics sx={{ fontSize: 40 }} />,
-  "economics-principles": <AccountBalance sx={{ fontSize: 40 }} />,
-  "cryptocurrency": <AccountBalance sx={{ fontSize: 40 }} />,
-  "financial-literacy": <ShowChart sx={{ fontSize: 40 }} />,
-  "critical-thinking": <EmojiObjects sx={{ fontSize: 40 }} />,
-  "emotional-intelligence": <PsychologyIcon sx={{ fontSize: 40 }} />,
-  "productivity-systems": <SelfImprovement sx={{ fontSize: 40 }} />,
-  "decision-making": <PsychologyAlt sx={{ fontSize: 40 }} />,
-  "mindfulness-meditation": <HealthAndSafety sx={{ fontSize: 40 }} />,
-  "learning-how-to-learn": <School sx={{ fontSize: 40 }} />,
-  "growth-mindset": <MindIcon sx={{ fontSize: 40 }} />,
-  "communication-skills": <Language sx={{ fontSize: 40 }} />,
-  "leadership-basics": <Group sx={{ fontSize: 40 }} />,
-  "future-careers": <Rocket sx={{ fontSize: 40 }} />,
-  "data-literacy": <DataThresholding sx={{ fontSize: 40 }} />,
-  "ux-design-principles": <DesignServices sx={{ fontSize: 40 }} />,
-  "project-management": <Analytics sx={{ fontSize: 40 }} />,
-  "ethical-technology": <VolunteerActivism sx={{ fontSize: 40 }} />,
-  "systems-thinking": <Architecture sx={{ fontSize: 40 }} />
+// Modern purple color palette
+const purplePalette = {
+  50: '#faf5ff',
+  100: '#f3e8ff',
+  200: '#e9d5ff',
+  300: '#d8b4fe',
+  400: '#c084fc',
+  500: '#a855f7',
+  600: '#9333ea',
+  700: '#7c3aed',
+  800: '#6b21a8',
+  900: '#581c87'
 };
 
-// All predefined topics organized by field
+// Category icons and colors
+const CATEGORY_DATA = {
+  programming: { icon: <Code />, color: purplePalette[600], name: "Programming" },
+  science: { icon: <Science />, color: purplePalette[500], name: "Science" },
+  finance: { icon: <TrendingUp />, color: purplePalette[400], name: "Finance" },
+  'self-dev': { icon: <Psychology />, color: purplePalette[700], name: "Self Development" },
+  'future-skills': { icon: <Rocket />, color: purplePalette[800], name: "Future Skills" }
+};
+
+// Optimized topics data
 const PREDEFINED_TOPICS = [
-  { id: "python-basics", name: "Python Programming", description: "Fundamental programming concepts and syntax", level: "Beginner", duration: "4-5 weeks", color: "#3776AB", category: "programming" },
-  { id: "javascript-fundamentals", name: "JavaScript Fundamentals", description: "Core concepts of web programming language", level: "Beginner", duration: "4-5 weeks", color: "#F7DF1E", category: "programming" },
-  { id: "data-structures-algorithms", name: "Data Structures & Algorithms", description: "Essential computer science foundations", level: "Intermediate", duration: "6-8 weeks", color: "#00BCD4", category: "programming" },
-  { id: "web-development", name: "Modern Web Development", description: "Full-stack development principles", level: "Beginner", duration: "5-6 weeks", color: "#E44D26", category: "programming" },
-  { id: "ai-ml-basics", name: "AI & Machine Learning", description: "Introduction to artificial intelligence", level: "Intermediate", duration: "4-5 weeks", color: "#FF6B6B", category: "programming" },
-  { id: "cloud-computing", name: "Cloud Computing", description: "Understanding cloud services and architecture", level: "Intermediate", duration: "3-4 weeks", color: "#4285F4", category: "programming" },
-  { id: "cybersecurity-essentials", name: "Cybersecurity", description: "Digital security principles and practices", level: "Beginner", duration: "3-4 weeks", color: "#228B22", category: "programming" },
-  { id: "blockchain-web3", name: "Blockchain & Web3", description: "Decentralized technology fundamentals", level: "Intermediate", duration: "4-5 weeks", color: "#3D3D3D", category: "programming" },
-  { id: "api-design", name: "API Design", description: "Building and consuming web APIs", level: "Intermediate", duration: "3-4 weeks", color: "#FF5722", category: "programming" },
-  { id: "quantum-computing", name: "Quantum Computing", description: "Principles of quantum information science", level: "Advanced", duration: "4-5 weeks", color: "#9C27B0", category: "science" },
-  { id: "biotechnology", name: "Biotechnology", description: "Biological technology applications", level: "Intermediate", duration: "4-5 weeks", color: "#4CAF50", category: "science" },
-  { id: "neuroscience-basics", name: "Neuroscience", description: "Understanding brain and cognition", level: "Intermediate", duration: "4-5 weeks", color: "#2196F3", category: "science" },
-  { id: "space-technology", name: "Space Technology", description: "Space exploration and satellite systems", level: "Intermediate", duration: "3-4 weeks", color: "#3F51B5", category: "science" },
-  { id: "climate-science", name: "Climate Science", description: "Climate systems and sustainability", level: "Beginner", duration: "3-4 weeks", color: "#009688", category: "science" },
-  { id: "scientific-method", name: "Scientific Thinking", description: "Critical analysis and research methods", level: "Beginner", duration: "2-3 weeks", color: "#FF9800", category: "science" },
-  { id: "physics-concepts", name: "Modern Physics", description: "Key concepts in contemporary physics", level: "Intermediate", duration: "4-5 weeks", color: "#795548", category: "science" },
-  { id: "personal-finance", name: "Personal Finance", description: "Budgeting, saving, and financial planning", level: "Beginner", duration: "3-4 weeks", color: "#2196F3", category: "finance" },
-  { id: "investing-basics", name: "Investment Principles", description: "Stock market and investment strategies", level: "Beginner", duration: "4-5 weeks", color: "#4CAF50", category: "finance" },
-  { id: "entrepreneurship", name: "Entrepreneurship", description: "Starting and scaling businesses", level: "Beginner", duration: "4-5 weeks", color: "#FF9800", category: "finance" },
-  { id: "digital-marketing", name: "Digital Marketing", description: "Online marketing strategies and analytics", level: "Beginner", duration: "3-4 weeks", color: "#E91E63", category: "finance" },
-  { id: "economics-principles", name: "Economics", description: "Market systems and economic theory", level: "Beginner", duration: "4-5 weeks", color: "#607D8B", category: "finance" },
-  { id: "cryptocurrency", name: "Cryptocurrency", description: "Digital currencies and blockchain economics", level: "Intermediate", duration: "3-4 weeks", color: "#FF5722", category: "finance" },
-  { id: "financial-literacy", name: "Financial Literacy", description: "Essential money management skills", level: "Beginner", duration: "2-3 weeks", color: "#009688", category: "finance" },
-  { id: "critical-thinking", name: "Critical Thinking", description: "Analytical reasoning and problem solving", level: "Beginner", duration: "3-4 weeks", color: "#9C27B0", category: "self-dev" },
-  { id: "emotional-intelligence", name: "Emotional Intelligence", description: "Self-awareness and relationship management", level: "Beginner", duration: "3-4 weeks", color: "#FF5722", category: "self-dev" },
-  { id: "productivity-systems", name: "Productivity Systems", description: "Time management and workflow optimization", level: "Beginner", duration: "2-3 weeks", color: "#4CAF50", category: "self-dev" },
-  { id: "decision-making", name: "Decision Making", description: "Strategic thinking and choice architecture", level: "Beginner", duration: "2-3 weeks", color: "#2196F3", category: "self-dev" },
-  { id: "mindfulness-meditation", name: "Mindfulness", description: "Mental focus and stress management", level: "Beginner", duration: "2-3 weeks", color: "#795548", category: "self-dev" },
-  { id: "learning-how-to-learn", name: "Learning How to Learn", description: "Meta-learning and skill acquisition", level: "Beginner", duration: "2-3 weeks", color: "#FF9800", category: "self-dev" },
-  { id: "growth-mindset", name: "Growth Mindset", description: "Developing resilience and adaptability", level: "Beginner", duration: "2-3 weeks", color: "#E91E63", category: "self-dev" },
-  { id: "communication-skills", name: "Communication Skills", description: "Effective speaking and listening techniques", level: "Beginner", duration: "3-4 weeks", color: "#00BCD4", category: "self-dev" },
-  { id: "leadership-basics", name: "Leadership Fundamentals", description: "Team management and influence skills", level: "Beginner", duration: "3-4 weeks", color: "#3F51B5", category: "self-dev" },
-  { id: "future-careers", name: "Future Careers", description: "Emerging job markets and skills", level: "Beginner", duration: "2-3 weeks", color: "#FF6B6B", category: "self-dev" },
-  { id: "data-literacy", name: "Data Literacy", description: "Understanding and interpreting data", level: "Beginner", duration: "3-4 weeks", color: "#4285F4", category: "future-skills" },
-  { id: "ux-design-principles", name: "UX Design", description: "User experience design fundamentals", level: "Beginner", duration: "3-4 weeks", color: "#E91E63", category: "future-skills" },
-  { id: "project-management", name: "Project Management", description: "Agile and traditional project methodologies", level: "Beginner", duration: "3-4 weeks", color: "#4CAF50", category: "future-skills" },
-  { id: "ethical-technology", name: "Ethical Technology", description: "AI ethics and responsible innovation", level: "Intermediate", duration: "2-3 weeks", color: "#607D8B", category: "future-skills" },
-  { id: "systems-thinking", name: "Systems Thinking", description: "Understanding complex interconnected systems", level: "Intermediate", duration: "3-4 weeks", color: "#9C27B0", category: "future-skills" }
+  // Programming
+  { id: "python-basics", name: "Python Programming", description: "Fundamental programming concepts and syntax", category: "programming", popularity: 95 },
+  { id: "javascript-fundamentals", name: "JavaScript Fundamentals", description: "Core concepts of web programming language", category: "programming", popularity: 88 },
+  { id: "data-structures-algorithms", name: "Data Structures & Algorithms", description: "Essential computer science foundations", category: "programming", popularity: 92 },
+  { id: "web-development", name: "Modern Web Development", description: "Full-stack development principles", category: "programming", popularity: 85 },
+  { id: "mobile-app-dev", name: "Mobile App Development", description: "iOS and Android app development", category: "programming", popularity: 79 },
+  { id: "ai-ml-basics", name: "AI & Machine Learning", description: "Introduction to artificial intelligence", category: "programming", popularity: 96 },
+  { id: "cloud-computing", name: "Cloud Computing", description: "Understanding cloud services and architecture", category: "programming", popularity: 78 },
+  { id: "cybersecurity-essentials", name: "Cybersecurity", description: "Digital security principles and practices", category: "programming", popularity: 82 },
+  { id: "blockchain-web3", name: "Blockchain & Web3", description: "Decentralized technology fundamentals", category: "programming", popularity: 75 },
+  { id: "api-design", name: "API Design", description: "Building and consuming web APIs", category: "programming", popularity: 80 },
+
+  // Science
+  { id: "quantum-computing", name: "Quantum Computing", description: "Principles of quantum information science", category: "science", popularity: 65 },
+  { id: "biotechnology", name: "Biotechnology", description: "Biological technology applications", category: "science", popularity: 70 },
+  { id: "neuroscience-basics", name: "Neuroscience", description: "Understanding brain and cognition", category: "science", popularity: 72 },
+  { id: "space-technology", name: "Space Technology", description: "Space exploration and satellite systems", category: "science", popularity: 68 },
+  { id: "climate-science", name: "Climate Science", description: "Climate systems and sustainability", category: "science", popularity: 85 },
+  { id: "scientific-method", name: "Scientific Thinking", description: "Critical analysis and research methods", category: "science", popularity: 78 },
+  { id: "physics-concepts", name: "Modern Physics", description: "Key concepts in contemporary physics", category: "science", popularity: 71 },
+  { id: "chemistry-foundations", name: "Chemistry Foundations", description: "Fundamental chemical principles", category: "science", popularity: 69 },
+
+  // Finance
+  { id: "personal-finance", name: "Personal Finance", description: "Budgeting, saving, and financial planning", category: "finance", popularity: 90 },
+  { id: "investing-basics", name: "Investment Principles", description: "Stock market and investment strategies", category: "finance", popularity: 82 },
+  { id: "entrepreneurship", name: "Entrepreneurship", description: "Starting and scaling businesses", category: "finance", popularity: 88 },
+  { id: "digital-marketing", name: "Digital Marketing", description: "Online marketing strategies and analytics", category: "finance", popularity: 79 },
+  { id: "economics-principles", name: "Economics", description: "Market systems and economic theory", category: "finance", popularity: 75 },
+  { id: "cryptocurrency", name: "Cryptocurrency", description: "Digital currencies and blockchain economics", category: "finance", popularity: 81 },
+  { id: "financial-literacy", name: "Financial Literacy", description: "Essential money management skills", category: "finance", popularity: 92 },
+
+  // Self Development
+  { id: "critical-thinking", name: "Critical Thinking", description: "Analytical reasoning and problem solving", category: "self-dev", popularity: 87 },
+  { id: "emotional-intelligence", name: "Emotional Intelligence", description: "Self-awareness and relationship management", category: "self-dev", popularity: 89 },
+  { id: "productivity-systems", name: "Productivity Systems", description: "Time management and workflow optimization", category: "self-dev", popularity: 84 },
+  { id: "decision-making", name: "Decision Making", description: "Strategic thinking and choice architecture", category: "self-dev", popularity: 80 },
+  { id: "mindfulness-meditation", name: "Mindfulness", description: "Mental focus and stress management", category: "self-dev", popularity: 86 },
+  { id: "learning-how-to-learn", name: "Learning How to Learn", description: "Meta-learning and skill acquisition", category: "self-dev", popularity: 91 },
+  { id: "growth-mindset", name: "Growth Mindset", description: "Developing resilience and adaptability", category: "self-dev", popularity: 88 },
+  { id: "communication-skills", name: "Communication Skills", description: "Effective speaking and listening techniques", category: "self-dev", popularity: 85 },
+  { id: "leadership-basics", name: "Leadership Fundamentals", description: "Team management and influence skills", category: "self-dev", popularity: 83 },
+  { id: "future-careers", name: "Future Careers", description: "Emerging job markets and skills", category: "self-dev", popularity: 79 },
+
+  // Future Skills
+  { id: "data-literacy", name: "Data Literacy", description: "Understanding and interpreting data", category: "future-skills", popularity: 86 },
+  { id: "ux-design-principles", name: "UX Design", description: "User experience design fundamentals", category: "future-skills", popularity: 82 },
+  { id: "project-management", name: "Project Management", description: "Agile and traditional project methodologies", category: "future-skills", popularity: 84 },
+  { id: "ethical-technology", name: "Ethical Technology", description: "AI ethics and responsible innovation", category: "future-skills", popularity: 77 },
+  { id: "systems-thinking", name: "Systems Thinking", description: "Understanding complex interconnected systems", category: "future-skills", popularity: 80 }
 ];
 
-// Categories for tabs
 const CATEGORIES = [
   { id: "all", name: "All Courses", icon: <School />, count: PREDEFINED_TOPICS.length },
-  { id: "programming", name: "💻 Programming", icon: <Code />, count: PREDEFINED_TOPICS.filter(t => t.category === "programming").length },
-  { id: "science", name: "🔬 Science", icon: <Science />, count: PREDEFINED_TOPICS.filter(t => t.category === "science").length },
-  { id: "finance", name: "💼 Finance", icon: <TrendingUp />, count: PREDEFINED_TOPICS.filter(t => t.category === "finance").length },
-  { id: "self-dev", name: "🧠 Self Dev", icon: <PsychologyIcon />, count: PREDEFINED_TOPICS.filter(t => t.category === "self-dev").length },
-  { id: "future-skills", name: "🌐 Future Skills", icon: <Rocket />, count: PREDEFINED_TOPICS.filter(t => t.category === "future-skills").length }
+  { id: "programming", name: "Programming", icon: <Code />, count: PREDEFINED_TOPICS.filter(t => t.category === "programming").length },
+  { id: "science", name: "Science", icon: <Science />, count: PREDEFINED_TOPICS.filter(t => t.category === "science").length },
+  { id: "finance", name: "Finance", icon: <TrendingUp />, count: PREDEFINED_TOPICS.filter(t => t.category === "finance").length },
+  { id: "self-dev", name: "Self Development", icon: <Psychology />, count: PREDEFINED_TOPICS.filter(t => t.category === "self-dev").length },
+  { id: "future-skills", name: "Future Skills", icon: <Rocket />, count: PREDEFINED_TOPICS.filter(t => t.category === "future-skills").length }
 ];
 
 export default function TopicSelection() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
-  const [hoveredTopic, setHoveredTopic] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-useEffect(() => {
-  // Handle Google OAuth token from URL and store as authToken cookie
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokenFromUrl = urlParams.get('token');
-  const source = urlParams.get('source');
-  
-  if (tokenFromUrl && source === 'google') {
-    console.log("✅ [PERSONALIZE] Google OAuth token found in URL, storing as authToken cookie");
-    
-    // Store the token in frontend cookie for persistence
-    setFrontendCookie(tokenFromUrl);
-    console.log("🍪 [PERSONALIZE] authToken cookie set for persistence");
-    
-    // Clean URL - remove token from address bar
-    window.history.replaceState({}, '', '/personalize');
-    
-    // Optional: Redirect to profile if user doesn't need personalization
-    const checkUserProfile = async () => {
-      try {
-        const profileResponse = await getProfile();
-        const userData = profileResponse.data?.user || profileResponse.data;
-        
-        if (userData) {
-          // Check if user needs personalization
-          const needsPersonalization = !userData.learningStyle || 
-                                     userData.learningStyle === 'visual' || 
-                                     !userData.progress || 
-                                     userData.progress.length === 0;
-          
-          if (!needsPersonalization) {
-            console.log("🔄 [PERSONALIZE] User already personalized, redirecting to profile...");
-            navigate('/profile');
-          }
-        }
-      } catch (error) {
-        console.log("ℹ️ [PERSONALIZE] Could not check user profile, staying on personalize page");
-      }
-    };
-    
-    checkUserProfile();
-  }
-}, []);
+  // Memoized filtered topics
+  const filteredTopics = useMemo(() => {
+    return PREDEFINED_TOPICS.filter(topic => {
+      const matchesCategory = selectedCategory === "all" || topic.category === selectedCategory;
+      const matchesSearch = topic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           topic.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [selectedCategory, searchQuery]);
+
   const handleTopicSelect = (topicId) => {
     setSelectedTopic(topicId);
     setError("");
-  };
-
-  const handleCategoryChange = (event, newValue) => {
-    setSelectedCategory(newValue);
-    setSelectedTopic(""); // Reset selection when changing category
   };
 
   const handleStartLearning = async () => {
@@ -485,457 +407,306 @@ useEffect(() => {
       setError("");
       
       const topic = PREDEFINED_TOPICS.find(t => t.id === selectedTopic);
-      const response = await personalizeAndGenerate({
-        topic: topic.name
-      });
-      
-      // Redirect to profile after successful personalization
+      await personalizeAndGenerate({ topic: topic.name });
       navigate('/profile');
       
     } catch (err) {
       console.error("API Error:", err);
-      const errorMessage = err.response?.data?.message || "Oops! Something went wrong. Please try again.";
-      setError(errorMessage);
+      setError(err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter topics based on selected category
-  const filteredTopics = selectedCategory === "all" 
-    ? PREDEFINED_TOPICS 
-    : PREDEFINED_TOPICS.filter(topic => topic.category === selectedCategory);
-
- 
   return (
-    <Container maxWidth="xl" sx={{ 
-      py: { xs: 2, md: 4 },
+    <Box sx={{ 
       minHeight: '100vh',
-      background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.03)} 0%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
+      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #e9d5ff 100%)',
     }}>
-      {/* Header Section */}
-      <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
-        <Fade in timeout={800}>
-          <Paper 
-            elevation={0}
-            sx={{ 
-              p: { xs: 3, md: 4 },
-              borderRadius: 4,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              color: 'white',
-              mx: 'auto',
-              maxWidth: '900px',
-              position: 'relative',
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)',
-              }
-            }}
-          >
-            <Typography 
-              variant="h1" 
-              gutterBottom 
-              sx={{ 
-                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' },
-                fontWeight: 800,
-                background: 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                mb: 2
-              }}
-            >
-              🚀 Future-Proof Your Skills
-            </Typography>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                opacity: 0.9, 
-                fontSize: { xs: '0.9rem', md: '1.1rem' },
-                fontWeight: 300,
-                maxWidth: '700px',
-                mx: 'auto',
-                lineHeight: 1.6
-              }}
-            >
-              Master {PREDEFINED_TOPICS.length}+ essential skills for the next decade. 
-              Theoretical foundations, practical insights, and future-focused learning.
-            </Typography>
-          </Paper>
-        </Fade>
-      </Box>
-
-      {/* Category Tabs */}
-      <Box sx={{ px: { xs: 1, sm: 2 }, mb: 4 }}>
-        <Fade in timeout={1000}>
-          <Paper 
-            elevation={2} 
-            sx={{ 
-              borderRadius: 3, 
-              p: 2,
-              mb: 3,
-              background: 'white'
-            }}
-          >
-            <Typography 
-              variant="h5" 
-              gutterBottom 
-              sx={{ 
-                textAlign: 'center',
-                fontWeight: 700,
-                color: theme.palette.text.primary,
-                mb: 3
-              }}
-            >
-              Explore Learning Paths
-            </Typography>
-            
-            <Box sx={{ 
-              borderBottom: 1, 
-              borderColor: 'divider',
-              overflowX: 'auto',
-              '& .MuiTabs-scroller': {
-                overflowX: 'auto !important'
-              }
-            }}>
-              <Tabs
-                value={selectedCategory}
-                onChange={handleCategoryChange}
-                variant="scrollable"
-                scrollButtons="auto"
-                allowScrollButtonsMobile
-                sx={{
-                  minHeight: '60px',
-                  '& .MuiTab-root': {
-                    minHeight: '50px',
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    borderRadius: 2,
-                    mx: 0.5,
-                    minWidth: 'auto',
-                    px: { xs: 1.5, sm: 2 }
-                  }
+      <Container maxWidth="xl" sx={{ py: 3, px: { xs: 2, md: 4 } }}>
+        
+        {/* Header Section */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Fade in timeout={600}>
+            <Box>
+              <School sx={{ 
+                fontSize: { xs: '3rem', md: '4rem' }, 
+                color: purplePalette[600],
+                mb: 2 
+              }} />
+              <Typography 
+                variant="h3" 
+                sx={{ 
+                  fontWeight: 800,
+                  background: `linear-gradient(135deg, ${purplePalette[600]} 0%, ${purplePalette[800]} 100%)`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent',
+                  mb: 1,
+                  fontSize: { xs: '2rem', md: '3rem' }
                 }}
               >
-                {CATEGORIES.map((category) => (
-                  <Tab
-                    key={category.id}
-                    value={category.id}
-                    icon={category.icon}
-                    iconPosition="start"
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <span>{category.name.split(' ')[0]}</span>
-                        <Chip 
-                          label={category.count} 
-                          size="small" 
-                          sx={{ 
-                            height: '20px', 
-                            fontSize: '0.7rem',
-                            backgroundColor: selectedCategory === category.id ? 'white' : 'grey.200',
-                            color: selectedCategory === category.id ? 'primary.main' : 'grey.700'
-                          }} 
-                        />
-                      </Box>
-                    }
-                    sx={{
-                      backgroundColor: selectedCategory === category.id ? 'primary.main' : 'transparent',
-                      color: selectedCategory === category.id ? 'white' : 'text.primary',
-                      '&:hover': {
-                        backgroundColor: selectedCategory === category.id ? 'primary.dark' : 'grey.100',
-                      }
-                    }}
-                  />
-                ))}
-              </Tabs>
+                Explore Learning Paths
+              </Typography>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: 'text.secondary',
+                  fontWeight: 400,
+                }}
+              >
+                {PREDEFINED_TOPICS.length} curated courses • Start your journey
+              </Typography>
             </Box>
-          </Paper>
-        </Fade>
-      </Box>
+          </Fade>
+        </Box>
 
-      {/* Error Alert */}
-      {error && (
-        <Zoom in>
-          <Alert 
-            severity="error" 
-            sx={{ 
-              mb: 3, 
-              borderRadius: 3,
-              boxShadow: 2,
-              mx: { xs: 1, sm: 2 }
-            }}
-          >
-            {error}
-          </Alert>
-        </Zoom>
-      )}
-
-      {/* Topics Grid */}
-      <Box sx={{ px: { xs: 1, sm: 2 } }}>
-        <Grid container spacing={2} justifyContent="center">
-          {filteredTopics.map((topic, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={topic.id}>
-              <Zoom in timeout={800 + index * 100}>
-                <Card 
-                  sx={{ 
-                    cursor: 'pointer',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: selectedTopic === topic.id 
-                      ? `3px solid ${topic.color}`
-                      : '2px solid transparent',
-                    background: selectedTopic === topic.id
-                      ? `linear-gradient(135deg, ${alpha(topic.color, 0.08)} 0%, ${alpha(topic.color, 0.03)} 100%)`
-                      : 'white',
-                    transform: selectedTopic === topic.id 
-                      ? 'translateY(-8px) scale(1.02)'
-                      : hoveredTopic === topic.id
-                      ? 'translateY(-4px) scale(1.01)'
-                      : 'translateY(0) scale(1)',
-                    boxShadow: selectedTopic === topic.id 
-                      ? `0 16px 32px ${alpha(topic.color, 0.15)}`
-                      : hoveredTopic === topic.id
-                      ? '0 8px 24px rgba(0,0,0,0.12)'
-                      : '0 2px 12px rgba(0,0,0,0.06)',
-                    borderRadius: 3,
-                    overflow: 'visible',
-                    position: 'relative',
-                    height: '100%',
-                    '&::before': selectedTopic === topic.id ? {
-                      content: '""',
-                      position: 'absolute',
-                      top: -2,
-                      left: -2,
-                      right: -2,
-                      bottom: -2,
-                      background: `linear-gradient(135deg, ${topic.color} 0%, ${alpha(topic.color, 0.5)} 100%)`,
-                      borderRadius: 3,
-                      zIndex: -1,
-                    } : {},
-                    '&:hover': {
-                      transform: 'translateY(-4px) scale(1.01)',
-                      boxShadow: '0 12px 28px rgba(0,0,0,0.15)',
-                    }
-                  }}
-                  onClick={() => handleTopicSelect(topic.id)}
-                  onMouseEnter={() => setHoveredTopic(topic.id)}
-                  onMouseLeave={() => setHoveredTopic("")}
-                >
-                  <CardContent sx={{ p: 2.5, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    {/* Topic Icon */}
-                    <Box
-                      sx={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: '50%',
-                        background: `linear-gradient(135deg, ${topic.color} 0%, ${alpha(topic.color, 0.7)} 100%)`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 12px',
-                        color: 'white',
-                        boxShadow: `0 6px 16px ${alpha(topic.color, 0.3)}`
-                      }}
-                    >
-                      {topicIcons[topic.id]}
-                    </Box>
-
-                    {/* Topic Name */}
-                    <Typography 
-                      variant="h6" 
-                      gutterBottom
-                      sx={{ 
-                        fontWeight: 700,
-                        color: theme.palette.text.primary,
-                        mb: 1,
-                        fontSize: '1rem',
-                        lineHeight: 1.3
-                      }}
-                    >
-                      {topic.name}
-                    </Typography>
-
-                    {/* Topic Description */}
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary"
-                      sx={{ 
-                        mb: 2,
-                        lineHeight: 1.4,
-                        flexGrow: 1,
-                        fontSize: '0.8rem'
-                      }}
-                    >
-                      {topic.description}
-                    </Typography>
-
-                    {/* Chips for Level and Duration */}
-                    <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', mb: 1, flexWrap: 'wrap' }}>
-                      <Chip 
-                        label={topic.level}
-                        size="small"
-                        variant="outlined"
-                        sx={{ 
-                          borderColor: topic.color,
-                          color: topic.color,
-                          fontWeight: 600,
-                          fontSize: '0.65rem',
-                          height: '20px'
-                        }}
-                      />
-                      <Chip 
-                        label={topic.duration}
-                        size="small"
-                        variant="outlined"
-                        sx={{ 
-                          borderColor: theme.palette.grey[400],
-                          color: theme.palette.grey[700],
-                          fontWeight: 500,
-                          fontSize: '0.65rem',
-                          height: '20px'
-                        }}
-                      />
-                    </Box>
-
-                    {/* Selection Indicator */}
-                    {selectedTopic === topic.id && (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: -6,
-                          right: -6,
-                          width: 20,
-                          height: 20,
-                          borderRadius: '50%',
-                          background: topic.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          boxShadow: `0 2px 8px ${alpha(topic.color, 0.5)}`
-                        }}
-                      >
-                        ✓
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              </Zoom>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* No topics found message */}
-        {filteredTopics.length === 0 && (
+        {/* Search Bar */}
+        <Box sx={{ mb: 3, maxWidth: '600px', mx: 'auto' }}>
           <Fade in timeout={800}>
-            <Paper 
-              sx={{ 
-                p: 6, 
-                textAlign: 'center', 
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`
+            <Paper
+              sx={{
+                p: 1,
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: 2,
+                background: 'white',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
               }}
             >
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No courses found in this category
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Try selecting a different category or check back later for new courses.
-              </Typography>
+              <Search sx={{ color: purplePalette[400], mx: 1 }} />
+              <InputBase
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ flex: 1 }}
+              />
             </Paper>
           </Fade>
-        )}
-      </Box>
+        </Box>
 
-      {/* Start Button */}
-      <Fade in timeout={2000}>
-        <Box sx={{ textAlign: 'center', mt: 6, mb: 4, px: { xs: 2, sm: 0 } }}>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleStartLearning}
-            disabled={!selectedTopic || loading}
-            sx={{
-              px: 6,
-              py: 1.5,
-              fontSize: { xs: '1rem', sm: '1.1rem' },
-              fontWeight: 700,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              borderRadius: 3,
-              boxShadow: selectedTopic 
-                ? '0 12px 30px rgba(102, 126, 234, 0.4)'
-                : '0 4px 20px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 16px 40px rgba(102, 126, 234, 0.5)',
-                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.dark} 100%)`,
-              },
-              '&:disabled': {
-                background: theme.palette.grey[300],
-                color: theme.palette.grey[500],
-                transform: 'none',
-                boxShadow: 'none'
-              },
-              minWidth: { xs: '180px', sm: '200px' }
-            }}
-          >
-            {loading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box 
-                  sx={{ 
-                    width: 16, 
-                    height: 16, 
-                    border: '2px solid transparent',
-                    borderTop: '2px solid currentColor',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }} 
-                />
-                Starting...
-              </Box>
-            ) : (
-              "Start Learning Journey 🚀"
-            )}
-          </Button>
+        {/* Main Content */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 4 }}>
           
-          {!selectedTopic && (
-            <Typography 
-              variant="body2" 
-              color="text.secondary" 
-              sx={{ mt: 2, fontStyle: 'italic' }}
+          {/* Category Sidebar - Always Column */}
+          <Box sx={{ 
+            width: { xs: '100%', lg: '80px' },
+            display: 'flex', 
+            flexDirection: { xs: 'row', lg: 'column' },
+            gap: 1,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            {CATEGORIES.map((category) => (
+              <Tooltip key={category.id} title={category.name} placement="right" arrow>
+                <Box
+                  onClick={() => setSelectedCategory(category.id)}
+                  sx={{
+                    width: { xs: '50px', lg: '60px' },
+                    height: { xs: '50px', lg: '60px' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 2,
+                    backgroundColor: selectedCategory === category.id ? purplePalette[500] : 'transparent',
+                    color: selectedCategory === category.id ? 'white' : purplePalette[600],
+                    border: `2px solid ${selectedCategory === category.id ? purplePalette[500] : purplePalette[200]}`,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                    '&:hover': {
+                      backgroundColor: selectedCategory === category.id ? purplePalette[600] : purplePalette[50],
+                      transform: 'scale(1.05)',
+                    }
+                  }}
+                >
+                  {category.icon}
+                  
+                  {/* Badge for course count */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: -4,
+                      right: -4,
+                      backgroundColor: purplePalette[500],
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: 20,
+                      height: 20,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.7rem',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {category.count}
+                  </Box>
+                </Box>
+              </Tooltip>
+            ))}
+          </Box>
+
+          {/* Courses Grid */}
+          <Box sx={{ flex: 1 }}>
+            {/* Selected Category Info */}
+            <Box sx={{ mb: 3, textAlign: { xs: 'center', lg: 'left' } }}>
+              <Typography variant="h5" fontWeight={700} color={purplePalette[700]}>
+                {CATEGORIES.find(cat => cat.id === selectedCategory)?.name}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {filteredTopics.length} courses available
+              </Typography>
+            </Box>
+
+            {/* Error Alert */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {/* Courses Grid */}
+            <Grid container spacing={2}>
+              {filteredTopics.map((topic, index) => {
+                const categoryData = CATEGORY_DATA[topic.category];
+                const isSelected = selectedTopic === topic.id;
+                
+                return (
+                  <Grid item xs={12} sm={6} md={4} xl={3} key={topic.id}>
+                    <Fade in timeout={400 + index * 50}>
+                      <Card 
+                        sx={{ 
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          border: isSelected ? `2px solid ${categoryData.color}` : '1px solid #e2e8f0',
+                          background: isSelected ? alpha(categoryData.color, 0.08) : 'white',
+                          transform: isSelected ? 'translateY(-2px)' : 'none',
+                          boxShadow: isSelected ? `0 8px 25px ${alpha(categoryData.color, 0.15)}` : '0 2px 8px rgba(0,0,0,0.06)',
+                          borderRadius: 2,
+                          height: '100%',
+                          '&:hover': {
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 8px 20px ${alpha(categoryData.color, 0.1)}`,
+                          }
+                        }}
+                        onClick={() => handleTopicSelect(topic.id)}
+                      >
+                        <CardContent sx={{ p: 2.5, position: 'relative' }}>
+                          {/* Category & Rating */}
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Chip
+                              label={categoryData.name}
+                              size="small"
+                              sx={{
+                                backgroundColor: alpha(categoryData.color, 0.1),
+                                color: categoryData.color,
+                                fontWeight: 600,
+                              }}
+                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Star sx={{ fontSize: 16, color: '#fbbf24' }} />
+                              <Typography variant="caption" fontWeight={600}>
+                                {topic.popularity}%
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          {/* Course Info */}
+                          <Typography variant="h6" fontWeight={700} sx={{ mb: 1, lineHeight: 1.3 }}>
+                            {topic.name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+                            {topic.description}
+                          </Typography>
+
+                          {/* Selection Indicator */}
+                          {isSelected && (
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                top: 12,
+                                right: 12,
+                                width: 20,
+                                height: 20,
+                                borderRadius: '50%',
+                                background: categoryData.color,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              ✓
+                            </Box>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Fade>
+                  </Grid>
+                );
+              })}
+            </Grid>
+
+            {/* No Results */}
+            {filteredTopics.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No courses found
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Try a different search or category
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Action Button */}
+        <Box sx={{ 
+          position: 'sticky', 
+          bottom: 0, 
+          background: 'linear-gradient(transparent, #faf5ff)',
+          py: 3, 
+          mt: 4,
+          textAlign: 'center'
+        }}>
+          <Fade in timeout={1200}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleStartLearning}
+              disabled={!selectedTopic || loading}
+              sx={{
+                px: 6,
+                py: 1.5,
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                background: `linear-gradient(135deg, ${purplePalette[500]} 0%, ${purplePalette[700]} 100%)`,
+                borderRadius: 2,
+                minWidth: '200px',
+                '&:hover': {
+                  transform: 'translateY(-1px)',
+                  boxShadow: `0 8px 25px ${alpha(purplePalette[500], 0.4)}`,
+                },
+                '&:disabled': {
+                  background: 'grey.300',
+                }
+              }}
             >
-              Select a topic above to begin your learning adventure
-            </Typography>
-          )}
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Start Learning"}
+            </Button>
+          </Fade>
           
           {selectedTopic && (
-            <Typography 
-              variant="body2" 
-              color="primary" 
-              sx={{ mt: 2, fontWeight: 600 }}
-            >
-              Ready to start learning: {PREDEFINED_TOPICS.find(t => t.id === selectedTopic)?.name}
+            <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: purplePalette[600] }}>
+              Selected: {PREDEFINED_TOPICS.find(t => t.id === selectedTopic)?.name}
             </Typography>
           )}
         </Box>
-      </Fade>
-
-      {/* Add CSS animation for spinner */}
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </Container>
+      </Container>
+    </Box>
   );
 }

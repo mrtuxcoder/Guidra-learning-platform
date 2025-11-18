@@ -11,7 +11,7 @@ import {
   IconButton,
   useScrollTrigger,
   Slide,
-  CircularProgress
+  Chip
 } from '@mui/material';
 import {
   AccountCircle,
@@ -19,12 +19,11 @@ import {
   Person,
   School,
   Menu as MenuIcon,
-  Dashboard,
-  Explore
+  Explore,
+  RocketLaunch
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getProfile, logoutUser } from '../api/auth';
-import { clearAllTokens } from '../utils/auth';
+import { getProfile } from '../api/auth';
 import { completeLogout } from '../utils/auth';
 
 function HideOnScroll(props) {
@@ -44,51 +43,47 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Optimized auth check with caching
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    console.log('🔍 Checking authentication status...');
-    
-    try {
-      setLoading(true);
-      console.log('📡 Fetching user data from API...');
-      const response = await getProfile();
-      console.log('✅ API Response:', response);
-      
-      const userData = response.data?.user || response.data || response;
-      console.log('👤 User data from API:', userData);
-      
-      if (userData) {
-        setUser(userData);
-      } else {
-        setUser(null);
+    const checkAuth = async () => {
+      // Check if we already have user data cached
+      const cachedUser = sessionStorage.getItem('cachedUser');
+      if (cachedUser) {
+        setUser(JSON.parse(cachedUser));
+        return;
       }
-    } catch (error) {
-      console.error('❌ API fetch failed:', error);
-      setUser(null);
-    } finally {
-      setLoading(false);
-      setAuthChecked(true);
-    }
-  };
+
+      try {
+        setIsLoading(true);
+        const response = await getProfile();
+        const userData = response.data?.user || response.data || response;
+        
+        if (userData) {
+          setUser(userData);
+          // Cache user data for this session
+          sessionStorage.setItem('cachedUser', JSON.stringify(userData));
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const getUserInitial = () => {
     if (!user) return 'U';
-    if (user.name) return user.name.charAt(0).toUpperCase();
-    if (user.email) return user.email.charAt(0).toUpperCase();
-    return 'U';
+    return user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U';
   };
 
   const getUserDisplayName = () => {
     if (!user) return '';
-    if (user.name) return user.name.split(' ')[0];
-    if (user.email) return user.email.split('@')[0];
-    return 'Learner';
+    return user.name?.split(' ')[0] || user.email?.split('@')[0] || 'Learner';
   };
 
   const handleUserMenu = (event) => {
@@ -104,60 +99,43 @@ export default function Navbar() {
     setMobileMenuAnchor(null);
   };
 
-  const handleLogout = async () => {
-  // Use instant logout - no waiting
-  completeLogout(); // or use instantLogout() for even faster
-};
-
-  const isActive = (path) => {
-    return location.pathname === path;
+  const handleLogout = () => {
+    sessionStorage.removeItem('cachedUser');
+    completeLogout();
   };
 
+  const isActive = (path) => location.pathname === path;
+
   const navItems = [
-    { path: '/learn', label: 'Learn', icon: <School /> },
-    { path: '/personalize', label: 'Explore', icon: <Explore /> },
-    { path: '/profile', label: 'Profile', icon: <Person /> }
+    { path: '/learn', label: 'Learn', icon: <School sx={{ fontSize: 20 }} /> },
+    { path: '/personalize', label: 'Explore', icon: <Explore sx={{ fontSize: 20 }} /> },
+    { path: '/profile', label: 'Profile', icon: <Person sx={{ fontSize: 20 }} /> }
   ];
 
-  // Don't render until auth check is complete
-  if (!authChecked) {
-    return (
-      <HideOnScroll>
-        <AppBar 
-          position="sticky" 
-          sx={{ 
-            bgcolor: 'background.paper', 
-            color: 'text.primary', 
-            boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-            backdropFilter: 'blur(10px)',
-            background: 'rgba(255, 255, 255, 0.98)',
-            borderBottom: '1px solid',
-            borderColor: 'grey.200'
-          }}
-        >
-          <Toolbar sx={{ minHeight: '64px!important', py: 1, justifyContent: 'center' }}>
-            <CircularProgress size={24} />
-          </Toolbar>
-        </AppBar>
-      </HideOnScroll>
-    );
-  }
+  const purpleTheme = {
+    primary: '#7E57C2',
+    primaryLight: '#B39DDB',
+    primaryDark: '#5E35B1',
+    gradient: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
+    lightBg: '#F3E5F5',
+    subtleBg: '#FAF7FE'
+  };
 
   return (
     <HideOnScroll>
       <AppBar 
         position="sticky" 
         sx={{ 
-          bgcolor: 'background.paper', 
-          color: 'text.primary', 
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-          backdropFilter: 'blur(10px)',
-          background: 'rgba(255, 255, 255, 0.98)',
+          bgcolor: 'background.paper',
+          background: `linear-gradient(135deg, ${purpleTheme.subtleBg} 0%, #FFFFFF 100%)`,
+          color: 'text.primary',
+          boxShadow: '0 1px 8px rgba(126, 87, 194, 0.08)',
+          backdropFilter: 'blur(12px)',
           borderBottom: '1px solid',
-          borderColor: 'grey.200'
+          borderColor: 'rgba(126, 87, 194, 0.12)',
         }}
       >
-        <Toolbar sx={{ minHeight: '64px!important', py: 1 }}>
+        <Toolbar sx={{ minHeight: '64px!important', py: 0.5, px: { xs: 1, sm: 2 } }}>
           {/* Logo/Brand */}
           <Box 
             sx={{ 
@@ -165,30 +143,34 @@ export default function Navbar() {
               alignItems: 'center', 
               gap: 2, 
               flexGrow: 0, 
-              mr: 4,
+              mr: 3,
               cursor: 'pointer'
             }}
             onClick={() => navigate(user ? '/learn' : '/')}
           >
             <Box sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              width: 40,
+              height: 40,
+              borderRadius: 2.5,
+              background: purpleTheme.gradient,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
               fontWeight: 'bold',
-              fontSize: '1rem'
+              fontSize: '1.1rem',
+              boxShadow: '0 4px 12px rgba(126, 87, 194, 0.3)'
             }}>
-              AI
+              <RocketLaunch sx={{ fontSize: 20 }} />
             </Box>
             <Typography 
               variant="h6" 
               sx={{ 
-                fontWeight: '700',
-                color: 'text.primary',
+                fontWeight: '800',
+                background: purpleTheme.gradient,
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
                 display: { xs: 'none', sm: 'block' }
               }}
             >
@@ -196,13 +178,13 @@ export default function Navbar() {
             </Typography>
           </Box>
 
-          {/* Desktop Navigation - Only show when user is logged in */}
+          {/* Desktop Navigation */}
           {user && (
             <Box sx={{ 
               display: { xs: 'none', md: 'flex' }, 
               flexGrow: 1, 
-              gap: 1,
-              ml: 2 
+              gap: 0.5,
+              ml: 1 
             }}>
               {navItems.map((item) => (
                 <Button
@@ -212,15 +194,18 @@ export default function Navbar() {
                   startIcon={item.icon}
                   sx={{
                     fontWeight: isActive(item.path) ? '700' : '500',
-                    borderRadius: 2,
+                    borderRadius: 2.5,
                     px: 2.5,
                     py: 1,
-                    color: isActive(item.path) ? 'primary.main' : 'text.secondary',
-                    bgcolor: isActive(item.path) ? 'primary.50' : 'transparent',
+                    color: isActive(item.path) ? purpleTheme.primaryDark : 'text.secondary',
+                    bgcolor: isActive(item.path) ? purpleTheme.lightBg : 'transparent',
+                    border: isActive(item.path) ? `1px solid ${purpleTheme.primaryLight}20` : '1px solid transparent',
                     '&:hover': {
-                      bgcolor: isActive(item.path) ? 'primary.100' : 'grey.50',
+                      bgcolor: isActive(item.path) ? purpleTheme.lightBg : 'rgba(126, 87, 194, 0.04)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(126, 87, 194, 0.15)',
                     },
-                    transition: 'all 0.2s ease-in-out',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     minWidth: 'auto'
                   }}
                 >
@@ -235,83 +220,82 @@ export default function Navbar() {
 
           {/* User Menu */}
           {user ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Welcome Message */}
-              <Box sx={{ 
-                display: { xs: 'none', lg: 'flex' }, 
-                alignItems: 'center', 
-                gap: 1,
-                px: 2,
-                py: 0.75,
-                borderRadius: 2,
-                bgcolor: 'grey.50'
-              }}>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    fontWeight: '500',
-                    color: 'text.secondary'
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              {/* Welcome Chip */}
+              <Box sx={{ display: { xs: 'none', lg: 'flex' } }}>
+                <Chip
+                  icon={<AccountCircle sx={{ fontSize: 18, color: purpleTheme.primary }} />}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: '500' }}>
+                        Hi, {getUserDisplayName()}
+                      </Typography>
+                      {isLoading && (
+                        <Box 
+                          sx={{ 
+                            width: 6, 
+                            height: 6, 
+                            borderRadius: '50%', 
+                            bgcolor: purpleTheme.primary,
+                            animation: 'pulse 1.5s ease-in-out infinite'
+                          }} 
+                        />
+                      )}
+                    </Box>
+                  }
+                  variant="outlined"
+                  sx={{
+                    borderColor: purpleTheme.primaryLight,
+                    bgcolor: 'rgba(126, 87, 194, 0.04)',
+                    '& .MuiChip-label': { px: 1.5 }
                   }}
-                >
-                  Welcome,
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    fontWeight: '600',
-                    color: 'primary.main'
-                  }}
-                >
-                  {getUserDisplayName()}
-                </Typography>
-                {loading && (
-                  <CircularProgress size={14} sx={{ ml: 1 }} />
-                )}
+                />
               </Box>
 
-              {/* User Avatar & Menu */}
+              {/* User Avatar */}
               <IconButton
                 size="medium"
                 aria-label="user menu"
-                aria-controls="user-menu"
-                aria-haspopup="true"
                 onClick={handleUserMenu}
-                disabled={loading}
+                disabled={isLoading}
                 sx={{
-                  border: '1px solid',
-                  borderColor: 'grey.300',
+                  border: `2px solid ${purpleTheme.primaryLight}30`,
                   bgcolor: 'white',
                   '&:hover': {
-                    bgcolor: 'grey.50',
+                    bgcolor: purpleTheme.lightBg,
+                    transform: 'scale(1.05)',
+                    boxShadow: `0 4px 12px ${purpleTheme.primaryLight}40`
                   },
                   transition: 'all 0.2s ease-in-out',
                 }}
               >
-                {loading ? (
-                  <CircularProgress size={20} sx={{ color: 'primary.main' }} />
-                ) : (
-                  <Avatar 
-                    sx={{ 
-                      width: 32, 
-                      height: 32, 
-                      bgcolor: 'primary.main',
-                      fontWeight: '600',
-                      fontSize: '0.9rem'
-                    }}
-                  >
-                    {getUserInitial()}
-                  </Avatar>
-                )}
+                <Avatar 
+                  sx={{ 
+                    width: 34, 
+                    height: 34, 
+                    background: purpleTheme.gradient,
+                    fontWeight: '700',
+                    fontSize: '0.9rem',
+                    boxShadow: `0 2px 8px ${purpleTheme.primaryLight}50`
+                  }}
+                >
+                  {getUserInitial()}
+                </Avatar>
               </IconButton>
 
               {/* Mobile Menu Button */}
               <IconButton
                 size="medium"
                 aria-label="mobile menu"
-                aria-controls="mobile-menu"
-                aria-haspopup="true"
                 onClick={handleMobileMenu}
-                sx={{ display: { md: 'none' }, color: 'text.primary' }}
+                sx={{ 
+                  display: { md: 'none' }, 
+                  color: purpleTheme.primary,
+                  border: `1px solid ${purpleTheme.primaryLight}30`,
+                  '&:hover': {
+                    bgcolor: purpleTheme.lightBg
+                  }
+                }}
               >
                 <MenuIcon />
               </IconButton>
@@ -323,44 +307,65 @@ export default function Navbar() {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
                 PaperProps={{
-                  elevation: 2,
+                  elevation: 4,
                   sx: {
-                    mt: 1,
-                    borderRadius: 2,
-                    minWidth: 160,
+                    mt: 1.5,
+                    borderRadius: 3,
+                    minWidth: 180,
                     overflow: 'visible',
+                    border: `1px solid ${purpleTheme.primaryLight}20`,
                     '&:before': {
                       content: '""',
                       display: 'block',
                       position: 'absolute',
                       top: 0,
                       right: 14,
-                      width: 10,
-                      height: 10,
+                      width: 12,
+                      height: 12,
                       bgcolor: 'background.paper',
                       transform: 'translateY(-50%) rotate(45deg)',
                       zIndex: 0,
+                      borderLeft: `1px solid ${purpleTheme.primaryLight}20`,
+                      borderTop: `1px solid ${purpleTheme.primaryLight}20`,
                     },
                   },
                 }}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                <MenuItem onClick={() => navigate('/learn')} sx={{ py: 1 }}>
-                  <School sx={{ mr: 1.5, fontSize: 20, color: 'primary.main' }} />
-                  <Typography variant="body2">Learn</Typography>
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/personalize')} sx={{ py: 1 }}>
-                  <Explore sx={{ mr: 1.5, fontSize: 20, color: 'primary.main' }} />
-                  <Typography variant="body2">Explore</Typography>
-                </MenuItem>
-                <MenuItem onClick={() => navigate('/profile')} sx={{ py: 1 }}>
-                  <Person sx={{ mr: 1.5, fontSize: 20, color: 'primary.main' }} />
-                  <Typography variant="body2">Profile</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleLogout} sx={{ py: 1, color: 'error.main' }}>
-                  <Logout sx={{ mr: 1.5, fontSize: 20 }} />
-                  <Typography variant="body2">Sign Out</Typography>
+                {navItems.map((item) => (
+                  <MenuItem 
+                    key={item.path} 
+                    onClick={() => { navigate(item.path); handleClose(); }}
+                    sx={{ 
+                      py: 1.5,
+                      '&:hover': {
+                        bgcolor: purpleTheme.lightBg
+                      }
+                    }}
+                  >
+                    <Box sx={{ mr: 2, color: purpleTheme.primary }}>
+                      {item.icon}
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: '500' }}>
+                      {item.label}
+                    </Typography>
+                  </MenuItem>
+                ))}
+                <MenuItem 
+                  onClick={handleLogout}
+                  sx={{ 
+                    py: 1.5,
+                    color: 'error.main',
+                    '&:hover': {
+                      bgcolor: 'rgba(211, 47, 47, 0.04)'
+                    }
+                  }}
+                >
+                  <Logout sx={{ mr: 2, fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ fontWeight: '500' }}>
+                    Sign Out
+                  </Typography>
                 </MenuItem>
               </Menu>
 
@@ -371,11 +376,12 @@ export default function Navbar() {
                 open={Boolean(mobileMenuAnchor)}
                 onClose={handleClose}
                 PaperProps={{
-                  elevation: 2,
+                  elevation: 4,
                   sx: {
                     mt: 1,
-                    borderRadius: 2,
-                    minWidth: 160,
+                    borderRadius: 3,
+                    minWidth: 200,
+                    border: `1px solid ${purpleTheme.primaryLight}20`,
                   },
                 }}
               >
@@ -383,34 +389,45 @@ export default function Navbar() {
                   <MenuItem 
                     key={item.path} 
                     onClick={() => { navigate(item.path); handleClose(); }}
-                    sx={{ py: 1 }}
+                    sx={{ py: 1.5 }}
                   >
-                    {React.cloneElement(item.icon, { sx: { mr: 1.5, fontSize: 20 } })}
-                    <Typography variant="body2">
+                    <Box sx={{ mr: 2, color: purpleTheme.primary }}>
+                      {item.icon}
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: '500' }}>
                       {item.label}
                     </Typography>
                   </MenuItem>
                 ))}
-                <MenuItem onClick={handleLogout} sx={{ py: 1, color: 'error.main' }}>
-                  <Logout sx={{ mr: 1.5, fontSize: 20 }} />
-                  <Typography variant="body2">Sign Out</Typography>
+                <MenuItem 
+                  onClick={handleLogout}
+                  sx={{ py: 1.5, color: 'error.main' }}
+                >
+                  <Logout sx={{ mr: 2, fontSize: 20 }} />
+                  <Typography variant="body2" sx={{ fontWeight: '500' }}>
+                    Sign Out
+                  </Typography>
                 </MenuItem>
               </Menu>
             </Box>
           ) : (
-            /* Auth Buttons for non-logged in users */
+            /* Auth Buttons */
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
               <Button
                 color="inherit"
                 onClick={() => navigate('/login')}
                 sx={{
-                  fontWeight: '500',
-                  borderRadius: 2,
-                  px: 2.5,
-                  color: 'text.secondary',
+                  fontWeight: '600',
+                  borderRadius: 2.5,
+                  px: 3,
+                  color: purpleTheme.primary,
+                  border: `1px solid ${purpleTheme.primaryLight}40`,
                   '&:hover': {
-                    bgcolor: 'grey.50'
-                  }
+                    bgcolor: purpleTheme.lightBg,
+                    transform: 'translateY(-1px)',
+                    boxShadow: `0 4px 12px ${purpleTheme.primaryLight}20`
+                  },
+                  transition: 'all 0.2s ease-in-out'
                 }}
               >
                 Sign In
@@ -419,15 +436,16 @@ export default function Navbar() {
                 variant="contained"
                 onClick={() => navigate('/register')}
                 sx={{
-                  borderRadius: 2,
-                  px: 2.5,
-                  fontWeight: '600',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                  boxShadow: 'none',
+                  borderRadius: 2.5,
+                  px: 3,
+                  fontWeight: '700',
+                  background: purpleTheme.gradient,
+                  boxShadow: `0 4px 14px ${purpleTheme.primaryLight}50`,
                   '&:hover': {
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 25px ${purpleTheme.primaryLight}60`,
                   },
-                  transition: 'all 0.2s ease-in-out'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
                 Get Started
