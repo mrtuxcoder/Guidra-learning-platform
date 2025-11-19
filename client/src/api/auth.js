@@ -51,7 +51,7 @@ export const startGoogleOAuth = () => {
     const allowedOrigins = [
       'http://localhost:5173',  // Your Vite dev server
       'http://localhost:5000',  // Your backend (for development)
-      'https://your-vercel-app.vercel.app', // Your production frontend
+      'https://guidra.vercel.app/', // Your production frontend
     ];
     
     if (!allowedOrigins.includes(event.origin)) {
