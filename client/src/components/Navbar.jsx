@@ -458,7 +458,7 @@
 //   );
 // }
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -479,7 +479,6 @@ import {
   Logout,
   Person,
   School,
-  Menu as MenuIcon,
   Explore,
   RocketLaunch,
   Psychology,
@@ -512,7 +511,6 @@ export default function Navbar() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [randomIcon, setRandomIcon] = useState(null);
 
@@ -536,34 +534,27 @@ export default function Navbar() {
     setRandomIcon(iconSet[randomIndex]);
   }, []);
 
-  // Optimized auth check with caching
-  useEffect(() => {
-    const checkAuth = async () => {
-      const cachedUser = sessionStorage.getItem('cachedUser');
-      if (cachedUser) {
-        setUser(JSON.parse(cachedUser));
-        return;
+  // Optimized auth check with no caching for fresh data
+  const checkAuth = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await getProfile();
+      const userData = response.data?.user || response.data || response;
+      
+      if (userData) {
+        setUser(userData);
       }
-
-      try {
-        setIsLoading(true);
-        const response = await getProfile();
-        const userData = response.data?.user || response.data || response;
-        
-        if (userData) {
-          setUser(userData);
-          sessionStorage.setItem('cachedUser', JSON.stringify(userData));
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const getUserInitial = () => {
     if (!user) return 'U';
@@ -579,17 +570,11 @@ export default function Navbar() {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMobileMenu = (event) => {
-    setMobileMenuAnchor(event.currentTarget);
-  };
-
   const handleClose = () => {
     setAnchorEl(null);
-    setMobileMenuAnchor(null);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('cachedUser');
     completeLogout();
   };
 
@@ -625,40 +610,38 @@ export default function Navbar() {
         }}
       >
         <Toolbar sx={{ 
-          minHeight: { xs: '60px!important', sm: '64px!important' }, 
+          minHeight: { xs: '56px!important', sm: '64px!important' }, 
           py: 0.5, 
-          px: { xs: 1, sm: 2 } 
+          px: { xs: 1, sm: 2 },
+          gap: { xs: 1, sm: 2 }
         }}>
-          {/* Logo/Brand */}
+          {/* Logo/Brand - Always clickable */}
           <Box 
             sx={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: 2, 
-              flexGrow: 0, 
-              mr: 3,
-              cursor: 'pointer'
+              gap: 1.5, 
+              flexShrink: 0,
+              cursor: 'pointer',
+              flex: user ? 1 : 'none' // Take available space when user is logged in
             }}
             onClick={() => navigate(user ? '/learn' : '/')}
           >
             <Box sx={{
-              width: { xs: 36, sm: 40 },
-              height: { xs: 36, sm: 40 },
-              borderRadius: { xs: 2, sm: 2.5 },
+              width: { xs: 32, sm: 40 },
+              height: { xs: 32, sm: 40 },
+              borderRadius: { xs: 1.5, sm: 2.5 },
               background: purpleTheme.gradient,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
-              fontWeight: 'bold',
-              fontSize: { xs: '1rem', sm: '1.1rem' },
-              boxShadow: '0 4px 12px rgba(126, 87, 194, 0.3)',
-              transition: 'all 0.3s ease-in-out'
+              flexShrink: 0
             }}>
-              {randomIcon?.icon || <RocketLaunch sx={{ fontSize: { xs: 18, sm: 20 } }} />}
+              {randomIcon?.icon || <RocketLaunch sx={{ fontSize: { xs: 16, sm: 20 } }} />}
             </Box>
             
-            {/* Always show Guidra text on mobile and desktop */}
+            {/* Guidra title - Always visible on all screens */}
             <Typography 
               variant="h6" 
               sx={{ 
@@ -667,7 +650,8 @@ export default function Navbar() {
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                whiteSpace: 'nowrap'
               }}
             >
               Guidra
@@ -680,7 +664,8 @@ export default function Navbar() {
               display: { xs: 'none', md: 'flex' }, 
               flexGrow: 1, 
               gap: 0.5,
-              ml: 1 
+              justifyContent: 'center',
+              mx: 2
             }}>
               {navItems.map((item) => (
                 <Button
@@ -690,19 +675,17 @@ export default function Navbar() {
                   startIcon={item.icon}
                   sx={{
                     fontWeight: isActive(item.path) ? '700' : '500',
-                    borderRadius: 2.5,
-                    px: 2.5,
-                    py: 1,
+                    borderRadius: 2,
+                    px: 2,
+                    py: 0.75,
                     color: isActive(item.path) ? purpleTheme.primaryDark : 'text.secondary',
                     bgcolor: isActive(item.path) ? purpleTheme.lightBg : 'transparent',
                     border: isActive(item.path) ? `1px solid ${purpleTheme.primaryLight}20` : '1px solid transparent',
+                    minWidth: 'auto',
+                    fontSize: '0.9rem',
                     '&:hover': {
                       bgcolor: isActive(item.path) ? purpleTheme.lightBg : 'rgba(126, 87, 194, 0.04)',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(126, 87, 194, 0.15)',
                     },
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    minWidth: 'auto'
                   }}
                 >
                   {item.label}
@@ -711,78 +694,53 @@ export default function Navbar() {
             </Box>
           )}
 
-          {/* Spacer */}
-          <Box sx={{ flexGrow: 1 }} />
+          {/* Spacer - Only show when user is logged in and on desktop */}
+          {user && (
+            <Box sx={{ 
+              display: { xs: 'none', md: 'block' },
+              flexGrow: 1 
+            }} />
+          )}
 
           {/* User Menu */}
           {user ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
               {/* Welcome Chip - Hidden on mobile */}
               <Box sx={{ display: { xs: 'none', lg: 'flex' } }}>
                 <Chip
-                  icon={<AccountCircle sx={{ fontSize: 18, color: purpleTheme.primary }} />}
+                  icon={<AccountCircle sx={{ fontSize: 16, color: purpleTheme.primary }} />}
                   label={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: '500' }}>
+                      <Typography variant="body2" sx={{ fontWeight: '500', fontSize: '0.8rem' }}>
                         Hi, {getUserDisplayName()}
                       </Typography>
-                      {isLoading && (
-                        <Box 
-                          sx={{ 
-                            width: 6, 
-                            height: 6, 
-                            borderRadius: '50%', 
-                            bgcolor: purpleTheme.primary,
-                            animation: 'pulse 1.5s ease-in-out infinite'
-                          }} 
-                        />
-                      )}
                     </Box>
                   }
                   variant="outlined"
                   sx={{
                     borderColor: purpleTheme.primaryLight,
                     bgcolor: 'rgba(126, 87, 194, 0.04)',
-                    '& .MuiChip-label': { px: 1.5 }
+                    height: 32
                   }}
                 />
               </Box>
 
-              {/* User Avatar - Desktop only (clickable) */}
-              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-                <IconButton
-                  size="medium"
-                  aria-label="user menu"
-                  onClick={handleUserMenu}
-                  disabled={isLoading}
-                  sx={{
-                    border: `2px solid ${purpleTheme.primaryLight}30`,
-                    bgcolor: 'white',
-                    '&:hover': {
-                      bgcolor: purpleTheme.lightBg,
-                      transform: 'scale(1.05)',
-                      boxShadow: `0 4px 12px ${purpleTheme.primaryLight}40`
-                    },
-                    transition: 'all 0.2s ease-in-out',
-                  }}
-                >
-                  <Avatar 
-                    sx={{ 
-                      width: 34, 
-                      height: 34, 
-                      background: purpleTheme.gradient,
-                      fontWeight: '700',
-                      fontSize: '0.9rem',
-                      boxShadow: `0 2px 8px ${purpleTheme.primaryLight}50`
-                    }}
-                  >
-                    {getUserInitial()}
-                  </Avatar>
-                </IconButton>
-              </Box>
-
-              {/* User Avatar - Mobile only (non-clickable, just decorative) */}
-              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+              {/* User Avatar - Clickable on all devices */}
+              <IconButton
+                size="small"
+                aria-label="user menu"
+                onClick={handleUserMenu}
+                disabled={isLoading}
+                sx={{
+                  border: `2px solid ${purpleTheme.primaryLight}30`,
+                  bgcolor: 'white',
+                  width: { xs: 36, sm: 40 },
+                  height: { xs: 36, sm: 40 },
+                  '&:hover': {
+                    bgcolor: purpleTheme.lightBg,
+                  },
+                }}
+              >
                 <Badge
                   color="success"
                   variant="dot"
@@ -794,44 +752,19 @@ export default function Navbar() {
                 >
                   <Avatar 
                     sx={{ 
-                      width: 34, 
-                      height: 34, 
+                      width: { xs: 28, sm: 32 }, 
+                      height: { xs: 28, sm: 32 }, 
                       background: purpleTheme.gradient,
                       fontWeight: '700',
-                      fontSize: '0.9rem',
-                      boxShadow: `0 2px 8px ${purpleTheme.primaryLight}50`,
-                      cursor: 'default', // Remove pointer cursor on mobile
-                      '&:hover': {
-                        transform: 'none', // Remove hover effect on mobile
-                        boxShadow: `0 2px 8px ${purpleTheme.primaryLight}50` // Keep original shadow
-                      }
+                      fontSize: { xs: '0.8rem', sm: '0.9rem' },
                     }}
                   >
                     {getUserInitial()}
                   </Avatar>
                 </Badge>
-              </Box>
-
-              {/* Mobile Menu Button */}
-              <IconButton
-                size="medium"
-                aria-label="mobile menu"
-                onClick={handleMobileMenu}
-                sx={{ 
-                  display: { md: 'none' }, 
-                  color: purpleTheme.primary,
-                  border: `1px solid ${purpleTheme.primaryLight}30`,
-                  '&:hover': {
-                    bgcolor: purpleTheme.lightBg,
-                    transform: 'scale(1.05)'
-                  },
-                  transition: 'all 0.2s ease-in-out'
-                }}
-              >
-                <MenuIcon />
               </IconButton>
 
-              {/* Desktop User Menu */}
+              {/* User Menu - Same for all devices */}
               <Menu
                 id="user-menu"
                 anchorEl={anchorEl}
@@ -840,88 +773,19 @@ export default function Navbar() {
                 PaperProps={{
                   elevation: 4,
                   sx: {
-                    mt: 1.5,
-                    borderRadius: 3,
+                    mt: 1,
+                    borderRadius: 2,
                     minWidth: 180,
-                    overflow: 'visible',
                     border: `1px solid ${purpleTheme.primaryLight}20`,
-                    '&:before': {
-                      content: '""',
-                      display: 'block',
-                      position: 'absolute',
-                      top: 0,
-                      right: 14,
-                      width: 12,
-                      height: 12,
-                      bgcolor: 'background.paper',
-                      transform: 'translateY(-50%) rotate(45deg)',
-                      zIndex: 0,
-                      borderLeft: `1px solid ${purpleTheme.primaryLight}20`,
-                      borderTop: `1px solid ${purpleTheme.primaryLight}20`,
-                    },
                   },
                 }}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                {navItems.map((item) => (
-                  <MenuItem 
-                    key={item.path} 
-                    onClick={() => { navigate(item.path); handleClose(); }}
-                    sx={{ 
-                      py: 1.5,
-                      '&:hover': {
-                        bgcolor: purpleTheme.lightBg
-                      }
-                    }}
-                  >
-                    <Box sx={{ mr: 2, color: purpleTheme.primary }}>
-                      {item.icon}
-                    </Box>
-                    <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                      {item.label}
-                    </Typography>
-                  </MenuItem>
-                ))}
+                {/* User info in menu */}
                 <MenuItem 
-                  onClick={handleLogout}
                   sx={{ 
                     py: 1.5,
-                    color: 'error.main',
-                    '&:hover': {
-                      bgcolor: 'rgba(211, 47, 47, 0.04)'
-                    }
-                  }}
-                >
-                  <Logout sx={{ mr: 2, fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                    Sign Out
-                  </Typography>
-                </MenuItem>
-              </Menu>
-
-              {/* Mobile Menu */}
-              <Menu
-                id="mobile-menu"
-                anchorEl={mobileMenuAnchor}
-                open={Boolean(mobileMenuAnchor)}
-                onClose={handleClose}
-                PaperProps={{
-                  elevation: 4,
-                  sx: {
-                    mt: 1,
-                    borderRadius: 3,
-                    minWidth: 200,
-                    border: `1px solid ${purpleTheme.primaryLight}20`,
-                  },
-                }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              >
-                {/* User info in mobile menu */}
-                <MenuItem 
-                  sx={{ 
-                    py: 2,
                     bgcolor: purpleTheme.lightBg,
                     borderBottom: `1px solid ${purpleTheme.primaryLight}20`,
                     cursor: 'default',
@@ -933,17 +797,17 @@ export default function Navbar() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
                     <Avatar 
                       sx={{ 
-                        width: 40, 
-                        height: 40, 
+                        width: 36, 
+                        height: 36, 
                         background: purpleTheme.gradient,
                         fontWeight: '700',
-                        fontSize: '1rem'
+                        fontSize: '0.9rem'
                       }}
                     >
                       {getUserInitial()}
                     </Avatar>
-                    <Box>
-                      <Typography variant="body1" sx={{ fontWeight: '700', color: purpleTheme.primaryDark }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: '700', color: purpleTheme.primaryDark }}>
                         {getUserDisplayName()}
                       </Typography>
                       <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -958,13 +822,13 @@ export default function Navbar() {
                     key={item.path} 
                     onClick={() => { navigate(item.path); handleClose(); }}
                     sx={{ 
-                      py: 1.5,
+                      py: 1.25,
                       '&:hover': {
                         bgcolor: purpleTheme.lightBg
                       }
                     }}
                   >
-                    <Box sx={{ mr: 2, color: purpleTheme.primary }}>
+                    <Box sx={{ mr: 1.5, color: purpleTheme.primary }}>
                       {item.icon}
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: '500' }}>
@@ -975,14 +839,14 @@ export default function Navbar() {
                 <MenuItem 
                   onClick={handleLogout}
                   sx={{ 
-                    py: 1.5, 
+                    py: 1.25, 
                     color: 'error.main',
                     '&:hover': {
                       bgcolor: 'rgba(211, 47, 47, 0.04)'
                     }
                   }}
                 >
-                  <Logout sx={{ mr: 2, fontSize: 20 }} />
+                  <Logout sx={{ mr: 1.5, fontSize: 20 }} />
                   <Typography variant="body2" sx={{ fontWeight: '500' }}>
                     Sign Out
                   </Typography>
@@ -991,25 +855,22 @@ export default function Navbar() {
             </Box>
           ) : (
             /* Auth Buttons */
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
               <Button
                 color="inherit"
                 onClick={() => navigate('/login')}
                 sx={{
                   fontWeight: '600',
-                  borderRadius: 2.5,
-                  px: { xs: 2, sm: 3 },
-                  py: { xs: 0.75, sm: 1 },
+                  borderRadius: 2,
+                  px: { xs: 1.5, sm: 2.5 },
+                  py: { xs: 0.5, sm: 0.75 },
                   color: purpleTheme.primary,
                   border: `1px solid ${purpleTheme.primaryLight}40`,
-                  fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
                   minWidth: 'auto',
                   '&:hover': {
                     bgcolor: purpleTheme.lightBg,
-                    transform: 'translateY(-1px)',
-                    boxShadow: `0 4px 12px ${purpleTheme.primaryLight}20`
                   },
-                  transition: 'all 0.2s ease-in-out'
                 }}
               >
                 Sign In
@@ -1018,19 +879,17 @@ export default function Navbar() {
                 variant="contained"
                 onClick={() => navigate('/register')}
                 sx={{
-                  borderRadius: 2.5,
-                  px: { xs: 2, sm: 3 },
-                  py: { xs: 0.75, sm: 1 },
+                  borderRadius: 2,
+                  px: { xs: 1.5, sm: 2.5 },
+                  py: { xs: 0.5, sm: 0.75 },
                   fontWeight: '700',
                   background: purpleTheme.gradient,
-                  boxShadow: `0 4px 14px ${purpleTheme.primaryLight}50`,
-                  fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
                   minWidth: 'auto',
                   '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 8px 25px ${purpleTheme.primaryLight}60`,
+                    background: purpleTheme.gradient,
+                    opacity: 0.9,
                   },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
                 Get Started
