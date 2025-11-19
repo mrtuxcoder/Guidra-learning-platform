@@ -414,7 +414,7 @@ import {
 import { loginUser, googleAuth } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { hasAuthCookie } from "../utils/auth";
-
+import { startGoogleOAuth } from "../api/auth";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -488,6 +488,12 @@ export default function Login() {
       window.history.replaceState({}, document.title, cleanUrl);
     }
   }, []);
+
+  // Replace your current Google login button with:
+const handleGoogleLogin = () => {
+  // Use the new postMessage flow instead of direct redirect
+  startGoogleOAuth();
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -759,7 +765,6 @@ export default function Login() {
                     Enter your credentials to continue
                   </Typography>
                 </Box>
-
                 {/* Google Sign In Button */}
                 <Button
                   fullWidth
@@ -768,7 +773,7 @@ export default function Login() {
                     <CircularProgress size={isMobile ? 16 : 20} /> : 
                     <Google sx={{ fontSize: { xs: 18, md: 20 } }} />
                   }
-                  onClick={handleGoogleSignIn}
+                  onClick={handleGoogleLogin}
                   disabled={googleLoading}
                   sx={{
                     mb: 3,

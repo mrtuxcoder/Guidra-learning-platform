@@ -431,7 +431,7 @@ import {
 } from "@mui/icons-material";
 import { registerUser, googleAuth } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-
+import { startGoogleOAuth } from "../api/auth";
 export default function Register() {
   const [formData, setFormData] = useState({
     name: "",
@@ -517,6 +517,12 @@ export default function Register() {
     setTimeout(() => {
       setGoogleLoading(false);
     }, 5000);
+  };
+
+    // Replace your current Google login button with:
+  const handleGoogleLogin = () => {
+    // Use the new postMessage flow instead of direct redirect
+    startGoogleOAuth();
   };
 
   // Check if we're returning from OAuth with an error
@@ -771,7 +777,7 @@ export default function Register() {
                     <CircularProgress size={isMobile ? 16 : 20} /> : 
                     <Google sx={{ fontSize: { xs: 18, md: 20 } }} />
                   }
-                  onClick={handleGoogleSignIn}
+                  onClick={handleGoogleLogin}
                   disabled={googleLoading}
                   sx={{
                     mb: 3,
