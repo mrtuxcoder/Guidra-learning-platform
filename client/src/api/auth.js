@@ -54,6 +54,7 @@ export const startGoogleOAuth = () => {
       'http://localhost:5173',      // Dev frontend
       'http://localhost:5000',      // Dev backend
       'https://guidra.vercel.app',  // Production frontend (NO trailing slash!)
+      'https://guidra-learning-platform.onrender.com',
       window.location.origin,       // Current origin (dynamic)
     ].filter(origin => origin); // Remove any undefined
     
