@@ -444,30 +444,20 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    handleOAuthToken();
-    fetchProfile();
-  }, []);
-
-  const handleOAuthToken = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
-    const source = urlParams.get('source');
-    
-    if (tokenFromUrl && source === 'google') {
-      setFrontendCookie(tokenFromUrl);
-      window.history.replaceState({}, '', '/profile');
-    }
-  };
-
-  const fetchProfile = async () => {
+  // Fetch profile data with auto-refresh
+  const fetchProfile = async (forceRefresh = false) => {
     try {
       setError("");
       
+      // Use cache only if not forcing refresh and cache is recent (less than 30 seconds old)
       const cachedProfile = sessionStorage.getItem('userProfile');
-      if (cachedProfile) {
+      const cacheTimestamp = sessionStorage.getItem('userProfileTimestamp');
+      const isCacheRecent = cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < 30000; // 30 seconds
+      
+      if (cachedProfile && !forceRefresh && isCacheRecent) {
         setUser(JSON.parse(cachedProfile));
         setLoading(false);
         return;
@@ -483,7 +473,12 @@ export default function Profile() {
       };
       
       setUser(enhancedUserData);
+      setLastUpdated(Date.now());
+      
+      // Update cache
       sessionStorage.setItem('userProfile', JSON.stringify(enhancedUserData));
+      sessionStorage.setItem('userProfileTimestamp', Date.now().toString());
+      
     } catch (err) {
       console.error("Profile fetch error:", err);
       
@@ -498,8 +493,55 @@ export default function Profile() {
     }
   };
 
+  // Auto-refresh profile data
+  useEffect(() => {
+    fetchProfile();
+    
+    // Set up interval to refresh data every 30 seconds
+    const interval = setInterval(() => {
+      if (!loading) {
+        fetchProfile(true); // Force refresh
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Handle OAuth token
+  useEffect(() => {
+    const handleOAuthToken = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenFromUrl = urlParams.get('token');
+      const source = urlParams.get('source');
+      
+      if (tokenFromUrl && source === 'google') {
+        setFrontendCookie(tokenFromUrl);
+        window.history.replaceState({}, '', '/profile');
+        // Refresh profile after OAuth login
+        setTimeout(() => fetchProfile(true), 1000);
+      }
+    };
+    
+    handleOAuthToken();
+  }, []);
+
+  // Refresh profile when coming back to the page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchProfile(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   const handleLogout = () => {
     sessionStorage.removeItem('userProfile');
+    sessionStorage.removeItem('userProfileTimestamp');
     completeLogout();
   };
 
@@ -508,7 +550,13 @@ export default function Profile() {
   };
 
   const getLearningStyleInfo = (learningStyle) => {
-    return learningStyles.find(style => style.value === learningStyle) || learningStyles[0];
+    const style = learningStyles.find(style => style.value === learningStyle) || learningStyles[0];
+    
+    // Remove "theoretical learner" from the label
+    return {
+      ...style,
+      label: style.label.replace('Theoretical Learner', 'Learner').replace('theoretical', '')
+    };
   };
 
   const getProgressStats = (user) => {
@@ -564,8 +612,15 @@ export default function Profile() {
       completed: completedTopics,
       inProgress: inProgressTopics,
       completedSubtopics,
-      totalSubtopics
+      totalSubtopics,
+      lastUpdated
     };
+  };
+
+  // Manual refresh function
+  const handleRefresh = () => {
+    setLoading(true);
+    fetchProfile(true);
   };
 
   // Loading State
@@ -689,7 +744,7 @@ export default function Profile() {
         </Box>
         <Button 
           variant="contained"
-          onClick={fetchProfile}
+          onClick={handleRefresh}
           sx={{ 
             borderRadius: 3,
             background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
@@ -721,7 +776,8 @@ export default function Profile() {
         overflow: 'hidden'
       }}>
         <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: 3 }}>
-          <ProfileHeader user={user} styleInfo={styleInfo} />
+          <ProfileHeader user={user} />
+         
         </Container>
         
         {/* Wave decoration */}
@@ -889,140 +945,141 @@ export default function Profile() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <ProgressStats stats={stats} />
               
-           {/* Learning Journey Card - Fixed Responsiveness */}
-<Card sx={{ 
-  borderRadius: 3,
-  border: '1px solid rgba(126, 87, 194, 0.15)',
-  background: 'white',
-  boxShadow: '0 8px 32px rgba(126, 87, 194, 0.08)'
-}}>
-  <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-    <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4 } }}>
-      <Box sx={{
-        width: { xs: 50, sm: 60 },
-        height: { xs: 50, sm: 60 },
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        mx: 'auto',
-        mb: 2
-      }}>
-        <RocketLaunch sx={{ 
-          fontSize: { xs: 24, sm: 28 }, 
-          color: 'white' 
-        }} />
-      </Box>
-      <Typography variant="h4" sx={{ 
-        fontWeight: 800,
-        fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' },
-        background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
-        backgroundClip: 'text',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        mb: 1,
-        lineHeight: 1.2
-      }}>
-        Your Learning Journey
-      </Typography>
-      <Typography variant="body1" 
-        color="text.secondary"
-        sx={{ 
-          fontSize: { xs: '0.9rem', sm: '1rem' },
-          lineHeight: 1.5
-        }}
-      >
-        Keep up the great work! You're making amazing progress.
-      </Typography>
-    </Box>
+              {/* Learning Journey Card */}
+              <Card sx={{ 
+                borderRadius: 3,
+                border: '1px solid rgba(126, 87, 194, 0.15)',
+                background: 'white',
+                boxShadow: '0 8px 32px rgba(126, 87, 194, 0.08)'
+              }}>
+                <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+                  <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4 } }}>
+                    <Box sx={{
+                      width: { xs: 50, sm: 60 },
+                      height: { xs: 50, sm: 60 },
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 2
+                    }}>
+                      <RocketLaunch sx={{ 
+                        fontSize: { xs: 24, sm: 28 }, 
+                        color: 'white' 
+                      }} />
+                    </Box>
+                    <Typography variant="h4" sx={{ 
+                      fontWeight: 800,
+                      fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' },
+                      background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      mb: 1,
+                      lineHeight: 1.2
+                    }}>
+                      Your Learning Journey
+                    </Typography>
+                    <Typography variant="body1" 
+                      color="text.secondary"
+                      sx={{ 
+                        fontSize: { xs: '0.9rem', sm: '1rem' },
+                        lineHeight: 1.5
+                      }}
+                    >
+                      Keep up the great work! You're making amazing progress.
+                    </Typography>
+                  </Box>
 
-    <Grid container spacing={2} sx={{ mb: { xs: 2, sm: 3 } }}>
-      <Grid item xs={12} sm={6}>
-        <Box sx={{ 
-          textAlign: 'center', 
-          p: { xs: 2, sm: 3 }, 
-          borderRadius: 3,
-          background: 'rgba(126, 87, 194, 0.05)',
-          border: '1px solid rgba(126, 87, 194, 0.1)',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center'
-        }}>
-          <Typography variant="h2" sx={{ 
-            fontWeight: 800,
-            fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
-            color: '#7E57C2',
-            mb: 1,
-            lineHeight: 1
-          }}>
-            {stats.progressPercentage}%
-          </Typography>
-          <Typography variant="body1" 
-            fontWeight={600} 
-            color="text.primary"
-            sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
-          >
-            Overall Progress
-          </Typography>
-        </Box>
-      </Grid>
-      <Grid item xs={12} sm={6}>
-        <Box sx={{ 
-          textAlign: 'center', 
-          p: { xs: 2, sm: 3 }, 
-          borderRadius: 3,
-          background: 'rgba(126, 87, 194, 0.05)',
-          border: '1px solid rgba(126, 87, 194, 0.1)',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center'
-        }}>
-          <Typography variant="h2" sx={{ 
-            fontWeight: 800,
-            fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
-            color: '#5E35B1',
-            mb: 1,
-            lineHeight: 1
-          }}>
-            {stats.inProgress}
-          </Typography>
-          <Typography variant="body1" 
-            fontWeight={600} 
-            color="text.primary"
-            sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
-          >
-            In Progress
-          </Typography>
-        </Box>
-      </Grid>
-    </Grid>
+                  <Grid container spacing={2} sx={{ mb: { xs: 2, sm: 3 } }}>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ 
+                        textAlign: 'center', 
+                        p: { xs: 2, sm: 3 }, 
+                        borderRadius: 3,
+                        background: 'rgba(126, 87, 194, 0.05)',
+                        border: '1px solid rgba(126, 87, 194, 0.1)',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h2" sx={{ 
+                          fontWeight: 800,
+                          fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
+                          color: '#7E57C2',
+                          mb: 1,
+                          lineHeight: 1
+                        }}>
+                          {stats.progressPercentage}%
+                        </Typography>
+                        <Typography variant="body1" 
+                          fontWeight={600} 
+                          color="text.primary"
+                          sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
+                        >
+                          Overall Progress
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ 
+                        textAlign: 'center', 
+                        p: { xs: 2, sm: 3 }, 
+                        borderRadius: 3,
+                        background: 'rgba(126, 87, 194, 0.05)',
+                        border: '1px solid rgba(126, 87, 194, 0.1)',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h2" sx={{ 
+                          fontWeight: 800,
+                          fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
+                          color: '#5E35B1',
+                          mb: 1,
+                          lineHeight: 1
+                        }}>
+                          {stats.inProgress}
+                        </Typography>
+                        <Typography variant="body1" 
+                          fontWeight={600} 
+                          color="text.primary"
+                          sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}
+                        >
+                          In Progress
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
 
-    <Button
-      variant="contained"
-      fullWidth
-      size="large"
-      startIcon={<RocketLaunch />}
-      onClick={() => navigate('/learn')}
-      sx={{ 
-        borderRadius: 3,
-        background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
-        fontWeight: 700,
-        py: { xs: 1.5, sm: 2 },
-        fontSize: { xs: '1rem', sm: '1.1rem' },
-        boxShadow: '0 8px 25px rgba(126, 87, 194, 0.3)',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: '0 12px 35px rgba(126, 87, 194, 0.4)',
-        }
-      }}
-    >
-      Launch Next Lesson
-    </Button>
-  </CardContent>
-</Card>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    startIcon={<RocketLaunch />}
+                    onClick={() => navigate('/learn')}
+                    sx={{ 
+                      borderRadius: 3,
+                      background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
+                      fontWeight: 700,
+                      py: { xs: 1.5, sm: 2 },
+                      fontSize: { xs: '1rem', sm: '1.1rem' },
+                      boxShadow: '0 8px 25px rgba(126, 87, 194, 0.3)',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 12px 35px rgba(126, 87, 194, 0.4)',
+                      }
+                    }}
+                  >
+                    Launch Next Lesson
+                  </Button>
+                </CardContent>
+              </Card>
+
               {/* Desktop Quick Actions */}
               <Card sx={{ 
                 display: { xs: 'none', lg: 'block' },

@@ -285,27 +285,27 @@ import {
 import { personalizeAndGenerate } from "../api/learning";
 import { useNavigate } from "react-router-dom";
 
-// Modern purple color palette
+// Consistent purple color palette with profile page
 const purplePalette = {
-  50: '#faf5ff',
-  100: '#f3e8ff',
-  200: '#e9d5ff',
-  300: '#d8b4fe',
-  400: '#c084fc',
-  500: '#a855f7',
-  600: '#9333ea',
-  700: '#7c3aed',
-  800: '#6b21a8',
-  900: '#581c87'
+  50: '#FAF7FE',
+  100: '#F3E8FF',
+  200: '#E9D5FF',
+  300: '#D8B4FE',
+  400: '#C084FC',
+  500: '#A855F7',
+  600: '#9333EA',
+  700: '#7C3AED',
+  800: '#6B21A8',
+  900: '#581C87'
 };
 
-// Category icons and colors
+// Category icons and colors - consistent with profile theme
 const CATEGORY_DATA = {
-  programming: { icon: <Code />, color: purplePalette[600], name: "Programming" },
-  science: { icon: <Science />, color: purplePalette[500], name: "Science" },
-  finance: { icon: <TrendingUp />, color: purplePalette[400], name: "Finance" },
-  'self-dev': { icon: <Psychology />, color: purplePalette[700], name: "Self Development" },
-  'future-skills': { icon: <Rocket />, color: purplePalette[800], name: "Future Skills" }
+  programming: { icon: <Code />, color: '#7C3AED', name: "Programming" },
+  science: { icon: <Science />, color: '#9333EA', name: "Science" },
+  finance: { icon: <TrendingUp />, color: '#A855F7', name: "Finance" },
+  'self-dev': { icon: <Psychology />, color: '#6B21A8', name: "Self Development" },
+  'future-skills': { icon: <Rocket />, color: '#581C87', name: "Future Skills" }
 };
 
 // Optimized topics data
@@ -374,6 +374,8 @@ export default function TopicSelection() {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -421,29 +423,44 @@ export default function TopicSelection() {
   return (
     <Box sx={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #e9d5ff 100%)',
+      background: 'linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)',
     }}>
-      <Container maxWidth="xl" sx={{ py: 3, px: { xs: 2, md: 4 } }}>
+      <Container maxWidth="xl" sx={{ 
+        py: { xs: 2, md: 3 }, 
+        px: { xs: 2, sm: 3 } 
+      }}>
         
         {/* Header Section */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 } }}>
           <Fade in timeout={600}>
             <Box>
-              <School sx={{ 
-                fontSize: { xs: '3rem', md: '4rem' }, 
-                color: purplePalette[600],
-                mb: 2 
-              }} />
+              <Box sx={{
+                width: { xs: 60, md: 80 },
+                height: { xs: 60, md: 80 },
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                mb: 2,
+                boxShadow: '0 8px 32px rgba(126, 87, 194, 0.2)'
+              }}>
+                <School sx={{ 
+                  fontSize: { xs: '2rem', md: '2.5rem' }, 
+                  color: 'white' 
+                }} />
+              </Box>
               <Typography 
                 variant="h3" 
                 sx={{ 
                   fontWeight: 800,
-                  background: `linear-gradient(135deg, ${purplePalette[600]} 0%, ${purplePalette[800]} 100%)`,
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   color: 'transparent',
                   mb: 1,
-                  fontSize: { xs: '2rem', md: '3rem' }
+                  fontSize: { xs: '1.75rem', md: '2.5rem', lg: '3rem' }
                 }}
               >
                 Explore Learning Paths
@@ -453,6 +470,7 @@ export default function TopicSelection() {
                 sx={{ 
                   color: 'text.secondary',
                   fontWeight: 400,
+                  fontSize: { xs: '0.9rem', md: '1.1rem' }
                 }}
               >
                 {PREDEFINED_TOPICS.length} curated courses • Start your journey
@@ -471,10 +489,11 @@ export default function TopicSelection() {
                 alignItems: 'center',
                 borderRadius: 2,
                 background: 'white',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                boxShadow: '0 4px 20px rgba(126, 87, 194, 0.08)',
+                border: '1px solid rgba(126, 87, 194, 0.1)'
               }}
             >
-              <Search sx={{ color: purplePalette[400], mx: 1 }} />
+              <Search sx={{ color: '#7C3AED', mx: 1 }} />
               <InputBase
                 placeholder="Search courses..."
                 value={searchQuery}
@@ -486,16 +505,17 @@ export default function TopicSelection() {
         </Box>
 
         {/* Main Content */}
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3 }}>
           
-          {/* Category Sidebar - Always Column */}
+          {/* Category Sidebar */}
           <Box sx={{ 
             width: { xs: '100%', lg: '80px' },
             display: 'flex', 
             flexDirection: { xs: 'row', lg: 'column' },
             gap: 1,
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            flexShrink: 0
           }}>
             {CATEGORIES.map((category) => (
               <Tooltip key={category.id} title={category.name} placement="right" arrow>
@@ -508,14 +528,14 @@ export default function TopicSelection() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 2,
-                    backgroundColor: selectedCategory === category.id ? purplePalette[500] : 'transparent',
-                    color: selectedCategory === category.id ? 'white' : purplePalette[600],
-                    border: `2px solid ${selectedCategory === category.id ? purplePalette[500] : purplePalette[200]}`,
+                    backgroundColor: selectedCategory === category.id ? '#7C3AED' : 'transparent',
+                    color: selectedCategory === category.id ? 'white' : '#7C3AED',
+                    border: `2px solid ${selectedCategory === category.id ? '#7C3AED' : 'rgba(126, 87, 194, 0.2)'}`,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     position: 'relative',
                     '&:hover': {
-                      backgroundColor: selectedCategory === category.id ? purplePalette[600] : purplePalette[50],
+                      backgroundColor: selectedCategory === category.id ? '#6B21A8' : 'rgba(126, 87, 194, 0.05)',
                       transform: 'scale(1.05)',
                     }
                   }}
@@ -528,7 +548,7 @@ export default function TopicSelection() {
                       position: 'absolute',
                       top: -4,
                       right: -4,
-                      backgroundColor: purplePalette[500],
+                      backgroundColor: '#7C3AED',
                       color: 'white',
                       borderRadius: '50%',
                       width: 20,
@@ -548,10 +568,10 @@ export default function TopicSelection() {
           </Box>
 
           {/* Courses Grid */}
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             {/* Selected Category Info */}
             <Box sx={{ mb: 3, textAlign: { xs: 'center', lg: 'left' } }}>
-              <Typography variant="h5" fontWeight={700} color={purplePalette[700]}>
+              <Typography variant="h5" fontWeight={700} color="#7C3AED">
                 {CATEGORIES.find(cat => cat.id === selectedCategory)?.name}
               </Typography>
               <Typography variant="body1" color="text.secondary">
@@ -561,95 +581,148 @@ export default function TopicSelection() {
 
             {/* Error Alert */}
             {error && (
-              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+              <Alert severity="error" sx={{ 
+                mb: 3, 
+                borderRadius: 2,
+                border: '1px solid rgba(211, 47, 47, 0.2)'
+              }}>
                 {error}
               </Alert>
             )}
 
-            {/* Courses Grid */}
-            <Grid container spacing={2}>
-              {filteredTopics.map((topic, index) => {
-                const categoryData = CATEGORY_DATA[topic.category];
-                const isSelected = selectedTopic === topic.id;
-                
-                return (
-                  <Grid item xs={12} sm={6} md={4} xl={3} key={topic.id}>
-                    <Fade in timeout={400 + index * 50}>
-                      <Card 
-                        sx={{ 
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          border: isSelected ? `2px solid ${categoryData.color}` : '1px solid #e2e8f0',
-                          background: isSelected ? alpha(categoryData.color, 0.08) : 'white',
-                          transform: isSelected ? 'translateY(-2px)' : 'none',
-                          boxShadow: isSelected ? `0 8px 25px ${alpha(categoryData.color, 0.15)}` : '0 2px 8px rgba(0,0,0,0.06)',
-                          borderRadius: 2,
-                          height: '100%',
-                          '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 8px 20px ${alpha(categoryData.color, 0.1)}`,
-                          }
-                        }}
-                        onClick={() => handleTopicSelect(topic.id)}
-                      >
-                        <CardContent sx={{ p: 2.5, position: 'relative' }}>
-                          {/* Category & Rating */}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Chip
-                              label={categoryData.name}
-                              size="small"
-                              sx={{
-                                backgroundColor: alpha(categoryData.color, 0.1),
-                                color: categoryData.color,
-                                fontWeight: 600,
-                              }}
-                            />
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <Star sx={{ fontSize: 16, color: '#fbbf24' }} />
-                              <Typography variant="caption" fontWeight={600}>
-                                {topic.popularity}%
-                              </Typography>
-                            </Box>
-                          </Box>
+           {/* Courses Grid - Masonry Style for Natural Flow */}
+<Box sx={{
+  display: 'grid',
+  gridTemplateColumns: {
+    xs: '1fr',
+    sm: 'repeat(2, 1fr)',
+    md: 'repeat(3, 1fr)'
+  },
+  gap: 2,
+  alignContent: 'start'
+}}>
+  {filteredTopics.map((topic, index) => {
+    const categoryData = CATEGORY_DATA[topic.category];
+    const isSelected = selectedTopic === topic.id;
+    
+    // Calculate content height based on text length
+    const titleLines = Math.ceil(topic.name.length / 25); // ~25 chars per line
+    const descLines = Math.ceil(topic.description.length / 40); // ~40 chars per line
+    const totalLines = titleLines + descLines;
+    const cardHeight = Math.max(180, 140 + (totalLines * 8)); // Dynamic height
+    
+    return (
+      <Fade in timeout={400 + index * 50} key={topic.id}>
+        <Card 
+          sx={{ 
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            border: isSelected ? `2px solid ${categoryData.color}` : '1px solid rgba(126, 87, 194, 0.1)',
+            background: isSelected ? `linear-gradient(135deg, ${alpha(categoryData.color, 0.08)} 0%, ${alpha(categoryData.color, 0.02)} 100%)` : 'white',
+            transform: isSelected ? 'translateY(-2px)' : 'none',
+            boxShadow: isSelected ? '0 8px 25px rgba(126, 87, 194, 0.15)' : '0 2px 8px rgba(126, 87, 194, 0.06)',
+            borderRadius: 3,
+            height: `${cardHeight}px`,
+            display: 'flex',
+            flexDirection: 'column',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 8px 20px rgba(126, 87, 194, 0.1)',
+            }
+          }}
+          onClick={() => handleTopicSelect(topic.id)}
+        >
+          <CardContent sx={{ 
+            p: 2.5, 
+            position: 'relative',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Header - Fixed */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'flex-start',
+              mb: 2,
+              flexShrink: 0
+            }}>
+              <Chip
+                label={categoryData.name}
+                size="small"
+                sx={{
+                  backgroundColor: alpha(categoryData.color, 0.1),
+                  color: categoryData.color,
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  height: '24px'
+                }}
+              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                <Star sx={{ fontSize: 16, color: '#fbbf24' }} />
+                <Typography variant="caption" fontWeight={600} fontSize="0.75rem">
+                  {topic.popularity}%
+                </Typography>
+              </Box>
+            </Box>
 
-                          {/* Course Info */}
-                          <Typography variant="h6" fontWeight={700} sx={{ mb: 1, lineHeight: 1.3 }}>
-                            {topic.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-                            {topic.description}
-                          </Typography>
+            {/* Content - Flexible */}
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Typography 
+                variant="h6" 
+                fontWeight={700} 
+                sx={{ 
+                  mb: 1, 
+                  lineHeight: 1.3,
+                  fontSize: '1rem'
+                }}
+              >
+                {topic.name}
+              </Typography>
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ 
+                  lineHeight: 1.4,
+                  fontSize: '0.8rem',
+                  flex: 1
+                }}
+              >
+                {topic.description}
+              </Typography>
+            </Box>
 
-                          {/* Selection Indicator */}
-                          {isSelected && (
-                            <Box
-                              sx={{
-                                position: 'absolute',
-                                top: 12,
-                                right: 12,
-                                width: 20,
-                                height: 20,
-                                borderRadius: '50%',
-                                background: categoryData.color,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '12px',
-                                fontWeight: 'bold',
-                              }}
-                            >
-                              ✓
-                            </Box>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Fade>
-                  </Grid>
-                );
-              })}
-            </Grid>
+            {/* Selection Indicator */}
+            {isSelected && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  background: categoryData.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 8px rgba(126, 87, 194, 0.3)'
+                }}
+              >
+                ✓
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      </Fade>
+    );
+  })}
+</Box>
 
+          
             {/* No Results */}
             {filteredTopics.length === 0 && (
               <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -668,7 +741,7 @@ export default function TopicSelection() {
         <Box sx={{ 
           position: 'sticky', 
           bottom: 0, 
-          background: 'linear-gradient(transparent, #faf5ff)',
+          background: 'linear-gradient(transparent, #FAF7FE)',
           py: 3, 
           mt: 4,
           textAlign: 'center'
@@ -680,19 +753,22 @@ export default function TopicSelection() {
               onClick={handleStartLearning}
               disabled={!selectedTopic || loading}
               sx={{
-                px: 6,
-                py: 1.5,
-                fontSize: '1.1rem',
+                px: { xs: 4, md: 6 },
+                py: { xs: 1.25, md: 1.5 },
+                fontSize: { xs: '1rem', md: '1.1rem' },
                 fontWeight: 700,
-                background: `linear-gradient(135deg, ${purplePalette[500]} 0%, ${purplePalette[700]} 100%)`,
-                borderRadius: 2,
-                minWidth: '200px',
+                background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
+                borderRadius: 3,
+                minWidth: { xs: '180px', md: '200px' },
+                boxShadow: '0 8px 25px rgba(126, 87, 194, 0.3)',
                 '&:hover': {
                   transform: 'translateY(-1px)',
-                  boxShadow: `0 8px 25px ${alpha(purplePalette[500], 0.4)}`,
+                  boxShadow: '0 12px 35px rgba(126, 87, 194, 0.4)',
                 },
                 '&:disabled': {
                   background: 'grey.300',
+                  transform: 'none',
+                  boxShadow: 'none'
                 }
               }}
             >
@@ -701,7 +777,15 @@ export default function TopicSelection() {
           </Fade>
           
           {selectedTopic && (
-            <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: purplePalette[600] }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mt: 1, 
+                fontWeight: 600, 
+                color: '#7C3AED',
+                fontSize: { xs: '0.8rem', md: '0.9rem' }
+              }}
+            >
               Selected: {PREDEFINED_TOPICS.find(t => t.id === selectedTopic)?.name}
             </Typography>
           )}
