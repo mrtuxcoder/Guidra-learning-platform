@@ -502,7 +502,7 @@ export default function Profile() {
       if (!loading) {
         fetchProfile(true); // Force refresh
       }
-    }, 30000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, []);
