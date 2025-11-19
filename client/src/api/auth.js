@@ -30,6 +30,7 @@ export const logoutUser = async () => {
 // Main OAuth handler
 export const startGoogleOAuth = () => {
   console.log('🚀 [OAUTH] Starting Google OAuth...');
+  console.log('🔍 [OAUTH] Current origin:', window.location.origin);
   
   const popup = window.open(
     `${import.meta.env.VITE_API_BASE_URL}/user/google`,
@@ -45,14 +46,24 @@ export const startGoogleOAuth = () => {
   let messageReceived = false;
 
   const messageHandler = async (event) => {
-    console.log('📨 [FRONTEND] Message received:', event.data);
+    console.log('📨 [FRONTEND] Message received from:', event.origin);
+    console.log('📨 [FRONTEND] Message data:', event.data);
     
-    // SECURITY: Allow multiple origins for development
+    // SECURITY: Allow multiple origins
     const allowedOrigins = [
-      'http://localhost:5173',  // Your Vite dev server
-      'http://localhost:5000',  // Your backend (for development)
-      'https://guidra.vercel.app/', // Your production frontend
-    ];
+      'http://localhost:5173',      // Dev frontend
+      'http://localhost:5000',      // Dev backend
+      'https://guidra.vercel.app',  // Production frontend (NO trailing slash!)
+      window.location.origin,       // Current origin (dynamic)
+    ].filter(origin => origin); // Remove any undefined
+    
+    console.log('🔍 [FRONTEND] Allowed origins:', allowedOrigins);
+    
+    // Skip React DevTools messages and other non-OAuth messages
+    if (!event.data || !event.data.type || !event.data.type.includes('OAUTH')) {
+      console.log('🔍 [FRONTEND] Skipping non-OAuth message');
+      return;
+    }
     
     if (!allowedOrigins.includes(event.origin)) {
       console.warn('🔒 [FRONTEND] Ignoring message from unauthorized origin:', event.origin);
@@ -62,7 +73,7 @@ export const startGoogleOAuth = () => {
     const { type, token, error, needsPersonalization, redirectPath } = event.data;
     
     if (type === 'OAUTH_SUCCESS' && token) {
-      console.log('✅ [FRONTEND] OAuth success!');
+      console.log('✅ [FRONTEND] OAuth success! Token received');
       messageReceived = true;
       
       try {
@@ -77,9 +88,11 @@ export const startGoogleOAuth = () => {
         document.cookie = `authToken=${token}; path=/; max-age=${maxAge}; ${secureFlag}samesite=lax`;
         
         console.log('✅ [FRONTEND] authToken cookie set successfully!');
+        console.log('🔍 [FRONTEND] Cookies after setting:', document.cookie);
         
         // Redirect
         const finalPath = needsPersonalization ? '/personalize' : (redirectPath || '/profile');
+        console.log('🔄 [FRONTEND] Redirecting to:', finalPath);
         window.location.href = finalPath;
         
       } catch (err) {
@@ -101,7 +114,7 @@ export const startGoogleOAuth = () => {
   // Timeout after 30 seconds
   const timeoutId = setTimeout(() => {
     if (!messageReceived) {
-      console.log('⏰ [FRONTEND] OAuth timeout');
+      console.log('⏰ [FRONTEND] OAuth timeout - no valid message received');
       window.removeEventListener('message', messageHandler);
       window.location.href = '/login?error=oauth_timeout';
     }
@@ -127,7 +140,6 @@ export const hasAuthToken = () => {
   return !!getAuthToken();
 };
 
-// Keep the old googleAuth function for compatibility
 export const googleAuth = () => {
   console.warn('⚠️ [AUTH] Using deprecated googleAuth - use startGoogleOAuth instead');
   startGoogleOAuth();
