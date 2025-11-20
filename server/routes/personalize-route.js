@@ -7,7 +7,8 @@ const {
   getSubtopicsController,
   updateLearningPreferencesController,
   updateSubtopicProgressController,
-  generateTeachingContentController
+  generateTeachingContentController,
+  validateTopicController
 } = require("../controllers/learn-controller");
 
 const {
