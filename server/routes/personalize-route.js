@@ -30,6 +30,7 @@ router.post("/teach", authMiddleware, teachSubtopicController); // Main teaching
 router.post("/regenerate", authMiddleware, regenerateContentController); // Force regenerate content
 router.get("/content-history", authMiddleware, getContentHistoryController); // Get cache history
 router.delete("/clear-cache", authMiddleware, clearContentCacheController); // Clear user cache
+router.post("/validate-topic", authMiddleware, validateTopicController); // validate topic
 
 // Legacy endpoint (optional - keep if needed)
 router.post("/teach-legacy", authMiddleware, generateTeachingContentController);
