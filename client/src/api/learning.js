@@ -89,3 +89,8 @@ export const markTopicComplete = async (data) => {
   const response = await API.put('/user/progress/topic/complete', data);
   return response;
 };
+
+ //VALIDATE THE CUSTOM TOPIC
+ export const validateTopic = async (topic) => {
+  return await API.get('/learn/validate-topic');
+};

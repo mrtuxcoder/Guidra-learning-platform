@@ -22,6 +22,8 @@ export const checkUserExists = async (email) => {
   return await API.get(`/user/check-user?email=${encodeURIComponent(email)}`);
 };
 
+
+
 // LOGOUT
 export const logoutUser = async () => {
   return await API.post("/user/logout");
