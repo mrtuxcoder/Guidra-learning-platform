@@ -289,7 +289,6 @@
 //   );
 // };
 
-// export default LearningHeader;
 import React from 'react';
 import {
   Box,
@@ -300,7 +299,8 @@ import {
   CircularProgress,
   Typography,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  IconButton
 } from "@mui/material";
 import {
   AutoAwesome,
@@ -308,7 +308,8 @@ import {
   CheckCircle,
   Cached,
   NavigateBefore,
-  NavigateNext
+  NavigateNext,
+  Menu
 } from "@mui/icons-material";
 
 const LearningHeader = ({
@@ -322,7 +323,9 @@ const LearningHeader = ({
   contentLoading,
   onRegenerateContent,
   onCompleteSubtopic,
-  onNavigateSubtopic
+  onNavigateSubtopic,
+  onOpenSidebar, // New prop for sidebar toggle
+  colorPalette
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -332,7 +335,7 @@ const LearningHeader = ({
   // Find current subtopic index and calculate navigation
   const currentIndex = subtopics.findIndex(sub => sub.name === selectedSubtopic.name);
   const hasPrevious = currentIndex > 0;
-  const hasNext = currentIndex < subtopics.length - 1;
+  const hasNext = currentIndex < subtopics.length - 1 && currentIndex >= 0;
   const previousSubtopic = hasPrevious ? subtopics[currentIndex - 1] : null;
   const nextSubtopic = hasNext ? subtopics[currentIndex + 1] : null;
 
@@ -360,75 +363,122 @@ const LearningHeader = ({
         borderTop: '1px solid rgba(126, 87, 194, 0.1)',
         p: 1.5,
         zIndex: 1000,
-        boxShadow: '0 -2px 10px rgba(0,0,0,0.1)'
+        boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+        height: '100px' // Fixed height to prevent space
       }}>
-        {/* Navigation Row */}
+        {/* Top Row: Navigation + Sidebar Button */}
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
           mb: 1
         }}>
-          <Button
-            onClick={handlePrevious}
-            disabled={!hasPrevious}
-            variant="outlined"
+          {/* Sidebar Button */}
+          <IconButton
+            onClick={onOpenSidebar}
             size="small"
             sx={{
-              minWidth: 'auto',
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              p: 0,
-              borderColor: hasPrevious ? '#7C3AED' : '#ccc',
-              color: hasPrevious ? '#7C3AED' : '#ccc'
+              color: colorPalette[600],
+              background: colorPalette[50],
+              '&:hover': {
+                background: colorPalette[100]
+              }
             }}
           >
-            <NavigateBefore sx={{ fontSize: 20 }} />
-          </Button>
+            <Menu sx={{ fontSize: 20 }} />
+          </IconButton>
 
-          <Box sx={{ textAlign: 'center', flex: 1 }}>
-            <Typography variant="caption" sx={{ 
-              color: 'text.secondary',
-              fontSize: '0.7rem',
-              fontWeight: 600
-            }}>
-              {currentIndex + 1} / {subtopics.length}
-            </Typography>
-            <Typography variant="body2" sx={{ 
-              fontWeight: 600,
-              color: '#7C3AED',
-              fontSize: '0.8rem',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 120,
-              mx: 'auto'
-            }}>
-              {selectedSubtopic.name}
-            </Typography>
+          {/* Navigation */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 0.5,
+            flex: 1,
+            justifyContent: 'center',
+            mx: 1
+          }}>
+            <Button
+              onClick={handlePrevious}
+              disabled={!hasPrevious}
+              variant="outlined"
+              size="small"
+              sx={{
+                minWidth: 'auto',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                p: 0,
+                borderColor: hasPrevious ? colorPalette[600] : '#ccc',
+                color: hasPrevious ? colorPalette[600] : '#ccc'
+              }}
+            >
+              <NavigateBefore sx={{ fontSize: 18 }} />
+            </Button>
+
+            <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+              <Typography variant="caption" sx={{ 
+                color: 'text.secondary',
+                fontSize: '0.7rem',
+                fontWeight: 600
+              }}>
+                {currentIndex >= 0 ? `${currentIndex + 1} / ${subtopics.length}` : '1 / 1'}
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                fontWeight: 600,
+                color: colorPalette[600],
+                fontSize: '0.75rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.2
+              }}>
+                {selectedSubtopic.name}
+              </Typography>
+            </Box>
+
+            <Button
+              onClick={handleNext}
+              disabled={!hasNext}
+              variant="outlined"
+              size="small"
+              sx={{
+                minWidth: 'auto',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                p: 0,
+                borderColor: hasNext ? colorPalette[600] : '#ccc',
+                color: hasNext ? colorPalette[600] : '#ccc'
+              }}
+            >
+              <NavigateNext sx={{ fontSize: 18 }} />
+            </Button>
           </Box>
 
-          <Button
-            onClick={handleNext}
-            disabled={!hasNext}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 'auto',
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              p: 0,
-              borderColor: hasNext ? '#7C3AED' : '#ccc',
-              color: hasNext ? '#7C3AED' : '#ccc'
-            }}
-          >
-            <NavigateNext sx={{ fontSize: 20 }} />
-          </Button>
+          {/* Regeneration Counter */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            minWidth: 40
+          }}>
+            <Typography variant="caption" sx={{ 
+              color: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
+              fontSize: '0.65rem',
+              fontWeight: 700
+            }}>
+              {remainingGenerations}/{maxGenerations}
+            </Typography>
+            <Typography variant="caption" sx={{ 
+              color: 'text.secondary',
+              fontSize: '0.55rem'
+            }}>
+              Regens
+            </Typography>
+          </Box>
         </Box>
 
-        {/* Actions Row */}
+        {/* Bottom Row: Actions */}
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
@@ -459,7 +509,7 @@ const LearningHeader = ({
                 <Cached 
                   sx={{ 
                     fontSize: 16,
-                    color: '#7C3AED'
+                    color: colorPalette[600]
                   }} 
                 />
               ) : (
@@ -496,8 +546,8 @@ const LearningHeader = ({
                   height: 36,
                   borderRadius: '50%',
                   p: 0,
-                  borderColor: remainingGenerations === 0 ? '#f44336' : '#7C3AED',
-                  color: remainingGenerations === 0 ? '#f44336' : '#7C3AED',
+                  borderColor: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
+                  color: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
                 }}
               >
                 {contentLoading ? (
@@ -544,6 +594,8 @@ const LearningHeader = ({
       </Box>
     );
   }
+
+
 
   // Desktop View - Normal Header
   return (

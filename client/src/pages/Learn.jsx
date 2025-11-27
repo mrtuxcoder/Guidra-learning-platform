@@ -1031,13 +1031,14 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
       )}
 
       {/* Main Content Area */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column',
-        minHeight: 0,
-        overflow: 'hidden'
-      }}>
+    <Box sx={{ 
+    flex: 1, 
+    display: 'flex', 
+    flexDirection: 'column',
+    minHeight: 0,
+    overflow: 'hidden',
+    pb: isMobile ? '120px' : 0 // Add padding for mobile footer
+  }}>
         {/* Header */}
         <Box sx={{ 
           flexShrink: 0,
