@@ -1,4 +1,5 @@
-// import { useState, useEffect } from "react";
+
+// import { useState, useEffect, useCallback } from "react";
 // import {
 //   Box,
 //   Typography,
@@ -8,7 +9,6 @@
 //   Drawer,
 //   IconButton,
 //   Button,
-//   Snackbar
 // } from "@mui/material";
 // import { Menu, Refresh } from "@mui/icons-material";
 // import { getProfile } from "../api/auth";
@@ -26,6 +26,20 @@
 // import WelcomeState from "../components/WelcomeState";
 // import LoadingState from "../components/LoadingState";
 
+// // Consistent color palette
+// const purplePalette = {
+//   50: '#FAF7FE',
+//   100: '#F3E8FF',
+//   200: '#E9D5FF',
+//   300: '#D8B4FE',
+//   400: '#C084FC',
+//   500: '#A855F7',
+//   600: '#9333EA',
+//   700: '#7C3AED',
+//   800: '#6B21A8',
+//   900: '#581C87'
+// };
+
 // export default function Learning() {
 //   const [topics, setTopics] = useState([]);
 //   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -35,31 +49,20 @@
 //   const [loading, setLoading] = useState(false);
 //   const [contentLoading, setContentLoading] = useState(false);
 //   const [error, setError] = useState("");
-//   const [contentError, setContentError] = useState(""); // Separate error for content
+//   const [contentError, setContentError] = useState("");
 //   const [updatingSubtopic, setUpdatingSubtopic] = useState(null);
 //   const [contentInfo, setContentInfo] = useState({ cached: false, version: 1 });
 //   const [generationCounts, setGenerationCounts] = useState({});
 //   const [contentCache, setContentCache] = useState({});
 //   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-//   const [showError, setShowError] = useState(false); // Control error visibility
+//   const [showError, setShowError] = useState(false);
 
 //   const theme = useTheme();
 //   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 //   const MAX_GENERATIONS = 3;
 
-//   useEffect(() => {
-//     fetchUserTopics();
-//   }, []);
-
-//   // Clear errors when component unmounts or when selecting new content
-//   useEffect(() => {
-//     if (selectedSubtopic) {
-//       setContentError("");
-//       setShowError(false);
-//     }
-//   }, [selectedSubtopic]);
-
-//   const fetchUserTopics = async () => {
+//   // Memoized fetch functions
+//   const fetchUserTopics = useCallback(async () => {
 //     try {
 //       setLoading(true);
 //       setError("");
@@ -72,15 +75,15 @@
 //         await fetchSubtopics(firstTopic.topic);
 //       }
 //     } catch (err) {
-//       const errorMsg = err.response?.data?.message || "Failed to load topics. Please refresh the page.";
+//       const errorMsg = err.response?.data?.message || "Failed to load topics";
 //       setError(errorMsg);
 //       setShowError(true);
 //     } finally {
 //       setLoading(false);
 //     }
-//   };
+//   }, []);
 
-//   const fetchSubtopics = async (topic) => {
+//   const fetchSubtopics = useCallback(async (topic) => {
 //     try {
 //       setLoading(true);
 //       setError("");
@@ -88,21 +91,21 @@
 //       const { data } = await getSubtopics(topic);
 //       setSubtopics(data.subTopics || []);
       
-//       await fetchGenerationCounts(data.subTopics || [], topic);
+//       fetchGenerationCounts(data.subTopics || [], topic);
       
 //       if (isMobile) {
 //         setMobileDrawerOpen(false);
 //       }
 //     } catch (err) {
-//       const errorMsg = err.response?.data?.message || "Failed to load subtopics. Please try again.";
+//       const errorMsg = err.response?.data?.message || "Failed to load subtopics";
 //       setError(errorMsg);
 //       setShowError(true);
 //     } finally {
 //       setLoading(false);
 //     }
-//   };
+//   }, [isMobile]);
 
-//   const fetchGenerationCounts = async (subtopics, topic) => {
+//   const fetchGenerationCounts = useCallback(async (subtopics, topic) => {
 //     try {
 //       const counts = {};
 //       for (const subtopic of subtopics) {
@@ -116,42 +119,43 @@
 //       setGenerationCounts(counts);
 //     } catch (err) {
 //       console.error("Error fetching generation counts:", err);
-//       // Don't show error for generation counts - it's non-critical
 //     }
-//   };
+//   }, []);
 
-//   const handleSelectSubtopic = async (subtopic) => {
-//     setSelectedSubtopic(subtopic);
-//     setContentError(""); // Clear previous content errors
-    
-//     if (contentCache[subtopic.name]) {
-//       setContent(contentCache[subtopic.name].content);
-//       setContentInfo(contentCache[subtopic.name].info);
-//     } else {
-//       await handleGenerateContent(subtopic);
+//   const handleIncrementGenerationCount = useCallback(async (subtopicName) => {
+//     try {
+//       await incrementGenerationCount({
+//         topic: selectedTopic,
+//         subtopic: subtopicName
+//       });
+      
+//       setGenerationCounts(prev => ({
+//         ...prev,
+//         [subtopicName]: Math.min((prev[subtopicName] || 0) + 1, MAX_GENERATIONS)
+//       }));
+//     } catch (err) {
+//       console.error("Error incrementing generation count:", err);
 //     }
-//     if (isMobile) {
-//       setMobileDrawerOpen(false);
-//     }
-//   };
+//   }, [selectedTopic, MAX_GENERATIONS]);
 
-//   const handleGenerateContent = async (subtopic = selectedSubtopic) => {
+//   const handleGenerateContent = useCallback(async (subtopic = selectedSubtopic) => {
 //     if (!subtopic || !selectedTopic) return;
     
 //     try {
 //       setContentLoading(true);
-//       setContentError(""); // Clear previous errors
-//       console.log("🔄 Generating content for:", { topic: selectedTopic, subtopic: subtopic.name });
+//       setContentError("");
       
+//       const cacheKey = `${selectedTopic}-${subtopic.name}`;
+//       if (contentCache[cacheKey]) {
+//         setContent(contentCache[cacheKey].content);
+//         setContentInfo(contentCache[cacheKey].info);
+//         setContentLoading(false);
+//         return;
+//       }
+
 //       const { data } = await teachSubtopic({
 //         topic: selectedTopic,
 //         subtopic: subtopic.name
-//       });
-
-//       console.log("✅ Content generated successfully:", { 
-//         cached: data.cached, 
-//         hasData: !!data.data,
-//         dataKeys: data.data ? Object.keys(data.data) : 'no data'
 //       });
 
 //       if (!data.cached) {
@@ -167,7 +171,7 @@
       
 //       setContentCache(prev => ({
 //         ...prev,
-//         [subtopic.name]: {
+//         [cacheKey]: {
 //           content: data.data,
 //           info: {
 //             cached: data.cached || false,
@@ -177,57 +181,53 @@
 //         }
 //       }));
 //     } catch (err) {
-//       console.error("❌ Error generating content:", err);
-//       const errorMessage = err.response?.data?.message || 
-//                           err.message || 
-//                           "Failed to generate learning content. Please try again.";
+//       const errorMessage = err.response?.data?.message || "Failed to generate content";
 //       setContentError(errorMessage);
 //       setShowError(true);
 //     } finally {
 //       setContentLoading(false);
 //     }
-//   };
+//   }, [selectedTopic, selectedSubtopic, contentCache, handleIncrementGenerationCount]);
 
-//   const handleIncrementGenerationCount = async (subtopicName) => {
-//     try {
-//       await incrementGenerationCount({
-//         topic: selectedTopic,
-//         subtopic: subtopicName
-//       });
-      
-//       setGenerationCounts(prev => ({
-//         ...prev,
-//         [subtopicName]: Math.min((prev[subtopicName] || 0) + 1, MAX_GENERATIONS)
-//       }));
-//     } catch (err) {
-//       console.error("Error incrementing generation count:", err);
-//       // Don't show error for this - it's non-critical
+//   const handleSelectSubtopic = useCallback(async (subtopic) => {
+//     setSelectedSubtopic(subtopic);
+//     setContentError("");
+    
+//     const cacheKey = `${selectedTopic}-${subtopic.name}`;
+//     if (contentCache[cacheKey]) {
+//       setContent(contentCache[cacheKey].content);
+//       setContentInfo(contentCache[cacheKey].info);
+//     } else {
+//       await handleGenerateContent(subtopic);
 //     }
-//   };
+//     if (isMobile) {
+//       setMobileDrawerOpen(false);
+//     }
+//   }, [selectedTopic, contentCache, handleGenerateContent, isMobile]);
 
-//   const getRemainingGenerations = (subtopicName) => {
+//   const getRemainingGenerations = useCallback((subtopicName) => {
 //     const used = generationCounts[subtopicName] || 0;
 //     return Math.max(0, MAX_GENERATIONS - used);
-//   };
+//   }, [generationCounts, MAX_GENERATIONS]);
 
-//   const canGenerate = (subtopicName) => {
+//   const canGenerate = useCallback((subtopicName) => {
 //     return getRemainingGenerations(subtopicName) > 0;
-//   };
+//   }, [getRemainingGenerations]);
 
-//   const handleRegenerateContent = async () => {
+//   const handleRegenerateContent = useCallback(async () => {
 //     if (!selectedSubtopic || !selectedTopic) return;
     
 //     const subtopicName = selectedSubtopic.name;
     
 //     if (!canGenerate(subtopicName)) {
-//       setContentError(`Generation limit reached! You can only generate content ${MAX_GENERATIONS} times per subtopic.`);
+//       setContentError(`Generation limit reached (${MAX_GENERATIONS} times)`);
 //       setShowError(true);
 //       return;
 //     }
 
 //     try {
 //       setContentLoading(true);
-//       setContentError(""); // Clear previous errors
+//       setContentError("");
 //       const { data } = await regenerateContent({
 //         topic: selectedTopic,
 //         subtopic: subtopicName
@@ -242,9 +242,10 @@
 //         source: "ai"
 //       });
       
+//       const cacheKey = `${selectedTopic}-${subtopicName}`;
 //       setContentCache(prev => ({
 //         ...prev,
-//         [subtopicName]: {
+//         [cacheKey]: {
 //           content: data.data,
 //           info: {
 //             cached: false,
@@ -254,20 +255,21 @@
 //         }
 //       }));
 //     } catch (err) {
-//       const errorMessage = err.response?.data?.message || "Failed to regenerate learning content. Please try again.";
+//       const errorMessage = err.response?.data?.message || "Failed to regenerate content";
 //       setContentError(errorMessage);
 //       setShowError(true);
 //     } finally {
 //       setContentLoading(false);
 //     }
-//   };
+//   }, [selectedTopic, selectedSubtopic, canGenerate, handleIncrementGenerationCount]);
 
-//   const handleUpdateUnderstanding = async (subtopic, newUnderstanding) => {
+//   const handleUpdateUnderstanding = useCallback(async (subtopic, newUnderstanding) => {
 //     const previousUnderstanding = subtopic.understandingLevel;
     
 //     try {
 //       setUpdatingSubtopic(subtopic.name);
-//       setError(""); // Clear errors
+//       setError("");
+      
 //       setSubtopics(prev => prev.map(sub => 
 //         sub.name === subtopic.name 
 //           ? { ...sub, understandingLevel: newUnderstanding }
@@ -296,24 +298,23 @@
 //         setSelectedSubtopic(prev => ({ ...prev, understandingLevel: previousUnderstanding }));
 //       }
 
-//       const errorMessage = "Failed to update understanding level. Please try again.";
-//       setError(errorMessage);
+//       setError("Failed to update understanding");
 //       setShowError(true);
 //     } finally {
 //       setUpdatingSubtopic(null);
 //     }
-//   };
+//   }, [selectedTopic, selectedSubtopic]);
 
-//   const handleCompleteSubtopic = async (subtopic) => {
+//   const handleCompleteSubtopic = useCallback(async (subtopic) => {
 //     if (!subtopic.understandingLevel || subtopic.understandingLevel < 1) {
-//       setContentError("Please rate your understanding (1-5 stars) before marking as complete");
+//       setContentError("Please rate your understanding first");
 //       setShowError(true);
 //       return;
 //     }
 
 //     try {
 //       setUpdatingSubtopic(subtopic.name);
-//       setError(""); // Clear errors
+//       setError("");
       
 //       await updateSubtopicProgress({
 //         topic: selectedTopic,
@@ -333,63 +334,74 @@
 //       }
 
 //     } catch (err) {
-//       const errorMessage = "Failed to complete subtopic. Please try again.";
-//       setError(errorMessage);
+//       setError("Failed to complete subtopic");
 //       setShowError(true);
 //     } finally {
 //       setUpdatingSubtopic(null);
 //     }
-//   };
+//   }, [selectedTopic, selectedSubtopic]);
 
-//   const calculateProgress = () => {
+//   const calculateProgress = useCallback(() => {
 //     if (!subtopics.length) return 0;
 //     const completed = subtopics.filter(sub => sub.completed).length;
 //     return (completed / subtopics.length) * 100;
-//   };
+//   }, [subtopics]);
 
-//   const handleCloseError = () => {
+//   const handleCloseError = useCallback(() => {
 //     setShowError(false);
 //     setError("");
 //     setContentError("");
-//   };
+//   }, []);
 
-//   const handleRetryContent = () => {
+//   const handleRetryContent = useCallback(() => {
 //     if (selectedSubtopic) {
 //       handleGenerateContent(selectedSubtopic);
 //     }
-//   };
+//   }, [selectedSubtopic, handleGenerateContent]);
 
-//   // Determine which error to show (content errors take priority)
+//   // Effects
+//   useEffect(() => {
+//     fetchUserTopics();
+//   }, [fetchUserTopics]);
+
+//   useEffect(() => {
+//     if (selectedSubtopic) {
+//       setContentError("");
+//       setShowError(false);
+//     }
+//   }, [selectedSubtopic]);
+
 //   const currentError = contentError || error;
 
 //   return (
 //     <Box sx={{ 
 //       display: 'flex', 
 //       height: '100vh', 
-//       background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+//       background: 'white',
 //       flexDirection: { xs: 'column', md: 'row' },
 //       overflow: 'hidden'
 //     }}>
 //       {/* Mobile Header */}
 //       {isMobile && (
 //         <Box sx={{ 
-//           p: 2, 
+//           p: 1.5, 
 //           background: 'white',
-//           borderBottom: 1,
-//           borderColor: 'divider',
+//           borderBottom: '1px solid rgba(126, 87, 194, 0.1)',
 //           display: 'flex',
 //           alignItems: 'center',
-//           gap: 2,
+//           gap: 1.5,
 //           flexShrink: 0
 //         }}>
 //           <IconButton
 //             onClick={() => setMobileDrawerOpen(true)}
-//             sx={{ color: 'primary.main' }}
+//             sx={{ color: purplePalette[600] }}
 //           >
 //             <Menu />
 //           </IconButton>
-//           <Typography variant="h6" fontWeight="700" color="primary">
-//             Learning Path
+//           <Typography variant="h6" fontWeight="600" sx={{
+//             color: purplePalette[600]
+//           }}>
+//             Learning
 //           </Typography>
 //         </Box>
 //       )}
@@ -403,9 +415,10 @@
 //           sx={{
 //             '& .MuiDrawer-paper': {
 //               width: '100%',
-//               maxWidth: 350,
+//               maxWidth: 320,
 //               height: '100vh',
-//               overflow: 'hidden'
+//               overflow: 'hidden',
+//               background: 'white'
 //             }
 //           }}
 //         >
@@ -421,14 +434,14 @@
 //             onSubtopicSelect={handleSelectSubtopic}
 //             onUpdateUnderstanding={handleUpdateUnderstanding}
 //             progress={calculateProgress()}
+//             colorPalette={purplePalette}
 //           />
 //         </Drawer>
 //       ) : (
 //         <Box sx={{ 
-//           width: 350,
-//           m: 2,
-//           display: { xs: 'none', md: 'block' },
-//           flexShrink: 0
+//           width: 320,
+//           flexShrink: 0,
+//           borderRight: '1px solid rgba(126, 87, 194, 0.1)'
 //         }}>
 //           <LearningSidebar
 //             topics={topics}
@@ -442,6 +455,7 @@
 //             onSubtopicSelect={handleSelectSubtopic}
 //             onUpdateUnderstanding={handleUpdateUnderstanding}
 //             progress={calculateProgress()}
+//             colorPalette={purplePalette}
 //           />
 //         </Box>
 //       )}
@@ -452,15 +466,13 @@
 //         display: 'flex', 
 //         flexDirection: 'column',
 //         minHeight: 0,
-//         overflow: 'hidden',
-//         m: { xs: 0, md: 2 },
-//         mt: { xs: 0, md: 2 },
-//         mb: { xs: 0, md: 2 }
+//         overflow: 'hidden'
 //       }}>
-//         {/* Header - Fixed height */}
+//         {/* Header */}
 //         <Box sx={{ 
 //           flexShrink: 0,
-//           mb: { xs: 1, md: 2 }
+//           p: { xs: 1.5, md: 2 },
+//           borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
 //         }}>
 //           <LearningHeader
 //             selectedTopic={selectedTopic}
@@ -473,18 +485,23 @@
 //             onRegenerateContent={handleRegenerateContent}
 //             onCompleteSubtopic={handleCompleteSubtopic}
 //             onUpdateUnderstanding={handleUpdateUnderstanding}
+//             colorPalette={purplePalette}
 //           />
 //         </Box>
 
-//         {/* Error Alert - Fixed height with retry option */}
+//         {/* Error Alert */}
 //         {showError && currentError && (
 //           <Box sx={{ 
 //             flexShrink: 0,
-//             mb: { xs: 1, md: 2 }
+//             p: { xs: 1.5, md: 2 },
+//             pb: 0
 //           }}>
 //             <Alert 
 //               severity="error" 
-//               sx={{ borderRadius: 2 }} 
+//               sx={{ 
+//                 borderRadius: 1,
+//                 fontSize: '0.875rem'
+//               }} 
 //               onClose={handleCloseError}
 //               action={
 //                 contentError && selectedSubtopic && (
@@ -493,6 +510,7 @@
 //                     size="small" 
 //                     startIcon={<Refresh />}
 //                     onClick={handleRetryContent}
+//                     sx={{ fontWeight: 600, fontSize: '0.75rem' }}
 //                   >
 //                     Retry
 //                   </Button>
@@ -504,33 +522,29 @@
 //           </Box>
 //         )}
 
-//         {/* Content Area - Scrollable */}
+//         {/* Content Area */}
 //         <Box sx={{ 
 //           flex: 1,
 //           minHeight: 0,
-//           overflow: 'hidden',
-//           display: 'flex',
-//           flexDirection: 'column'
+//           overflow: 'hidden'
 //         }}>
 //           {contentLoading ? (
-//             <LoadingState isContentLoading={true} source={contentInfo?.source} />
+//             <LoadingState 
+//               isContentLoading={true} 
+//               source={contentInfo?.source} 
+//               colorPalette={purplePalette}
+//             />
 //           ) : content && selectedSubtopic && !contentError ? (
-//             <Box sx={{ 
-//               flex: 1,
-//               display: 'flex',
-//               minHeight: 0,
-//               overflow: 'hidden'
-//             }}>
-//               <LearningContent
-//                 content={content}
-//                 contentInfo={contentInfo}
-//                 selectedTopic={selectedTopic}
-//                 selectedSubtopic={selectedSubtopic}
-//                 contentLoading={contentLoading}
-//                 contentError={contentError}
-//                 onRetry={handleRetryContent}
-//               />
-//             </Box>
+//             <LearningContent
+//               content={content}
+//               contentInfo={contentInfo}
+//               selectedTopic={selectedTopic}
+//               selectedSubtopic={selectedSubtopic}
+//               contentLoading={contentLoading}
+//               contentError={contentError}
+//               onRetry={handleRetryContent}
+//               colorPalette={purplePalette}
+//             />
 //           ) : (
 //             <WelcomeState 
 //               subtopicName={selectedSubtopic?.name}
@@ -538,6 +552,7 @@
 //               onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
 //               error={contentError}
 //               onRetry={handleRetryContent}
+//               colorPalette={purplePalette}
 //             />
 //           )}
 //         </Box>
@@ -545,6 +560,8 @@
 //     </Box>
 //   );
 // }
+
+
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -919,6 +936,12 @@ export default function Learning() {
   }, [selectedSubtopic]);
 
   const currentError = contentError || error;
+  const handleNavigateSubtopic = useCallback((subtopic) => {
+  handleSelectSubtopic(subtopic);
+}, [handleSelectSubtopic]);
+const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
+  handleSelectSubtopic(subtopic);
+}, [handleSelectSubtopic]);
 
   return (
     <Box sx={{ 
@@ -1021,19 +1044,21 @@ export default function Learning() {
           p: { xs: 1.5, md: 2 },
           borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
         }}>
-          <LearningHeader
-            selectedTopic={selectedTopic}
-            selectedSubtopic={selectedSubtopic}
-            updatingSubtopic={updatingSubtopic}
-            contentInfo={contentInfo}
-            remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
-            maxGenerations={MAX_GENERATIONS}
-            contentLoading={contentLoading}
-            onRegenerateContent={handleRegenerateContent}
-            onCompleteSubtopic={handleCompleteSubtopic}
-            onUpdateUnderstanding={handleUpdateUnderstanding}
-            colorPalette={purplePalette}
-          />
+      <LearningHeader
+  selectedTopic={selectedTopic}
+  selectedSubtopic={selectedSubtopic}
+  subtopics={subtopics} // Add this prop
+  updatingSubtopic={updatingSubtopic}
+  contentInfo={contentInfo}
+  remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
+  maxGenerations={MAX_GENERATIONS}
+  contentLoading={contentLoading}
+  onRegenerateContent={handleRegenerateContent}
+  onCompleteSubtopic={handleCompleteSubtopic}
+  onUpdateUnderstanding={handleUpdateUnderstanding}
+  onNavigateSubtopic={handleNavigateSubtopic} // Add this prop
+  colorPalette={purplePalette}
+/>
         </Box>
 
         {/* Error Alert */}
@@ -1093,14 +1118,16 @@ export default function Learning() {
               colorPalette={purplePalette}
             />
           ) : (
-            <WelcomeState 
-              subtopicName={selectedSubtopic?.name}
-              isReady={!!selectedSubtopic}
-              onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
-              error={contentError}
-              onRetry={handleRetryContent}
-              colorPalette={purplePalette}
-            />
+         <WelcomeState 
+  subtopicName={selectedSubtopic?.name}
+  isReady={!!selectedSubtopic}
+  onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
+  error={contentError}
+  onRetry={handleRetryContent}
+  subtopics={subtopics} // Add this
+  onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete} // Add this
+  colorPalette={purplePalette}
+/>
           )}
         </Box>
       </Box>
