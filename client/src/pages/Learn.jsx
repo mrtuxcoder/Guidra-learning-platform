@@ -1072,43 +1072,43 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
           </Box>
         )}
 
-        {/* Content Area */}
-        <Box sx={{ 
-          flex: 1,
-          minHeight: 0,
-          overflow: 'hidden'
-        }}>
-          {contentLoading ? (
-            <LoadingState 
-              isContentLoading={true} 
-              source={contentInfo?.source} 
-              colorPalette={purplePalette}
-            />
-          ) : content && selectedSubtopic && !contentError ? (
-            <LearningContent
-              content={content}
-              contentInfo={contentInfo}
-              selectedTopic={selectedTopic}
-              selectedSubtopic={selectedSubtopic}
-              contentLoading={contentLoading}
-              contentError={contentError}
-              onRetry={handleRetryContent}
-              colorPalette={purplePalette}
-            />
-          ) : (
-         <WelcomeState 
+       {/* Content Area */}
+<Box sx={{ 
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden'
+}}>
+  {contentLoading ? (
+    <LoadingState 
+      isContentLoading={true} 
+      source={contentInfo?.source} 
+      colorPalette={purplePalette}
+    />
+  ) : content && selectedSubtopic && !contentError ? (
+    <LearningContent
+      content={content}
+      contentInfo={contentInfo}
+      selectedTopic={selectedTopic}
+      selectedSubtopic={selectedSubtopic}
+      contentLoading={contentLoading}
+      contentError={contentError}
+      onRetry={handleRetryContent}
+      colorPalette={purplePalette}
+    />
+  ) : (
+  <WelcomeState 
   subtopicName={selectedSubtopic?.name}
   isReady={!!selectedSubtopic}
   onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
   error={contentError}
   onRetry={handleRetryContent}
-  subtopics={subtopics} // Add this
-  onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete} // Add this
+  subtopics={subtopics}
+  onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
+  onOpenSidebar={() => setMobileDrawerOpen(true)} // ← This is crucial
   colorPalette={purplePalette}
 />
-          )}
-        </Box>
-      </Box>
+  )}
+</Box>     </Box>
     </Box>
   );
 }
