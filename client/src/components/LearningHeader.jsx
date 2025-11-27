@@ -351,251 +351,283 @@ const LearningHeader = ({
     }
   };
 
-  // Mobile View - Fixed Footer Style
-  if (isMobile) {
-    return (
+ // Mobile View - Premium Dock with Progress Bar
+if (isMobile) {
+  const progress = ((currentIndex + 1) / subtopics.length) * 100;
+  
+  return (
+    <Box sx={{
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      background: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(30px)',
+      borderTop: '1px solid rgba(126, 87, 194, 0.15)',
+      zIndex: 1000,
+      height: '80px',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Progress Bar */}
       <Box sx={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'white',
-        borderTop: '1px solid rgba(126, 87, 194, 0.1)',
-        p: 1.5,
-        zIndex: 1000,
-        boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-        height: '100px' // Fixed height to prevent space
+        width: '100%',
+        height: '3px',
+        background: 'rgba(126, 87, 194, 0.1)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        {/* Top Row: Navigation + Sidebar Button */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          height: '100%',
+          background: `linear-gradient(90deg, ${colorPalette[500]} 0%, ${colorPalette[600]} 100%)`,
+          width: `${progress}%`,
+          transition: 'width 0.3s ease',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            height: '100%',
+            width: '20px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 100%)'
+          }
+        }} />
+      </Box>
+
+      {/* Main Dock */}
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        px: 2,
+        py: 1
+      }}>
+        
+        {/* Left Section - Navigation & Progress */}
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
-          justifyContent: 'space-between',
-          mb: 1
+          gap: 1.5
         }}>
-          {/* Sidebar Button */}
-          <IconButton
-            onClick={onOpenSidebar}
-            size="small"
-            sx={{
-              color: colorPalette[600],
-              background: colorPalette[50],
-              '&:hover': {
-                background: colorPalette[100]
-              }
-            }}
-          >
-            <Menu sx={{ fontSize: 20 }} />
-          </IconButton>
-
-          {/* Navigation */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 0.5,
-            flex: 1,
-            justifyContent: 'center',
-            mx: 1
-          }}>
-            <Button
-              onClick={handlePrevious}
-              disabled={!hasPrevious}
-              variant="outlined"
-              size="small"
+          {/* Menu Button */}
+          <Tooltip title="Menu">
+            <IconButton
+              onClick={onOpenSidebar}
               sx={{
-                minWidth: 'auto',
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                p: 0,
-                borderColor: hasPrevious ? colorPalette[600] : '#ccc',
-                color: hasPrevious ? colorPalette[600] : '#ccc'
+                width: 44,
+                height: 44,
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(126, 87, 194, 0.1) 0%, rgba(126, 87, 194, 0.05) 100%)',
+                color: colorPalette[600],
+                border: '1px solid rgba(126, 87, 194, 0.1)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, rgba(126, 87, 194, 0.2) 0%, rgba(126, 87, 194, 0.1) 100%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(126, 87, 194, 0.15)'
+                },
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              <NavigateBefore sx={{ fontSize: 18 }} />
-            </Button>
+              <Menu sx={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
 
-            <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+          {/* Navigation Controls */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            background: 'rgba(126, 87, 194, 0.05)',
+            borderRadius: '14px',
+            p: 0.5,
+            border: '1px solid rgba(126, 87, 194, 0.1)'
+          }}>
+            <Tooltip title="Previous">
+              <IconButton
+                onClick={handlePrevious}
+                disabled={!hasPrevious}
+                size="small"
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  color: hasPrevious ? colorPalette[600] : 'rgba(0,0,0,0.2)',
+                  background: hasPrevious ? 'rgba(126, 87, 194, 0.1)' : 'transparent',
+                  '&:hover': hasPrevious ? {
+                    background: 'rgba(126, 87, 194, 0.2)',
+                    transform: 'scale(1.1)'
+                  } : {},
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <NavigateBefore sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
+            {/* Progress Indicator */}
+            <Box sx={{ 
+              px: 1.5,
+              textAlign: 'center',
+              minWidth: 50
+            }}>
               <Typography variant="caption" sx={{ 
-                color: 'text.secondary',
-                fontSize: '0.7rem',
-                fontWeight: 600
-              }}>
-                {currentIndex >= 0 ? `${currentIndex + 1} / ${subtopics.length}` : '1 / 1'}
-              </Typography>
-              <Typography variant="body2" sx={{ 
-                fontWeight: 600,
                 color: colorPalette[600],
-                fontSize: '0.75rem',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                lineHeight: 1.2
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                lineHeight: 1,
+                display: 'block'
               }}>
-                {selectedSubtopic.name}
+                {currentIndex >= 0 ? currentIndex + 1 : 1}
+              </Typography>
+              <Typography variant="caption" sx={{ 
+                color: colorPalette[500],
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                lineHeight: 1,
+                display: 'block'
+              }}>
+                of {subtopics.length}
               </Typography>
             </Box>
 
-            <Button
-              onClick={handleNext}
-              disabled={!hasNext}
-              variant="outlined"
-              size="small"
-              sx={{
-                minWidth: 'auto',
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                p: 0,
-                borderColor: hasNext ? colorPalette[600] : '#ccc',
-                color: hasNext ? colorPalette[600] : '#ccc'
-              }}
-            >
-              <NavigateNext sx={{ fontSize: 18 }} />
-            </Button>
-          </Box>
-
-          {/* Regeneration Counter */}
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            minWidth: 40
-          }}>
-            <Typography variant="caption" sx={{ 
-              color: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
-              fontSize: '0.65rem',
-              fontWeight: 700
-            }}>
-              {remainingGenerations}/{maxGenerations}
-            </Typography>
-            <Typography variant="caption" sx={{ 
-              color: 'text.secondary',
-              fontSize: '0.55rem'
-            }}>
-              Regens
-            </Typography>
+            <Tooltip title="Next">
+              <IconButton
+                onClick={handleNext}
+                disabled={!hasNext}
+                size="small"
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  color: hasNext ? colorPalette[600] : 'rgba(0,0,0,0.2)',
+                  background: hasNext ? 'rgba(126, 87, 194, 0.1)' : 'transparent',
+                  '&:hover': hasNext ? {
+                    background: 'rgba(126, 87, 194, 0.2)',
+                    transform: 'scale(1.1)'
+                  } : {},
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <NavigateNext sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Box>
 
-        {/* Bottom Row: Actions */}
+        {/* Right Section - Actions */}
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
-          justifyContent: 'space-between',
           gap: 1
         }}>
-          {/* Left side: Status icons */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1
-          }}>
-            {/* Completed status */}
-            {selectedSubtopic.completed && (
-              <Tooltip title="Topic completed">
-                <CheckCircle 
-                  sx={{ 
-                    fontSize: 18,
-                    color: '#4CAF50'
-                  }} 
-                />
-              </Tooltip>
-            )}
-
-            {/* Content source */}
-            <Tooltip title={contentInfo?.source === "cache" ? "Cached content" : "AI generated"}>
-              {contentInfo?.source === "cache" ? (
-                <Cached 
-                  sx={{ 
-                    fontSize: 16,
-                    color: colorPalette[600]
-                  }} 
-                />
-              ) : (
-                <AutoAwesome 
-                  sx={{ 
-                    fontSize: 16,
-                    color: '#FF9800'
-                  }} 
-                />
-              )}
-            </Tooltip>
-          </Box>
-
-          {/* Right side: Actions */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1
-          }}>
-            {/* Regenerate button */}
-            <Tooltip title={
-              remainingGenerations === 0
-                ? `No generations left`
-                : `${remainingGenerations} generations left`
-            }>
-              <Button
+          {/* Regeneration System */}
+          <Tooltip title={`${remainingGenerations} regenerations available`}>
+            <Box sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              background: remainingGenerations === 0 
+                ? 'rgba(244, 67, 54, 0.08)' 
+                : 'rgba(126, 87, 194, 0.08)',
+              borderRadius: '12px',
+              px: 1.5,
+              py: 0.75,
+              border: remainingGenerations === 0 
+                ? '1px solid rgba(244, 67, 54, 0.2)' 
+                : '1px solid rgba(126, 87, 194, 0.2)'
+            }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="caption" sx={{ 
+                  color: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  display: 'block'
+                }}>
+                  {remainingGenerations}
+                </Typography>
+                <Typography variant="caption" sx={{ 
+                  color: remainingGenerations === 0 ? '#f44336' : colorPalette[500],
+                  fontSize: '0.55rem',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  display: 'block'
+                }}>
+                  REGEN
+                </Typography>
+              </Box>
+              
+              <IconButton
                 onClick={onRegenerateContent}
                 disabled={contentLoading || remainingGenerations === 0}
-                variant="outlined"
                 size="small"
                 sx={{
-                  minWidth: 'auto',
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  p: 0,
-                  borderColor: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
+                  width: 32,
+                  height: 32,
+                  borderRadius: '8px',
                   color: remainingGenerations === 0 ? '#f44336' : colorPalette[600],
+                  background: remainingGenerations === 0 
+                    ? 'rgba(244, 67, 54, 0.1)' 
+                    : 'rgba(126, 87, 194, 0.1)',
+                  '&:hover': !contentLoading && remainingGenerations > 0 ? {
+                    background: 'rgba(126, 87, 194, 0.2)',
+                    transform: 'scale(1.1)'
+                  } : {},
+                  transition: 'all 0.2s ease'
                 }}
               >
                 {contentLoading ? (
-                  <CircularProgress size={16} />
+                  <CircularProgress size={14} />
                 ) : remainingGenerations === 0 ? (
                   <Lock sx={{ fontSize: 16 }} />
                 ) : (
                   <AutoAwesome sx={{ fontSize: 16 }} />
                 )}
-              </Button>
-            </Tooltip>
+              </IconButton>
+            </Box>
+          </Tooltip>
 
-            {/* Complete button */}
-            {!selectedSubtopic.completed && (
-              <Tooltip title="Mark as complete">
-                <Button
-                  onClick={() => onCompleteSubtopic(selectedSubtopic)}
-                  disabled={
-                    updatingSubtopic === selectedSubtopic.name ||
-                    !selectedSubtopic.understandingLevel ||
-                    selectedSubtopic.understandingLevel < 1
-                  }
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    minWidth: 'auto',
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    p: 0,
-                    background: '#4CAF50',
-                  }}
-                >
-                  {updatingSubtopic === selectedSubtopic.name ? (
-                    <CircularProgress size={16} sx={{ color: 'white' }} />
-                  ) : (
-                    <CheckCircle sx={{ fontSize: 16, color: 'white' }} />
-                  )}
-                </Button>
-              </Tooltip>
-            )}
-          </Box>
+          {/* Complete Button */}
+          {!selectedSubtopic.completed && (
+            <Tooltip title="Mark as complete">
+              <IconButton
+                onClick={() => onCompleteSubtopic(selectedSubtopic)}
+                disabled={
+                  updatingSubtopic === selectedSubtopic.name ||
+                  !selectedSubtopic.understandingLevel ||
+                  selectedSubtopic.understandingLevel < 1
+                }
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: '12px',
+                  background: `linear-gradient(135deg, #10b981 0%, #059669 100%)`,
+                  color: 'white',
+                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                  '&:hover': !updatingSubtopic ? {
+                    background: `linear-gradient(135deg, #059669 0%, #047857 100%)`,
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                  } : {},
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
+                {updatingSubtopic === selectedSubtopic.name ? (
+                  <CircularProgress size={18} sx={{ color: 'white' }} />
+                ) : (
+                  <CheckCircle sx={{ fontSize: 18 }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       </Box>
-    );
-  }
-
-
+    </Box>
+  );
+}
 
   // Desktop View - Normal Header
   return (

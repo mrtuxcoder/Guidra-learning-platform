@@ -769,10 +769,10 @@ export default function Learning() {
     }
   }, [selectedTopic, contentCache, handleGenerateContent, isMobile]);
 
-  const getRemainingGenerations = useCallback((subtopicName) => {
-    const used = generationCounts[subtopicName] || 0;
-    return Math.max(0, MAX_GENERATIONS - used);
-  }, [generationCounts, MAX_GENERATIONS]);
+const getRemainingGenerations = useCallback((subtopicName) => {
+  const used = generationCounts[subtopicName] || 0;
+  return Math.max(0, MAX_GENERATIONS - used);
+}, [generationCounts, MAX_GENERATIONS]);
 
   const canGenerate = useCallback((subtopicName) => {
     return getRemainingGenerations(subtopicName) > 0;
