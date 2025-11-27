@@ -951,30 +951,6 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
       flexDirection: { xs: 'column', md: 'row' },
       overflow: 'hidden'
     }}>
-      {/* Mobile Header */}
-      {isMobile && (
-        <Box sx={{ 
-          p: 1.5, 
-          background: 'white',
-          borderBottom: '1px solid rgba(126, 87, 194, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          flexShrink: 0
-        }}>
-          <IconButton
-            onClick={() => setMobileDrawerOpen(true)}
-            sx={{ color: purplePalette[600] }}
-          >
-            <Menu />
-          </IconButton>
-          <Typography variant="h6" fontWeight="600" sx={{
-            color: purplePalette[600]
-          }}>
-            Learning
-          </Typography>
-        </Box>
-      )}
 
       {/* Sidebar */}
       {isMobile ? (
@@ -1037,14 +1013,14 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
     flexDirection: 'column',
     minHeight: 0,
     overflow: 'hidden',
-    pb: isMobile ? '120px' : 0 // Add padding for mobile footer
+   pb: isMobile ? '80px' : 0 // Match the footer height
   }}>
         {/* Header */}
-        <Box sx={{ 
-          flexShrink: 0,
-          p: { xs: 1.5, md: 2 },
-          borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
-        }}>
+         <Box sx={{ 
+    flexShrink: 0,
+    p: { xs: 1.5, md: 2 },
+    borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
+  }}>
 <LearningHeader
   selectedTopic={selectedTopic}
   selectedSubtopic={selectedSubtopic}
