@@ -1045,10 +1045,11 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
           p: { xs: 1.5, md: 2 },
           borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
         }}>
-      <LearningHeader
+ // In your Learn.jsx, update the LearningHeader props:
+<LearningHeader
   selectedTopic={selectedTopic}
   selectedSubtopic={selectedSubtopic}
-  subtopics={subtopics} // Add this prop
+  subtopics={subtopics}
   updatingSubtopic={updatingSubtopic}
   contentInfo={contentInfo}
   remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
@@ -1057,7 +1058,8 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
   onRegenerateContent={handleRegenerateContent}
   onCompleteSubtopic={handleCompleteSubtopic}
   onUpdateUnderstanding={handleUpdateUnderstanding}
-  onNavigateSubtopic={handleNavigateSubtopic} // Add this prop
+  onNavigateSubtopic={handleNavigateSubtopic}
+  onOpenSidebar={() => setMobileDrawerOpen(true)} // Add this
   colorPalette={purplePalette}
 />
         </Box>
