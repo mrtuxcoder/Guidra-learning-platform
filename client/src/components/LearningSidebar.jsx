@@ -354,7 +354,6 @@
 // };
 
 // export default LearningSidebar;
-
 import React from 'react';
 import {
   Box,
@@ -368,15 +367,15 @@ import {
   Card,
   CardContent,
   LinearProgress,
-  Rating,
-  CircularProgress,
+  IconButton,
   useTheme,
   useMediaQuery
 } from "@mui/material";
 import {
   CheckCircle,
   RadioButtonUnchecked,
-  PlayArrow
+  PlayArrow,
+  Close
 } from "@mui/icons-material";
 
 const LearningSidebar = ({
@@ -391,18 +390,12 @@ const LearningSidebar = ({
   onSubtopicSelect,
   onUpdateUnderstanding,
   progress,
-  colorPalette
+  colorPalette,
+  onCloseSidebar // New prop for closing sidebar
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const getUnderstandingColor = (level) => {
-    if (!level) return colorPalette[300];
-    if (level <= 2) return '#ef4444'; // red-500
-    if (level <= 4) return '#f59e0b'; // amber-500
-    return '#10b981'; // emerald-500
-  };
 
   const SubtopicItem = ({ subtopic, index }) => (
     <ListItem 
@@ -447,7 +440,22 @@ const LearningSidebar = ({
           }}>
             <ListItemIcon sx={{ minWidth: 28 }}>
               {updatingSubtopic === subtopic.name ? (
-                <CircularProgress size={16} color="inherit" />
+                <Box sx={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box 
+                    sx={{ 
+                      width: 12, 
+                      height: 12, 
+                      borderRadius: '50%', 
+                      border: `2px solid ${selectedSubtopic?.name === subtopic.name ? 'rgba(255,255,255,0.5)' : colorPalette[400]}`,
+                      borderTop: `2px solid transparent`,
+                      animation: 'spin 1s linear infinite',
+                      '@keyframes spin': {
+                        '0%': { transform: 'rotate(0deg)' },
+                        '100%': { transform: 'rotate(360deg)' }
+                      }
+                    }} 
+                  />
+                </Box>
               ) : subtopic.completed ? (
                 <CheckCircle color="inherit" fontSize="small" />
               ) : contentCache[subtopic.name] ? (
@@ -469,37 +477,6 @@ const LearningSidebar = ({
             </Typography>
           </Box>
           
-          {/* REMOVED: Star icon for understanding level */}
-        </Box>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          mt: 1,
-          gap: 1
-        }}>
-          {/* REMOVED: Rating component for mobile, keep for desktop */}
-          {!isMobile && (
-            <Tooltip title="Rate your understanding">
-              <span>
-                <Rating
-                  value={subtopic.understandingLevel || 0}
-                  onChange={(event, newValue) => {
-                    if (newValue !== null) onUpdateUnderstanding(subtopic, newValue);
-                  }}
-                  size="small"
-                  disabled={updatingSubtopic === subtopic.name}
-                  sx={{
-                    '& .MuiRating-icon': {
-                      color: selectedSubtopic?.name === subtopic.name ? 'white' : getUnderstandingColor(subtopic.understandingLevel)
-                    }
-                  }}
-                />
-              </span>
-            </Tooltip>
-          )}
-          
           {subtopic.completed && (
             <Chip 
               label="Completed" 
@@ -518,8 +495,8 @@ const LearningSidebar = ({
           )}
         </Box>
 
-        {/* MOBILE: Show simple understanding indicator instead of stars */}
-        {isMobile && subtopic.understandingLevel > 0 && (
+        {/* Content Status Indicator */}
+        {contentCache[subtopic.name] && (
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -528,20 +505,23 @@ const LearningSidebar = ({
           }}>
             <Box 
               sx={{
-                width: 8,
-                height: 8,
+                width: 6,
+                height: 6,
                 borderRadius: '50%',
-                backgroundColor: getUnderstandingColor(subtopic.understandingLevel)
+                backgroundColor: selectedSubtopic?.name === subtopic.name ? 
+                  'rgba(255,255,255,0.7)' : 
+                  colorPalette[400]
               }}
             />
             <Typography 
               variant="caption" 
               sx={{ 
                 color: selectedSubtopic?.name === subtopic.name ? 'rgba(255,255,255,0.8)' : 'text.secondary',
-                fontSize: '0.7rem'
+                fontSize: '0.7rem',
+                fontWeight: 500
               }}
             >
-              Understanding Level {subtopic.understandingLevel}/5
+              Content ready
             </Typography>
           </Box>
         )}
@@ -598,22 +578,51 @@ const LearningSidebar = ({
       width: '100%', 
       height: '100%',
       borderRadius: { xs: 0, md: 3 },
-      boxShadow: { xs: 'none', md: 3 },
+      boxShadow: { xs: 'none', md: '0 8px 32px rgba(126, 87, 194, 0.12)' },
       display: 'flex',
       flexDirection: 'column',
-      background: 'white'
+      background: 'white',
+      border: { xs: 'none', md: '1px solid rgba(126, 87, 194, 0.1)' },
+      position: 'relative'
     }}>
-      {/* Header Section */}
+      {/* Header Section with Exit Button */}
       <Box sx={{ 
         p: { xs: 2, sm: 3 }, 
         borderBottom: '1px solid', 
-        borderColor: colorPalette[100] 
+        borderColor: colorPalette[100],
+        position: 'relative'
       }}>
+        {/* Exit Button - Top Right */}
+        <IconButton
+          onClick={onCloseSidebar}
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            width: 32,
+            height: 32,
+            borderRadius: 2,
+            backgroundColor: colorPalette[50],
+            color: colorPalette[600],
+            border: `1px solid ${colorPalette[200]}`,
+            '&:hover': {
+              backgroundColor: colorPalette[100],
+              transform: 'scale(1.1)',
+            },
+            transition: 'all 0.2s ease-in-out'
+          }}
+        >
+          <Close fontSize="small" />
+        </IconButton>
+
         <Typography 
           variant={isMobile ? "h6" : "h5"} 
           fontWeight="800" 
           gutterBottom 
-          sx={{ color: colorPalette[600] }}
+          sx={{ 
+            color: colorPalette[600],
+            pr: 4 // Make space for exit button
+          }}
         >
           📚 Learning Path
         </Typography>
@@ -624,7 +633,8 @@ const LearningSidebar = ({
           color: 'white', 
           p: 2, 
           borderRadius: 2, 
-          mt: 2 
+          mt: 2,
+          boxShadow: '0 4px 16px rgba(126, 87, 194, 0.2)'
         }}>
           <Box sx={{ 
             display: 'flex', 
@@ -641,7 +651,8 @@ const LearningSidebar = ({
               sx={{ 
                 backgroundColor: 'rgba(255,255,255,0.2)', 
                 color: 'white',
-                fontWeight: 600
+                fontWeight: 700,
+                fontSize: '0.75rem'
               }}
             />
           </Box>
@@ -661,13 +672,13 @@ const LearningSidebar = ({
           <Typography 
             variant="caption" 
             sx={{ 
-              opacity: 0.8, 
+              opacity: 0.9, 
               mt: 1, 
               display: 'block',
               fontWeight: 500
             }}
           >
-            {subtopics.filter(s => s.completed).length} of {subtopics.length} completed
+            {subtopics.filter(s => s.completed).length} of {subtopics.length} topics completed
           </Typography>
         </Card>
       </Box>
@@ -682,8 +693,22 @@ const LearningSidebar = ({
           variant="subtitle1" 
           fontWeight="700" 
           gutterBottom 
-          sx={{ color: colorPalette[600] }}
+          sx={{ 
+            color: colorPalette[600],
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
         >
+          <Box 
+            component="span"
+            sx={{
+              width: 4,
+              height: 16,
+              borderRadius: 1,
+              background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[600]} 100%)`
+            }}
+          />
           Your Topics
         </Typography>
         <Box sx={{ 
@@ -719,8 +744,22 @@ const LearningSidebar = ({
           variant="subtitle1" 
           fontWeight="700" 
           gutterBottom 
-          sx={{ color: colorPalette[600] }}
+          sx={{ 
+            color: colorPalette[600],
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
         >
+          <Box 
+            component="span"
+            sx={{
+              width: 4,
+              height: 16,
+              borderRadius: 1,
+              background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[600]} 100%)`
+            }}
+          />
           Subtopics
         </Typography>
         <List sx={{ py: 0 }}>
