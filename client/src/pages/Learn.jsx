@@ -1045,7 +1045,6 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
           p: { xs: 1.5, md: 2 },
           borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
         }}>
- // In your Learn.jsx, update the LearningHeader props:
 <LearningHeader
   selectedTopic={selectedTopic}
   selectedSubtopic={selectedSubtopic}
