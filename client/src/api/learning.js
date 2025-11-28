@@ -99,3 +99,9 @@ export const markTopicComplete = async (data) => {
 export const validateTopic = async (topic) => {
   return await API.post('/learn/validate-topic', { topic });
 };
+
+// NEW: Mermaid Mindmap Generation
+export const generateMermaidMindmap = async (data) => {
+  const response = await API.post('/learn/generate-mindmap', data);
+  return response;
+};

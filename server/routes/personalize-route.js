@@ -15,7 +15,9 @@ const {
   teachSubtopicController,
   regenerateContentController,
   getContentHistoryController,
-  clearContentCacheController
+  clearContentCacheController,
+    generateMermaidMapController,
+    fixMermaidSyntaxController
 } = require('../controllers/content-controller')
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -32,6 +34,8 @@ router.post("/regenerate", authMiddleware, regenerateContentController); // Forc
 router.get("/content-history", authMiddleware, getContentHistoryController); // Get cache history
 router.delete("/clear-cache", authMiddleware, clearContentCacheController); // Clear user cache
 router.post("/validate-topic", authMiddleware, validateTopicController); // validate topic
+router.post('/generate-mindmap', authMiddleware, generateMermaidMapController);
+router.post('/fix-mindmap-syntax', authMiddleware, fixMermaidSyntaxController);
 
 // Legacy endpoint (optional - keep if needed)
 router.post("/teach-legacy", authMiddleware, generateTeachingContentController);

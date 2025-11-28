@@ -26,6 +26,7 @@ app.use(cors({
     const allowedOrigins = [
       process.env.CLIENT_URL,
       'http://localhost:5173', // Vite default
+      'http://localhost:5174'
     ];
     
     // Allow requests with no origin (like mobile apps, Postman, or server requests)

@@ -10,7 +10,12 @@ function buildPrompt(user, { topic, subtopic, taskType }) {
     return generateSubtopicPrompt(topic, difficultyPreference || "beginner");
   } else if (taskType === "teachSubtopic") {
     return generateTeachingPrompt(user, topic, subtopic);
-  } else {
+  } 
+  else if (taskType === "generateMindmap") {
+    return generateMindmapPrompt(user, topic, subtopic);
+  } 
+  
+  else {
     throw new Error(`Unknown task type: ${taskType}`);
   }
 }
@@ -182,7 +187,98 @@ FAILURE CONDITIONS:
 END: produce the described JSON object ONLY — no surrounding commentary, no markdown, no additional output.
 `;
 }
+function generateMindmapPrompt(user, topic, subtopic) {
+  const { difficultyPreference, learningStyle, name } = user;
 
+  return `
+Generate ONLY a Mermaid.js flowchart mindmap for the subtopic: "${subtopic}" under topic: "${topic}"
+
+LEARNER CONTEXT:
+- Learning Level: ${difficultyPreference}
+- Learning Style: ${learningStyle}
+- Name: ${name}
+
+STRICT OUTPUT RULES:
+- Output ONLY the Mermaid.js code
+- No explanations, no JSON, no markdown blocks
+- No surrounding text of any kind
+- Must be valid Mermaid.js syntax that renders correctly
+
+MERMAID.JS REQUIREMENTS:
+1. Start with: graph TD
+2. Use ONLY square bracket node labels: [Label Text]
+3. Node IDs must be single uppercase letters (A, B, C, etc.)
+4. Maximum 8 nodes total
+5. Must show clear hierarchical structure
+6. Include styling for visual clarity
+
+REQUIRED STRUCTURE:
+graph TD
+    A[${subtopic}] --> B[Main Branch 1]
+    A --> C[Main Branch 2] 
+    A --> D[Main Branch 3]
+    
+    B --> B1[Key Detail 1]
+    B --> B2[Key Detail 2]
+    
+    C --> C1[Key Detail 1]
+    C --> C2[Key Detail 2]
+    
+    D --> D1[Key Detail 1]
+    D --> D2[Key Detail 2]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+
+CONTENT GUIDELINES:
+- Replace placeholder labels with specific, concise content about "${subtopic}"
+- Keep labels short (2-5 words max)
+- Ensure logical flow from general to specific
+- Make it educational and informative
+- Focus on core concepts and relationships
+
+OUTPUT ONLY THE MERMAID CODE - NO OTHER TEXT.
+`;
+}
+
+// Cleanup function for subtopic parsing
+function cleanSubtopicOutput(text) {
+  if (!text || typeof text !== 'string') return [];
+  
+  const lines = text.split('\n')
+    .map(line => {
+      // Remove numbering and bullets
+      let cleaned = line.replace(/^\d+[\.\)]\s*/, '')
+                       .replace(/^[-•*]\s*/, '')
+                       .trim();
+      
+      // Remove content in parentheses and after dashes
+      cleaned = cleaned.replace(/\s*\([^)]*\)/g, '')
+                       .replace(/\s*\-.*$/g, '')
+                       .replace(/\s*\—.*$/g, '');
+      
+      return cleaned;
+    })
+    .filter(line => 
+      line.length > 3 && 
+      line.length < 100 &&
+      !line.toLowerCase().includes('here are') &&
+      !line.toLowerCase().includes('subtopics for') &&
+      line !== ''
+    )
+    .slice(0, 18);
+  
+  return lines;
+}
+
+module.exports = {
+  buildPrompt,
+  generateSubtopicPrompt,
+  generateMindmapPrompt,
+  cleanSubtopicOutput
+};
 // Cleanup function for subtopic parsing
 function cleanSubtopicOutput(text) {
   if (!text || typeof text !== 'string') return [];

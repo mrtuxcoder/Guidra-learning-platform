@@ -926,34 +926,35 @@ const WelcomeState = ({
         p: 3,
         position: 'relative'
       }}>
-        {/* Menu Button - Top Left */}
-        {onOpenSidebar && (
-          <Tooltip title="Open menu">
-            <IconButton
-              onClick={onOpenSidebar}
-              sx={{
-                position: 'absolute',
-                top: 20,
-                left: 20,
-                width: 48,
-                height: 48,
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(126, 87, 194, 0.1) 0%, rgba(126, 87, 194, 0.05) 100%)',
-                color: colorPalette[600],
-                border: '1px solid rgba(126, 87, 194, 0.1)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, rgba(126, 87, 194, 0.2) 0%, rgba(126, 87, 194, 0.1) 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 20px rgba(126, 87, 194, 0.15)'
-                },
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                zIndex: 1000
-              }}
-            >
-              <Menu sx={{ fontSize: 24 }} />
-            </IconButton>
-          </Tooltip>
-        )}
+       {/* Menu Button - Top Left */}
+{onOpenSidebar && (
+  <Tooltip title="Open menu">
+    <IconButton
+      onClick={onOpenSidebar}
+      sx={{
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        width: 48,
+        height: 48,
+        display: { xs: 'flex', md: 'none' }, // Show on mobile, hide on desktop
+        borderRadius: '12px',
+        background: 'linear-gradient(135deg, rgba(126, 87, 194, 0.1) 0%, rgba(126, 87, 194, 0.05) 100%)',
+        color: colorPalette[600],
+        border: '1px solid rgba(126, 87, 194, 0.1)',
+        '&:hover': {
+          background: 'linear-gradient(135deg, rgba(126, 87, 194, 0.2) 0%, rgba(126, 87, 194, 0.1) 100%)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 20px rgba(126, 87, 194, 0.15)'
+        },
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: 1000
+      }}
+    >
+      <Menu sx={{ fontSize: 24 }} />
+    </IconButton>
+  </Tooltip>
+)}
 
         <Card sx={{ 
           maxWidth: 450,
