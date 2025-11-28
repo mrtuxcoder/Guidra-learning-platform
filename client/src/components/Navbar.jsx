@@ -917,7 +917,9 @@ import {
   Slide,
   Chip,
   Badge,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   AccountCircle,
@@ -934,7 +936,8 @@ import {
   Book,
   Star,
   PsychologyAlt,
-  School as LearnIcon
+  School as LearnIcon,
+  Search
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getProfile } from '../api/auth';
@@ -954,9 +957,11 @@ function HideOnScroll(props) {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Start with loading true
+  const [isLoading, setIsLoading] = useState(true);
   const [randomIcon, setRandomIcon] = useState(null);
 
   // Array of 10 random icons with colors
@@ -1006,11 +1011,6 @@ export default function Navbar() {
     return user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U';
   };
 
-  const getUserDisplayName = () => {
-    if (!user) return '';
-    return user.name?.split(' ')[0] || user.email?.split('@')[0] || 'Learner';
-  };
-
   const handleUserMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -1025,9 +1025,11 @@ export default function Navbar() {
 
   const isActive = (path) => location.pathname === path;
 
+  // Updated navItems to include Custom Topic
   const navItems = [
     { path: '/learn', label: 'Learn', icon: <School sx={{ fontSize: 20 }} /> },
     { path: '/personalize', label: 'Explore', icon: <Explore sx={{ fontSize: 20 }} /> },
+    { path: '/custom-topic', label: 'Custom Topic', icon: <Search sx={{ fontSize: 20 }} /> },
     { path: '/profile', label: 'Profile', icon: <Person sx={{ fontSize: 20 }} /> }
   ];
 
@@ -1040,7 +1042,7 @@ export default function Navbar() {
     subtleBg: '#FAF7FE'
   };
 
-  // Loading state for avatar
+  // Avatar only clickable in mobile view
   const renderUserAvatar = () => {
     if (isLoading) {
       return (
@@ -1069,15 +1071,16 @@ export default function Navbar() {
         <IconButton
           size="small"
           aria-label="user menu"
-          onClick={handleUserMenu}
+          onClick={isMobile ? handleUserMenu : undefined} // Only clickable in mobile
           sx={{
             border: `2px solid ${purpleTheme.primaryLight}30`,
             bgcolor: 'white',
             width: { xs: 36, sm: 40 },
             height: { xs: 36, sm: 40 },
-            '&:hover': {
+            '&:hover': isMobile ? {
               bgcolor: purpleTheme.lightBg,
-            },
+            } : {},
+            cursor: isMobile ? 'pointer' : 'default', // Change cursor based on clickability
           }}
         >
           <Badge
@@ -1108,53 +1111,9 @@ export default function Navbar() {
     return null;
   };
 
-  // Loading state for user info chip
+  // Remove user info chip completely
   const renderUserInfo = () => {
-    if (isLoading) {
-      return (
-        <Box sx={{ display: { xs: 'none', lg: 'flex' } }}>
-          <Chip
-            icon={<CircularProgress size={16} sx={{ color: purpleTheme.primary }} />}
-            label={
-              <Typography variant="body2" sx={{ fontWeight: '500', fontSize: '0.8rem', color: 'text.secondary' }}>
-                Checking...
-              </Typography>
-            }
-            variant="outlined"
-            sx={{
-              borderColor: purpleTheme.primaryLight,
-              bgcolor: 'rgba(126, 87, 194, 0.04)',
-              height: 32
-            }}
-          />
-        </Box>
-      );
-    }
-
-    if (user) {
-      return (
-        <Box sx={{ display: { xs: 'none', lg: 'flex' } }}>
-          <Chip
-            icon={<AccountCircle sx={{ fontSize: 16, color: purpleTheme.primary }} />}
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: '500', fontSize: '0.8rem' }}>
-                  Hi, {getUserDisplayName()}
-                </Typography>
-              </Box>
-            }
-            variant="outlined"
-            sx={{
-              borderColor: purpleTheme.primaryLight,
-              bgcolor: 'rgba(126, 87, 194, 0.04)',
-              height: 32
-            }}
-          />
-        </Box>
-      );
-    }
-
-    return null;
+    return null; // Completely removed the user info chip
   };
 
   // Auth buttons (only show when not loading and no user)
@@ -1268,7 +1227,7 @@ export default function Navbar() {
               gap: 1.5, 
               flexShrink: 0,
               cursor: 'pointer',
-              flex: user ? 1 : 'none' // Take available space when user is logged in
+              flex: user ? 1 : 'none'
             }}
             onClick={() => navigate(user ? '/learn' : '/')}
           >
@@ -1349,103 +1308,70 @@ export default function Navbar() {
 
           {/* User Section */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-            {/* User Info Chip */}
+            {/* User Info Chip - Removed */}
             {renderUserInfo()}
             
-            {/* User Avatar */}
+            {/* User Avatar - Only clickable in mobile */}
             {renderUserAvatar()}
 
             {/* Auth Buttons */}
             {renderAuthButtons()}
 
-            {/* User Menu */}
-            <Menu
-              id="user-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              PaperProps={{
-                elevation: 4,
-                sx: {
-                  mt: 1,
-                  borderRadius: 2,
-                  minWidth: 180,
-                  border: `1px solid ${purpleTheme.primaryLight}20`,
-                },
-              }}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            >
-              {/* User info in menu */}
-              <MenuItem 
-                sx={{ 
-                  py: 1.5,
-                  bgcolor: purpleTheme.lightBg,
-                  borderBottom: `1px solid ${purpleTheme.primaryLight}20`,
-                  cursor: 'default',
-                  '&:hover': {
-                    bgcolor: purpleTheme.lightBg
-                  }
+            {/* User Menu - Only show in mobile */}
+            {isMobile && (
+              <Menu
+                id="user-menu"
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                PaperProps={{
+                  elevation: 4,
+                  sx: {
+                    mt: 1,
+                    borderRadius: 2,
+                    minWidth: 180,
+                    border: `1px solid ${purpleTheme.primaryLight}20`,
+                  },
                 }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                  <Avatar 
+                {navItems.map((item) => (
+                  <MenuItem 
+                    key={item.path} 
+                    onClick={() => { navigate(item.path); handleClose(); }}
                     sx={{ 
-                      width: 36, 
-                      height: 36, 
-                      background: purpleTheme.gradient,
-                      fontWeight: '700',
-                      fontSize: '0.9rem'
+                      py: 1.25,
+                      '&:hover': {
+                        bgcolor: purpleTheme.lightBg
+                      }
                     }}
                   >
-                    {getUserInitial()}
-                  </Avatar>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" sx={{ fontWeight: '700', color: purpleTheme.primaryDark }}>
-                      {getUserDisplayName()}
+                    <Box sx={{ mr: 1.5, color: purpleTheme.primary }}>
+                      {item.icon}
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: '500' }}>
+                      {item.label}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      Active now
-                    </Typography>
-                  </Box>
-                </Box>
-              </MenuItem>
-
-              {navItems.map((item) => (
+                  </MenuItem>
+                ))}
                 <MenuItem 
-                  key={item.path} 
-                  onClick={() => { navigate(item.path); handleClose(); }}
+                  onClick={handleLogout}
                   sx={{ 
-                    py: 1.25,
+                    py: 1.25, 
+                    color: 'error.main',
                     '&:hover': {
-                      bgcolor: purpleTheme.lightBg
+                      bgcolor: 'rgba(211, 47, 47, 0.04)'
                     }
                   }}
                 >
-                  <Box sx={{ mr: 1.5, color: purpleTheme.primary }}>
-                    {item.icon}
-                  </Box>
+                  <Logout sx={{ mr: 1.5, fontSize: 20 }} />
                   <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                    {item.label}
+                    Sign Out
                   </Typography>
                 </MenuItem>
-              ))}
-              <MenuItem 
-                onClick={handleLogout}
-                sx={{ 
-                  py: 1.25, 
-                  color: 'error.main',
-                  '&:hover': {
-                    bgcolor: 'rgba(211, 47, 47, 0.04)'
-                  }
-                }}
-              >
-                <Logout sx={{ mr: 1.5, fontSize: 20 }} />
-                <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                  Sign Out
-                </Typography>
-              </MenuItem>
-            </Menu>
+              </Menu>
+            )}
           </Box>
         </Toolbar>
       </AppBar>

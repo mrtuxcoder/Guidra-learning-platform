@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Learn from "./pages/Learn";
 import Personalize from "./pages/Personalize";
+import CustomTopicSearch from "./pages/CustomTopicSearch";
 import Layout from "./components/Layout";
 import { checkAuthQuick, isAuthenticated } from "./utils/auth";
 
@@ -127,6 +128,15 @@ export default function App() {
             <Navigate to="/login" replace />
           )
         } />
+        <Route path="/custom-topic" element={
+  isAuth ? (
+    <Layout>
+      <CustomTopicSearch />
+    </Layout>
+  ) : (
+    <Navigate to="/login" replace />
+  )
+} />
 
         {/* Catch all route */}
         <Route path="*" element={

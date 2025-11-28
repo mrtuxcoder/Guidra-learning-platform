@@ -90,7 +90,12 @@ export const markTopicComplete = async (data) => {
   return response;
 };
 
- //VALIDATE THE CUSTOM TOPIC
- export const validateTopic = async (topic) => {
-  return await API.get('/learn/validate-topic');
+//  //VALIDATE THE CUSTOM TOPIC
+//  export const validateTopic = async (topic) => {
+//   return await API.get('/learn/validate-topic');
+// };
+
+// In your api/learning.js
+export const validateTopic = async (topic) => {
+  return await API.post('/learn/validate-topic', { topic });
 };
