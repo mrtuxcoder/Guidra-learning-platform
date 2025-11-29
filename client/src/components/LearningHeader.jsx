@@ -69,7 +69,7 @@ const LearningHeader = ({
     return (
       <Box sx={{
         position: 'fixed',
-        bottom: 16,
+        bottom: 10,
         left: '50%',
         transform: 'translateX(-50%)',
         background: 'rgba(255, 255, 255, 0.98)',
