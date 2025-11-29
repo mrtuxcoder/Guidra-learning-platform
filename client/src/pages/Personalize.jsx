@@ -1,255 +1,3 @@
-
-// import React, { useState } from "react";
-// import {
-//   Container,
-//   Paper,
-//   Typography,
-//   Box,
-//   Stepper,
-//   Step,
-//   StepLabel,
-//   Alert,
-//   Fade,
-//   useTheme
-// } from "@mui/material";
-// import { personalizeAndGenerate } from "../api/learning";
-// import LearningStyleStep from "../components/personalize/LearningStyleStep";
-// import MissionStep from "../components/personalize/MissionStep";
-// import LaunchStep from "../components/personalize/LaunchStep";
-// import SuccessStep from "../components/personalize/SuccessStep";
-// import StepperNavigation from "../components/personalize/StepperNavigation";
-// import { steps, customPalette } from "../components/personalize/constants";
-
-// export default function PersonalizedLearningSetup() {
-//   const theme = useTheme();
-//   theme.palette.primary.main = customPalette.primary.main;
-//   theme.palette.primary.light = customPalette.primary.light;
-//   theme.palette.secondary.main = customPalette.secondary.main;
-//   theme.palette.success.main = customPalette.success.main;
-//   theme.palette.background.default = customPalette.background.default;
-
-//   const [activeStep, setActiveStep] = useState(0);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-//   const [success, setSuccess] = useState("");
-
-//   const [formData, setFormData] = useState({
-//     topic: "",
-//     learningStyle: "",
-//     reasonForLearning: "",
-//     tonePreference: "friendly",
-//     difficultyPreference: "intermediate"
-//   });
-
-//   const [apiResponse, setApiResponse] = useState(null);
-
-//   const handleInputChange = (field) => (event) => {
-//     setFormData({
-//       ...formData,
-//       [field]: event.target.value
-//     });
-//   };
-
-//   const handleStyleSelect = (styleValue) => {
-//     setFormData({
-//       ...formData,
-//       learningStyle: styleValue
-//     });
-//   };
-
-//   const handleNext = () => {
-//     setActiveStep((prevStep) => prevStep + 1);
-//     setError("");
-//   };
-
-//   const handleBack = () => {
-//     setActiveStep((prevStep) => prevStep - 1);
-//     setError("");
-//   };
-
-//   const isStepValid = () => {
-//     switch (activeStep) {
-//       case 0:
-//         return formData.learningStyle && formData.tonePreference && formData.difficultyPreference;
-//       case 1:
-//         return formData.topic.trim() && formData.reasonForLearning.trim();
-//       case 2:
-//         return true;
-//       default:
-//         return false;
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     try {
-//       setLoading(true);
-//       setError("");
-      
-//       const response = await personalizeAndGenerate({
-//         topic: formData.topic,
-//         learningStyle: formData.learningStyle,
-//         reasonForLearning: formData.reasonForLearning,
-//         tonePreference: formData.tonePreference,
-//         difficultyPreference: formData.difficultyPreference
-//       });
-      
-//       setApiResponse(response.data);
-//       setSuccess(response.data.message || "🎉 Amazing! Your personalized learning universe is ready!");
-      
-//       setActiveStep(3);
-      
-//     } catch (err) {
-//       console.error("API Error:", err);
-//       const errorMessage = err.response?.data?.message || "Oops! Something went wrong. Let's try that again! 🤔";
-//       setError(errorMessage);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleStartLearning = () => {
-//     window.location.href = `/profile`;
-//   };
-
-//   const handleCreateAnother = () => {
-//     setFormData({
-//       topic: "",
-//       learningStyle: "",
-//       reasonForLearning: "",
-//       tonePreference: "friendly",
-//       difficultyPreference: "intermediate"
-//     });
-//     setApiResponse(null);
-//     setSuccess("");
-//     setError("");
-//     setActiveStep(0);
-//   };
-
-//   // In your personalize.js file, find the renderStepContent function
-// const renderStepContent = (step) => {
-//   switch (step) {
-//     case 0:
-//       return (
-//         <LearningStyleStep
-//           formData={formData}
-//           handleStyleSelect={handleStyleSelect}
-//           handleInputChange={handleInputChange}
-//           theme={theme}
-//         />
-//       );
-//     case 1:
-//       return (
-//         <MissionStep
-//           formData={formData}
-//           handleInputChange={handleInputChange}
-//           theme={theme}
-//         />
-//       );
-//     case 2:
-//       return (
-//         <LaunchStep
-//           formData={formData}
-//           theme={theme}
-//         />
-//       );
-//     case 3:
-//       // REMOVE THE FADE WRAPPER - just return SuccessStep directly
-//       return (
-//         <SuccessStep
-//           formData={formData}
-//           apiResponse={apiResponse}
-//           handleStartLearning={handleStartLearning}
-//           handleCreateAnother={handleCreateAnother}
-//           theme={theme}
-//         />
-//       );
-//     default:
-//       return null;
-//   }
-// };
-//   const StepperStyle = {
-//     "& .MuiStepLabel-root .Mui-completed": {
-//       color: customPalette.success.main,
-//     },
-//     "& .MuiStepLabel-root .Mui-active": {
-//       color: customPalette.primary.main,
-//     },
-//     "& .MuiStepLabel-label": {
-//       fontWeight: 'bold',
-//       fontSize: { xs: '0.75rem', md: '1rem' }
-//     },
-//     "& .MuiStepLabel-root .Mui-disabled": {
-//       color: 'rgba(0, 0, 0, 0.4)',
-//     },
-//     "& .MuiStepIcon-root": {
-//       fontSize: { xs: '1.5rem', md: '2rem' },
-//     }
-//   };
-
-//   return (
-//     <Container maxWidth="lg" sx={{ 
-//       py: { xs: 3, md: 6 },
-//       minHeight: '100vh',
-//       backgroundColor: theme.palette.background.default,
-//     }}>
-//       <Paper 
-//         elevation={10} 
-//         sx={{ 
-//           p: { xs: 3, md: 6 },
-//           borderRadius: 4,
-//           background: `linear-gradient(145deg, ${theme.palette.primary.main} 0%, #764ba2 100%)`,
-//           color: 'white',
-//           mb: 6,
-//           textAlign: 'center',
-//         }}
-//       >
-//         <Typography variant="h2" gutterBottom fontWeight="900" sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' } }}>
-//           🎓 The Learning Architect
-//         </Typography>
-//         <Typography variant="h5" sx={{ opacity: 0.9, fontSize: { xs: '1rem', md: '1.5rem' } }}>
-//           Design Your Perfect AI-Powered Learning Adventure!
-//         </Typography>
-//       </Paper>
-
-//       <Stepper activeStep={activeStep} sx={{ mb: 6, ...StepperStyle }}>
-//         {steps.map((label) => (
-//           <Step key={label}>
-//             <StepLabel>{label}</StepLabel>
-//           </Step>
-//         ))}
-//       </Stepper>
-
-//       <Box sx={{ px: { xs: 0, sm: 2 } }}>
-//         {error && (
-//           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-//             {error}
-//           </Alert>
-//         )}
-
-//         {success && activeStep !== 3 && (
-//           <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
-//             {success}
-//           </Alert>
-//         )}
-
-//         {renderStepContent(activeStep)}
-//       </Box>
-
-//       {activeStep < 3 && (
-//         <StepperNavigation
-//           activeStep={activeStep}
-//           loading={loading}
-//           isStepValid={isStepValid}
-//           handleBack={handleBack}
-//           handleNext={handleNext}
-//           handleSubmit={handleSubmit}
-//           theme={theme}
-//         />
-//       )}
-//     </Container>
-//   );
-// }
-
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
@@ -260,7 +8,6 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
   Fade,
   CircularProgress,
   InputBase,
@@ -273,8 +20,6 @@ import {
 } from "@mui/material";
 import {
   Search,
-  FilterList,
-  Star,
   School,
   Code,
   Science,
@@ -375,7 +120,6 @@ export default function TopicSelection() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -424,10 +168,11 @@ export default function TopicSelection() {
     <Box sx={{ 
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)',
+      pb: 8 // Space for bottom button
     }}>
       <Container maxWidth="xl" sx={{ 
         py: { xs: 2, md: 3 }, 
-        px: { xs: 2, sm: 3 } 
+        px: { xs: 1.5, sm: 2, md: 3 } 
       }}>
         
         {/* Header Section */}
@@ -447,7 +192,7 @@ export default function TopicSelection() {
                 boxShadow: '0 8px 32px rgba(126, 87, 194, 0.2)'
               }}>
                 <School sx={{ 
-                  fontSize: { xs: '2rem', md: '2.5rem' }, 
+                  fontSize: { xs: '1.75rem', md: '2.5rem' }, 
                   color: 'white' 
                 }} />
               </Box>
@@ -460,7 +205,7 @@ export default function TopicSelection() {
                   WebkitBackgroundClip: 'text',
                   color: 'transparent',
                   mb: 1,
-                  fontSize: { xs: '1.75rem', md: '2.5rem', lg: '3rem' }
+                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.5rem', lg: '3rem' }
                 }}
               >
                 Explore Learning Paths
@@ -470,7 +215,7 @@ export default function TopicSelection() {
                 sx={{ 
                   color: 'text.secondary',
                   fontWeight: 400,
-                  fontSize: { xs: '0.9rem', md: '1.1rem' }
+                  fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1.1rem' }
                 }}
               >
                 {PREDEFINED_TOPICS.length} curated courses • Start your journey
@@ -480,7 +225,7 @@ export default function TopicSelection() {
         </Box>
 
         {/* Search Bar */}
-        <Box sx={{ mb: 3, maxWidth: '600px', mx: 'auto' }}>
+        <Box sx={{ mb: 3, maxWidth: '600px', mx: 'auto', px: { xs: 1, sm: 0 } }}>
           <Fade in timeout={800}>
             <Paper
               sx={{
@@ -493,12 +238,15 @@ export default function TopicSelection() {
                 border: '1px solid rgba(126, 87, 194, 0.1)'
               }}
             >
-              <Search sx={{ color: '#7C3AED', mx: 1 }} />
+              <Search sx={{ color: '#7C3AED', mx: 1, fontSize: { xs: '1.25rem', md: '1.5rem' } }} />
               <InputBase
                 placeholder="Search courses..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ flex: 1 }}
+                sx={{ 
+                  flex: 1,
+                  fontSize: { xs: '0.9rem', md: '1rem' }
+                }}
               />
             </Paper>
           </Fade>
@@ -507,23 +255,28 @@ export default function TopicSelection() {
         {/* Main Content */}
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3 }}>
           
-          {/* Category Sidebar */}
+          {/* Category Sidebar - Horizontal Scroll on Mobile */}
           <Box sx={{ 
             width: { xs: '100%', lg: '80px' },
             display: 'flex', 
             flexDirection: { xs: 'row', lg: 'column' },
             gap: 1,
-            justifyContent: 'center',
+            justifyContent: { xs: 'flex-start', lg: 'center' },
             alignItems: 'center',
-            flexShrink: 0
+            flexShrink: 0,
+            overflowX: { xs: 'auto', lg: 'visible' },
+            pb: { xs: 1, lg: 0 },
+            '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar on mobile
+            scrollbarWidth: 'none', // Firefox
           }}>
             {CATEGORIES.map((category) => (
-              <Tooltip key={category.id} title={category.name} placement="right" arrow>
+              <Tooltip key={category.id} title={category.name} placement={isMobile ? "bottom" : "right"} arrow>
                 <Box
                   onClick={() => setSelectedCategory(category.id)}
                   sx={{
                     width: { xs: '50px', lg: '60px' },
                     height: { xs: '50px', lg: '60px' },
+                    minWidth: { xs: '50px', lg: '60px' }, // Prevent shrinking on mobile
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -570,11 +323,15 @@ export default function TopicSelection() {
           {/* Courses Grid */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             {/* Selected Category Info */}
-            <Box sx={{ mb: 3, textAlign: { xs: 'center', lg: 'left' } }}>
-              <Typography variant="h5" fontWeight={700} color="#7C3AED">
+            <Box sx={{ 
+              mb: 3, 
+              textAlign: { xs: 'center', lg: 'left' },
+              px: { xs: 1, sm: 0 }
+            }}>
+              <Typography variant="h5" fontWeight={700} color="#7C3AED" sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>
                 {CATEGORIES.find(cat => cat.id === selectedCategory)?.name}
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body1" color="text.secondary" sx={{ fontSize: { xs: '0.85rem', md: '1rem' } }}>
                 {filteredTopics.length} courses available
               </Typography>
             </Box>
@@ -584,152 +341,158 @@ export default function TopicSelection() {
               <Alert severity="error" sx={{ 
                 mb: 3, 
                 borderRadius: 2,
-                border: '1px solid rgba(211, 47, 47, 0.2)'
+                border: '1px solid rgba(211, 47, 47, 0.2)',
+                mx: { xs: 1, sm: 0 }
               }}>
                 {error}
               </Alert>
             )}
 
-           {/* Courses Grid - Masonry Style for Natural Flow */}
-<Box sx={{
-  display: 'grid',
-  gridTemplateColumns: {
-    xs: '1fr',
-    sm: 'repeat(2, 1fr)',
-    md: 'repeat(3, 1fr)'
-  },
-  gap: 2,
-  alignContent: 'start'
-}}>
-  {filteredTopics.map((topic, index) => {
-    const categoryData = CATEGORY_DATA[topic.category];
-    const isSelected = selectedTopic === topic.id;
-    
-    // Calculate content height based on text length
-    const titleLines = Math.ceil(topic.name.length / 25); // ~25 chars per line
-    const descLines = Math.ceil(topic.description.length / 40); // ~40 chars per line
-    const totalLines = titleLines + descLines;
-    const cardHeight = Math.max(180, 140 + (totalLines * 8)); // Dynamic height
-    
-    return (
-      <Fade in timeout={400 + index * 50} key={topic.id}>
-        <Card 
-          sx={{ 
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            border: isSelected ? `2px solid ${categoryData.color}` : '1px solid rgba(126, 87, 194, 0.1)',
-            background: isSelected ? `linear-gradient(135deg, ${alpha(categoryData.color, 0.08)} 0%, ${alpha(categoryData.color, 0.02)} 100%)` : 'white',
-            transform: isSelected ? 'translateY(-2px)' : 'none',
-            boxShadow: isSelected ? '0 8px 25px rgba(126, 87, 194, 0.15)' : '0 2px 8px rgba(126, 87, 194, 0.06)',
-            borderRadius: 3,
-            height: `${cardHeight}px`,
-            display: 'flex',
-            flexDirection: 'column',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: '0 8px 20px rgba(126, 87, 194, 0.1)',
-            }
-          }}
-          onClick={() => handleTopicSelect(topic.id)}
-        >
-          <CardContent sx={{ 
-            p: 2.5, 
-            position: 'relative',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            {/* Header - Fixed */}
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'flex-start',
-              mb: 2,
-              flexShrink: 0
+            {/* Courses Grid - Responsive */}
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)'
+              },
+              gap: { xs: 1.5, sm: 2 },
+              alignContent: 'start',
+              px: { xs: 0.5, sm: 0 }
             }}>
-              <Chip
-                label={categoryData.name}
-                size="small"
-                sx={{
-                  backgroundColor: alpha(categoryData.color, 0.1),
-                  color: categoryData.color,
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  height: '24px'
-                }}
-              />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
-                <Star sx={{ fontSize: 16, color: '#fbbf24' }} />
-                <Typography variant="caption" fontWeight={600} fontSize="0.75rem">
-                  {topic.popularity}%
-                </Typography>
-              </Box>
+              {filteredTopics.map((topic, index) => {
+                const categoryData = CATEGORY_DATA[topic.category];
+                const isSelected = selectedTopic === topic.id;
+                
+                return (
+                  <Fade in timeout={400 + index * 50} key={topic.id}>
+                    <Card 
+                      sx={{ 
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        border: isSelected ? `2px solid ${categoryData.color}` : '1px solid rgba(126, 87, 194, 0.1)',
+                        background: isSelected ? `linear-gradient(135deg, ${alpha(categoryData.color, 0.08)} 0%, ${alpha(categoryData.color, 0.02)} 100%)` : 'white',
+                        transform: isSelected ? 'translateY(-2px)' : 'none',
+                        boxShadow: isSelected ? '0 8px 25px rgba(126, 87, 194, 0.15)' : '0 2px 8px rgba(126, 87, 194, 0.06)',
+                        borderRadius: 3,
+                        height: '100%',
+                        minHeight: { xs: '140px', sm: '160px' },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 20px rgba(126, 87, 194, 0.1)',
+                        }
+                      }}
+                      onClick={() => handleTopicSelect(topic.id)}
+                    >
+                      <CardContent sx={{ 
+                        p: { xs: 1.5, sm: 2 }, 
+                        position: 'relative',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        '&:last-child': { pb: { xs: 1.5, sm: 2 } }
+                      }}>
+                        {/* Header */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'flex-start',
+                          mb: 1.5,
+                          flexShrink: 0
+                        }}>
+                          <Chip
+                            label={categoryData.name}
+                            size="small"
+                            sx={{
+                              backgroundColor: alpha(categoryData.color, 0.1),
+                              color: categoryData.color,
+                              fontWeight: 600,
+                              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                              height: { xs: '20px', sm: '24px' }
+                            }}
+                          />
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 0.5, 
+                            flexShrink: 0,
+                            backgroundColor: alpha('#7C3AED', 0.1),
+                            borderRadius: 1,
+                            px: 0.75,
+                            py: 0.25
+                          }}>
+                            <Typography variant="caption" fontWeight={600} fontSize={{ xs: '0.65rem', sm: '0.75rem' }} color="#7C3AED">
+                              {topic.popularity}%
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Content */}
+                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <Typography 
+                            variant="h6" 
+                            fontWeight={700} 
+                            sx={{ 
+                              mb: 1, 
+                              lineHeight: 1.3,
+                              fontSize: { xs: '0.9rem', sm: '1rem' }
+                            }}
+                          >
+                            {topic.name}
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{ 
+                              lineHeight: 1.4,
+                              fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                              flex: 1
+                            }}
+                          >
+                            {topic.description}
+                          </Typography>
+                        </Box>
+
+                        {/* Selection Indicator */}
+                        {isSelected && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                              width: { xs: 16, sm: 20 },
+                              height: { xs: 16, sm: 20 },
+                              borderRadius: '50%',
+                              background: categoryData.color,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontSize: { xs: '10px', sm: '12px' },
+                              fontWeight: 'bold',
+                              boxShadow: '0 2px 8px rgba(126, 87, 194, 0.3)'
+                            }}
+                          >
+                            ✓
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Fade>
+                );
+              })}
             </Box>
 
-            {/* Content - Flexible */}
-            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Typography 
-                variant="h6" 
-                fontWeight={700} 
-                sx={{ 
-                  mb: 1, 
-                  lineHeight: 1.3,
-                  fontSize: '1rem'
-                }}
-              >
-                {topic.name}
-              </Typography>
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
-                sx={{ 
-                  lineHeight: 1.4,
-                  fontSize: '0.8rem',
-                  flex: 1
-                }}
-              >
-                {topic.description}
-              </Typography>
-            </Box>
-
-            {/* Selection Indicator */}
-            {isSelected && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 12,
-                  right: 12,
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: categoryData.color,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  boxShadow: '0 2px 8px rgba(126, 87, 194, 0.3)'
-                }}
-              >
-                ✓
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      </Fade>
-    );
-  })}
-</Box>
-
-          
             {/* No Results */}
             {filteredTopics.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 8 }}>
-                <Typography variant="h6" color="text.secondary" gutterBottom>
+              <Box sx={{ textAlign: 'center', py: 8, px: { xs: 2, sm: 0 } }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                   No courses found
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}>
                   Try a different search or category
                 </Typography>
               </Box>
@@ -739,56 +502,79 @@ export default function TopicSelection() {
 
         {/* Action Button */}
         <Box sx={{ 
-          position: 'sticky', 
+          position: 'fixed', 
           bottom: 0, 
-          background: 'linear-gradient(transparent, #FAF7FE)',
-          py: 3, 
-          mt: 4,
-          textAlign: 'center'
+          left: 0, 
+          right: 0, 
+          background: 'linear-gradient(transparent, #FAF7FE 60%)',
+          py: 2, 
+          px: { xs: 2, sm: 3 },
+          zIndex: 1000,
+          borderTop: '1px solid rgba(126, 87, 194, 0.1)'
         }}>
           <Fade in timeout={1200}>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={handleStartLearning}
-              disabled={!selectedTopic || loading}
-              sx={{
-                px: { xs: 4, md: 6 },
-                py: { xs: 1.25, md: 1.5 },
-                fontSize: { xs: '1rem', md: '1.1rem' },
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
-                borderRadius: 3,
-                minWidth: { xs: '180px', md: '200px' },
-                boxShadow: '0 8px 25px rgba(126, 87, 194, 0.3)',
-                '&:hover': {
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 12px 35px rgba(126, 87, 194, 0.4)',
-                },
-                '&:disabled': {
-                  background: 'grey.300',
-                  transform: 'none',
-                  boxShadow: 'none'
-                }
-              }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : "Start Learning"}
-            </Button>
+            <Box sx={{ textAlign: 'center' }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleStartLearning}
+                disabled={!selectedTopic || loading}
+                sx={{
+                  px: { xs: 4, md: 6 },
+                  py: { xs: 1.25, md: 1.5 },
+                  fontSize: { xs: '0.9rem', md: '1rem' },
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
+                  borderRadius: 3,
+                  minWidth: { xs: '160px', md: '180px' },
+                  boxShadow: '0 8px 25px rgba(126, 87, 194, 0.3)',
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 12px 35px rgba(126, 87, 194, 0.4)',
+                  },
+                  '&:disabled': {
+                    background: 'grey.300',
+                    transform: 'none',
+                    boxShadow: 'none'
+                  }
+                }}
+              >
+                {loading ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress 
+                      size={20} 
+                      color="inherit" 
+                      sx={{ 
+                        color: 'white',
+                        '& .MuiCircularProgress-circle': {
+                          strokeLinecap: 'round',
+                        }
+                      }} 
+                    />
+                    <Typography sx={{ fontSize: { xs: '0.8rem', md: '0.9rem' } }}>
+                      Starting...
+                    </Typography>
+                  </Box>
+                ) : (
+                  "Start Learning"
+                )}
+              </Button>
+              
+              {selectedTopic && (
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    mt: 1, 
+                    fontWeight: 600, 
+                    color: '#7C3AED',
+                    fontSize: { xs: '0.75rem', md: '0.8rem' }
+                  }}
+                >
+                  Selected: {PREDEFINED_TOPICS.find(t => t.id === selectedTopic)?.name}
+                </Typography>
+              )}
+            </Box>
           </Fade>
-          
-          {selectedTopic && (
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                mt: 1, 
-                fontWeight: 600, 
-                color: '#7C3AED',
-                fontSize: { xs: '0.8rem', md: '0.9rem' }
-              }}
-            >
-              Selected: {PREDEFINED_TOPICS.find(t => t.id === selectedTopic)?.name}
-            </Typography>
-          )}
         </Box>
       </Container>
     </Box>
