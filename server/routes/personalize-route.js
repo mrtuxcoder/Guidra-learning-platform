@@ -3,11 +3,10 @@
 const express = require("express");
 const router = express.Router();
 const {
-  personalizeAndGenerateController,
-  getSubtopicsController,
+  subtopicGenerateController,
+   getSubtopicsController,
   updateLearningPreferencesController,
   updateSubtopicProgressController,
-  generateTeachingContentController,
   validateTopicController
 } = require("../controllers/learn-controller");
 
@@ -23,7 +22,7 @@ const {
 const authMiddleware = require("../middlewares/authMiddleware");
 
 // Learning & Progress Routes
-router.post("/new", authMiddleware, personalizeAndGenerateController)
+router.post("/new", authMiddleware, subtopicGenerateController )
 router.put("/update", authMiddleware, updateLearningPreferencesController);
 router.get("/subtopics/:topic", authMiddleware, getSubtopicsController);
 router.put("/progress", authMiddleware, updateSubtopicProgressController);
@@ -37,7 +36,5 @@ router.post("/validate-topic", authMiddleware, validateTopicController); // vali
 router.post('/generate-mindmap', authMiddleware, generateMermaidMapController);
 router.post('/fix-mindmap-syntax', authMiddleware, fixMermaidSyntaxController);
 
-// Legacy endpoint (optional - keep if needed)
-router.post("/teach-legacy", authMiddleware, generateTeachingContentController);
 
 module.exports = router;

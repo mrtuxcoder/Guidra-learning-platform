@@ -31,43 +31,6 @@ exports.getSubtopicsController = async (req, res) => {
   }
 };
 
-// Generate teaching content for a specific subtopic (legacy version without caching)
-exports.teachSubtopicController = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { topic, subtopic } = req.body;
-
-    if (!topic || !subtopic)
-      return res.status(400).json({ message: "Topic and subtopic are required." });
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const aiPrompt = buildPrompt(user, { topic, subtopic, taskType: "teachSubtopic" });
-    const aiResponse = await callAI(aiPrompt);
-
-    let structuredContent;
-    try {
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-      structuredContent = JSON.parse(jsonMatch ? jsonMatch[0] : aiResponse);
-    } catch {
-      structuredContent = { explanation: aiResponse };
-    }
-
-    res.status(200).json({
-      message: `Teaching content generated for "${subtopic}"`,
-      topic,
-      subtopic,
-      learningStyle: user.learningStyle,
-      data: structuredContent,
-    });
-  } catch (error) {
-    console.error("Error in teachSubtopicController:", error);
-    res.status(500).json({ message: "Failed to generate teaching content" });
-  }
-};
-
-// Update progress for a specific subtopic (completion status and understanding level)
 exports.updateSubtopicProgressController = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -122,42 +85,7 @@ exports.updateSubtopicProgressController = async (req, res) => {
   }
 };
 
-// Generate structured teaching content with strict JSON validation
-exports.generateTeachingContentController = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { topic, subtopic } = req.body;
 
-    if (!topic || !subtopic)
-      return res.status(400).json({ message: "Topic and subtopic are required." });
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const aiPrompt = buildPrompt(user, { topic, subtopic, taskType: "teachSubtopic" });
-    const aiResponse = await callAI(aiPrompt);
-
-    let structuredContent;
-    try {
-      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-      structuredContent = JSON.parse(jsonMatch ? jsonMatch[0] : aiResponse);
-    } catch (err) {
-      console.error("JSON parse error:", err);
-      return res.status(500).json({ message: "AI returned unstructured data.", raw: aiResponse });
-    }
-
-    res.status(200).json({
-      message: `Structured teaching content generated for "${subtopic}"`,
-      topic,
-      subtopic,
-      learningStyle: user.learningStyle,
-      data: structuredContent,
-    });
-  } catch (error) {
-    console.error("Error in generateTeachingContentController:", error);
-    res.status(500).json({ message: "Failed to generate structured teaching content" });
-  }
-};
 
 // Update user's learning preferences (style and motivation)
 exports.updateLearningPreferencesController = async (req, res) => {
@@ -192,7 +120,7 @@ exports.updateLearningPreferencesController = async (req, res) => {
 };
 
 // Main endpoint: Generate personalized learning path with subtopics for a new topic
-exports.personalizeAndGenerateController = async (req, res) => {
+exports.subtopicGenerateController = async (req, res) => {
   try {
     const userId = req.user._id;
     const { topic } = req.body;

@@ -56,6 +56,7 @@ export const updateQuizMarks = async (data) => {
 
 export const getQuizMarks = async (topic, subtopic) => {
   const response = await API.get(`/user/progress/quiz-marks?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`);
+
   return response;
 };
 
@@ -97,7 +98,10 @@ export const markTopicComplete = async (data) => {
 
 // In your api/learning.js
 export const validateTopic = async (topic) => {
-  return await API.post('/learn/validate-topic', { topic });
+  
+  const response = await API.post('/learn/validate-topic', { topic });
+  console.log(response)
+  return response;
 };
 
 // NEW: Mermaid Mindmap Generation
