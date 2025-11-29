@@ -396,7 +396,7 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
           sx={{
             '& .MuiDrawer-paper': {
               width: '100%',
-              maxWidth: 320,
+              maxWidth: 300,
               height: '100vh',
               overflow: 'hidden',
               background: 'white'
@@ -420,7 +420,7 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
         </Drawer>
       ) : (
         <Box sx={{ 
-          width: 320,
+          width: 300,
           flexShrink: 0,
           borderRight: '1px solid rgba(126, 87, 194, 0.1)'
         }}>
@@ -442,50 +442,51 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
       )}
 
       {/* Main Content Area */}
-    <Box sx={{ 
-    flex: 1, 
-    display: 'flex', 
-    flexDirection: 'column',
-    minHeight: 0,
-    overflow: 'hidden',
-   pb: isMobile ? '80px' : 0 // Match the footer height
-  }}>
+      <Box sx={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        minHeight: 0,
+        overflow: 'hidden',
+        pb: isMobile ? '70px' : 0
+      }}>
         {/* Header */}
-         <Box sx={{ 
-    flexShrink: 0,
-    p: { xs: 1.5, md: 2 },
-    borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
-  }}>
-<LearningHeader
-  selectedTopic={selectedTopic}
-  selectedSubtopic={selectedSubtopic}
-  subtopics={subtopics}
-  updatingSubtopic={updatingSubtopic}
-  contentInfo={contentInfo}
-  remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
-  maxGenerations={MAX_GENERATIONS}
-  contentLoading={contentLoading}
-  onRegenerateContent={handleRegenerateContent}
-  onCompleteSubtopic={handleCompleteSubtopic}
-  onUpdateUnderstanding={handleUpdateUnderstanding}
-  onNavigateSubtopic={handleNavigateSubtopic}
-  onOpenSidebar={() => setMobileDrawerOpen(true)} // Add this
-  colorPalette={purplePalette}
-/>
+        <Box sx={{ 
+          flexShrink: 0,
+          p: { xs: 1, md: 1.5 },
+          borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
+        }}>
+          <LearningHeader
+            selectedTopic={selectedTopic}
+            selectedSubtopic={selectedSubtopic}
+            subtopics={subtopics}
+            updatingSubtopic={updatingSubtopic}
+            contentInfo={contentInfo}
+            remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
+            maxGenerations={MAX_GENERATIONS}
+            contentLoading={contentLoading}
+            onRegenerateContent={handleRegenerateContent}
+            onCompleteSubtopic={handleCompleteSubtopic}
+            onUpdateUnderstanding={handleUpdateUnderstanding}
+            onNavigateSubtopic={handleNavigateSubtopic}
+            onOpenSidebar={() => setMobileDrawerOpen(true)}
+            colorPalette={purplePalette}
+          />
         </Box>
 
         {/* Error Alert */}
         {showError && currentError && (
           <Box sx={{ 
             flexShrink: 0,
-            p: { xs: 1.5, md: 2 },
-            pb: 0
+            px: { xs: 1, md: 1.5 },
+            pt: 0.5
           }}>
             <Alert 
               severity="error" 
               sx={{ 
                 borderRadius: 1,
-                fontSize: '0.875rem'
+                fontSize: '0.875rem',
+                py: 0.5
               }} 
               onClose={handleCloseError}
               action={
@@ -495,7 +496,12 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
                     size="small" 
                     startIcon={<Refresh />}
                     onClick={handleRetryContent}
-                    sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+                    sx={{ 
+                      fontWeight: 600, 
+                      fontSize: '0.75rem',
+                      minWidth: 'auto',
+                      px: 1
+                    }}
                   >
                     Retry
                   </Button>
@@ -507,43 +513,44 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
           </Box>
         )}
 
-       {/* Content Area */}
-<Box sx={{ 
-  flex: 1,
-  minHeight: 0,
-  overflow: 'hidden'
-}}>
-  {contentLoading ? (
-    <LoadingState 
-      isContentLoading={true} 
-      source={contentInfo?.source} 
-      colorPalette={purplePalette}
-    />
-  ) : content && selectedSubtopic && !contentError ? (
-    <LearningContent
-      content={content}
-      contentInfo={contentInfo}
-      selectedTopic={selectedTopic}
-      selectedSubtopic={selectedSubtopic}
-      contentLoading={contentLoading}
-      contentError={contentError}
-      onRetry={handleRetryContent}
-      colorPalette={purplePalette}
-    />
-  ) : (
-  <WelcomeState 
-  subtopicName={selectedSubtopic?.name}
-  isReady={!!selectedSubtopic}
-  onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
-  error={contentError}
-  onRetry={handleRetryContent}
-  subtopics={subtopics}
-  onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
-  onOpenSidebar={() => setMobileDrawerOpen(true)} // ← This is crucial
-  colorPalette={purplePalette}
-/>
-  )}
-</Box>     </Box>
+        {/* Content Area - NO PADDING */}
+        <Box sx={{ 
+          flex: 1,
+          minHeight: 0,
+          overflow: 'auto'
+        }}>
+          {contentLoading ? (
+            <LoadingState 
+              isContentLoading={true} 
+              source={contentInfo?.source} 
+              colorPalette={purplePalette}
+            />
+          ) : content && selectedSubtopic && !contentError ? (
+            <LearningContent
+              content={content}
+              contentInfo={contentInfo}
+              selectedTopic={selectedTopic}
+              selectedSubtopic={selectedSubtopic}
+              contentLoading={contentLoading}
+              contentError={contentError}
+              onRetry={handleRetryContent}
+              colorPalette={purplePalette}
+            />
+          ) : (
+            <WelcomeState 
+              subtopicName={selectedSubtopic?.name}
+              isReady={!!selectedSubtopic}
+              onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
+              error={contentError}
+              onRetry={handleRetryContent}
+              subtopics={subtopics}
+              onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
+              onOpenSidebar={() => setMobileDrawerOpen(true)}
+              colorPalette={purplePalette}
+            />
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 }
