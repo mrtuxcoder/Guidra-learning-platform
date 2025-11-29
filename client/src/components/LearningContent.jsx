@@ -16,7 +16,6 @@ import {
   Radio,
   Alert,
   LinearProgress,
-  Chip,
   IconButton,
   Tooltip
 } from "@mui/material";
@@ -27,7 +26,6 @@ import {
   Cancel,
   AutoAwesome,
   Psychology,
-  Bookmark,
   VolumeUp
 } from "@mui/icons-material";
 import MermaidDiagram from "../components/MermaidDiagram";
@@ -43,7 +41,7 @@ const LearningContent = ({
   contentLoading, 
   onGenerateContent,
   colorPalette,
-  userRemainingGenerations = 5 // Add this prop
+  userRemainingGenerations = 5
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -55,7 +53,6 @@ const LearningContent = ({
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizResults, setQuizResults] = useState({ correct: 0, wrong: 0 });
   const [savingQuiz, setSavingQuiz] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     concept: true,
     explanation: true,
@@ -66,20 +63,31 @@ const LearningContent = ({
 
   // Handle mindmap regeneration
   const handleManualMindmapRegenerate = async () => {
+    if (!selectedTopic || !selectedSubtopic?.name) {
+      console.error('Missing topic or subtopic for mindmap regeneration');
+      return;
+    }
+
     try {
       setRegeneratingMindmap(true);
       const response = await generateMermaidMindmap({
         topic: selectedTopic,
-        subtopic: selectedSubtopic?.name
+        subtopic: selectedSubtopic.name
       });
       
-      // Update your state with the new mindmap
-      setMindmapData(prev => ({
-        ...prev,
-        mindmap: response.data.mindmap
-      }));
+      if (response?.data?.mindmap) {
+        setMindmapData(prev => ({
+          ...prev,
+          mindmap: response.data.mindmap,
+          hasError: false
+        }));
+      }
     } catch (error) {
       console.error('Failed to regenerate mindmap:', error);
+      setMindmapData(prev => ({
+        ...prev,
+        hasError: true
+      }));
     } finally {
       setRegeneratingMindmap(false);
     }
@@ -111,6 +119,13 @@ const LearningContent = ({
       });
     }
   }, [content?.mindmap, mindmapData]);
+
+  // Reset quiz when content changes
+  React.useEffect(() => {
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    setQuizResults({ correct: 0, wrong: 0 });
+  }, [content]);
 
   if (contentLoading) {
     return <LoadingState isContentLoading={true} source={contentInfo?.source} colorPalette={colorPalette} />;
@@ -556,7 +571,26 @@ const LearningContent = ({
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      background: 'white'
+      background: 'white',
+      '& ::-webkit-scrollbar': {
+        width: '6px',
+      },
+      '& ::-webkit-scrollbar-track': {
+        background: colorPalette[50],
+        borderRadius: '3px',
+      },
+      '& ::-webkit-scrollbar-thumb': {
+        background: colorPalette[200],
+        borderRadius: '3px',
+        transition: 'background 0.2s ease',
+      },
+      '& ::-webkit-scrollbar-thumb:hover': {
+        background: colorPalette[300],
+      },
+      '& *': {
+        scrollbarWidth: 'thin',
+        scrollbarColor: `${colorPalette[200]} ${colorPalette[50]}`,
+      }
     }}>
       {/* Header */}
       <Box sx={{ 
@@ -579,18 +613,6 @@ const LearningContent = ({
             >
               {selectedTopic}
             </Typography>
-          </Box>
-          
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Tooltip title="Bookmark this lesson">
-              <IconButton 
-                size="small"
-                onClick={() => setBookmarked(!bookmarked)}
-                sx={{ color: bookmarked ? '#f59e0b' : colorPalette[500] }}
-              >
-                <Bookmark />
-              </IconButton>
-            </Tooltip>
           </Box>
         </Box>
       </Box>
