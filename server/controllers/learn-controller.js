@@ -139,12 +139,12 @@ exports.subtopicGenerateController = async (req, res) => {
       });
     }
 
-    // Check if topic is supported by the system
-    if (!isSupportedTopic(topic)) {
-      return res.status(400).json({
-        message: "This topic isn't supported yet. Try topics like: HTML, CSS, JavaScript, React, Node.js, Git, or other web development topics.",
-      });
-    }
+    // // Check if topic is supported by the system
+    // if (!isSupportedTopic(topic)) {
+    //   return res.status(400).json({
+    //     message: "This topic isn't supported yet. Try topics like: HTML, CSS, JavaScript, React, Node.js, Git, or other web development topics.",
+    //   });
+    // }
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
