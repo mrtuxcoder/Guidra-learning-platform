@@ -1,12 +1,17 @@
-
 import React from 'react';
 import { 
   Box, 
   Typography,
-  Fade
+  Fade,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 
 const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   // Modern Gradient Loader Component
   const GradientLoader = ({ size = 80, speed = 2 }) => (
     <Box
@@ -50,13 +55,13 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
       overflow: 'hidden',
       pointerEvents: 'none',
     }}>
-      {[...Array(15)].map((_, i) => (
+      {[...Array(isMobile ? 8 : 15)].map((_, i) => (
         <Box
           key={i}
           sx={{
             position: 'absolute',
-            width: 6,
-            height: 6,
+            width: isMobile ? 4 : 6,
+            height: isMobile ? 4 : 6,
             borderRadius: '50%',
             background: `rgba(124, 58, 237, ${0.3 + (i % 3) * 0.2})`,
             top: `${Math.random() * 100}%`,
@@ -69,7 +74,7 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
                 opacity: 0.7
               },
               '50%': { 
-                transform: 'translateY(-20px) rotate(180deg)',
+                transform: `translateY(${isMobile ? -15 : -20}px) rotate(180deg)`,
                 opacity: 1
               }
             }
@@ -88,22 +93,25 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
-            height: '400px',
+            height: '100%',
+            minHeight: isMobile ? '300px' : '400px',
+            width: '100%',
             flexDirection: 'column', 
-            gap: 4,
+            gap: isMobile ? 3 : 4,
             background: 'linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 50%, #E9D5FF 100%)',
-            borderRadius: 3,
-            p: 4,
+            borderRadius: isMobile ? 2 : 3,
+            p: isMobile ? 2 : 4,
             position: 'relative',
             overflow: 'hidden',
             border: '1px solid rgba(124, 58, 237, 0.1)',
             boxShadow: '0 8px 32px rgba(124, 58, 237, 0.1)',
+            boxSizing: 'border-box'
           }}
         >
           <FloatingParticles />
           
           <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <GradientLoader size={100} speed={1.5} />
+            <GradientLoader size={isMobile ? 80 : 100} speed={1.5} />
             
             {/* Animated Icon */}
             <Box
@@ -121,7 +129,7 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             >
               <Typography 
                 sx={{ 
-                  fontSize: 32,
+                  fontSize: isMobile ? 24 : 32,
                   fontWeight: 'bold',
                   background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
                   backgroundClip: 'text',
@@ -134,27 +142,30 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             </Box>
           </Box>
 
-          <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 1, width: '100%' }}>
             <Typography 
-              variant="h5" 
+              variant={isMobile ? "h6" : "h5"}
               fontWeight="700"
               sx={{ 
                 background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                mb: 1.5
+                mb: isMobile ? 1 : 1.5,
+                fontSize: isMobile ? '1.1rem' : '1.5rem'
               }}
             >
               {source === "cache" ? "Loading Your Content" : "Crafting Your Lesson"}
             </Typography>
             
             <Typography 
-              variant="body1" 
+              variant={isMobile ? "body2" : "body1"}
               sx={{ 
                 color: '#6B7280',
-                maxWidth: 300,
-                lineHeight: 1.6
+                maxWidth: isMobile ? 280 : 300,
+                lineHeight: 1.6,
+                margin: '0 auto',
+                fontSize: isMobile ? '0.875rem' : '1rem'
               }}
             >
               {source === "cache" 
@@ -163,13 +174,13 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             </Typography>
 
             {/* Progress Dots */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: isMobile ? 1.5 : 2 }}>
               {[0, 1, 2].map((dot) => (
                 <Box
                   key={dot}
                   sx={{
-                    width: 8,
-                    height: 8,
+                    width: isMobile ? 6 : 8,
+                    height: isMobile ? 6 : 8,
                     borderRadius: '50%',
                     background: `linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)`,
                     animation: `bounce 1.4s ease-in-out ${dot * 0.16}s infinite both`,
@@ -201,29 +212,37 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
           display: 'flex', 
           justifyContent: 'center', 
           alignItems: 'center', 
-          height: '100vh', 
+          height: '100vh',
+          width: '100vw',
           flexDirection: 'column', 
-          gap: 4,
+          gap: isMobile ? 3 : 4,
           background: 'linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 30%, #FFFFFF 70%)',
-          position: 'relative',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           overflow: 'hidden',
+          p: isMobile ? 2 : 3,
+          boxSizing: 'border-box'
         }}
       >
         <FloatingParticles />
         
-        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center', width: '100%' }}>
           {/* Animated Logo/Brand */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: isMobile ? 3 : 4 }}>
             <Box
               sx={{
-                width: 120,
-                height: 120,
+                width: isMobile ? 80 : 120,
+                height: isMobile ? 80 : 120,
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 24px',
+                margin: '0 auto',
+                mb: isMobile ? 2 : 3,
                 animation: 'gentlePulse 3s ease-in-out infinite',
                 boxShadow: '0 8px 32px rgba(124, 58, 237, 0.2)',
                 '@keyframes gentlePulse': {
@@ -240,7 +259,7 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             >
               <Typography 
                 sx={{ 
-                  fontSize: 48,
+                  fontSize: isMobile ? 32 : 48,
                   fontWeight: 'bold',
                   color: 'white',
                 }}
@@ -251,8 +270,8 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
           </Box>
 
           {/* Main Loader */}
-          <Box sx={{ position: 'relative', mb: 4 }}>
-            <GradientLoader size={120} speed={2} />
+          <Box sx={{ position: 'relative', mb: isMobile ? 3 : 4 }}>
+            <GradientLoader size={isMobile ? 80 : 120} speed={2} />
             
             {/* Center Icon */}
             <Box
@@ -265,7 +284,7 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             >
               <Typography 
                 sx={{ 
-                  fontSize: 40,
+                  fontSize: isMobile ? 28 : 40,
                   background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
@@ -283,29 +302,31 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
           </Box>
 
           {/* Content */}
-          <Box sx={{ maxWidth: 400, mx: 'auto' }}>
+          <Box sx={{ maxWidth: isMobile ? '100%' : 400, mx: 'auto', px: isMobile ? 1 : 0 }}>
             <Typography 
-              variant="h4" 
+              variant={isMobile ? "h5" : "h4"}
               fontWeight="800"
               sx={{ 
                 background: 'linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                mb: 2,
-                fontSize: { xs: '1.75rem', sm: '2rem' }
+                mb: isMobile ? 1.5 : 2,
+                fontSize: isMobile ? '1.5rem' : '2rem',
+                lineHeight: 1.2
               }}
             >
               Preparing Your Learning Journey
             </Typography>
             
             <Typography 
-              variant="h6" 
+              variant={isMobile ? "body1" : "h6"}
               sx={{ 
                 color: '#6B7280',
                 fontWeight: '400',
-                mb: 3,
-                lineHeight: 1.6
+                mb: isMobile ? 2 : 3,
+                lineHeight: 1.6,
+                fontSize: isMobile ? '0.9rem' : '1rem'
               }}
             >
               Setting up your personalized educational experience...
@@ -314,11 +335,13 @@ const LoadingState = ({ isContentLoading = false, source = "ai" }) => {
             {/* Animated Progress Bar */}
             <Box sx={{ 
               width: '100%', 
-              height: 6, 
+              height: isMobile ? 4 : 6, 
               background: 'rgba(124, 58, 237, 0.1)',
               borderRadius: 3,
               overflow: 'hidden',
               position: 'relative',
+              maxWidth: isMobile ? 280 : 400,
+              margin: '0 auto',
               '&::after': {
                 content: '""',
                 position: 'absolute',
