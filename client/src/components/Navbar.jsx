@@ -116,6 +116,7 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
+    handleClose();
     completeLogout();
   };
 
@@ -138,7 +139,7 @@ export default function Navbar() {
     subtleBg: '#FAF7FE'
   };
 
-  // Avatar only clickable in mobile view
+  // Avatar component - clickable in both desktop and mobile
   const renderUserAvatar = () => {
     if (isLoading) {
       return (
@@ -167,16 +168,16 @@ export default function Navbar() {
         <IconButton
           size="small"
           aria-label="user menu"
-          onClick={isMobile ? handleUserMenu : undefined} // Only clickable in mobile
+          onClick={handleUserMenu} // Clickable in both desktop and mobile
           sx={{
             border: `2px solid ${purpleTheme.primaryLight}30`,
             bgcolor: 'white',
             width: { xs: 36, sm: 40 },
             height: { xs: 36, sm: 40 },
-            '&:hover': isMobile ? {
+            '&:hover': {
               bgcolor: purpleTheme.lightBg,
-            } : {},
-            cursor: isMobile ? 'pointer' : 'default', // Change cursor based on clickability
+            },
+            cursor: 'pointer',
           }}
         >
           <Badge
@@ -214,39 +215,12 @@ export default function Navbar() {
 
   // Auth buttons (only show when not loading and no user)
   const renderAuthButtons = () => {
+    // Don't show anything while loading
     if (isLoading) {
-      return (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
-          <Button
-            disabled
-            sx={{
-              fontWeight: '600',
-              borderRadius: 2,
-              px: { xs: 1.5, sm: 2.5 },
-              py: { xs: 0.5, sm: 0.75 },
-              minWidth: 'auto',
-              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-            }}
-          >
-            Sign In
-          </Button>
-          <Button
-            disabled
-            variant="contained"
-            sx={{
-              borderRadius: 2,
-              px: { xs: 1.5, sm: 2.5 },
-              py: { xs: 0.5, sm: 0.75 },
-              minWidth: 'auto',
-              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-            }}
-          >
-            Get Started
-          </Button>
-        </Box>
-      );
+      return null;
     }
 
+    // Only show auth buttons if user is not logged in
     if (!user) {
       return (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
@@ -358,8 +332,20 @@ export default function Navbar() {
             </Typography>
           </Box>
 
+          {/* Show only loader while auth is loading */}
+          {isLoading && (
+            <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <CircularProgress 
+                size={24} 
+                sx={{ 
+                  color: purpleTheme.primary,
+                }} 
+              />
+            </Box>
+          )}
+
           {/* Desktop Navigation - Only show when user is loaded and authenticated */}
-          {user && (
+          {user && !isLoading && (
             <Box sx={{ 
               display: { xs: 'none', md: 'flex' }, 
               flexGrow: 1, 
@@ -395,7 +381,7 @@ export default function Navbar() {
           )}
 
           {/* Spacer - Only show when user is logged in and on desktop */}
-          {user && (
+          {user && !isLoading && (
             <Box sx={{ 
               display: { xs: 'none', md: 'block' },
               flexGrow: 1 
@@ -407,14 +393,14 @@ export default function Navbar() {
             {/* User Info Chip - Removed */}
             {renderUserInfo()}
             
-            {/* User Avatar - Only clickable in mobile */}
-            {renderUserAvatar()}
+            {/* User Avatar - Clickable in both desktop and mobile */}
+            {!isLoading && renderUserAvatar()}
 
-            {/* Auth Buttons */}
+            {/* Auth Buttons - Only show when not loading and user is not logged in */}
             {renderAuthButtons()}
 
-            {/* User Menu - Only show in mobile */}
-            {isMobile && (
+            {/* User Menu - Show in both desktop and mobile when user is logged in */}
+            {user && !isLoading && (
               <Menu
                 id="user-menu"
                 anchorEl={anchorEl}
@@ -432,7 +418,8 @@ export default function Navbar() {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                {navItems.map((item) => (
+                {/* Navigation items for mobile */}
+                {isMobile && navItems.map((item) => (
                   <MenuItem 
                     key={item.path} 
                     onClick={() => { navigate(item.path); handleClose(); }}
@@ -451,6 +438,8 @@ export default function Navbar() {
                     </Typography>
                   </MenuItem>
                 ))}
+                
+                {/* Logout option for both desktop and mobile */}
                 <MenuItem 
                   onClick={handleLogout}
                   sx={{ 
