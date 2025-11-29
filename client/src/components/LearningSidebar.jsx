@@ -1,26 +1,24 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
-  Chip,
   Tooltip,
   Card,
-  CardContent,
-  LinearProgress,
-  IconButton,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  alpha,
+  LinearProgress,
+  Collapse,
+  IconButton
 } from "@mui/material";
 import {
   CheckCircle,
   RadioButtonUnchecked,
-  PlayArrow,
-  Close
+  ExpandMore,
+  ExpandLess
 } from "@mui/icons-material";
 
 const LearningSidebar = ({
@@ -35,383 +33,389 @@ const LearningSidebar = ({
   onSubtopicSelect,
   onUpdateUnderstanding,
   progress,
-  colorPalette,
-  onCloseSidebar // New prop for closing sidebar
+  colorPalette
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [expandedTopic, setExpandedTopic] = useState(null);
 
-  const SubtopicItem = ({ subtopic, index }) => (
-    <ListItem 
-      selected={selectedSubtopic?.name === subtopic.name}
-      onClick={() => onSubtopicSelect(subtopic)}
-      disabled={updatingSubtopic === subtopic.name}
-      sx={{ 
-        borderRadius: 2,
-        mb: 1,
-        py: isSmallMobile ? 1.5 : 2,
-        px: isSmallMobile ? 1.5 : 2,
-        backgroundColor: selectedSubtopic?.name === subtopic.name ? colorPalette[600] : 'transparent',
-        color: selectedSubtopic?.name === subtopic.name ? 'white' : 'text.primary',
-        border: selectedSubtopic?.name === subtopic.name ? '2px solid' : '1px solid',
-        borderColor: selectedSubtopic?.name === subtopic.name ? colorPalette[600] : colorPalette[100],
-        '&:hover': {
-          backgroundColor: selectedSubtopic?.name === subtopic.name ? colorPalette[700] : colorPalette[50],
-          borderColor: selectedSubtopic?.name === subtopic.name ? colorPalette[700] : colorPalette[200],
-        },
-        '&.Mui-disabled': {
-          opacity: 0.6,
-          pointerEvents: 'none'
-        },
-        cursor: 'pointer',
-        transition: 'all 0.2s ease-in-out'
+  const handleTopicClick = (topicName) => {
+    onTopicSelect(topicName);
+    // Only auto-expand on mobile if it's not already expanded
+    if (isMobile && expandedTopic !== topicName) {
+      setExpandedTopic(topicName);
+    }
+  };
+
+  const handleExpandClick = (topicName, event) => {
+    event.stopPropagation(); // Prevent topic selection when clicking expand icon
+    setExpandedTopic(expandedTopic === topicName ? null : topicName);
+  };
+
+  // Premium completion indicator
+  const CompletionIndicator = ({ completed, isSelected }) => (
+    <Box
+      sx={{
+        position: 'relative',
+        width: 20,
+        height: 20,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}
     >
-      <Box sx={{ width: '100%' }}>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          mb: 1,
-          gap: 1
-        }}>
+      {completed ? (
+        <Box
+          sx={{
+            width: 16,
+            height: 16,
+            borderRadius: '50%',
+            backgroundColor: colorPalette[600],
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 2px 8px ${alpha(colorPalette[600], 0.3)}`,
+            animation: 'scaleIn 0.3s ease-out',
+            '@keyframes scaleIn': {
+              '0%': { transform: 'scale(0)' },
+              '70%': { transform: 'scale(1.1)' },
+              '100%': { transform: 'scale(1)' }
+            }
+          }}
+        >
+          <CheckCircle 
+            sx={{ 
+              fontSize: 12, 
+              color: 'white'
+            }} 
+          />
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            border: `2px solid ${colorPalette[200]}`,
+            backgroundColor: 'white',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              borderColor: colorPalette[300],
+            }
+          }}
+        />
+      )}
+    </Box>
+  );
+
+  const SubtopicItem = ({ subtopic, index, topicName }) => {
+    const hasContent = contentCache[subtopic.name];
+    const isSelected = selectedSubtopic?.name === subtopic.name;
+    const isUpdating = updatingSubtopic === subtopic.name;
+
+    const handleSubtopicClick = () => {
+      onSubtopicSelect(subtopic);
+      // Close the topic when a subtopic is selected on mobile
+      if (isMobile) {
+        setExpandedTopic(null);
+      }
+    };
+
+    return (
+      <ListItem 
+        selected={isSelected}
+        onClick={handleSubtopicClick}
+        disabled={isUpdating}
+        sx={{ 
+          borderRadius: 1,
+          py: 1.25,
+          px: 3,
+          backgroundColor: isSelected ? alpha(colorPalette[50], 0.8) : 'transparent',
+          color: 'text.primary',
+          border: 'none',
+          position: 'relative',
+          '&:hover': {
+            backgroundColor: alpha(colorPalette[50], 0.6),
+          },
+          '&.Mui-disabled': {
+            opacity: 0.5,
+            pointerEvents: 'none'
+          },
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          borderLeft: isSelected ? `3px solid ${colorPalette[500]}` : '3px solid transparent'
+        }}
+      >
+        {/* Loading overlay */}
+        {isUpdating && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                borderRadius: '50%',
+                border: `2px solid ${colorPalette[100]}`,
+                borderTop: `2px solid ${colorPalette[600]}`,
+                animation: 'spin 1s linear infinite'
+              }}
+            />
+          </Box>
+        )}
+
+        <Box sx={{ width: '100%', position: 'relative', zIndex: 1 }}>
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 1,
-            minWidth: 0,
-            flex: 1
+            gap: 2
           }}>
-            <ListItemIcon sx={{ minWidth: 28 }}>
-              {updatingSubtopic === subtopic.name ? (
-                <Box sx={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Box 
-                    sx={{ 
-                      width: 12, 
-                      height: 12, 
-                      borderRadius: '50%', 
-                      border: `2px solid ${selectedSubtopic?.name === subtopic.name ? 'rgba(255,255,255,0.5)' : colorPalette[400]}`,
-                      borderTop: `2px solid transparent`,
-                      animation: 'spin 1s linear infinite',
-                      '@keyframes spin': {
-                        '0%': { transform: 'rotate(0deg)' },
-                        '100%': { transform: 'rotate(360deg)' }
-                      }
-                    }} 
-                  />
-                </Box>
-              ) : subtopic.completed ? (
-                <CheckCircle color="inherit" fontSize="small" />
-              ) : contentCache[subtopic.name] ? (
-                <PlayArrow color="inherit" fontSize="small" />
-              ) : (
-                <RadioButtonUnchecked color="inherit" fontSize="small" />
-              )}
-            </ListItemIcon>
+            {/* Completion Indicator */}
+            <CompletionIndicator 
+              completed={subtopic.completed} 
+              isSelected={isSelected}
+            />
+
+            {/* Subtopic Name */}
             <Typography 
               variant="body2" 
-              fontWeight="600"
+              fontWeight="400"
               sx={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                flex: 1,
+                fontSize: '0.85rem',
+                color: isSelected ? colorPalette[700] : 'text.primary',
+                lineHeight: 1.4
               }}
             >
               {subtopic.name}
             </Typography>
+
+            {/* Status Indicator */}
+            {hasContent && !isUpdating && (
+              <Tooltip title="Content ready">
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    backgroundColor: colorPalette[500],
+                  }}
+                />
+              </Tooltip>
+            )}
           </Box>
-          
-          {subtopic.completed && (
-            <Chip 
-              label="Completed" 
-              size="small" 
-              color="success"
-              sx={{ 
-                height: 20,
-                fontSize: '0.7rem',
-                '& .MuiChip-label': { 
-                  px: 1, 
-                  fontSize: '0.7rem',
-                  fontWeight: 600
-                }
-              }}
-            />
-          )}
+        </Box>
+      </ListItem>
+    );
+  };
+
+  const TopicItem = ({ topic, index }) => {
+    const isSelected = selectedTopic === topic.topic;
+    const isExpanded = expandedTopic === topic.topic;
+    const completedCount = topic.subTopics?.filter(s => s.completed).length || 0;
+    const totalCount = topic.subTopics?.length || 0;
+    const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+    return (
+      <Box sx={{ mb: 1.5 }}>
+        {/* Topic Header */}
+        <ListItem 
+          onClick={() => handleTopicClick(topic.topic)}
+          selected={isSelected}
+          sx={{ 
+            borderRadius: 1,
+            py: 1.5,
+            px: 2,
+            backgroundColor: isSelected ? alpha(colorPalette[50], 0.8) : 'transparent',
+            border: `1px solid ${isSelected ? colorPalette[300] : colorPalette[100]}`,
+            position: 'relative',
+            '&:hover': {
+              backgroundColor: alpha(colorPalette[50], 0.6),
+              borderColor: colorPalette[200],
+            },
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <ListItemText 
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography 
+                  variant="body2" 
+                  fontWeight="600"
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: isSelected ? colorPalette[700] : 'text.primary',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  {topic.topic}
+                </Typography>
+                <IconButton 
+                  size="small" 
+                  onClick={(event) => handleExpandClick(topic.topic, event)}
+                  sx={{ 
+                    color: colorPalette[500],
+                    transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                    transition: 'transform 0.2s ease'
+                  }}
+                >
+                  <ExpandMore />
+                </IconButton>
+              </Box>
+            } 
+            secondary={
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary" 
+                  fontWeight="500"
+                >
+                  {completedCount}/{totalCount} completed
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  color={colorPalette[600]} 
+                  fontWeight="600"
+                >
+                  {Math.round(progress)}%
+                </Typography>
+              </Box>
+            }
+            sx={{ my: 0, width: '100%' }}
+          />
+        </ListItem>
+        
+        {/* Progress Bar */}
+        <Box sx={{ px: 2, mt: 0.5 }}>
+          <LinearProgress 
+            variant="determinate" 
+            value={progress} 
+            sx={{ 
+              height: 3, 
+              borderRadius: 2,
+              backgroundColor: colorPalette[100],
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: colorPalette[500],
+                borderRadius: 2,
+              }
+            }}
+          />
         </Box>
 
-        {/* Content Status Indicator */}
-        {contentCache[subtopic.name] && (
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 0.5,
-            mt: 0.5
-          }}>
-            <Box 
-              sx={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                backgroundColor: selectedSubtopic?.name === subtopic.name ? 
-                  'rgba(255,255,255,0.7)' : 
-                  colorPalette[400]
-              }}
-            />
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: selectedSubtopic?.name === subtopic.name ? 'rgba(255,255,255,0.8)' : 'text.secondary',
-                fontSize: '0.7rem',
-                fontWeight: 500
-              }}
-            >
-              Content ready
-            </Typography>
-          </Box>
-        )}
+        {/* Subtopic Collapse */}
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+          <List sx={{ py: 0.5, pl: 1 }}>
+            {topic.subTopics?.map((subtopic, subIndex) => (
+              <SubtopicItem 
+                key={subIndex} 
+                subtopic={subtopic} 
+                index={subIndex}
+                topicName={topic.topic}
+              />
+            ))}
+          </List>
+        </Collapse>
       </Box>
-    </ListItem>
-  );
-
-  const TopicItem = ({ topic, index }) => (
-    <ListItem 
-      onClick={() => onTopicSelect(topic.topic)}
-      selected={selectedTopic === topic.topic}
-      sx={{ 
-        borderRadius: 2,
-        mb: 1,
-        py: isSmallMobile ? 1 : 1.5,
-        px: isSmallMobile ? 1.5 : 2,
-        backgroundColor: selectedTopic === topic.topic ? colorPalette[100] : 'transparent',
-        border: '1px solid',
-        borderColor: selectedTopic === topic.topic ? colorPalette[300] : 'transparent',
-        '&:hover': {
-          backgroundColor: selectedTopic === topic.topic ? colorPalette[100] : colorPalette[50],
-          borderColor: selectedTopic === topic.topic ? colorPalette[300] : colorPalette[200],
-        },
-        cursor: 'pointer',
-        transition: 'all 0.2s ease-in-out'
-      }}
-    >
-      <ListItemText 
-        primary={
-          <Typography 
-            variant="body2" 
-            fontWeight="600"
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {topic.topic}
-          </Typography>
-        } 
-        secondary={
-          <Typography variant="caption" color="text.secondary">
-            {topic.subTopics?.filter(s => s.completed).length || 0}/{topic.subTopics?.length || 0} completed
-          </Typography>
-        }
-        sx={{ my: 0 }}
-      />
-    </ListItem>
-  );
+    );
+  };
 
   return (
     <Card sx={{ 
       width: '100%', 
       height: '100%',
-      borderRadius: { xs: 0, md: 3 },
-      boxShadow: { xs: 'none', md: '0 8px 32px rgba(126, 87, 194, 0.12)' },
+      borderRadius: { xs: 0, md: 2 },
+      boxShadow: { xs: 'none', md: '0 2px 24px rgba(126, 87, 194, 0.08)' },
       display: 'flex',
       flexDirection: 'column',
       background: 'white',
-      border: { xs: 'none', md: '1px solid rgba(126, 87, 194, 0.1)' },
-      position: 'relative'
+      border: { xs: 'none', md: `1px solid ${colorPalette[100]}` },
+      position: 'relative',
+      overflow: 'hidden',
+      '& ::-webkit-scrollbar': {
+        width: '6px',
+      },
+      '& ::-webkit-scrollbar-track': {
+        background: colorPalette[50],
+        borderRadius: '3px',
+      },
+      '& ::-webkit-scrollbar-thumb': {
+        background: colorPalette[200],
+        borderRadius: '3px',
+        transition: 'background 0.2s ease',
+      },
+      '& ::-webkit-scrollbar-thumb:hover': {
+        background: colorPalette[300],
+      },
+      '& *': {
+        scrollbarWidth: 'thin',
+        scrollbarColor: `${colorPalette[200]} ${colorPalette[50]}`,
+      }
     }}>
-      {/* Header Section with Exit Button */}
+      {/* Header Section */}
       <Box sx={{ 
-        p: { xs: 2, sm: 3 }, 
-        borderBottom: '1px solid', 
-        borderColor: colorPalette[100],
-        position: 'relative'
-      }}>
-        {/* Exit Button - Top Right */}
-        <IconButton
-          onClick={onCloseSidebar}
-          sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            width: 32,
-            height: 32,
-            borderRadius: 2,
-            backgroundColor: colorPalette[50],
-            color: colorPalette[600],
-            border: `1px solid ${colorPalette[200]}`,
-            '&:hover': {
-              backgroundColor: colorPalette[100],
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease-in-out'
-          }}
-        >
-          <Close fontSize="small" />
-        </IconButton>
-
-        <Typography 
-          variant={isMobile ? "h6" : "h5"} 
-          fontWeight="800" 
-          gutterBottom 
-          sx={{ 
-            color: colorPalette[600],
-            pr: 4 // Make space for exit button
-          }}
-        >
-          📚 Learning Path
-        </Typography>
-        
-        {/* Progress Card */}
-        <Card sx={{ 
-          background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`, 
-          color: 'white', 
-          p: 2, 
-          borderRadius: 2, 
-          mt: 2,
-          boxShadow: '0 4px 16px rgba(126, 87, 194, 0.2)'
-        }}>
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 1 
-          }}>
-            <Typography variant="body2" fontWeight="600">
-              Course Progress
-            </Typography>
-            <Chip 
-              label={`${Math.round(progress)}%`}
-              size="small"
-              sx={{ 
-                backgroundColor: 'rgba(255,255,255,0.2)', 
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.75rem'
-              }}
-            />
-          </Box>
-          <LinearProgress 
-            variant="determinate" 
-            value={progress} 
-            sx={{ 
-              height: 8, 
-              borderRadius: 4,
-              backgroundColor: 'rgba(255,255,255,0.3)',
-              '& .MuiLinearProgress-bar': {
-                backgroundColor: 'white',
-                borderRadius: 4
-              }
-            }}
-          />
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              opacity: 0.9, 
-              mt: 1, 
-              display: 'block',
-              fontWeight: 500
-            }}
-          >
-            {subtopics.filter(s => s.completed).length} of {subtopics.length} topics completed
-          </Typography>
-        </Card>
-      </Box>
-
-      {/* Topics Section */}
-      <Box sx={{ 
-        p: { xs: 1.5, sm: 2 }, 
-        borderBottom: '1px solid', 
-        borderColor: colorPalette[100] 
+        p: 3, 
+        borderBottom: `1px solid ${colorPalette[100]}`,
+        background: 'white'
       }}>
         <Typography 
-          variant="subtitle1" 
+          variant="h6" 
           fontWeight="700" 
-          gutterBottom 
           sx={{ 
-            color: colorPalette[600],
+            color: colorPalette[700],
             display: 'flex',
             alignItems: 'center',
-            gap: 1
+            gap: 1.5
           }}
         >
-          <Box 
-            component="span"
+          <Box
             sx={{
-              width: 4,
-              height: 16,
-              borderRadius: 1,
-              background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[600]} 100%)`
+              width: 24,
+              height: 24,
+              borderRadius: '6px',
+              backgroundColor: colorPalette[600],
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 12,
+              color: 'white',
+              fontWeight: 'bold',
+              boxShadow: `0 2px 8px ${alpha(colorPalette[600], 0.3)}`
             }}
-          />
-          Your Topics
+          >
+            ●
+          </Box>
+          Course Content
         </Typography>
-        <Box sx={{ 
-          maxHeight: 120, 
-          overflow: 'auto',
-          '&::-webkit-scrollbar': {
-            width: 4,
-          },
-          '&::-webkit-scrollbar-track': {
-            background: colorPalette[50],
-            borderRadius: 2,
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: colorPalette[300],
-            borderRadius: 2,
-          }
-        }}>
-          <List dense sx={{ py: 0 }}>
-            {topics.map((topic, index) => (
-              <TopicItem key={index} topic={topic} index={index} />
-            ))}
-          </List>
-        </Box>
       </Box>
 
-      {/* Subtopics Section */}
+      {/* Topics Section with Progress */}
       <Box sx={{ 
         flex: 1, 
         overflow: 'auto',
-        p: { xs: 1.5, sm: 2 }
+        p: 2.5
       }}>
-        <Typography 
-          variant="subtitle1" 
-          fontWeight="700" 
-          gutterBottom 
-          sx={{ 
-            color: colorPalette[600],
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          <Box 
-            component="span"
-            sx={{
-              width: 4,
-              height: 16,
-              borderRadius: 1,
-              background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[600]} 100%)`
-            }}
-          />
-          Subtopics
-        </Typography>
-        <List sx={{ py: 0 }}>
-          {subtopics.map((subtopic, index) => (
-            <SubtopicItem key={index} subtopic={subtopic} index={index} />
+        <Box>
+          {topics.map((topic, index) => (
+            <TopicItem key={index} topic={topic} index={index} />
           ))}
-        </List>
+        </Box>
       </Box>
     </Card>
   );
