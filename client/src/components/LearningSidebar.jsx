@@ -53,6 +53,32 @@ const LearningSidebar = ({
     setExpandedTopic(expandedTopic === topicName ? null : topicName);
   };
 
+  // Find the parent topic for a subtopic
+  const findParentTopic = (subtopicName) => {
+    for (const topic of topics) {
+      if (topic.subTopics?.some(sub => sub.name === subtopicName)) {
+        return topic.topic;
+      }
+    }
+    return null;
+  };
+
+  const handleSubtopicClick = (subtopic, topicName) => {
+    // First select the parent topic
+    const parentTopic = topicName || findParentTopic(subtopic.name);
+    if (parentTopic && parentTopic !== selectedTopic) {
+      onTopicSelect(parentTopic);
+    }
+    
+    // Then select the subtopic
+    onSubtopicSelect(subtopic);
+    
+    // Close the topic when a subtopic is selected on mobile
+    if (isMobile) {
+      setExpandedTopic(null);
+    }
+  };
+
   // Premium completion indicator
   const CompletionIndicator = ({ completed, isSelected }) => (
     <Box
@@ -114,18 +140,10 @@ const LearningSidebar = ({
     const isSelected = selectedSubtopic?.name === subtopic.name;
     const isUpdating = updatingSubtopic === subtopic.name;
 
-    const handleSubtopicClick = () => {
-      onSubtopicSelect(subtopic);
-      // Close the topic when a subtopic is selected on mobile
-      if (isMobile) {
-        setExpandedTopic(null);
-      }
-    };
-
     return (
       <ListItem 
         selected={isSelected}
-        onClick={handleSubtopicClick}
+        onClick={() => handleSubtopicClick(subtopic, topicName)}
         disabled={isUpdating}
         sx={{ 
           borderRadius: 1,
