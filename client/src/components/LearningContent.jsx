@@ -187,8 +187,8 @@ const LearningContent = ({
             onClick={() => toggleSection(sectionKey)}
           >
             <Box sx={{
-              width: 40,
-              height: 40,
+              width: isMobile ? 32 : 40,
+              height: isMobile ? 32 : 40,
               borderRadius: '10px',
               background: `linear-gradient(135deg, ${colorPalette[400]} 0%, ${colorPalette[600]} 100%)`,
               display: 'flex',
@@ -197,13 +197,13 @@ const LearningContent = ({
               mr: 2,
               flexShrink: 0
             }}>
-              <Typography sx={{ fontSize: '1.2rem' }}>
+              <Typography sx={{ fontSize: isMobile ? '1rem' : '1.2rem' }}>
                 {emoji}
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography 
-                variant="h6" 
+                variant={isMobile ? "subtitle1" : "h6"}
                 fontWeight="600"
                 sx={{ color: colorPalette[700] }}
               >
@@ -237,15 +237,15 @@ const LearningContent = ({
                           display: 'flex',
                           alignItems: 'flex-start',
                           mb: 2,
-                          p: 2,
+                          p: isMobile ? 1.5 : 2,
                           borderRadius: 1,
                           background: index % 2 === 0 ? colorPalette[50] : 'transparent',
                           border: `1px solid ${colorPalette[100]}`,
                         }}
                       >
                         <Box sx={{
-                          width: 24,
-                          height: 24,
+                          width: isMobile ? 20 : 24,
+                          height: isMobile ? 20 : 24,
                           borderRadius: '6px',
                           background: colorPalette[500],
                           display: 'flex',
@@ -255,7 +255,7 @@ const LearningContent = ({
                           flexShrink: 0,
                           mt: 0.25
                         }}>
-                          <Typography variant="caption" sx={{ color: 'white', fontWeight: '700' }}>
+                          <Typography variant="caption" sx={{ color: 'white', fontWeight: '700', fontSize: isMobile ? '0.6rem' : '0.75rem' }}>
                             {index + 1}
                           </Typography>
                         </Box>
@@ -264,7 +264,8 @@ const LearningContent = ({
                           sx={{ 
                             lineHeight: 1.6,
                             color: 'text.primary',
-                            flex: 1
+                            flex: 1,
+                            fontSize: isMobile ? '0.9rem' : '1rem'
                           }}
                         >
                           {typeof item === 'string' ? item : JSON.stringify(item)}
@@ -274,7 +275,7 @@ const LearningContent = ({
                   </Box>
                 ) : (
                   <Box sx={{
-                    p: 2,
+                    p: isMobile ? 1.5 : 2,
                     borderRadius: 1,
                     background: colorPalette[50],
                     border: `1px solid ${colorPalette[100]}`
@@ -284,6 +285,7 @@ const LearningContent = ({
                       sx={{ 
                         lineHeight: 1.7,
                         color: 'text.primary',
+                        fontSize: isMobile ? '0.9rem' : '1rem'
                       }}
                     >
                       {typeof sectionContent === 'string' ? sectionContent : JSON.stringify(sectionContent)}
@@ -373,11 +375,11 @@ const LearningContent = ({
         border: `2px solid ${colorPalette[200]}`,
         borderRadius: 2,
       }}>
-        <CardContent sx={{ p: 2 }}>
+        <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Box sx={{
-              width: 40,
-              height: 40,
+              width: isMobile ? 32 : 40,
+              height: isMobile ? 32 : 40,
               borderRadius: '10px',
               background: colorPalette[500],
               display: 'flex',
@@ -385,10 +387,10 @@ const LearningContent = ({
               justifyContent: 'center',
               mr: 2
             }}>
-              <Quiz sx={{ fontSize: 20, color: 'white' }} />
+              <Quiz sx={{ fontSize: isMobile ? 18 : 20, color: 'white' }} />
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight="600" sx={{ color: colorPalette[700] }}>
+              <Typography variant={isMobile ? "subtitle1" : "h6"} fontWeight="600" sx={{ color: colorPalette[700] }}>
                 Knowledge Check
               </Typography>
             </Box>
@@ -397,10 +399,10 @@ const LearningContent = ({
           {/* Progress */}
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-              <Typography variant="body2" fontWeight="600">
+              <Typography variant="body2" fontWeight="600" sx={{ fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                 Progress
               </Typography>
-              <Typography variant="body2" fontWeight="600">
+              <Typography variant="body2" fontWeight="600" sx={{ fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                 {answeredCount} / {quizItems.length}
               </Typography>
             </Box>
@@ -444,7 +446,8 @@ const LearningContent = ({
                       fontWeight="600" 
                       sx={{ 
                         flex: 1,
-                        color: colorPalette[700]
+                        color: colorPalette[700],
+                        fontSize: isMobile ? '0.8rem' : '0.875rem'
                       }}
                     >
                       {question.question || quizItem}
@@ -468,23 +471,24 @@ const LearningContent = ({
                             control={<Radio 
                               disabled={quizSubmitted}
                               sx={{ color: colorPalette[500] }}
+                              size={isMobile ? "small" : "medium"}
                             />}
                             label={
                               <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                                <Typography variant="body2" sx={{ flex: 1 }}>
+                                <Typography variant="body2" sx={{ flex: 1, fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                                   {option}
                                 </Typography>
                                 {answerStatus === 'correct' && (
-                                  <CheckCircle sx={{ color: '#10b981', ml: 1, fontSize: 16 }} />
+                                  <CheckCircle sx={{ color: '#10b981', ml: 1, fontSize: isMobile ? 14 : 16 }} />
                                 )}
                                 {answerStatus === 'wrong' && (
-                                  <Cancel sx={{ color: '#ef4444', ml: 1, fontSize: 16 }} />
+                                  <Cancel sx={{ color: '#ef4444', ml: 1, fontSize: isMobile ? 14 : 16 }} />
                                 )}
                               </Box>
                             }
                             sx={{ 
                               mb: 1,
-                              p: 1,
+                              p: isMobile ? 0.75 : 1,
                               borderRadius: 1,
                               border: `1px solid ${
                                 answerStatus === 'correct' ? '#10b981' : 
@@ -504,6 +508,7 @@ const LearningContent = ({
                         variant="outlined"
                         onClick={() => !quizSubmitted && !userAnswer && handleQuizAnswer(index, "Reflected")}
                         disabled={quizSubmitted || userAnswer}
+                        size={isMobile ? "small" : "medium"}
                         sx={{
                           borderColor: colorPalette[500],
                           color: colorPalette[500],
@@ -522,6 +527,7 @@ const LearningContent = ({
             {!quizSubmitted ? (
               <Button
                 variant="contained"
+                size={isMobile ? "small" : "medium"}
                 sx={{ 
                   background: colorPalette[600],
                   flex: 1
@@ -534,6 +540,7 @@ const LearningContent = ({
             ) : (
               <Button
                 variant="outlined"
+                size={isMobile ? "small" : "medium"}
                 sx={{ 
                   borderColor: colorPalette[600],
                   color: colorPalette[600],
@@ -555,7 +562,7 @@ const LearningContent = ({
               severity="info"
               sx={{ mt: 2 }}
             >
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ fontSize: isMobile ? '0.8rem' : '0.875rem' }}>
                 Results: {quizResults.correct} correct, {quizResults.wrong} wrong ({scorePercentage}%)
               </Typography>
             </Alert>
@@ -594,14 +601,14 @@ const LearningContent = ({
     }}>
       {/* Header */}
       <Box sx={{ 
-        p: 2,
+        p: isMobile ? 1.5 : 2,
         borderBottom: `1px solid ${colorPalette[100]}`,
         background: 'white'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
           <Box sx={{ flex: 1 }}>
             <Typography 
-              variant="h5" 
+              variant={isMobile ? "h6" : "h5"}
               fontWeight="600"
               sx={{ color: colorPalette[700] }}
             >
@@ -609,7 +616,10 @@ const LearningContent = ({
             </Typography>
             <Typography 
               variant="body2" 
-              sx={{ color: colorPalette[500] }}
+              sx={{ 
+                color: colorPalette[500],
+                fontSize: isMobile ? '0.8rem' : '0.875rem'
+              }}
             >
               {selectedTopic}
             </Typography>
@@ -621,7 +631,7 @@ const LearningContent = ({
       <Box sx={{ 
         flex: 1,
         overflow: 'auto',
-        p: 2
+        p: isMobile ? 1.5 : 2
       }}>
         {safeContent.concept && (
           <ContentSection
@@ -672,8 +682,8 @@ const LearningContent = ({
 
         {safeContent.mindmap && (
           <Card sx={{ mb: 3, borderRadius: 2 }}>
-            <CardContent sx={{ p: 2 }}>
-              <Typography variant="h6" fontWeight="600" sx={{ mb: 2, color: colorPalette[700] }}>
+            <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
+              <Typography variant={isMobile ? "subtitle1" : "h6"} fontWeight="600" sx={{ mb: 2, color: colorPalette[700] }}>
                 Mind Map
               </Typography>
               <MermaidDiagram
