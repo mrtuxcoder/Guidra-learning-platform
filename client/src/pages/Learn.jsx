@@ -448,7 +448,7 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
         flexDirection: 'column',
         minHeight: 0,
         overflow: 'hidden',
-        pb: isMobile ? '70px' : 0
+        pb: isMobile ? '0px' : 0
       }}>
         {/* Header */}
         <Box sx={{ 
@@ -537,17 +537,23 @@ const handleNavigateToFirstIncomplete = useCallback((subtopic) => {
               colorPalette={purplePalette}
             />
           ) : (
-            <WelcomeState 
-              subtopicName={selectedSubtopic?.name}
-              isReady={!!selectedSubtopic}
-              onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
-              error={contentError}
-              onRetry={handleRetryContent}
-              subtopics={subtopics}
-              onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
-              onOpenSidebar={() => setMobileDrawerOpen(true)}
-              colorPalette={purplePalette}
-            />
+         // In your main Learning component, update the WelcomeState usage:
+<WelcomeState 
+  subtopicName={selectedSubtopic?.name}
+  isReady={!!selectedSubtopic}
+  onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
+  subtopics={subtopics}
+  topics={topics}
+  selectedTopic={selectedTopic}
+  onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
+  onTopicSelect={fetchSubtopics}
+  onSubtopicSelect={handleSelectSubtopic}
+  onOpenSidebar={() => setMobileDrawerOpen(true)}
+  progress={calculateProgress()}
+  generationCounts={generationCounts}
+  contentCache={contentCache}
+  colorPalette={purplePalette}
+/>
           )}
         </Box>
       </Box>
