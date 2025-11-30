@@ -129,7 +129,6 @@ const MermaidDiagram = ({
       setError(null);
       setIsLoading(true);
       
-      console.log("🔄 Manually regenerating mindmap via API...");
       
       await onManualRegenerate();
       setAutoRegenerated(false); // Reset for new mindmap
@@ -217,7 +216,6 @@ const MermaidDiagram = ({
 
           // Auto-regenerate ONLY if we haven't done it before
           if (!autoRegenerated && onManualRegenerate && remainingGenerations > 0) {
-            console.log('🔄 Auto-regenerating mindmap (first attempt)');
             setAutoRegenerated(true);
             await handleManualRegenerate();
             return; // Exit early, new render will be triggered by prop change

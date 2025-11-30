@@ -61,14 +61,12 @@ export default function App() {
     const isNonAuthRoute = ['/', '/login', '/register'].includes(location.pathname);
     
     if ((isAuth && isNonAuthRoute) || (!isAuth && isAuthRoute)) {
-      console.log('🔄 [APP] Route change detected, re-checking auth...');
       checkAuth();
     }
   }, [location.pathname]);
 
   const checkAuth = async () => {
     try {
-      console.log('🔐 [APP] Checking authentication status...');
       
       // Use quick check for initial load, full check for auth routes
       const shouldFullCheck = ['/profile', '/personalize', '/learn'].includes(location.pathname);
@@ -76,7 +74,6 @@ export default function App() {
         ? await isAuthenticated() 
         : await checkAuthQuick();
       
-      console.log('🔐 [APP] Authentication result:', authenticated);
       setIsAuth(authenticated);
     } catch (error) {
       console.error('🔐 [APP] Auth check error:', error);

@@ -97,7 +97,6 @@ export const markTopicComplete = async (data) => {
 export const validateTopic = async (topic) => {
   
   const response = await API.post('/learn/validate-topic', { topic });
-  console.log(response)
   return response;
 };
 

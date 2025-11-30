@@ -64,7 +64,6 @@ const LearningContent = ({
   // Handle mindmap regeneration
   const handleManualMindmapRegenerate = async () => {
     if (!selectedTopic || !selectedSubtopic?.name) {
-      console.error('Missing topic or subtopic for mindmap regeneration');
       return;
     }
 
