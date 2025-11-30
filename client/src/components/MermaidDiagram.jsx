@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import mermaid from 'mermaid';
 import {
   Dialog,
@@ -11,7 +11,6 @@ import {
   useTheme,
   useMediaQuery,
   Typography,
-  Chip,
   Tooltip
 } from '@mui/material';
 import { 
@@ -43,14 +42,13 @@ const MermaidDiagram = ({
   const [renderedSvg, setRenderedSvg] = useState(null);
   const [isRotated, setIsRotated] = useState(false);
   const [showCode, setShowCode] = useState(false);
-  const [regenerating, setRegenerating] = useState(false);
   const [autoRegenerated, setAutoRegenerated] = useState(false);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Default color palette if not provided
-  const colors = colorPalette || {
+  const colors = {
     50: '#FAF7FE',
     100: '#F3E8FF',
     200: '#E9D5FF',
@@ -60,21 +58,13 @@ const MermaidDiagram = ({
     600: '#9333EA',
     700: '#7C3AED',
     800: '#6B21A8',
-    900: '#581C87'
+    900: '#581C87',
+    ...colorPalette
   };
 
-  // Initialize mermaid with error suppression
+  // Initialize mermaid with proper error handling
   useEffect(() => {
     try {
-      // Suppress console errors from mermaid
-      const originalError = console.error;
-      console.error = (...args) => {
-        if (args[0] && typeof args[0] === 'string' && args[0].includes('mermaid')) {
-          return; // Suppress mermaid errors
-        }
-        originalError.apply(console, args);
-      };
-
       mermaid.initialize({
         startOnLoad: false,
         theme: 'default',
@@ -104,16 +94,13 @@ const MermaidDiagram = ({
           }
         `
       });
-
-      // Restore console.error after initialization
-      console.error = originalError;
     } catch (error) {
-      // Silent catch - don't show initialization errors
+      console.warn('Mermaid initialization warning:', error);
     }
   }, [isMobile, colors]);
 
   // Handle manual mindmap regeneration
-  const handleManualRegenerate = async () => {
+  const handleManualRegenerate = useCallback(async () => {
     if (remainingGenerations <= 0) {
       setError('No regenerations available');
       return;
@@ -125,24 +112,18 @@ const MermaidDiagram = ({
     }
 
     try {
-      setRegenerating(true);
       setError(null);
       setIsLoading(true);
-      
-      
       await onManualRegenerate();
-      setAutoRegenerated(false); // Reset for new mindmap
-      
     } catch (err) {
       console.error('Manual mindmap regeneration error:', err);
       setError(err.response?.data?.message || 'Failed to regenerate mindmap');
-      setRegenerating(false);
       setIsLoading(false);
     }
-  };
+  }, [onManualRegenerate, remainingGenerations]);
 
   // Simple cleaning function
-  const cleanMermaidSyntax = (inputChart) => {
+  const cleanMermaidSyntax = useCallback((inputChart) => {
     if (!inputChart) return '';
     
     let cleaned = inputChart.trim();
@@ -160,12 +141,15 @@ const MermaidDiagram = ({
       .replace(/;/g, '');
     
     return cleaned;
-  };
+  }, []);
 
   // Enhanced render function with ONE auto-regeneration attempt
   useEffect(() => {
+    let isMounted = true;
+    let consoleErrorOriginal = null;
+
     const renderDiagram = async () => {
-      if (!ref.current || !chart) {
+      if (!isMounted || !ref.current || !chart) {
         setIsLoading(false);
         return;
       }
@@ -190,41 +174,36 @@ const MermaidDiagram = ({
         let finalSvg;
 
         try {
-          // Suppress mermaid errors during render
-          const originalError = console.error;
+          // Temporarily suppress mermaid errors during render
+          consoleErrorOriginal = console.error;
           console.error = (...args) => {
             if (args[0] && typeof args[0] === 'string' && args[0].includes('mermaid')) {
               return;
             }
-            originalError.apply(console, args);
+            consoleErrorOriginal.apply(console, args);
           };
 
           // Render the cleaned diagram
           const result = await mermaid.render(id, cleanedChart);
           finalSvg = result.svg;
 
-          // Restore console.error
-          console.error = originalError;
         } catch (renderError) {
-          // Restore console.error if it was suppressed
-          console.error = (...args) => {
-            if (args[0] && typeof args[0] === 'string' && args[0].includes('mermaid')) {
-              return;
-            }
-            console.error.apply(console, args);
-          };
-
           // Auto-regenerate ONLY if we haven't done it before
-          if (!autoRegenerated && onManualRegenerate && remainingGenerations > 0) {
+          if (!autoRegenerated && onManualRegenerate && remainingGenerations > 0 && isMounted) {
             setAutoRegenerated(true);
             await handleManualRegenerate();
             return; // Exit early, new render will be triggered by prop change
           }
           
           throw new Error('Unable to render diagram');
+        } finally {
+          // Restore console.error
+          if (consoleErrorOriginal) {
+            console.error = consoleErrorOriginal;
+          }
         }
         
-        if (finalSvg) {
+        if (finalSvg && isMounted) {
           // Create container for SVG
           const svgContainer = document.createElement('div');
           svgContainer.innerHTML = finalSvg;
@@ -268,89 +247,103 @@ const MermaidDiagram = ({
           
           // Store the rendered SVG for zoom view
           setRenderedSvg(finalSvg);
-          setRegenerating(false);
         }
         
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       } catch (renderError) {
-        // Don't show the technical error to users
-        setError('This mindmap cannot be displayed. You can try regenerating it.');
-        setIsLoading(false);
-        setRegenerating(false);
-        
-        // Show error state with retry option
-        if (ref.current) {
-          ref.current.innerHTML = '';
-          const errorDiv = document.createElement('div');
-          errorDiv.style.cssText = `
-            padding: 40px 20px;
-            text-align: center;
-            color: #666;
-            border: 2px dashed #ff9800;
-            border-radius: 8px;
-            background: #fff3e0;
-            cursor: pointer;
-            min-height: ${isMobile ? '300px' : '200px'};
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: ${isMobile ? '16px' : '14px'};
-          `;
+        if (isMounted) {
+          setError('This mindmap cannot be displayed. You can try regenerating it.');
+          setIsLoading(false);
           
-          const canRetry = onManualRegenerate && remainingGenerations > 0;
-          
-          errorDiv.innerHTML = `
-            <div style="font-size: ${isMobile ? '64px' : '48px'}; margin-bottom: 16px;">📊</div>
-            <p style="margin: 0 0 10px 0; font-weight: bold; color: #f57c00; font-size: ${isMobile ? '18px' : '16px'};">Diagram Display Issue</p>
-            <p style="margin: 0 0 15px 0; text-align: center; font-size: ${isMobile ? '16px' : '14px'};">This mindmap cannot be rendered properly</p>
-            ${canRetry ? `
-              <button style="
-                background: #1976d2;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 6px;
-                font-size: ${isMobile ? '16px' : '14px'};
-                font-weight: 600;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-top: 10px;
-              ">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-                </svg>
-                Regenerate Mindmap
-              </button>
-            ` : `
-              <div style="display: inline-flex; align-items: center; gap: 5px; color: #1976d2; font-size: ${isMobile ? '16px' : '14px'}; font-weight: 500;">
-                <svg width="${isMobile ? '20' : '16'}" height="${isMobile ? '20' : '16'}" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>
-                View Diagram Code
-              </div>
-            `}
-          `;
-          
-          // Add click handlers
-          if (canRetry) {
-            const retryButton = errorDiv.querySelector('button');
-            retryButton.onclick = (e) => {
-              e.stopPropagation();
-              handleManualRegenerate();
-            };
+          // Show error state with retry option
+          if (ref.current) {
+            ref.current.innerHTML = '';
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+              padding: 40px 20px;
+              text-align: center;
+              color: #666;
+              border: 2px dashed #ff9800;
+              border-radius: 8px;
+              background: #fff3e0;
+              cursor: pointer;
+              min-height: ${isMobile ? '300px' : '200px'};
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              font-size: ${isMobile ? '16px' : '14px'};
+            `;
+            
+            const canRetry = onManualRegenerate && remainingGenerations > 0;
+            
+            errorDiv.innerHTML = `
+              <div style="font-size: ${isMobile ? '64px' : '48px'}; margin-bottom: 16px;">📊</div>
+              <p style="margin: 0 0 10px 0; font-weight: bold; color: #f57c00; font-size: ${isMobile ? '18px' : '16px'};">Diagram Display Issue</p>
+              <p style="margin: 0 0 15px 0; text-align: center; font-size: ${isMobile ? '16px' : '14px'};">This mindmap cannot be rendered properly</p>
+              ${canRetry ? `
+                <button style="
+                  background: #1976d2;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 6px;
+                  font-size: ${isMobile ? '16px' : '14px'};
+                  font-weight: 600;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin-top: 10px;
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                  </svg>
+                  Regenerate Mindmap
+                </button>
+              ` : `
+                <div style="display: inline-flex; align-items: center; gap: 5px; color: #1976d2; font-size: ${isMobile ? '16px' : '14px'}; font-weight: 500;">
+                  <svg width="${isMobile ? '20' : '16'}" height="${isMobile ? '20' : '16'}" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                  </svg>
+                  View Diagram Code
+                </div>
+              `}
+            `;
+            
+            // Add click handlers
+            if (canRetry) {
+              const retryButton = errorDiv.querySelector('button');
+              retryButton.onclick = (e) => {
+                e.stopPropagation();
+                handleManualRegenerate();
+              };
+            }
+            
+            errorDiv.onclick = () => setZoomOpen(true);
+            ref.current.appendChild(errorDiv);
           }
-          
-          errorDiv.onclick = () => setZoomOpen(true);
-          ref.current.appendChild(errorDiv);
         }
       }
     };
 
     renderDiagram();
-  }, [chart, isMobile, autoRegenerated]);
+
+    return () => {
+      isMounted = false;
+      // Restore console.error on cleanup
+      if (consoleErrorOriginal) {
+        console.error = consoleErrorOriginal;
+      }
+    };
+  }, [chart, isMobile, autoRegenerated, onManualRegenerate, remainingGenerations, handleManualRegenerate, cleanMermaidSyntax]);
+
+  // Reset autoRegenerated when chart changes
+  useEffect(() => {
+    setAutoRegenerated(false);
+  }, [chart]);
 
   // Handle zoom in/out
   const handleZoomIn = () => {
@@ -443,11 +436,11 @@ const MermaidDiagram = ({
           <Tooltip title={`Regenerate mindmap (${remainingGenerations} left)`}>
             <IconButton 
               onClick={handleManualRegenerate}
-              disabled={regenerating || remainingGenerations <= 0}
+              disabled={isRegenerating || remainingGenerations <= 0}
               size={isMobile ? "medium" : "large"}
               sx={{ 
                 color: remainingGenerations > 0 ? colors[500] : colors[300],
-                animation: regenerating ? 'pulse 1s infinite' : 'none',
+                animation: isRegenerating ? 'pulse 1s infinite' : 'none',
                 '@keyframes pulse': {
                   '0%': { opacity: 1 },
                   '50%': { opacity: 0.7 },
@@ -455,7 +448,7 @@ const MermaidDiagram = ({
                 }
               }}
             >
-              {regenerating ? <CircularProgress size={20} /> : <Refresh />}
+              {isRegenerating ? <CircularProgress size={20} /> : <Refresh />}
             </IconButton>
           </Tooltip>
         )}
@@ -539,7 +532,7 @@ const MermaidDiagram = ({
                   <Button
                     startIcon={<Refresh />}
                     onClick={handleManualRegenerate}
-                    disabled={regenerating || remainingGenerations <= 0}
+                    disabled={isRegenerating || remainingGenerations <= 0}
                     variant="outlined"
                     size="small"
                     sx={{
@@ -548,7 +541,7 @@ const MermaidDiagram = ({
                       fontWeight: '600'
                     }}
                   >
-                    {regenerating ? 'Regenerating...' : `Regenerate Mindmap`}
+                    {isRegenerating ? 'Regenerating...' : `Regenerate Mindmap`}
                   </Button>
                 )}
               </Box>
@@ -666,8 +659,8 @@ const MermaidDiagram = ({
                   <Button
                     variant="outlined"
                     onClick={handleManualRegenerate}
-                    disabled={regenerating}
-                    startIcon={regenerating ? <CircularProgress size={16} /> : <Refresh />}
+                    disabled={isRegenerating}
+                    startIcon={isRegenerating ? <CircularProgress size={16} /> : <Refresh />}
                     sx={{
                       borderColor: colors[500],
                       color: colors[600],
@@ -676,7 +669,7 @@ const MermaidDiagram = ({
                       py: 1
                     }}
                   >
-                    {regenerating ? 'Regenerating...' : 'Regenerate Mindmap'}
+                    {isRegenerating ? 'Regenerating...' : 'Regenerate Mindmap'}
                   </Button>
                 )}
               </Box>
@@ -698,9 +691,9 @@ const MermaidDiagram = ({
                       color="inherit" 
                       size="small"
                       onClick={handleManualRegenerate}
-                      disabled={regenerating}
+                      disabled={isRegenerating}
                     >
-                      {regenerating ? '...' : 'Regenerate'}
+                      {isRegenerating ? '...' : 'Regenerate'}
                     </Button>
                   )}
                   <Button 
@@ -774,7 +767,7 @@ const MermaidDiagram = ({
                 fontWeight: '500'
               }}
             >
-              {regenerating ? 'Regenerating mindmap...' : 'Rendering diagram...'}
+              {isRegenerating ? 'Regenerating mindmap...' : 'Rendering diagram...'}
             </Typography>
           </Box>
         )}
@@ -797,10 +790,10 @@ const MermaidDiagram = ({
                     e.stopPropagation();
                     handleManualRegenerate();
                   }}
-                  disabled={regenerating}
+                  disabled={isRegenerating}
                   sx={{ fontWeight: '600' }}
                 >
-                  {regenerating ? '...' : 'Retry'}
+                  {isRegenerating ? '...' : 'Retry'}
                 </Button>
               ) : (
                 <Button 
@@ -821,7 +814,7 @@ const MermaidDiagram = ({
             <Typography variant="body2" fontWeight="500">
               {error}
             </Typography>
-            {onManualRegenerate && remainingGenerations > 0 && !regenerating && (
+            {onManualRegenerate && remainingGenerations > 0 && !isRegenerating && (
               <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
                 Click "Retry" to regenerate with correct syntax
               </Typography>
@@ -868,7 +861,6 @@ const MermaidDiagram = ({
           >
             <Fullscreen fontSize={isMobile ? "medium" : "small"} />
             {error ? 'View details' : 'Click to enlarge'}
-     
           </Box>
         )}
       </Box>
