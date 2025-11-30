@@ -393,16 +393,7 @@ export default function Login() {
                   }}
                 />
 
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-                   <Link 
-                      component="button" 
-                      type="button" 
-                      sx={{ color: purplePalette[600], fontWeight: 600, fontSize: '0.875rem', textDecoration: 'none' }}
-                   >
-                     Forgot Password?
-                   </Link>
-                </Box>
-
+         
                 {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
 
                 <Button
