@@ -359,7 +359,7 @@ export default function CustomTopicSearch() {
                     Try Different Words If Rejected
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    If a topic isn't accepted, rephrase it or use more specific terminology ex: fundamental,basics
+                    If a topic isn't accepted, rephrase it or use more specific terminology ex: fundamental, basics
                   </Typography>
                 </Box>
               </Box>
