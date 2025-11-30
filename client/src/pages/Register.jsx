@@ -46,10 +46,10 @@ const purplePalette = {
 };
 
 const features = [
-  { icon: <AutoAwesome fontSize="small" />, label: "Personalized Paths", desc: "Curated just for you" },
-  { icon: <FormatListBulleted fontSize="small" />, label: "Structured Learning", desc: "Step-by-step mastery" },
-  { icon: <CheckCircle fontSize="small" />, label: "Progress Tracking", desc: "Visualize your growth" },
-  { icon: <Lightbulb fontSize="small" />, label: "AI Powered", desc: "Future-ready skills" },
+  { icon: <AutoAwesome fontSize="small" />, label: "Start With the Basics", desc: "Learn fundamentals across 30+ subjects." },
+  { icon: <FormatListBulleted fontSize="small" />, label: "Consistent Lesson Format", desc: "Concept → Explanation → Example → Practice → Quiz." },
+  { icon: <CheckCircle fontSize="small" />, label: "Your Learning Workspace", desc: "Track your topics, retries, and understanding levels." },
+  { icon: <Lightbulb fontSize="small" />, label: "AI-Generated Content", desc: "Reliable, cached outputs with zero hallucination drift." },
 ];
 
 export default function Register() {
@@ -145,32 +145,6 @@ export default function Register() {
         Create your free account to start learning today.
       </Typography>
 
-      <Stack 
-        direction="row" 
-        spacing={1} 
-        sx={{ 
-          overflowX: 'auto', 
-          pb: 1, 
-          justifyContent: 'center',
-          '&::-webkit-scrollbar': { display: 'none' },
-          scrollbarWidth: 'none'
-        }}
-      >
-        {features.map((feat, index) => (
-          <Chip
-            key={index}
-            icon={React.cloneElement(feat.icon, { style: { color: 'white' } })}
-            label={feat.label}
-            sx={{
-              bgcolor: 'rgba(255, 255, 255, 0.15)',
-              color: 'white',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              fontWeight: 500
-            }}
-          />
-        ))}
-      </Stack>
     </Box>
   );
 
@@ -201,38 +175,78 @@ export default function Register() {
           <Typography variant="h3" fontWeight="900">Guidra</Typography>
         </Box>
 
-        <Typography variant="h4" fontWeight="700" sx={{ mb: 2, lineHeight: 1.2 }}>
-          Join the Future of <br /> Learning
-        </Typography>
         
         <Typography variant="h6" sx={{ mb: 6, opacity: 0.85, fontWeight: 400 }}>
-          Create an account to unlock your personalized curriculum.
+        Start learning with clean, structured AI lessons tailored for beginners.
         </Typography>
 
-        <Grid container spacing={2}>
-          {features.map((feat, index) => (
-            <Grid item xs={6} key={index}>
-              <Box sx={{ 
-                p: 2, 
-                borderRadius: 2, 
-                bgcolor: 'rgba(255,255,255,0.1)', 
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                height: '100%',
-                transition: 'transform 0.2s',
-                '&:hover': { transform: 'translateY(-2px)', bgcolor: 'rgba(255,255,255,0.15)' }
-              }}>
-                <Box sx={{ color: purplePalette[200], mb: 1 }}>{feat.icon}</Box>
-                <Typography variant="subtitle1" fontWeight="700" gutterBottom>
-                  {feat.label}
-                </Typography>
-                <Typography variant="caption" sx={{ opacity: 0.7, lineHeight: 1.4, display: 'block' }}>
-                  {feat.desc}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+    {/* Desktop Feature Grid */}
+<Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+  {features.map((feat, index) => (
+    <Box 
+      key={index}
+      sx={{ 
+        p: 2, 
+        borderRadius: 3,
+        bgcolor: 'rgba(255,255,255,0.1)', 
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        minHeight: '140px', // Minimum height
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.3s ease',
+        '&:hover': { 
+          transform: 'translateY(-4px)', 
+          bgcolor: 'rgba(255,255,255,0.15)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+        }
+      }}
+    >
+      <Box 
+        sx={{ 
+          color: 'white', 
+          mb: 2,
+          width: 48,
+          height: 48,
+          borderRadius: 2,
+          bgcolor: 'rgba(255,255,255,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.5rem',
+          flexShrink: 0 // Prevent icon from affecting height
+        }}
+      >
+        {feat.icon}
+      </Box>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Typography 
+          variant="subtitle1" 
+          fontWeight="700" 
+          sx={{ 
+            color: 'white', 
+            fontSize: '1rem',
+            mb: 1,
+            lineHeight: 1.2
+          }}
+        >
+          {feat.label}
+        </Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            opacity: 0.9, 
+            lineHeight: 1.4, 
+            color: 'rgba(255,255,255,0.9)',
+            fontSize: '0.8rem'
+          }}
+        >
+          {feat.desc}
+        </Typography>
+      </Box>
+    </Box>
+  ))}
+</Box>
       </Box>
     </Box>
   );
