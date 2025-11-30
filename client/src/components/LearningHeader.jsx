@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Box,
@@ -41,7 +40,10 @@ const LearningHeader = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  if (!selectedSubtopic) return null;
+  // Early return with proper null handling
+  if (!selectedSubtopic) {
+    return null;
+  }
 
   // Find current subtopic index and calculate navigation
   const currentIndex = subtopics.findIndex(sub => sub.name === selectedSubtopic.name);
@@ -52,13 +54,13 @@ const LearningHeader = ({
 
   const handlePrevious = () => {
     if (hasPrevious && previousSubtopic) {
-      onNavigateSubtopic(previousSubtopic);
+      onNavigateSubtopic?.(previousSubtopic);
     }
   };
 
   const handleNext = () => {
     if (hasNext && nextSubtopic) {
-      onNavigateSubtopic(nextSubtopic);
+      onNavigateSubtopic?.(nextSubtopic);
     }
   };
 
@@ -67,53 +69,61 @@ const LearningHeader = ({
     const progress = ((currentIndex + 1) / subtopics.length) * 100;
     
     return (
-      <Box sx={{
-        position: 'fixed',
-        bottom: 10,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(255, 255, 255, 0.98)',
-        backdropFilter: 'blur(40px)',
-        border: '1px solid rgba(126, 87, 194, 0.15)',
-        borderRadius: '24px',
-        zIndex: 1000,
-        height: '56px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: `
-          0 12px 32px rgba(126, 87, 194, 0.18),
-          0 4px 16px rgba(0, 0, 0, 0.08),
-          0 2px 8px rgba(0, 0, 0, 0.04)
-        `,
-        minWidth: '320px',
-        maxWidth: 'calc(100vw - 32px)',
-        overflow: 'hidden',
-      }}>
-        {/* Floating Progress Indicator */}
-        <Box sx={{
-          position: 'absolute',
-          top: -4,
+      <Box 
+        component="footer"
+        sx={{
+          position: 'fixed',
+          bottom: 10,
           left: '50%',
           transform: 'translateX(-50%)',
-          background: `linear-gradient(90deg, ${colorPalette[500]} 0%, ${colorPalette[600]} 100%)`,
-          height: '2px',
-          width: `${progress}%`,
-          maxWidth: '260px',
-          borderRadius: '1px',
-          boxShadow: '0 1px 4px rgba(126, 87, 194, 0.3)',
-          transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-        }} />
-
-        {/* Main Footer Content */}
-        <Box sx={{
-          flex: 1,
+          background: 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: 'blur(40px)',
+          border: '1px solid rgba(126, 87, 194, 0.15)',
+          borderRadius: '24px',
+          zIndex: 1000,
+          height: '56px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 2,
-          py: 1,
-          height: '100%',
-        }}>
+          boxShadow: `
+            0 12px 32px rgba(126, 87, 194, 0.18),
+            0 4px 16px rgba(0, 0, 0, 0.08),
+            0 2px 8px rgba(0, 0, 0, 0.04)
+          `,
+          minWidth: '320px',
+          maxWidth: 'calc(100vw - 32px)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Floating Progress Indicator */}
+        <Box 
+          component="span"
+          sx={{
+            position: 'absolute',
+            top: -4,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: `linear-gradient(90deg, ${colorPalette?.[500] || '#7e57c2'} 0%, ${colorPalette?.[600] || '#6d48b5'} 100%)`,
+            height: '2px',
+            width: `${progress}%`,
+            maxWidth: '260px',
+            borderRadius: '1px',
+            boxShadow: '0 1px 4px rgba(126, 87, 194, 0.3)',
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          }} 
+        />
+
+        {/* Main Footer Content */}
+        <Box 
+          sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 2,
+            py: 1,
+            height: '100%',
+          }}
+        >
           
           {/* Left Section - Navigation */}
           <Box sx={{ 
@@ -130,7 +140,7 @@ const LearningHeader = ({
                   height: 34,
                   borderRadius: '10px',
                   background: 'rgba(126, 87, 194, 0.08)',
-                  color: colorPalette[600],
+                  color: colorPalette?.[600] || '#6d48b5',
                   border: '1px solid rgba(126, 87, 194, 0.12)',
                   '&:hover': {
                     background: 'rgba(126, 87, 194, 0.15)',
@@ -144,14 +154,17 @@ const LearningHeader = ({
             </Tooltip>
 
             {/* Navigation Controls */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              background: 'rgba(126, 87, 194, 0.06)',
-              borderRadius: '12px',
-              p: 0.5,
-              border: '1px solid rgba(126, 87, 194, 0.1)'
-            }}>
+            <Box 
+              component="nav"
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                background: 'rgba(126, 87, 194, 0.06)',
+                borderRadius: '12px',
+                p: 0.5,
+                border: '1px solid rgba(126, 87, 194, 0.1)'
+              }}
+            >
               <Tooltip title="Previous lesson" placement="top">
                 <IconButton
                   onClick={handlePrevious}
@@ -161,7 +174,7 @@ const LearningHeader = ({
                     width: 28,
                     height: 28,
                     borderRadius: '8px',
-                    color: hasPrevious ? colorPalette[600] : 'rgba(126, 87, 194, 0.3)',
+                    color: hasPrevious ? (colorPalette?.[600] || '#6d48b5') : 'rgba(126, 87, 194, 0.3)',
                     background: hasPrevious ? 'rgba(126, 87, 194, 0.1)' : 'transparent',
                     '&:hover': hasPrevious ? {
                       background: 'rgba(126, 87, 194, 0.18)',
@@ -176,13 +189,16 @@ const LearningHeader = ({
 
               {/* Progress Indicator */}
               <Tooltip title={`Lesson ${currentIndex + 1} of ${subtopics.length}`} placement="top">
-                <Box sx={{ 
-                  px: 1.2,
-                  textAlign: 'center',
-                  minWidth: 40
-                }}>
+                <Box 
+                  component="span"
+                  sx={{ 
+                    px: 1.2,
+                    textAlign: 'center',
+                    minWidth: 40
+                  }}
+                >
                   <Typography variant="caption" sx={{ 
-                    color: colorPalette[700],
+                    color: colorPalette?.[700] || '#5d3a9f',
                     fontSize: '0.65rem',
                     fontWeight: 800,
                     lineHeight: 1,
@@ -191,7 +207,7 @@ const LearningHeader = ({
                     {currentIndex >= 0 ? currentIndex + 1 : 1}
                   </Typography>
                   <Typography variant="caption" sx={{ 
-                    color: colorPalette[500],
+                    color: colorPalette?.[500] || '#7e57c2',
                     fontSize: '0.5rem',
                     fontWeight: 600,
                     lineHeight: 1,
@@ -211,7 +227,7 @@ const LearningHeader = ({
                     width: 28,
                     height: 28,
                     borderRadius: '8px',
-                    color: hasNext ? colorPalette[600] : 'rgba(126, 87, 194, 0.3)',
+                    color: hasNext ? (colorPalette?.[600] || '#6d48b5') : 'rgba(126, 87, 194, 0.3)',
                     background: hasNext ? 'rgba(126, 87, 194, 0.1)' : 'transparent',
                     '&:hover': hasNext ? {
                       background: 'rgba(126, 87, 194, 0.18)',
@@ -238,23 +254,26 @@ const LearningHeader = ({
                 ? "No regenerations available" 
                 : `${remainingGenerations} regenerations available`
             } placement="top">
-              <Box sx={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.6,
-                background: remainingGenerations === 0 
-                  ? 'rgba(239, 68, 68, 0.08)' 
-                  : 'rgba(126, 87, 194, 0.08)',
-                borderRadius: '10px',
-                px: 1.2,
-                py: 0.4,
-                border: remainingGenerations === 0 
-                  ? '1px solid rgba(239, 68, 68, 0.15)' 
-                  : '1px solid rgba(126, 87, 194, 0.15)'
-              }}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Box 
+                component="span"
+                sx={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.6,
+                  background: remainingGenerations === 0 
+                    ? 'rgba(239, 68, 68, 0.08)' 
+                    : 'rgba(126, 87, 194, 0.08)',
+                  borderRadius: '10px',
+                  px: 1.2,
+                  py: 0.4,
+                  border: remainingGenerations === 0 
+                    ? '1px solid rgba(239, 68, 68, 0.15)' 
+                    : '1px solid rgba(126, 87, 194, 0.15)'
+                }}
+              >
+                <Box component="span" sx={{ textAlign: 'center' }}>
                   <Typography variant="caption" sx={{ 
-                    color: remainingGenerations === 0 ? '#ef4444' : colorPalette[600],
+                    color: remainingGenerations === 0 ? '#ef4444' : (colorPalette?.[600] || '#6d48b5'),
                     fontSize: '0.6rem',
                     fontWeight: 800,
                     lineHeight: 1,
@@ -263,7 +282,7 @@ const LearningHeader = ({
                     {remainingGenerations}
                   </Typography>
                   <Typography variant="caption" sx={{ 
-                    color: remainingGenerations === 0 ? '#ef4444' : colorPalette[500],
+                    color: remainingGenerations === 0 ? '#ef4444' : (colorPalette?.[500] || '#7e57c2'),
                     fontSize: '0.45rem',
                     fontWeight: 700,
                     lineHeight: 1,
@@ -282,7 +301,7 @@ const LearningHeader = ({
                       width: 26,
                       height: 26,
                       borderRadius: '7px',
-                      color: remainingGenerations === 0 ? '#ef4444' : colorPalette[600],
+                      color: remainingGenerations === 0 ? '#ef4444' : (colorPalette?.[600] || '#6d48b5'),
                       background: remainingGenerations === 0 
                         ? 'rgba(239, 68, 68, 0.1)' 
                         : 'rgba(126, 87, 194, 0.1)',
@@ -320,11 +339,11 @@ const LearningHeader = ({
                     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
                     cursor: 'default',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Same color on hover
-                      transform: 'none', // No movement on hover
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      transform: 'none',
                     }
                   }}
-                  disabled // Make it non-interactive
+                  disabled
                 >
                   <CheckCircle sx={{ fontSize: 16 }} />
                 </IconButton>
@@ -339,7 +358,7 @@ const LearningHeader = ({
                   : "Mark as complete"
               } placement="top">
                 <IconButton
-                  onClick={() => onCompleteSubtopic(selectedSubtopic)}
+                  onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
                   disabled={
                     updatingSubtopic === selectedSubtopic.name ||
                     !selectedSubtopic.understandingLevel ||
@@ -375,16 +394,19 @@ const LearningHeader = ({
     );
   }
 
-  // Desktop View - Premium Header (unchanged)
+  // Desktop View - Premium Header
   return (
-    <Card sx={{
-      borderRadius: 3,
-      boxShadow: '0 4px 24px rgba(126, 87, 194, 0.08)',
-      background: 'white',
-      border: '1px solid rgba(126, 87, 194, 0.1)',
-      overflow: 'visible',
-      mb: 3
-    }}>
+    <Card 
+      component="header"
+      sx={{
+        borderRadius: 3,
+        boxShadow: '0 4px 24px rgba(126, 87, 194, 0.08)',
+        background: 'white',
+        border: '1px solid rgba(126, 87, 194, 0.1)',
+        overflow: 'visible',
+        mb: 3
+      }}
+    >
       <Box sx={{ p: 2.5 }}>
         <Box sx={{
           display: 'flex',
@@ -398,9 +420,9 @@ const LearningHeader = ({
               variant="h6" 
               fontWeight="700"
               sx={{ 
-                color: colorPalette[700],
+                color: colorPalette?.[700] || '#5d3a9f',
                 mb: 0.5,
-                background: `linear-gradient(135deg, ${colorPalette[600]} 0%, ${colorPalette[700]} 100%)`,
+                background: `linear-gradient(135deg, ${colorPalette?.[600] || '#6d48b5'} 0%, ${colorPalette?.[700] || '#5d3a9f'} 100%)`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
@@ -411,7 +433,7 @@ const LearningHeader = ({
             <Typography 
               variant="body2" 
               sx={{ 
-                color: colorPalette[500],
+                color: colorPalette?.[500] || '#7e57c2',
                 fontWeight: 500
               }}
             >
@@ -420,15 +442,18 @@ const LearningHeader = ({
           </Box>
 
           {/* Navigation Area */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1.5,
-            background: 'rgba(126, 87, 194, 0.03)',
-            borderRadius: 2,
-            p: 1,
-            border: '1px solid rgba(126, 87, 194, 0.08)'
-          }}>
+          <Box 
+            component="nav"
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5,
+              background: 'rgba(126, 87, 194, 0.03)',
+              borderRadius: 2,
+              p: 1,
+              border: '1px solid rgba(126, 87, 194, 0.08)'
+            }}
+          >
             <Tooltip title="Previous lesson">
               <IconButton
                 onClick={handlePrevious}
@@ -437,7 +462,7 @@ const LearningHeader = ({
                   width: 36,
                   height: 36,
                   borderRadius: '10px',
-                  color: hasPrevious ? colorPalette[600] : 'rgba(126, 87, 194, 0.3)',
+                  color: hasPrevious ? (colorPalette?.[600] || '#6d48b5') : 'rgba(126, 87, 194, 0.3)',
                   background: hasPrevious ? 'rgba(126, 87, 194, 0.08)' : 'transparent',
                   '&:hover': hasPrevious ? {
                     background: 'rgba(126, 87, 194, 0.15)',
@@ -451,16 +476,16 @@ const LearningHeader = ({
             </Tooltip>
 
             {/* Progress */}
-            <Box sx={{ textAlign: 'center', minWidth: 60 }}>
+            <Box component="span" sx={{ textAlign: 'center', minWidth: 60 }}>
               <Typography variant="body2" sx={{ 
-                color: colorPalette[700],
+                color: colorPalette?.[700] || '#5d3a9f',
                 fontWeight: 700,
                 lineHeight: 1.2
               }}>
                 {currentIndex + 1}
               </Typography>
               <Typography variant="caption" sx={{ 
-                color: colorPalette[500],
+                color: colorPalette?.[500] || '#7e57c2',
                 fontWeight: 600,
                 lineHeight: 1.2
               }}>
@@ -476,7 +501,7 @@ const LearningHeader = ({
                   width: 36,
                   height: 36,
                   borderRadius: '10px',
-                  color: hasNext ? colorPalette[600] : 'rgba(126, 87, 194, 0.3)',
+                  color: hasNext ? (colorPalette?.[600] || '#6d48b5') : 'rgba(126, 87, 194, 0.3)',
                   background: hasNext ? 'rgba(126, 87, 194, 0.08)' : 'transparent',
                   '&:hover': hasNext ? {
                     background: 'rgba(126, 87, 194, 0.15)',
@@ -491,11 +516,14 @@ const LearningHeader = ({
           </Box>
 
           {/* Actions Area */}
-          <Box sx={{
-            display: 'flex',
-            gap: 2,
-            alignItems: 'center'
-          }}>
+          <Box 
+            component="section"
+            sx={{
+              display: 'flex',
+              gap: 2,
+              alignItems: 'center'
+            }}
+          >
             {/* Status chips */}
             <Box sx={{ display: 'flex', gap: 1 }}>
               {selectedSubtopic.completed && (
@@ -523,7 +551,7 @@ const LearningHeader = ({
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   background: 'rgba(126, 87, 194, 0.08)',
-                  color: colorPalette[600],
+                  color: colorPalette?.[600] || '#6d48b5',
                   border: '1px solid rgba(126, 87, 194, 0.2)'
                 }}
               />
@@ -546,8 +574,8 @@ const LearningHeader = ({
                 variant="outlined"
                 size="small"
                 sx={{
-                  borderColor: remainingGenerations === 0 ? '#ef4444' : colorPalette[500],
-                  color: remainingGenerations === 0 ? '#ef4444' : colorPalette[600],
+                  borderColor: remainingGenerations === 0 ? '#ef4444' : (colorPalette?.[500] || '#7e57c2'),
+                  color: remainingGenerations === 0 ? '#ef4444' : (colorPalette?.[600] || '#6d48b5'),
                   background: remainingGenerations === 0 ? 'rgba(239, 68, 68, 0.04)' : 'rgba(126, 87, 194, 0.04)',
                   fontWeight: 600,
                   borderRadius: 2,
@@ -571,7 +599,7 @@ const LearningHeader = ({
                   <CircularProgress size={18} /> 
                   : <CheckCircle sx={{ fontSize: 18 }} />
                 }
-                onClick={() => onCompleteSubtopic(selectedSubtopic)}
+                onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
                 disabled={
                   updatingSubtopic === selectedSubtopic.name ||
                   !selectedSubtopic.understandingLevel ||

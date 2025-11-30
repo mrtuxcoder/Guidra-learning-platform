@@ -503,11 +503,7 @@ export default function Learning() {
         pb: isMobile ? '0px' : 0
       }}>
         {/* Header */}
-        <Box sx={{ 
-          flexShrink: 0,
-          p: { xs: 1, md: 1.5 },
-          borderBottom: '1px solid rgba(126, 87, 194, 0.1)'
-        }}>
+        
           <LearningHeader
             selectedTopic={selectedTopic}
             selectedSubtopic={selectedSubtopic}
@@ -524,7 +520,7 @@ export default function Learning() {
             onOpenSidebar={() => setMobileDrawerOpen(true)}
             colorPalette={purplePalette}
           />
-        </Box>
+      
 
         {/* Error Alert */}
         {showError && currentError && (
