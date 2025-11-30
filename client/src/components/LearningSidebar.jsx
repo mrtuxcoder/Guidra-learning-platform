@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -40,6 +40,24 @@ const LearningSidebar = ({
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [expandedTopic, setExpandedTopic] = useState(null);
 
+  // Sync the topics with the updated subtopics
+  const syncedTopics = useMemo(() => {
+    if (!topics.length || !subtopics.length) return topics;
+    
+    return topics.map(topic => {
+      // Find subtopics that belong to this topic and merge with updated data
+      const updatedSubTopics = topic.subTopics?.map(subtopic => {
+        const updatedSubtopic = subtopics.find(sub => sub.name === subtopic.name);
+        return updatedSubtopic || subtopic;
+      }) || [];
+      
+      return {
+        ...topic,
+        subTopics: updatedSubTopics
+      };
+    });
+  }, [topics, subtopics]);
+
   const handleTopicClick = (topicName) => {
     onTopicSelect(topicName);
     // Only auto-expand on mobile if it's not already expanded
@@ -55,7 +73,7 @@ const LearningSidebar = ({
 
   // Find the parent topic for a subtopic
   const findParentTopic = (subtopicName) => {
-    for (const topic of topics) {
+    for (const topic of syncedTopics) {
       if (topic.subTopics?.some(sub => sub.name === subtopicName)) {
         return topic.topic;
       }
@@ -136,7 +154,7 @@ const LearningSidebar = ({
   );
 
   const SubtopicItem = ({ subtopic, index, topicName }) => {
-    const hasContent = contentCache[subtopic.name];
+    const hasContent = contentCache[`${selectedTopic}-${subtopic.name}`] || contentCache[subtopic.name];
     const isSelected = selectedSubtopic?.name === subtopic.name;
     const isUpdating = updatingSubtopic === subtopic.name;
 
@@ -430,7 +448,7 @@ const LearningSidebar = ({
         p: 2.5
       }}>
         <Box>
-          {topics.map((topic, index) => (
+          {syncedTopics.map((topic, index) => (
             <TopicItem key={index} topic={topic} index={index} />
           ))}
         </Box>

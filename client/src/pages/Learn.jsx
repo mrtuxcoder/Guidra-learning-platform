@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import {
   Box,
@@ -44,6 +43,7 @@ export default function Learning() {
   const [topics, setTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [subtopics, setSubtopics] = useState([]);
+  const [originalSubtopics, setOriginalSubtopics] = useState([]);
   const [selectedSubtopic, setSelectedSubtopic] = useState(null);
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -121,11 +121,15 @@ export default function Learning() {
       setSelectedTopic(topic);
       const { data } = await getSubtopics(topic);
       
-      // Reorder subtopics - incomplete first
-      const orderedSubtopics = getOrderedSubtopics(data.subTopics || []);
+      // Keep original order for navigation
+      const originalSubs = data.subTopics || [];
+      setOriginalSubtopics(originalSubs);
+      
+      // Create ordered version for display only
+      const orderedSubtopics = getOrderedSubtopics(originalSubs);
       setSubtopics(orderedSubtopics);
       
-      fetchGenerationCounts(orderedSubtopics, topic);
+      fetchGenerationCounts(originalSubs, topic);
       
       if (isMobile) {
         setMobileDrawerOpen(false);
@@ -314,14 +318,18 @@ export default function Learning() {
       setUpdatingSubtopic(subtopic.name);
       setError("");
       
+      const updatedSubtopic = { ...subtopic, understandingLevel: newUnderstanding };
+      
+      // Update both arrays
       setSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name 
-          ? { ...sub, understandingLevel: newUnderstanding }
-          : sub
+        sub.name === subtopic.name ? updatedSubtopic : sub
+      ));
+      setOriginalSubtopics(prev => prev.map(sub => 
+        sub.name === subtopic.name ? updatedSubtopic : sub
       ));
 
       if (selectedSubtopic?.name === subtopic.name) {
-        setSelectedSubtopic(prev => ({ ...prev, understandingLevel: newUnderstanding }));
+        setSelectedSubtopic(updatedSubtopic);
       }
 
       await updateSubtopicProgress({
@@ -332,7 +340,13 @@ export default function Learning() {
       });
 
     } catch (err) {
+      // Revert both arrays on error
       setSubtopics(prev => prev.map(sub => 
+        sub.name === subtopic.name 
+          ? { ...sub, understandingLevel: previousUnderstanding }
+          : sub
+      ));
+      setOriginalSubtopics(prev => prev.map(sub => 
         sub.name === subtopic.name 
           ? { ...sub, understandingLevel: previousUnderstanding }
           : sub
@@ -367,18 +381,26 @@ export default function Learning() {
         understandingLevel: subtopic.understandingLevel
       });
 
-      setSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name 
-          ? { ...sub, completed: true }
-          : sub
+      // Create the updated subtopic object
+      const updatedSubtopic = { ...subtopic, completed: true };
+      
+      // Update ORIGINAL subtopics array
+      setOriginalSubtopics(prev => prev.map(sub => 
+        sub.name === subtopic.name ? updatedSubtopic : sub
       ));
 
-      if (selectedSubtopic?.name === subtopic.name) {
-        setSelectedSubtopic(prev => ({ ...prev, completed: true }));
-      }
+      // Update SORTED subtopics array and re-sort it
+      setSubtopics(prev => {
+        const updatedArray = prev.map(sub => 
+          sub.name === subtopic.name ? updatedSubtopic : sub
+        );
+        return getOrderedSubtopics(updatedArray);
+      });
 
-      // Reorder subtopics after completion
-      setSubtopics(prev => getOrderedSubtopics(prev));
+      // Update selected subtopic if it's the current one
+      if (selectedSubtopic?.name === subtopic.name) {
+        setSelectedSubtopic(updatedSubtopic);
+      }
 
     } catch (err) {
       setError("Failed to complete subtopic");
@@ -503,24 +525,23 @@ export default function Learning() {
         pb: isMobile ? '0px' : 0
       }}>
         {/* Header */}
-        
-          <LearningHeader
-            selectedTopic={selectedTopic}
-            selectedSubtopic={selectedSubtopic}
-            subtopics={subtopics}
-            updatingSubtopic={updatingSubtopic}
-            contentInfo={contentInfo}
-            remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
-            maxGenerations={MAX_GENERATIONS}
-            contentLoading={contentLoading}
-            onRegenerateContent={handleRegenerateContent}
-            onCompleteSubtopic={handleCompleteSubtopic}
-            onUpdateUnderstanding={handleUpdateUnderstanding}
-            onNavigateSubtopic={handleNavigateSubtopic}
-            onOpenSidebar={() => setMobileDrawerOpen(true)}
-            colorPalette={purplePalette}
-          />
-      
+        <LearningHeader
+          selectedTopic={selectedTopic}
+          selectedSubtopic={selectedSubtopic}
+          subtopics={originalSubtopics}
+          displaySubtopics={subtopics}
+          updatingSubtopic={updatingSubtopic}
+          contentInfo={contentInfo}
+          remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
+          maxGenerations={MAX_GENERATIONS}
+          contentLoading={contentLoading}
+          onRegenerateContent={handleRegenerateContent}
+          onCompleteSubtopic={handleCompleteSubtopic}
+          onUpdateUnderstanding={handleUpdateUnderstanding}
+          onNavigateSubtopic={handleNavigateSubtopic}
+          onOpenSidebar={() => setMobileDrawerOpen(true)}
+          colorPalette={purplePalette}
+        />
 
         {/* Error Alert */}
         {showError && currentError && (

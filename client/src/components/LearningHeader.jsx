@@ -25,7 +25,8 @@ import {
 const LearningHeader = ({
   selectedTopic,
   selectedSubtopic,
-  subtopics = [],
+  subtopics = [], // Original order for navigation
+  displaySubtopics = [], // Sorted order for display (if needed)
   updatingSubtopic,
   contentInfo,
   remainingGenerations,
@@ -45,7 +46,7 @@ const LearningHeader = ({
     return null;
   }
 
-  // Find current subtopic index and calculate navigation
+  // Use ORIGINAL subtopics for navigation (consistent order)
   const currentIndex = subtopics.findIndex(sub => sub.name === selectedSubtopic.name);
   const hasPrevious = currentIndex > 0;
   const hasNext = currentIndex < subtopics.length - 1 && currentIndex >= 0;
