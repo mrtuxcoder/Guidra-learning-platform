@@ -495,36 +495,6 @@ const saveToCache = async ({ userId, topic, subtopic, user, content, aiPrompt })
   return cacheEntry;
 };
 
-// /**
-//  * Fix Cache - Clear and regenerate cache for specific topic
-//  */
-// exports.fixCacheController = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-//     const { topic, subtopic } = req.body;
-
-//     if (!topic || !subtopic) {
-//       return res.status(400).json({ message: "Topic and subtopic are required." });
-//     }
-
-//     // Delete existing cache entries
-//     const result = await ContentCache.deleteMany({
-//       userId,
-//       topic: topic.toLowerCase(),
-//       subtopic: subtopic.toLowerCase()
-//     });
-
-//     res.status(200).json({
-//       message: "Cache cleared successfully.",
-//       deletedCount: result.deletedCount,
-//       topic,
-//       subtopic
-//     });
-//   } catch (error) {
-//     console.error("Error in fixCacheController:", error);
-//     res.status(500).json({ message: "Failed to fix cache" });
-//   }
-// };
 
 /**
  * Fix Mindmap Cache - Specifically for mindmap issues

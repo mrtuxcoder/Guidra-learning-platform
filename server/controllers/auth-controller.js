@@ -35,60 +35,6 @@ exports.googleAuthController = (req, res, next) => {
   })(req, res, next);
 };
 
-/**
- * Google OAuth callback handler
- * NOTE: This sets cookie on BACKEND domain (render.com) which frontend can't access
- * Frontend needs to handle token separately via googleSuccessController
- */
-/**
- * Google OAuth callback handler
- * Redirects new users to /personalize, existing users to /profile
- */
-// exports.googleCallbackController = (req, res, next) => {
-//   console.log('🔐 [GOOGLE CALLBACK] Received callback');
-  
-//   passport.authenticate('google', { 
-//     session: false
-//   }, (err, user, info) => {
-//     try {
-//       if (err) {
-//         console.error('❌ [GOOGLE CALLBACK] Auth error:', err);
-//         return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
-//       }
-      
-//       if (!user) {
-//         console.error('❌ [GOOGLE CALLBACK] No user returned');
-//         return res.redirect(`${process.env.CLIENT_URL}/login?error=no_user`);
-//       }
-
-//       console.log('✅ [GOOGLE CALLBACK] User authenticated:', user.email);
-      
-//       // Generate token
-//       const token = signJwt({ id: user._id, email: user.email, name: user.name });
-      
-//       // Set backend cookie (render.com domain)
-//       setTokenCookie(res, user);
-//       console.log('✅ [GOOGLE CALLBACK] Token set in backend cookie for user:', user._id);
-      
-//       // Check if user needs to complete profile
-//       const needsPersonalization = !user.learningStyle || 
-//                                   user.learningStyle === 'visual' || 
-//                                   !user.progress || 
-//                                   user.progress.length === 0;
-      
-//       const redirectPath = needsPersonalization ? '/personalize' : '/profile';
-//       console.log(`🔄 [GOOGLE CALLBACK] Redirecting user to: ${redirectPath}`);
-      
-//       // Redirect with token in URL for frontend to store as authToken
-//       res.redirect(`${process.env.CLIENT_URL}${redirectPath}?token=${token}&source=google`);
-
-//     } catch (error) {
-//       console.error('❌ [GOOGLE CALLBACK] Error:', error);
-//       res.redirect(`${process.env.CLIENT_URL}/login?error=server_error`);
-//     }
-//   })(req, res, next);
-// };
-
 
 /**
  * Get Google OAuth token for frontend after successful authentication

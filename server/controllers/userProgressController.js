@@ -418,74 +418,7 @@ exports.updateUnderstandingLevel = async (req, res) => {
   }
 };
 
-// // Mark subtopic as completed or incomplete
-// exports.markSubtopicComplete = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-//     const { topic, subtopic, completed = true } = req.body;
 
-//     if (!topic || !subtopic) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Topic and subtopic are required"
-//       });
-//     }
-
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User not found"
-//       });
-//     }
-
-//     const topicIndex = user.progress.findIndex(
-//       progress => progress.topic.toLowerCase() === topic.toLowerCase()
-//     );
-
-//     if (topicIndex === -1) {
-//       return res.status(404).json({
-//         success: false,
-//         message: `Topic "${topic}" not found in user progress`
-//       });
-//     }
-
-//     const subtopicIndex = user.progress[topicIndex].subTopics.findIndex(
-//       sub => sub.name.toLowerCase() === subtopic.toLowerCase()
-//     );
-
-//     if (subtopicIndex === -1) {
-//       return res.status(404).json({
-//         success: false,
-//         message: `Subtopic "${subtopic}" not found in topic "${topic}"`
-//       });
-//     }
-
-//     user.progress[topicIndex].subTopics[subtopicIndex].completed = completed;
-//     user.progress[topicIndex].subTopics[subtopicIndex].lastReviewed = new Date();
-//     user.progress[topicIndex].lastAccessed = new Date();
-
-//     await user.save();
-
-//     res.status(200).json({
-//       success: true,
-//       message: `Subtopic "${subtopic}" ${completed ? 'marked as completed' : 'marked as incomplete'}`,
-//       data: {
-//         topic,
-//         subtopic,
-//         completed
-//       }
-//     });
-
-//   } catch (error) {
-//     console.error("Error marking subtopic complete:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to update completion status",
-//       error: process.env.NODE_ENV === 'development' ? error.message : undefined
-//     });
-//   }
-// };
 
 // Update quiz results and auto-calculate understanding level
 exports.updateQuizMarks = async (req, res) => {
