@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -16,7 +16,8 @@ import {
   useMediaQuery,
   Avatar,
   LinearProgress,
-  Container
+  Container,
+  CircularProgress
 } from "@mui/material";
 import { 
   AutoAwesome,
@@ -30,8 +31,7 @@ import {
   Bolt,
   SmartToy,
   School,
-  TrendingUp,
-  Add
+  TrendingUp
 } from "@mui/icons-material";
 
 const WelcomeState = ({ 
@@ -65,7 +65,17 @@ const WelcomeState = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
   const [activeSuggestion, setActiveSuggestion] = useState('continue');
+  const [isLoading, setIsLoading] = useState(true);
   
+  // Add loading delay to prevent flash of wrong content
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500); // Short delay to ensure data is loaded
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   // Memoized calculations
   const learningInsights = useMemo(() => {
     const validSubtopics = Array.isArray(subtopics) ? subtopics : [];
@@ -152,6 +162,69 @@ const WelcomeState = ({
       onSubtopicSelect(targetSubtopic);
     }
   };
+
+  // Loading state
+  const renderLoadingState = () => (
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}>
+      {/* Mobile Menu Button */}
+      {onOpenSidebar && (
+        <Tooltip title="Open menu">
+          <IconButton
+            onClick={onOpenSidebar}
+            sx={{
+              position: 'fixed',
+              top: isMobile ? 12 : 16,
+              left: isMobile ? 12 : 16,
+              width: isMobile ? 44 : 48,
+              height: isMobile ? 44 : 48,
+              display: { xs: 'flex', md: 'none' },
+              background: 'white',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              color: colorPalette[600],
+              zIndex: 1000,
+              '&:hover': {
+                background: '#f8fafc',
+              }
+            }}
+          >
+            <Menu sx={{ fontSize: isMobile ? 20 : 24 }} />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      <Box sx={{ textAlign: 'center' }}>
+        <CircularProgress 
+          size={isDesktop ? 80 : 60}
+          sx={{ 
+            color: colorPalette[500],
+            mb: 3 
+          }} 
+        />
+        <Typography 
+          variant={isDesktop ? "h5" : "h6"} 
+          fontWeight="600" 
+          color="#1e293b"
+          gutterBottom
+        >
+          Loading Your Learning Dashboard
+        </Typography>
+        <Typography 
+          variant="body1" 
+          color="#64748b"
+          sx={{ maxWidth: '400px' }}
+        >
+          Preparing your personalized learning experience...
+        </Typography>
+      </Box>
+    </Box>
+  );
 
   // Empty state when no topics are available
   const renderEmptyState = () => (
@@ -571,8 +644,50 @@ const WelcomeState = ({
     </Box>
   );
 
-  // Main render logic
-  if (!hasTopics) {
+  // Main content when data is loaded
+  const renderContent = () => {
+    if (!hasTopics) {
+      return (
+        <Fade in={true} timeout={400}>
+          <Box sx={{ 
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Mobile Menu Button */}
+            {onOpenSidebar && (
+              <Tooltip title="Open menu">
+                <IconButton
+                  onClick={onOpenSidebar}
+                  sx={{
+                    position: 'fixed',
+                    top: isMobile ? 12 : 16,
+                    left: isMobile ? 12 : 16,
+                    width: isMobile ? 44 : 48,
+                    height: isMobile ? 44 : 48,
+                    display: { xs: 'flex', md: 'none' },
+                    background: 'white',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    color: colorPalette[600],
+                    zIndex: 1000,
+                    '&:hover': {
+                      background: '#f8fafc',
+                    }
+                  }}
+                >
+                  <Menu sx={{ fontSize: isMobile ? 20 : 24 }} />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {renderHeader()}
+            {renderEmptyState()}
+          </Box>
+        </Fade>
+      );
+    }
+
     return (
       <Fade in={true} timeout={400}>
         <Box sx={{ 
@@ -607,113 +722,80 @@ const WelcomeState = ({
             </Tooltip>
           )}
 
-          {renderHeader()}
-          {renderEmptyState()}
+          {/* Full-screen content */}
+          <Box sx={{ 
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0
+          }}>
+            {renderHeader()}
+            
+            <Container 
+              maxWidth={false} 
+              sx={{ 
+                flex: 1,
+                py: isMobile ? 3 : isDesktop ? 4 : 3,
+                px: isMobile ? 2 : isDesktop ? 3 : 2
+              }}
+            >
+              <Box sx={{ 
+                maxWidth: isDesktop ? '800px' : '100%',
+                margin: '0 auto'
+              }}>
+                {/* Topic Selector at the top */}
+                {renderTopicSelector()}
+                
+                {/* Progress Card */}
+                {renderProgressCard()}
+                
+                {/* Quick Actions */}
+                {renderQuickActions()}
+
+                {/* Main CTA Button */}
+                {isReady && !learningInsights.isTopicCompleted && (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={onGenerateContent}
+                    startIcon={<AutoAwesome />}
+                    sx={{
+                      width: '100%',
+                      py: isMobile ? 1.5 : 2,
+                      borderRadius: 2,
+                      fontSize: isMobile ? '1rem' : '1.1rem',
+                      fontWeight: '700',
+                      background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
+                      boxShadow: `0 8px 24px ${colorPalette[300]}`,
+                      '&:hover': {
+                        transform: isMobile ? 'none' : 'translateY(-2px)',
+                        boxShadow: `0 12px 32px ${colorPalette[400]}`,
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <SmartToy sx={{ fontSize: isMobile ? 20 : 24 }} />
+                      Start Learning {subtopicName}
+                    </Box>
+                  </Button>
+                )}
+              </Box>
+            </Container>
+          </Box>
         </Box>
       </Fade>
     );
+  };
+
+  // Show loader first, then content
+  if (isLoading) {
+    return renderLoadingState();
   }
 
-  return (
-    <Fade in={true} timeout={400}>
-      <Box sx={{ 
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        {/* Mobile Menu Button */}
-        {onOpenSidebar && (
-          <Tooltip title="Open menu">
-            <IconButton
-              onClick={onOpenSidebar}
-              sx={{
-                position: 'fixed',
-                top: isMobile ? 12 : 16,
-                left: isMobile ? 12 : 16,
-                width: isMobile ? 44 : 48,
-                height: isMobile ? 44 : 48,
-                display: { xs: 'flex', md: 'none' },
-                background: 'white',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                color: colorPalette[600],
-                zIndex: 1000,
-                '&:hover': {
-                  background: '#f8fafc',
-                }
-              }}
-            >
-              <Menu sx={{ fontSize: isMobile ? 20 : 24 }} />
-            </IconButton>
-          </Tooltip>
-        )}
-
-        {/* Full-screen content */}
-        <Box sx={{ 
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-          maxWidth: '100%',
-          margin: 0
-        }}>
-          {renderHeader()}
-          
-          <Container 
-            maxWidth={false} 
-            sx={{ 
-              flex: 1,
-              py: isMobile ? 3 : isDesktop ? 4 : 3,
-              px: isMobile ? 2 : isDesktop ? 3 : 2
-            }}
-          >
-            <Box sx={{ 
-              maxWidth: isDesktop ? '800px' : '100%',
-              margin: '0 auto'
-            }}>
-              {/* Topic Selector at the top */}
-              {renderTopicSelector()}
-              
-              {/* Progress Card */}
-              {renderProgressCard()}
-              
-              {/* Quick Actions */}
-              {renderQuickActions()}
-
-              {/* Main CTA Button */}
-              {isReady && !learningInsights.isTopicCompleted && (
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={onGenerateContent}
-                  startIcon={<AutoAwesome />}
-                  sx={{
-                    width: '100%',
-                    py: isMobile ? 1.5 : 2,
-                    borderRadius: 2,
-                    fontSize: isMobile ? '1rem' : '1.1rem',
-                    fontWeight: '700',
-                    background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-                    boxShadow: `0 8px 24px ${colorPalette[300]}`,
-                    '&:hover': {
-                      transform: isMobile ? 'none' : 'translateY(-2px)',
-                      boxShadow: `0 12px 32px ${colorPalette[400]}`,
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <SmartToy sx={{ fontSize: isMobile ? 20 : 24 }} />
-                    Start Learning {subtopicName}
-                  </Box>
-                </Button>
-              )}
-            </Box>
-          </Container>
-        </Box>
-      </Box>
-    </Fade>
-  );
+  return renderContent();
 };
 
 // Helper functions
