@@ -22,7 +22,7 @@ function buildPrompt(user, { topic, subtopic, taskType }) {
 
 function generateSubtopicPrompt(topic, difficulty) {
   return `
-Generate exactly 12-15 subtopic names for: "${topic}"
+Generate exactly 15 subtopic names for: "${topic}"
 
 STRICT OUTPUT RULES:
 - ONLY subtopic names

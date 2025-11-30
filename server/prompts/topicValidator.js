@@ -10,8 +10,6 @@ CRITERIA FOR "YES":
 
 CRITERIA FOR "NO":
 - Single words without context ("cat", "javascript", "mathematics")
-- Overly broad fields ("social science", "computer science", "history")
-- Too narrow/simple topics ("how to boil water")
 - Personal chats/gossip/nonsense
 
 RESPOND WITH ONLY: YES or NO
