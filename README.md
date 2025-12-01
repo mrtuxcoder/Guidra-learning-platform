@@ -105,7 +105,7 @@ Guidra solves these gaps by giving students **structured, predictable, and revis
 Built by **George (Guganraj)**  
 MCA student • MERN developer • Focused on solving real problems students face when learning with AI.
 
----
+----
 
 ## 📜 License
 
