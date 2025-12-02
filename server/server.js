@@ -71,11 +71,6 @@ app.get('/health', (req, res) => {
 });
 
 
-app.use((req, res, next) => {
-  console.log('📦 Received cookies:', req.cookies);
-  console.log('📦 Received headers:', req.headers.cookie);
-  next();
-});
 
 
 // 404 handler - use a specific path instead of '*'
