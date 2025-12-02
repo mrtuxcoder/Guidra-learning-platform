@@ -1,4 +1,3 @@
-// App.js - UPDATED
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -10,7 +9,9 @@ import Learn from "./pages/Learn";
 import Personalize from "./pages/Personalize";
 import CustomTopicSearch from "./pages/CustomTopicSearch";
 import Layout from "./components/Layout";
+import PasswordSetupModal from "./components/PasswordSetupModal"; // ADD THIS
 import { checkAuthQuick, isAuthenticated } from "./utils/auth";
+import { usePasswordCheck } from "./hooks/usePasswordCheck"; // ADD THIS
 
 const theme = createTheme({
   palette: {
@@ -48,7 +49,15 @@ const LoadingSpinner = () => (
 export default function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
+  
+  // Use the password check hook
+  const { 
+    needsPasswordSetup, 
+    loading: passwordLoading,
+    setNeedsPasswordSetup 
+  } = usePasswordCheck();
 
   // Check auth on initial load
   useEffect(() => {
@@ -57,7 +66,7 @@ export default function App() {
 
   // Re-check auth only when moving between auth/non-auth routes
   useEffect(() => {
-    const isAuthRoute = ['/profile', '/personalize', '/learn'].includes(location.pathname);
+    const isAuthRoute = ['/profile', '/personalize', '/learn', '/custom-topic'].includes(location.pathname);
     const isNonAuthRoute = ['/', '/login', '/register'].includes(location.pathname);
     
     if ((isAuth && isNonAuthRoute) || (!isAuth && isAuthRoute)) {
@@ -65,11 +74,17 @@ export default function App() {
     }
   }, [location.pathname]);
 
+  // Show password modal when needed
+  useEffect(() => {
+    if (isAuth && needsPasswordSetup && !passwordLoading) {
+      setShowPasswordModal(true);
+    }
+  }, [isAuth, needsPasswordSetup, passwordLoading]);
+
   const checkAuth = async () => {
     try {
-      
       // Use quick check for initial load, full check for auth routes
-      const shouldFullCheck = ['/profile', '/personalize', '/learn'].includes(location.pathname);
+      const shouldFullCheck = ['/profile', '/personalize', '/learn', '/custom-topic'].includes(location.pathname);
       const authenticated = shouldFullCheck 
         ? await isAuthenticated() 
         : await checkAuthQuick();
@@ -83,6 +98,13 @@ export default function App() {
     }
   };
 
+  const handlePasswordSetupSuccess = () => {
+    setShowPasswordModal(false);
+    setNeedsPasswordSetup(false);
+    // Optionally refresh user data
+    checkAuth();
+  };
+
   // Show loading while checking auth
   if (!authChecked) {
     return <LoadingSpinner />;
@@ -91,6 +113,14 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      
+      {/* Password Setup Modal */}
+      <PasswordSetupModal
+        open={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onSuccess={handlePasswordSetupSuccess}
+      />
+      
       <Routes>
         {/* Public routes - only accessible when not logged in */}
         <Route path="/" element={!isAuth ? <Login /> : <Navigate to="/profile" replace />} />
@@ -126,14 +156,14 @@ export default function App() {
           )
         } />
         <Route path="/custom-topic" element={
-  isAuth ? (
-    <Layout>
-      <CustomTopicSearch />
-    </Layout>
-  ) : (
-    <Navigate to="/login" replace />
-  )
-} />
+          isAuth ? (
+            <Layout>
+              <CustomTopicSearch />
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } />
 
         {/* Catch all route */}
         <Route path="*" element={

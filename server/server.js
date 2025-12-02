@@ -9,6 +9,7 @@ const connectDB = require('./configs/db');
 const userRoute = require('./routes/user-route');
 const personalizeRoute = require('./routes/personalize-route');
 const progressRoute = require('./routes/progress-route')
+const passwordRoutes = require('./routes/passwordRoutes');
 
 const PORT = process.env.PORT || 5000;
 
@@ -63,7 +64,7 @@ app.use((req, res, next) => {
 app.use('/api/user', userRoute);
 app.use('/api/learn', personalizeRoute);
 app.use('/api/user/progress',progressRoute)
-
+app.use('/api/user/password', passwordRoutes);
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
