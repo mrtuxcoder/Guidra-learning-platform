@@ -1,7 +1,7 @@
 const User = require("../models/User");
-const ContentCache = require("../models/ContentCache");
-const callAIAPI = require("../utils/callAIAPI");
-const {buildPrompt} = require("../utils/buildPrompt");
+const ContentCache = require("../models/Content-cache");
+const callAIAPI = require("../utils/call-AI");
+const {buildPrompt} = require("../utils/build-prompt");
 const crypto = require('crypto');
 
 /**

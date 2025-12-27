@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const userProgressController = require('../controllers/userProgressController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const userProgressController = require('../controllers/user-progress-controller');
+const authMiddleware = require('../middlewares/auth-middleware');
 
 // Generation count routes - track how many times content was regenerated (max 3)
 router.put('/generation-count', authMiddleware, userProgressController.updateGenerationCount);

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const {loginController, registerController,logoutController, profileController, checkUserExists, googleAuthController,googleSuccessController,googleCallbackController} = require('../controllers/auth-controller')
-const authMiddleware = require('../middlewares/authMiddleware')
+const authMiddleware = require('../middlewares/auth-middleware')
 
 
 router.post('/login',loginController)

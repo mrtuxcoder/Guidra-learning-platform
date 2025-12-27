@@ -1,8 +1,8 @@
 const User = require("../models/User");
-const callAI = require("../utils/callAIAPI");
-const { buildPrompt, cleanSubtopicOutput } = require("../utils/buildPrompt");
-const { isNonsense, normalizeInput, isSupportedTopic } = require('../utils/simpleValidator');
-const { buildTopicValidatorPrompt } = require("../prompts/topicValidator");
+const callAI = require("../utils/call-AI");
+const { buildPrompt, cleanSubtopicOutput } = require("../utils/build-prompt");
+const { isNonsense, normalizeInput, isSupportedTopic } = require('../utils/simple-validator');
+const { buildTopicValidatorPrompt } = require("../prompts/topic-validator");
 
 // Get all subtopics for a specific topic from user progress
 exports.getSubtopicsController = async (req, res) => {

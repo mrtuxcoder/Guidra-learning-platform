@@ -19,7 +19,7 @@ const {
     fixMermaidSyntaxController
 } = require('../controllers/content-controller')
 
-const authMiddleware = require("../middlewares/authMiddleware");
+const authMiddleware = require("../middlewares/auth-middleware");
 
 // Learning & Progress Routes
 router.post("/new", authMiddleware, subtopicGenerateController )

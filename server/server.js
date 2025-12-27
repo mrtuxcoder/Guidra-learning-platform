@@ -7,9 +7,9 @@ dotenv.config({});
 const passport = require('./configs/passport');
 const connectDB = require('./configs/db');
 const userRoute = require('./routes/user-route');
-const personalizeRoute = require('./routes/personalize-route');
+const teachRoute = require('./routes/teach-route');
 const progressRoute = require('./routes/progress-route')
-const passwordRoutes = require('./routes/passwordRoutes');
+const passwordRoutes = require('./routes/password-routes');
 
 const PORT = process.env.PORT || 5000;
 
@@ -62,7 +62,7 @@ app.use((req, res, next) => {
 
 // API routes
 app.use('/api/user', userRoute);
-app.use('/api/learn', personalizeRoute);
+app.use('/api/learn', teachRoute);
 app.use('/api/user/progress',progressRoute)
 app.use('/api/user/password', passwordRoutes);
 // Health check

@@ -28,7 +28,7 @@ import {
   Psychology,
   VolumeUp
 } from "@mui/icons-material";
-import MermaidDiagram from "../components/MermaidDiagram";
+import MermaidDiagram from "./MermaidDiagram";
 import WelcomeState from "./WelcomeState";
 import LoadingState from "./LoadingState";
 import { updateQuizMarks, generateMermaidMindmap } from '../api/learning';

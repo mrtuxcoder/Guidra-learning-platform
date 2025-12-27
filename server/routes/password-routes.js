@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const passwordController = require('../controllers/passwordController');
-const authMiddleware = require('../middlewares/authMiddleware')
+const passwordController = require('../controllers/password-controller');
+const authMiddleware = require('../middlewares/auth-middleware')
 
 // Password management routes
 router.post('/set', authMiddleware, passwordController.setPassword);
