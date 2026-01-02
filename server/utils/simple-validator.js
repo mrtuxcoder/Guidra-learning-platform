@@ -176,8 +176,33 @@ function isSupportedTopic(topic) {
   });
 }
 
+/**
+ * Quick client-side validation for obvious cases
+ */
+function isObviouslyInvalid(topic) {
+  const invalidPatterns = [
+    // Too short
+    topic.length < 3,
+    
+    // Single common words without context
+    /^(cat|dog|car|book|food|water|hello|hi|test|ok|yes|no)$/i.test(topic),
+    
+    // Mostly special characters
+    /^[^a-zA-Z0-9]+$/.test(topic),
+    
+    // Too broad fields
+    /^(math|mathematics|science|history|biology|physics|chemistry|art|music|sports)$/i.test(topic),
+    
+    // Personal/gibberish
+    /^(asdf|qwerty|xyz|abc|123|lol|haha|hehe)$/i.test(topic)
+  ];
+
+  return invalidPatterns.some(pattern => pattern === true);
+}
+
 module.exports = {
   normalizeInput,
   isNonsense,
-  isSupportedTopic
+  isSupportedTopic,
+  isObviouslyInvalid
 };

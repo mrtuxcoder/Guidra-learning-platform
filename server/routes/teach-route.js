@@ -2,12 +2,11 @@
 
 const express = require("express");
 const router = express.Router();
-const {
-  subtopicGenerateController,
-   getSubtopicsController,
-  updateLearningPreferencesController,
-  validateTopicController
-} = require("../controllers/learn-controller");
+
+const { getSubtopicsController, subtopicGenerateController} = require('../controllers/curriculum-controllers/subtopic-controller')
+const {updateLearningPreferencesController} = require('../controllers/curriculum-controllers/preference-controller')
+const {validateTopicController} = require('../controllers/curriculum-controllers/topic-controller')
+const {updateSubtopicProgressController} = require('../controllers/progress-controllers/subtopic-progress')
 
 const {
   teachSubtopicController,
@@ -18,7 +17,7 @@ const {
     fixMermaidSyntaxController
 } = require('../controllers/content-controller')
 
-const {updateSubtopicProgressController} = require('../controllers/progress-controllers/subtopic-progress')
+
 
 const authMiddleware = require("../middlewares/auth-middleware");
 
