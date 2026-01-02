@@ -6,7 +6,6 @@ const {
   subtopicGenerateController,
    getSubtopicsController,
   updateLearningPreferencesController,
-  updateSubtopicProgressController,
   validateTopicController
 } = require("../controllers/learn-controller");
 
@@ -18,6 +17,8 @@ const {
     generateMermaidMapController,
     fixMermaidSyntaxController
 } = require('../controllers/content-controller')
+
+const {updateSubtopicProgressController} = require('../controllers/progress-controllers/subtopic-progress')
 
 const authMiddleware = require("../middlewares/auth-middleware");
 

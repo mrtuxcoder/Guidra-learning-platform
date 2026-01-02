@@ -4,7 +4,8 @@ const {updateUnderstandingLevel}= require('../controllers/progress-controllers/u
 const authMiddleware = require('../middlewares/auth-middleware');
 const {incrementGenerationCount, getGenerationCount,updateGenerationCount} = require('../controllers/progress-controllers/gen-count-controller')
 const {updateQuizMarks,getQuizMarks,clearQuizMarks} = require('../controllers/progress-controllers/quiz-mark-controller')
-const {markTopicComplete,addOrUpdateTopic,markSubtopicComplete,getUserProgress} = require('../controllers/progress-controllers/topic-controller')
+const {markTopicComplete,addOrUpdateTopic,getUserProgress} = require('../controllers/progress-controllers/topic-controller')
+const {markSubtopicComplete} = require('../controllers/progress-controllers/subtopic-progress')
 
 // Generation count routes - track how many times content was regenerated (max 3)
 router.put('/generation-count', authMiddleware, updateGenerationCount);
