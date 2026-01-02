@@ -11,13 +11,11 @@ const {updateSubtopicProgressController} = require('../controllers/progress-cont
 const {
   teachSubtopicController,
   regenerateContentController,
-  getContentHistoryController,
-  clearContentCacheController,
-    generateMermaidMapController,
-    fixMermaidSyntaxController
-} = require('../controllers/content-controller')
+} = require('../controllers/content-controllers/teach-subtopic-controller')
 
-
+const {fixMindmapCacheController, clearContentCacheController,debugCacheController} = require('../controllers/content-controllers/content-cache-controller')
+const {  getContentHistoryController} = require('../controllers/content-controllers/history-controller')
+const {generateMermaidMapController, fixMermaidSyntaxController} = require('../controllers/content-controllers/mermaid-controller')
 
 const authMiddleware = require("../middlewares/auth-middleware");
 
