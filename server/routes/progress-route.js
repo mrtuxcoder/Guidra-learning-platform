@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const userProgressController = require('../controllers/user-progress-controller');
 const authMiddleware = require('../middlewares/auth-middleware');
+const {incrementGenerationCount, getGenerationCount,updateGenerationCount} = require('../controllers/progress-controllers/gen-count-controller')
 
 // Generation count routes - track how many times content was regenerated (max 3)
-router.put('/generation-count', authMiddleware, userProgressController.updateGenerationCount);
-router.get('/generation-count', authMiddleware, userProgressController.getGenerationCount);
-router.put('/increment-generation', authMiddleware, userProgressController.incrementGenerationCount);
+router.put('/generation-count', authMiddleware, updateGenerationCount);
+router.get('/generation-count', authMiddleware, getGenerationCount);
+router.put('/increment-generation', authMiddleware, incrementGenerationCount);
 
 // Topic and progress management
 router.post('/topic', authMiddleware, userProgressController.addOrUpdateTopic);
