@@ -1,4 +1,4 @@
-const setTokenCookie = require('../../utils/set-token-cookie')
+const setTokenCookie = require('./set-token-cookie')
 const User = require('../../models/User');
 const { signJwt } = require('../../configs/jwt');
 

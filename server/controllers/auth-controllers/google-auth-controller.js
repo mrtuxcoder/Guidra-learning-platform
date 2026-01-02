@@ -1,7 +1,7 @@
 const User = require('../../models/User');
 const { signJwt } = require('../../configs/jwt');
 const passport = require('../../configs/passport');
-const setTokenCookie = require('../../utils/set-token-cookie')
+const setTokenCookie = require('./set-token-cookie')
 
 // ===== GOOGLE OAUTH CONTROLLERS =====
 
