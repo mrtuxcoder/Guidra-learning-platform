@@ -238,3 +238,43 @@ exports.markSubtopicComplete = async (req, res) => {
     });
   }
 };
+
+
+// Get all progress data for the user (dashboard overview)
+exports.getUserProgress = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).select('progress');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Calculate progress statistics
+    const totalSubtopics = user.progress.reduce((total, topic) => total + topic.subTopics.length, 0);
+    const completedSubtopics = user.progress.reduce((total, topic) => 
+      total + topic.subTopics.filter(sub => sub.completed).length, 0
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        progress: user.progress,
+        totalTopics: user.progress.length,
+        totalSubtopics,
+        completedSubtopics
+      }
+    });
+
+  } catch (error) {
+    console.error("Error getting user progress:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get user progress",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
