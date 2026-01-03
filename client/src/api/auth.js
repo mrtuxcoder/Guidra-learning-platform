@@ -107,7 +107,7 @@ export const startGoogleOAuth = () => {
       window.removeEventListener('message', messageHandler);
       window.location.href = '/login?error=oauth_timeout';
     }
-  }, 30000);
+  }, 60000);
 };
 
 // Cookie helper functions

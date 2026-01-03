@@ -19,11 +19,11 @@ import {
   incrementGenerationCount, 
   getGenerationCount 
 } from "../api/learning";
-import LearningSidebar from "../components/LearningSidebar";
-import LearningHeader from "../components/LearningHeader";
-import LearningContent from "../components/LearningContent";
-import WelcomeState from "../components/WelcomeState";
-import LoadingState from "../components/LoadingState";
+import LearningSidebar from "../components/learn/LearningSidebar/index";
+import LearningHeader from "../components/learn/LearningHeader/index";
+import LearningContent from "../components/learn/LearningContent/index";
+import WelcomeState from "../components/learn/WelcomeState/index";
+import LoadingState from "../components/learn/LoadingState/index";
 
 // Consistent color palette
 const purplePalette = {

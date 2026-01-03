@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import Navbar from './Navbar';
+import Navbar from '../components/Navbar/index'; 
 
 export default function Layout({ children }) {
   return (
