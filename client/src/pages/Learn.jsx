@@ -10,7 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import { Menu, Refresh } from "@mui/icons-material";
-import { getProfile } from "../api/auth";
+import { getProfile } from "../api";
 import { 
   getSubtopics, 
   teachSubtopic, 

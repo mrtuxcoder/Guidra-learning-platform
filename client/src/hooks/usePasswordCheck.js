@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { checkPasswordStatus } from '../api/password';
-import { getStoredToken } from '../utils/auth';
+import { getStoredToken } from '../api/utils/cookies';
 
 export const usePasswordCheck = () => {
   const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);

@@ -10,7 +10,7 @@ import {
   useMediaQuery
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { personalizeAndGenerate } from "../api/learning.js";
+import { personalizeAndGenerate } from "../api";
 
 // Import components
 import Header from "../components/Explore/Header";

@@ -10,7 +10,7 @@ import Explore from "./pages/Explore";
 import CustomTopicSearch from "./pages/CustomTopicSearch";
 import Layout from "./components/Layout";
 import PasswordSetupModal from "./components/PasswordSetupModal"; // ADD THIS
-import { checkAuthQuick, isAuthenticated } from "./utils/auth";
+import { checkAuthQuick, isAuthenticated } from "./api";
 import { usePasswordCheck } from "./hooks/usePasswordCheck"; // ADD THIS
 
 const theme = createTheme({

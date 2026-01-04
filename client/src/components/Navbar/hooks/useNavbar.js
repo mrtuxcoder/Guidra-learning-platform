@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getProfile } from '../../../api/auth';
-import { completeLogout } from '../../../utils/auth';
+import { getProfile } from '../../../api';
+import { completeLogout } from '../../../api';
 import { iconSet } from '../constants.jsx';
 
 export const useNavbar = (navigate, location, isMobile) => {

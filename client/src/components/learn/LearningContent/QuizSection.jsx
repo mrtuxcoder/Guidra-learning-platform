@@ -3,7 +3,7 @@ import { Card, CardContent, Box, Typography, Alert, Button } from "@mui/material
 import { Quiz } from "@mui/icons-material";
 import QuizQuestion from "./QuizQuestion";
 import QuizProgress from "./QuizProgress";
-import { updateQuizMarks } from '../../../api/learning';
+import { updateQuizMarks } from '../../../api';
 
 const QuizSection = ({ quizItems, selectedTopic, selectedSubtopic, isMobile, colorPalette }) => {
   const [quizAnswers, setQuizAnswers] = useState({});

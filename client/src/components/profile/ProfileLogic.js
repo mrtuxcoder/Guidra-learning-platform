@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getProfile } from "../../api/auth";
-import { hasAuthCookie } from "../../utils/auth";
-import { authHelpers } from "../../api/api";
+import { getProfile } from "../../api";
+import { hasAuthCookie } from "../../api";
+import { authHelpers } from "../../api";
 
 const { setFrontendCookie } = authHelpers;
 
@@ -66,7 +66,7 @@ export const useProfileLogic = (navigate) => {
   const checkPasswordStatus = async (userData) => {
     try {
       if (userData && userData.authProvider === 'google' && !userData.password) {
-        const { checkNeedsPasswordSetup } = await import('../../utils/auth');
+        const { checkNeedsPasswordSetup } = await import('../../api');
         const passwordInfo = await checkNeedsPasswordSetup();
         
         if (passwordInfo.needsPasswordSetup) {
@@ -218,4 +218,4 @@ export const getProgressStats = (user) => {
 };
 
 // Need to import completeLogout
-import { completeLogout } from "../../utils/auth";
+import { completeLogout } from "../../api";

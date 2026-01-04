@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser, startGoogleOAuth } from "../api/auth";
-import { hasAuthCookie } from "../utils/auth";
+import { loginUser, startGoogleOAuth } from "../api";
+import { hasAuthCookie } from "../api";
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthForm from "../components/auth/AuthForm";
 import { loginFeatures } from "../components/auth/constants.jsx";

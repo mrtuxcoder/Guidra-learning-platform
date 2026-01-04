@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser, startGoogleOAuth } from "../api/auth";
+import { registerUser, startGoogleOAuth } from "../api";
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthForm from "../components/auth/AuthForm";
 import { registerFeatures } from "../components/auth/constants.jsx";

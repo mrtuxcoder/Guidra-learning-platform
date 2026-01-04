@@ -1,4 +1,10 @@
+// /src/api/api.js
 import axios from "axios";
+import { 
+  getStoredToken, 
+  setFrontendCookie, 
+  removeFrontendCookie 
+} from './utils/cookies.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,41 +13,28 @@ const API = axios.create({
   withCredentials: true,
 });
 
-// Frontend cookie helpers
-const setFrontendCookie = (token, days = 7) => {
-  const maxAge = days * 24 * 60 * 60;
-  document.cookie = `authToken=${token}; path=/; max-age=${maxAge}; secure; samesite=lax`;
- 
-};
-
-const removeFrontendCookie = () => {
-  document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=lax';
-};
-
-const getFrontendCookie = () => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; authToken=`);
-  if (parts.length === 2) {
-    return parts.pop().split(';').shift();
-  }
-  return null;
-};
-
-const getStoredToken = () => {
-  // Only check frontend cookie (no localStorage)
-  return getFrontendCookie();
+// Re-export cookie helpers
+export const authHelpers = {
+  setFrontendCookie,
+  removeFrontendCookie,
+  getFrontendCookie: () => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; authToken=`);
+    if (parts.length === 2) {
+      return parts.pop().split(';').shift();
+    }
+    return null;
+  },
+  getStoredToken,
 };
 
 // Request interceptor
 API.interceptors.request.use(
   (config) => {
-    
-    // Add Authorization header if we have a token from frontend cookie
     const token = getStoredToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
   (error) => {
@@ -52,15 +45,10 @@ API.interceptors.request.use(
 // Response interceptor
 API.interceptors.response.use(
   (response) => {
-    // Check if response contains a token (login/register/success endpoints)
     if (response.data?.token) {
-      const token = response.data.token;
-      
-      // Store token ONLY in frontend cookie (no localStorage)
-      setFrontendCookie(token);
+      setFrontendCookie(response.data.token);
     }
     
-    // Check if logout response - clear frontend tokens
     if (response.data?.message?.includes('logout') || response.data?.clearFrontendCookie) {
       removeFrontendCookie();
     }
@@ -68,12 +56,8 @@ API.interceptors.response.use(
     return response;
   },
   (error) => {
-    
-    // Auto-logout on 401 Unauthorized
     if (error.response?.status === 401) {
       removeFrontendCookie();
-      
-      // Redirect to login if not already there
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
@@ -82,13 +66,5 @@ API.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// Export cookie helpers for use in auth.js
-export const authHelpers = {
-  setFrontendCookie,
-  removeFrontendCookie,
-  getFrontendCookie,
-  getStoredToken
-};
 
 export default API;

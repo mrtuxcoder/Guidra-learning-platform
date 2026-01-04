@@ -10,7 +10,7 @@ import Guidelines from "../components/CustomTopicSearch/Guidelines";
 import ValidatedTopic from "../components/CustomTopicSearch/ValidatedTopic";
 import ErrorDisplay from "../components/CustomTopicSearch/ErrorDisplay";
 import BasicLearningOption from "../components/CustomTopicSearch/BasicLearningOption";
-import { validateTopic, personalizeAndGenerate } from "../api/learning";
+import { validateTopic, personalizeAndGenerate } from "../api";
 
 export default function CustomTopicSearch() {
   const navigate = useNavigate();

@@ -18,7 +18,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { setPassword } from '../api/password';
-import { setFrontendCookie } from '../utils/auth';
+import { setFrontendCookie } from '../api/utils/cookies';
 
 // Purple color palette
 const purplePalette = {
