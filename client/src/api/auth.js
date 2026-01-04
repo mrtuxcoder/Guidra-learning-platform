@@ -4,36 +4,34 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // REGISTER
 export const registerUser = async (userData) => {
-  return await API.post("/user/register", userData);
+  return await API.post("/api/v1/auth/register", userData);
 }
 
 // LOGIN
 export const loginUser = async (credentials) => {
-  return await API.post("/user/login", credentials);
+  return await API.post("/api/v1/auth/login", credentials);
 };
 
 // GET PROFILE
 export const getProfile = async () => {
-  return await API.get("/user/profile");
+  return await API.get("/api/v1/users/me");
 };
 
 // CHECK USER EXISTS (for Google OAuth flow)
 export const checkUserExists = async (email) => {
-  return await API.get(`/user/check-user?email=${encodeURIComponent(email)}`);
+  return await API.get(`/api/v1/users/check?email=${encodeURIComponent(email)}`);
 };
-
-
 
 // LOGOUT
 export const logoutUser = async () => {
-  return await API.post("/user/logout");
+  return await API.post("/api/v1/auth/logout");
 };
 
 // Main OAuth handler
 export const startGoogleOAuth = () => {
   
   const popup = window.open(
-    `${import.meta.env.VITE_API_BASE_URL}/user/google`,
+    `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/google`,
     'oauth_popup',
     'width=600,height=700,scrollbars=no,resizable=no'
   );

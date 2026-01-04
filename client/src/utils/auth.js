@@ -22,7 +22,7 @@ export const hasAuthCookie = () => {
 export const isAuthenticated = async () => {
   try {
     // Make a direct API call to check auth status
-    const response = await API.get("/user/profile", {
+    const response = await API.get("/api/v1/users/me", {
       validateStatus: (status) => status < 500
     });
     

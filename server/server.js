@@ -6,10 +6,11 @@ dotenv.config({});
 
 const passport = require('./configs/passport');
 const connectDB = require('./configs/db');
-const userRoute = require('./routes/user-route');
-const teachRoute = require('./routes/teach-route');
-const progressRoute = require('./routes/progress-route')
-const passwordRoutes = require('./routes/password-routes');
+const authRoutes = require('./routes/v1/auth-routes');
+const userRoutes = require('./routes/v1/user-routes');
+const learningRoutes = require('./routes/v1/learning-routes');
+const progressRoutes = require('./routes/v1/progress-routes');
+const contentRoutes = require('./routes/v1/content-routes');
 
 const PORT = process.env.PORT || 5000;
 
@@ -19,9 +20,7 @@ app.use(passport.initialize());
 // Connect to database
 connectDB();
 
-
-// Simple CORS setup - NO app.options('*')
-// Fix your CORS configuration:
+// CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
@@ -30,13 +29,11 @@ app.use(cors({
       'http://localhost:5174'
     ];
     
-    // Allow requests with no origin (like mobile apps, Postman, or server requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      // Allow any Vercel preview deployment
       if (origin.includes('.vercel.app')) {
         callback(null, true);
       } else {
@@ -60,20 +57,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// API routes
-app.use('/api/user', userRoute);
-app.use('/api/learn', teachRoute);
-app.use('/api/user/progress',progressRoute)
-app.use('/api/user/password', passwordRoutes);
+// API v1 Routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/learning', learningRoutes);
+app.use('/api/v1/progress', progressRoutes);
+app.use('/api/v1/content', contentRoutes);
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
 
-
-
-
-// 404 handler - use a specific path instead of '*'
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
@@ -84,11 +80,8 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-
-
-
 app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode`);
+  console.log(`Server running in ${process.env.NODE_ENV} mode`);
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌐 Health check`);
+  console.log(`🌐 Health check: http://localhost:${PORT}/health`);
 });
