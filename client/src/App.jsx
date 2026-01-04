@@ -6,7 +6,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Learn from "./pages/Learn";
-import Personalize from "./pages/Personalize";
+import Explore from "./pages/Explore";
 import CustomTopicSearch from "./pages/CustomTopicSearch";
 import Layout from "./components/Layout";
 import PasswordSetupModal from "./components/PasswordSetupModal"; // ADD THIS
@@ -66,7 +66,7 @@ export default function App() {
 
   // Re-check auth only when moving between auth/non-auth routes
   useEffect(() => {
-    const isAuthRoute = ['/profile', '/personalize', '/learn', '/custom-topic'].includes(location.pathname);
+    const isAuthRoute = ['/profile', '/explore', '/learn', '/custom-topic'].includes(location.pathname);
     const isNonAuthRoute = ['/', '/login', '/register'].includes(location.pathname);
     
     if ((isAuth && isNonAuthRoute) || (!isAuth && isAuthRoute)) {
@@ -84,7 +84,7 @@ export default function App() {
   const checkAuth = async () => {
     try {
       // Use quick check for initial load, full check for auth routes
-      const shouldFullCheck = ['/profile', '/personalize', '/learn', '/custom-topic'].includes(location.pathname);
+      const shouldFullCheck = ['/profile', '/explore', '/learn', '/custom-topic'].includes(location.pathname);
       const authenticated = shouldFullCheck 
         ? await isAuthenticated() 
         : await checkAuthQuick();
@@ -137,10 +137,10 @@ export default function App() {
             <Navigate to="/login" replace />
           )
         } />
-        <Route path="/personalize" element={
+        <Route path="/explore" element={
           isAuth ? (
             <Layout>
-              <Personalize />
+              <Explore />
             </Layout>
           ) : (
             <Navigate to="/login" replace />

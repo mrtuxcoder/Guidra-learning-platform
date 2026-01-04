@@ -45,7 +45,7 @@ const EmptyState = ({ colorPalette }) => {
       <Button
         variant="contained"
         size="large"
-        onClick={() => window.location.href = '/personalize'}
+        onClick={() => window.location.href = '/explore'}
         startIcon={<Explore />}
         sx={{
           py: 2,

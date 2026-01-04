@@ -35,7 +35,7 @@ export default function Register() {
     try {
       await registerUser(formData);
       setError("");
-      window.location.href = "/personalize";
+      window.location.href = "/explore";
     } catch (err) {
       setError(err.response?.data?.error || err.response?.data?.message || "Registration failed. Please try again.");
     } finally {

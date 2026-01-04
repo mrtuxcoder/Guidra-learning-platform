@@ -5,7 +5,7 @@ import { School, Explore, Logout } from "@mui/icons-material";
 const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
   const actions = [
     { icon: <School />, label: 'Continue Learning', action: () => onNavigate('/learn'), variant: 'contained' },
-    { icon: <Explore />, label: 'Explore Courses', action: () => onNavigate('/personalize'), variant: 'outlined' },
+    { icon: <Explore />, label: 'Explore Courses', action: () => onNavigate('/explore'), variant: 'outlined' },
     { icon: <Logout />, label: 'Sign Out', action: onLogout, variant: 'outlined', color: 'error' }
   ];
 

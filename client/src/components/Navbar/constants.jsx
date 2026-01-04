@@ -32,7 +32,7 @@ export const iconSet = [
 // Navigation items
 export const navItems = [
   { path: '/learn', label: 'Learn', icon: <School sx={{ fontSize: 20 }} /> },
-  { path: '/personalize', label: 'Explore', icon: <Explore sx={{ fontSize: 20 }} /> },
+  { path: '/explore', label: 'Explore', icon: <Explore sx={{ fontSize: 20 }} /> },
   { path: '/custom-topic', label: 'Custom Topic', icon: <Search sx={{ fontSize: 20 }} />, beta: true },
   { path: '/profile', label: 'Profile', icon: <Person sx={{ fontSize: 20 }} /> }
 ];

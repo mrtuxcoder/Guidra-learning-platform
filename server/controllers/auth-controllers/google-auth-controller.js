@@ -20,7 +20,7 @@ exports.googleAuthController = (req, res, next) => {
 
 /**
  * Get Google OAuth token for frontend after successful authentication
- * Frontend calls this after being redirected to /personalize
+ * Frontend calls this after being redirected to /explore
  */
 exports.googleSuccessController = async (req, res) => {
   try {
@@ -125,7 +125,7 @@ exports.googleCallbackController = (req, res, next) => {
                                   !user.progress || 
                                   user.progress.length === 0;
       
-      const redirectPath = needsPersonalization ? '/personalize' : '/profile';
+      const redirectPath = needsPersonalization ? '/explore' : '/profile';
       
       // Send HTML that communicates token to frontend via postMessage
       res.send(`

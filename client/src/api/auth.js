@@ -82,7 +82,7 @@ export const startGoogleOAuth = () => {
         
         
         // Redirect
-        const finalPath = needsPersonalization ? '/personalize' : (redirectPath || '/profile');
+        const finalPath = needsPersonalization ? '/explore' : (redirectPath || '/profile');
         window.location.href = finalPath;
         
       } catch (err) {

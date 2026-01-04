@@ -10,19 +10,19 @@ import {
   useMediaQuery
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { personalizeAndGenerate } from "../api/learning";
+import { personalizeAndGenerate } from "../api/learning.js";
 
 // Import components
-import Header from "../components/personalize/Header";
-import SearchBar from "../components/personalize/SearchBar";
-import CategorySidebar from "../components/personalize/CategorySidebar";
-import CourseCard from "../components/personalize/CourseCard";
-import ActionButton from "../components/personalize/ActionButton";
+import Header from "../components/Explore/Header";
+import SearchBar from "../components/Explore/SearchBar";
+import CategorySidebar from "../components/Explore/CategorySidebar";
+import CourseCard from "../components/Explore/CourseCard";
+import ActionButton from "../components/Explore/ActionButton";
 
 // Import constants
-import { PREDEFINED_TOPICS, CATEGORIES } from "../components/personalize/constants.jsx";
+import { PREDEFINED_TOPICS, CATEGORIES } from "../components/Explore/constants.jsx";
 
-export default function Personalize() {
+export default function Explore() {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
