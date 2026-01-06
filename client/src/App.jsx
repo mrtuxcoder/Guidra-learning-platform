@@ -9,9 +9,9 @@ import Learn from "./pages/Learn";
 import Explore from "./pages/Explore";
 import CustomTopicSearch from "./pages/CustomTopicSearch";
 import Layout from "./components/Layout";
-import PasswordSetupModal from "./components/PasswordSetupModal"; // ADD THIS
-import { checkAuthQuick, isAuthenticated } from "./api";
-import { usePasswordCheck } from "./hooks/usePasswordCheck"; // ADD THIS
+import PasswordSetupModal from "./components/PasswordSetupModal";
+import { hasAuthCookie, isAuthenticated } from "./api"; 
+import { usePasswordCheck } from "./hooks/usePasswordCheck";
 
 const theme = createTheme({
   palette: {
@@ -86,8 +86,8 @@ export default function App() {
       // Use quick check for initial load, full check for auth routes
       const shouldFullCheck = ['/profile', '/explore', '/learn', '/custom-topic'].includes(location.pathname);
       const authenticated = shouldFullCheck 
-        ? await isAuthenticated() 
-        : await checkAuthQuick();
+        ? await isAuthenticated() // Makes API call to verify token
+        : hasAuthCookie(); // Just checks cookie presence (no API call)
       
       setIsAuth(authenticated);
     } catch (error) {

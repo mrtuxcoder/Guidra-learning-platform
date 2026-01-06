@@ -1,4 +1,4 @@
-// /src/api/utils/cookies.js - ENHANCED
+// /src/api/utils/cookies.js - SIMPLIFIED
 export const setFrontendCookie = (token, days = 7) => {
   const maxAge = days * 24 * 60 * 60;
   document.cookie = `authToken=${token}; path=/; max-age=${maxAge}; secure; samesite=lax`;
@@ -21,11 +21,6 @@ export const getStoredToken = () => {
   return getFrontendCookie();
 };
 
-export const hasAuthToken = () => {
-  return !!getFrontendCookie();
-};
-
-// Cache utilities
 export const createCache = (ttl = 60000) => {
   let cache = { timestamp: 0, value: null };
   
@@ -48,7 +43,6 @@ export const createCache = (ttl = 60000) => {
   };
 };
 
-// Create auth cache instance
 export const authCache = createCache(60000);
 
 export const clearAuthCache = () => {
@@ -59,7 +53,6 @@ export const clearAllTokens = () => {
   removeFrontendCookie();
   authCache.clear();
   
-  // Clear all possible cookie variations
   const domains = [window.location.hostname, '.' + window.location.hostname];
   domains.forEach(domain => {
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;

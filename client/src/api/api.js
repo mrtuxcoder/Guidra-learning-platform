@@ -13,22 +13,12 @@ const API = axios.create({
   withCredentials: true,
 });
 
-// Re-export cookie helpers
 export const authHelpers = {
   setFrontendCookie,
   removeFrontendCookie,
-  getFrontendCookie: () => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; authToken=`);
-    if (parts.length === 2) {
-      return parts.pop().split(';').shift();
-    }
-    return null;
-  },
   getStoredToken,
 };
 
-// Request interceptor
 API.interceptors.request.use(
   (config) => {
     const token = getStoredToken();
@@ -42,7 +32,6 @@ API.interceptors.request.use(
   }
 );
 
-// Response interceptor
 API.interceptors.response.use(
   (response) => {
     if (response.data?.token) {

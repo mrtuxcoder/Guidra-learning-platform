@@ -1,21 +1,26 @@
-// /src/api/auth.js - COMPREHENSIVE VERSION
+// /src/api/auth.js - DEDUPLICATED
 import API, { authHelpers } from './api';
-import { authCache, clearAllTokens, clearAuthCache } from './utils/cookies.js';
+import { clearAllTokens, clearAuthCache } from './utils/cookies.js';
 
-// Use the helpers from api.js
 export const {
   setFrontendCookie,
   removeFrontendCookie,
-  getFrontendCookie,
   getStoredToken
 } = authHelpers;
 
-// Basic cookie helpers (re-export)
+export const getFrontendCookie = () => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; authToken=`);
+  if (parts.length === 2) {
+    return parts.pop().split(';').shift();
+  }
+  return null;
+};
+
 export const hasAuthCookie = () => {
   return !!getFrontendCookie();
 };
 
-// CORE API FUNCTIONS
 export const registerUser = async (userData) => {
   return await API.post("/api/v1/auth/register", userData);
 };
@@ -37,7 +42,6 @@ export const logoutUser = async () => {
   return await API.post("/api/v1/auth/logout");
 };
 
-// AUTH UTILITIES (from utils/auth.js)
 export const isAuthenticated = async () => {
   try {
     const response = await API.get("/api/v1/users/me", {
@@ -147,15 +151,10 @@ export const changePassword = async (passwordData) => {
 
 export const completeLogout = async () => {
   removeFrontendCookie();
-  clearAuthCache();
   
   window.location.href = '/login';
   
   API.post("/api/v1/auth/logout").catch(() => {});
-};
-
-export const checkAuthQuick = async () => {
-  return hasAuthCookie();
 };
 
 export const handleManualLogin = (token, userData = null) => {
@@ -236,7 +235,6 @@ export const initializeAuth = async () => {
   }
 };
 
-// GOOGLE OAUTH (from original auth.js)
 export const startGoogleOAuth = () => {
   const popup = window.open(
     `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/google`,
@@ -308,41 +306,16 @@ export const startGoogleOAuth = () => {
   }, 60000);
 };
 
-export const getAuthToken = () => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; authToken=`);
-  if (parts.length === 2) {
-    return parts.pop().split(';').shift();
-  }
-  return null;
-};
-
-export const removeAuthToken = () => {
-  document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
-};
-
-export const hasAuthToken = () => {
-  return !!getAuthToken();
-};
-
-export const googleAuth = () => {
-  startGoogleOAuth();
-};
-
-// Export cache utilities
 export { clearAllTokens, clearAuthCache };
 
-// Default export
 export default {
-  // Core auth functions
   getStoredToken,
+  getFrontendCookie,
   isAuthenticated,
   isAuthenticatedWithInfo,
-  checkAuthQuick,
   hasAuthCookie,
   initializeAuth,
   
-  // User actions
   loginUser,
   registerUser,
   logoutUser,
@@ -350,30 +323,20 @@ export default {
   getProfile,
   checkUserExists,
   
-  // Password management
   checkNeedsPasswordSetup,
   setupPassword,
   changePassword,
   
-  // OAuth
   startGoogleOAuth,
-  googleAuth,
   
-  // Route guards
   requireAuth,
   requireGuest,
   
-  // Utilities
   debugAuth,
   clearAllTokens,
   clearAuthCache,
   handleManualLogin,
   
-  // Cookie helpers
   setFrontendCookie,
   removeFrontendCookie,
-  getFrontendCookie,
-  getAuthToken,
-  removeAuthToken,
-  hasAuthToken,
 };
