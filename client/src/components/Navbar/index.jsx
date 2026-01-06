@@ -3,7 +3,6 @@ import {
   AppBar,
   Toolbar,
   Box,
-  CircularProgress,
   useMediaQuery,
   useTheme
 } from '@mui/material';
@@ -67,39 +66,35 @@ const Navbar = () => {
             px: { xs: 1, sm: 2 },
             gap: { xs: 1, sm: 2 }
           }}>
-            {/* Logo */}
+            {/* Logo - always shown */}
             <Logo randomIcon={randomIcon} user={user} navigate={navigate} />
 
-            {/* Show only loader while auth is loading */}
-            {isLoading && (
-              <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <CircularProgress 
-                  size={24} 
-                  sx={{ 
-                    color: purpleTheme.primary,
-                  }} 
-                />
-              </Box>
+            {/* Desktop Navigation - only shown when user is loaded and logged in */}
+            {!isLoading && user && (
+              <NavigationItems 
+                isMobile={isMobile} 
+                isActive={isActive} 
+                navigate={navigate} 
+                user={user} 
+              />
             )}
 
-            {/* Desktop Navigation */}
-            <NavigationItems 
-              isMobile={isMobile} 
-              isActive={isActive} 
-              navigate={navigate} 
-              user={user} 
-            />
-
-            {/* Spacer - Only show when user is logged in and on desktop */}
-            {user && !isLoading && (
+            {/* Spacer - Only show when user is logged in and not loading */}
+            {!isLoading && user && (
               <Box sx={{ 
                 display: { xs: 'none', md: 'block' },
                 flexGrow: 1 
               }} />
             )}
 
-            {/* User Section */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+            {/* User Section - This box remains in layout for consistent spacing */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              flexShrink: 0,
+              minWidth: isLoading ? '40px' : 'auto' // Maintain consistent width while loading
+            }}>
               <UserAvatar
                 isLoading={isLoading}
                 user={user}

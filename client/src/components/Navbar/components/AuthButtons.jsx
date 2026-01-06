@@ -3,14 +3,17 @@ import { Box, Button } from '@mui/material';
 import { purpleTheme, getThemeGradient } from '../constants.jsx';
 
 const AuthButtons = ({ isLoading, user, navigate, randomIcon }) => {
+  // Show nothing while loading
   if (isLoading) {
     return null;
   }
 
+  // If user exists (logged in), don't show auth buttons
   if (user) {
     return null;
   }
 
+  // Only show auth buttons when NOT loading and user is NOT logged in
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
       <Button
