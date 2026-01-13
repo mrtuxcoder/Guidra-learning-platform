@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 import { Button, CircularProgress } from "@mui/material";
 import { Google } from "@mui/icons-material";
-import { buttonStyles } from './styles';
+import { buttonStyles } from "./styles";
 
 const GoogleButton = ({ loading, onClick, text = "Continue with Google" }) => {
   return (
@@ -13,7 +13,7 @@ const GoogleButton = ({ loading, onClick, text = "Continue with Google" }) => {
       disabled={loading}
       sx={buttonStyles.googleButton}
     >
-      {loading ? 'Redirecting...' : text}
+      {loading ? "Redirecting..." : text}
     </Button>
   );
 };

@@ -37,7 +37,11 @@ export default function Register() {
       setError("");
       window.location.href = "/explore";
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || "Registration failed. Please try again.");
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -52,14 +56,18 @@ export default function Register() {
   // OAuth Error Handling
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get('error');
+    const error = urlParams.get("error");
     if (error) {
-      let msg = 'Authentication failed.';
-      if (error === 'auth_failed') msg = 'Google authentication failed.';
-      if (error === 'no_user') msg = 'Unable to retrieve user info.';
-      
+      let msg = "Authentication failed.";
+      if (error === "auth_failed") msg = "Google authentication failed.";
+      if (error === "no_user") msg = "Unable to retrieve user info.";
+
       setError(msg);
-      window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.origin + window.location.pathname
+      );
     }
   }, []);
 

@@ -1,5 +1,5 @@
 import { Box, IconButton, Button, Tooltip } from '@mui/material';
-import { ZoomIn, ZoomOut, Close, RotateRight, Code, Refresh } from '@mui/icons-material';
+import { ZoomIn, ZoomOut, Close, RotateRight, Code, Refresh} from '@mui/icons-material';
 
 const DiagramControls = ({
   zoomLevel,
@@ -15,7 +15,8 @@ const DiagramControls = ({
   colors,
   onManualRegenerate,
   isRegenerating,
-  remainingGenerations
+  remainingGenerations,
+  CircularProgress
 }) => (
   <Box sx={{ 
     position: 'sticky', 
@@ -94,7 +95,7 @@ const DiagramControls = ({
               }
             }}
           >
-            {isRegenerating ? <CircularProgress size={20} /> : <Refresh />}
+            {isRegenerating ? <Close size={20} /> : <Refresh />}
           </IconButton>
         </Tooltip>
       )}

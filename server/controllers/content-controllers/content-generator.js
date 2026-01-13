@@ -1,27 +1,15 @@
 const User = require("../../models/User");
 const ContentCache = require("../../models/Content-cache");
 const callAIAPI = require("../../utils/call-AI");
-const { buildPrompt } = require("../../utils/build-prompt");
-const crypto = require('crypto');
+const { generateUnifiedPrompt } = require("../../utils/content-prompt-builder");
+const crypto = require("crypto");
 const {
   createStructuredContentFromText,
-  extractKeyConceptsFromText,
-  extractExampleFromText,
-  generatePracticeFromTopic,
-  generateFallbackMindmap
 } = require("../../utils/content-utils");
 const {
-  validateContentStructure
-} = require("../../utils/validation-utils");
-const {
-  validateAndFixMermaidSyntax,
-  validateMermaidSyntax,
-  isFallbackMindmap
-} = require("../../utils/mermaid-utils");
-const {
-  saveToCache,
-  getCachedContent
-} = require("../../utils/cache-utils");
+  validateContentStructure,
+} = require("../../utils/content-validation-utils");
+const { saveToCache, getCachedContent } = require("../../utils/cache-utils");
 
 /**
  * 🧠 Personalized Teaching for a Subtopic WITH CACHING - CONTENT PRESERVED
@@ -32,7 +20,9 @@ exports.teachSubtopicController = async (req, res) => {
     const { topic, subtopic, regenerate = false } = req.body;
 
     if (!topic || !subtopic)
-      return res.status(400).json({ message: "Topic and subtopic are required." });
+      return res
+        .status(400)
+        .json({ message: "Topic and subtopic are required." });
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -42,13 +32,18 @@ exports.teachSubtopicController = async (req, res) => {
     }
 
     // Check cache first using utility
-    const cachedContent = await getCachedContent(userId, topic, subtopic, user.learningStyle);
+    const cachedContent = await getCachedContent(
+      userId,
+      topic,
+      subtopic,
+      user.learningStyle
+    );
 
     if (cachedContent) {
       console.log("📂 Loading from cache - Checking mindmap...");
-      
+
       // Enhanced validation - specifically check for mindmap
-      if (!cachedContent.content || typeof cachedContent.content !== 'object') {
+      if (!cachedContent.content || typeof cachedContent.content !== "object") {
         console.error("❌ Invalid cache content structure, regenerating...");
         await ContentCache.deleteOne({ _id: cachedContent._id });
       } else if (!cachedContent.content.mindmap) {
@@ -71,21 +66,14 @@ exports.teachSubtopicController = async (req, res) => {
       }
     }
 
-    // Generate new content
-    const aiPrompt = buildPrompt(user, {
-      topic,
-      subtopic,
-      taskType: "teachSubtopic",
-    });
-
+    const aiPrompt = generateUnifiedPrompt(user, topic, subtopic);
 
     const aiResponse = await callAIAPI(aiPrompt);
-
     let structuredContent;
     try {
       let jsonString = aiResponse.trim();
-      jsonString = jsonString.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-      
+      jsonString = jsonString.replace(/```json\s*/g, "").replace(/```\s*/g, "");
+
       try {
         structuredContent = JSON.parse(jsonString);
       } catch (directError) {
@@ -98,21 +86,30 @@ exports.teachSubtopicController = async (req, res) => {
       }
     } catch (parseError) {
       console.error("❌ JSON Parse Error:", parseError.message);
-      structuredContent = createStructuredContentFromText(aiResponse, topic, subtopic);
+      structuredContent = createStructuredContentFromText(
+        aiResponse,
+        topic,
+        subtopic
+      );
     }
 
     // Enhanced validation - PRESERVES AI CONTENT
-    const validatedContent = validateContentStructure(structuredContent, topic, subtopic);
+    const validatedContent = validateContentStructure(
+      structuredContent,
+      topic,
+      subtopic
+    );
 
+    let stringId = String(userId);
     // Save to cache with FULL content
     const newCacheEntry = await saveToCache({
-      userId,
+      userId: stringId,
       topic,
       subtopic,
       user,
       content: validatedContent,
       aiPrompt,
-      crypto
+      crypto,
     });
 
     res.status(200).json({
@@ -126,7 +123,9 @@ exports.teachSubtopicController = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in teachSubtopicController:", error);
-    res.status(500).json({ message: "Failed to generate personalized teaching content" });
+    res
+      .status(500)
+      .json({ message: "Failed to generate personalized teaching content" });
   }
 };
 
@@ -139,7 +138,9 @@ exports.regenerateContentController = async (req, res) => {
     const { topic, subtopic } = req.body;
 
     if (!topic || !subtopic)
-      return res.status(400).json({ message: "Topic and subtopic are required." });
+      return res
+        .status(400)
+        .json({ message: "Topic and subtopic are required." });
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -153,19 +154,15 @@ exports.regenerateContentController = async (req, res) => {
 
 const handleRegenerateContent = async (userId, user, topic, subtopic, res) => {
   try {
-    const aiPrompt = buildPrompt(user, {
-      topic,
-      subtopic,
-      taskType: "teachSubtopic",
-    });
+    const aiPrompt = generateUnifiedPrompt(user, topic, subtopic);
 
     const aiResponse = await callAIAPI(aiPrompt);
 
     let structuredContent;
     try {
       let jsonString = aiResponse.trim();
-      jsonString = jsonString.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-      
+      jsonString = jsonString.replace(/```json\s*/g, "").replace(/```\s*/g, "");
+
       try {
         structuredContent = JSON.parse(jsonString);
       } catch (directError) {
@@ -177,11 +174,19 @@ const handleRegenerateContent = async (userId, user, topic, subtopic, res) => {
         }
       }
     } catch (parseError) {
-      structuredContent = createStructuredContentFromText(aiResponse, topic, subtopic);
+      structuredContent = createStructuredContentFromText(
+        aiResponse,
+        topic,
+        subtopic
+      );
     }
 
     // Enhanced validation - PRESERVES AI CONTENT
-    const validatedContent = validateContentStructure(structuredContent, topic, subtopic);
+    const validatedContent = validateContentStructure(
+      structuredContent,
+      topic,
+      subtopic
+    );
 
     const newCacheEntry = await saveToCache({
       userId,
@@ -190,7 +195,7 @@ const handleRegenerateContent = async (userId, user, topic, subtopic, res) => {
       user,
       content: validatedContent,
       aiPrompt,
-      crypto
+      crypto,
     });
 
     res.status(200).json({

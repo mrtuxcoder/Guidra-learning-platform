@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
 import MobileHeader from "./MobileHeader";
 import DesktopHeader from "./DesktopHeader";
@@ -17,10 +17,10 @@ const LearningHeader = ({
   onCompleteSubtopic,
   onNavigateSubtopic,
   onOpenSidebar,
-  colorPalette
+  colorPalette,
 }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // Early return with proper null handling
   if (!selectedSubtopic) {
@@ -28,7 +28,9 @@ const LearningHeader = ({
   }
 
   // Use ORIGINAL subtopics for navigation (consistent order)
-  const currentIndex = subtopics.findIndex(sub => sub.name === selectedSubtopic.name);
+  const currentIndex = subtopics.findIndex(
+    (sub) => sub.name === selectedSubtopic.name
+  );
   const hasPrevious = currentIndex > 0;
   const hasNext = currentIndex < subtopics.length - 1 && currentIndex >= 0;
   const previousSubtopic = hasPrevious ? subtopics[currentIndex - 1] : null;

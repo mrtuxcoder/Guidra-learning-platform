@@ -1,24 +1,24 @@
-import React from 'react';
+import React from "react";
 import { Paper, Box, Typography, Fade } from "@mui/material";
 import { Warning } from "@mui/icons-material";
 
 const guidelines = [
   {
     title: "Finish Current Topics First",
-    desc: "Stay on one learning path at a time. It keeps your progress accurate and avoids confusion."
+    desc: "Stay on one learning path at a time. It keeps your progress accurate and avoids confusion.",
   },
   {
     title: "Use Clear, Beginner-Friendly Topics",
-    desc: "Enter simple topics like 'Basics of Git' or 'Intro to Psychology' for the best results."
+    desc: "Enter simple topics like 'Basics of Git' or 'Intro to Psychology' for the best results.",
   },
   {
     title: "Rephrase If Validation Fails",
-    desc: "Try clearer wording or add terms like 'fundamentals', 'introduction', or 'basics'."
+    desc: "Try clearer wording or add terms like 'fundamentals', 'introduction', or 'basics'.",
   },
   {
     title: "Guided Lessons Only",
-    desc: "This tool creates structured lessons and learning paths, not general chat-style answers."
-  }
+    desc: "This tool creates structured lessons and learning paths, not general chat-style answers.",
+  },
 ];
 
 const Guidelines = ({ show }) => {
@@ -33,7 +33,7 @@ const Guidelines = ({ show }) => {
           mt: 3,
           borderRadius: "16px",
           background: "rgba(124, 58, 237, 0.05)",
-          border: "1px solid rgba(124, 58, 237, 0.1)"
+          border: "1px solid rgba(124, 58, 237, 0.1)",
         }}
       >
         <Typography
@@ -44,7 +44,7 @@ const Guidelines = ({ show }) => {
             mb: 2,
             display: "flex",
             alignItems: "center",
-            gap: 1
+            gap: 1,
           }}
         >
           <Warning sx={{ fontSize: 20 }} />
@@ -73,7 +73,7 @@ const GuidelineItem = ({ index, guideline }) => (
         alignItems: "center",
         justifyContent: "center",
         mt: 0.5,
-        flexShrink: 0
+        flexShrink: 0,
       }}
     >
       <Typography variant="caption" sx={{ color: "white", fontWeight: 700 }}>

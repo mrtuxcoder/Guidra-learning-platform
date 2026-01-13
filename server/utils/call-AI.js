@@ -6,11 +6,10 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // ====== GROQ MODELS (BEST FIRST) ======
 const GROQ_MODELS = [
-  "llama-3.3-70b-versatile",  // ⭐ best quality, main model
+  "llama-3.3-70b-versatile", // ⭐ best quality, main model
   // "mixtral-8x7b-instruct",    // strong fallback, long context
   // "llama-3.1-8b-instant"      // fast fallback for small tasks
 ];
-
 
 // ====== GEMINI MODELS ======
 const GEMINI_MODELS = ["gemini-2.0-flash"];
@@ -18,7 +17,7 @@ const GEMINI_MODELS = ["gemini-2.0-flash"];
 // ====== HUGGINGFACE MODELS ======
 const HUGGINGFACE_MODELS = [
   "openai/gpt-oss-120b:fastest",
-  "meta-llama/Meta-Llama-3-70B-Instruct"
+  "meta-llama/Meta-Llama-3-70B-Instruct",
 ];
 
 /* ------------------------------------------------------------
@@ -36,13 +35,13 @@ async function callGroqAPI(prompt, index = 0) {
         model,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 3000,
-        temperature: 0.5
+        temperature: 0.5,
       },
       {
         headers: {
           Authorization: `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -70,7 +69,7 @@ async function callGeminiAPI(prompt, index = 0) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
     const response = await axios.post(url, {
-      contents: [{ parts: [{ text: prompt }] }]
+      contents: [{ parts: [{ text: prompt }] }],
     });
 
     return response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -100,12 +99,12 @@ async function callHFChat(prompt, index = 0) {
         model,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 3500,
-        temperature: 0.7
+        temperature: 0.7,
       },
       {
         headers: {
-          Authorization: `Bearer ${HUGGINGFACE_TOKEN}`
-        }
+          Authorization: `Bearer ${HUGGINGFACE_TOKEN}`,
+        },
       }
     );
 
@@ -136,11 +135,11 @@ async function callHFText(prompt, index = 0) {
         inputs: prompt,
         parameters: {
           max_new_tokens: 3000,
-          temperature: 0.7
-        }
+          temperature: 0.7,
+        },
       },
       {
-        headers: { Authorization: `Bearer ${HUGGINGFACE_TOKEN}` }
+        headers: { Authorization: `Bearer ${HUGGINGFACE_TOKEN}` },
       }
     );
 
@@ -167,10 +166,10 @@ async function callAIAPI(prompt) {
   const clean = prompt.trim();
 
   const pipeline = [
-    () => callGroqAPI(clean),   // BEST
+    () => callGroqAPI(clean), // BEST
     () => callGeminiAPI(clean), // SECOND
-    () => callHFChat(clean),    // THIRD
-    () => callHFText(clean)     // WORST
+    () => callHFChat(clean), // THIRD
+    () => callHFText(clean), // WORST
   ];
 
   for (const fn of pipeline) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   TextField,
   Box,
@@ -6,18 +6,18 @@ import {
   Alert,
   Link,
   InputAdornment,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import {
   Email,
   LockOutlined,
   Person,
   Visibility,
-  VisibilityOff
+  VisibilityOff,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import GoogleButton from './GoogleButton';
-import SubmitButton from './SubmitButton';
+import GoogleButton from "./GoogleButton";
+import SubmitButton from "./SubmitButton";
 
 const AuthForm = ({
   formType,
@@ -28,21 +28,21 @@ const AuthForm = ({
   onGoogleLogin,
   loading,
   error,
-  showDivider = true
+  showDivider = true,
 }) => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const isRegister = formType === 'REGISTER';
-  const config = isRegister 
+  const isRegister = formType === "REGISTER";
+  const config = isRegister
     ? {
         title: "Create Account",
         subtitle: "Join Guidra and start your journey.",
         submitText: "Create Account",
         linkText: "Already have an account?",
         linkAction: "Sign In",
-        linkTo: "/login"
+        linkTo: "/login",
       }
     : {
         title: "Welcome Back",
@@ -50,48 +50,60 @@ const AuthForm = ({
         submitText: "Sign In",
         linkText: "Don't have an account?",
         linkAction: "Sign Up",
-        linkTo: "/register"
+        linkTo: "/register",
       };
 
   const fields = [
-    ...(isRegister ? [{
-      name: "name",
-      label: "Full Name",
-      type: "text",
-      icon: <Person sx={{ color: '#C084FC' }} />,
-      showPasswordToggle: false
-    }] : []),
+    ...(isRegister
+      ? [
+          {
+            name: "name",
+            label: "Full Name",
+            type: "text",
+            icon: <Person sx={{ color: "#C084FC" }} />,
+            showPasswordToggle: false,
+          },
+        ]
+      : []),
     {
       name: "email",
       label: "Email",
       type: "email",
-      icon: <Email sx={{ color: '#C084FC' }} />,
-      showPasswordToggle: false
+      icon: <Email sx={{ color: "#C084FC" }} />,
+      showPasswordToggle: false,
     },
     {
       name: "password",
       label: "Password",
       type: showPassword ? "text" : "password",
-      icon: <LockOutlined sx={{ color: '#C084FC' }} />,
+      icon: <LockOutlined sx={{ color: "#C084FC" }} />,
       showPasswordToggle: true,
       toggleState: showPassword,
-      toggleSetter: setShowPassword
+      toggleSetter: setShowPassword,
     },
-    ...(isRegister ? [{
-      name: "confirmPassword",
-      label: "Confirm Password",
-      type: showConfirmPassword ? "text" : "password",
-      icon: <LockOutlined sx={{ color: '#C084FC' }} />,
-      showPasswordToggle: true,
-      toggleState: showConfirmPassword,
-      toggleSetter: setShowConfirmPassword
-    }] : [])
+    ...(isRegister
+      ? [
+          {
+            name: "confirmPassword",
+            label: "Confirm Password",
+            type: showConfirmPassword ? "text" : "password",
+            icon: <LockOutlined sx={{ color: "#C084FC" }} />,
+            showPasswordToggle: true,
+            toggleState: showConfirmPassword,
+            toggleSetter: setShowConfirmPassword,
+          },
+        ]
+      : []),
   ];
 
   return (
     <>
       <Box sx={{ textAlign: "center", mb: 4 }}>
-        <Typography variant="h4" fontWeight="800" sx={{ color: '#6B21A8', mb: 1 }}>
+        <Typography
+          variant="h4"
+          fontWeight="800"
+          sx={{ color: "#6B21A8", mb: 1 }}
+        >
           {config.title}
         </Typography>
         <Typography variant="body1" color="text.secondary">
@@ -106,12 +118,15 @@ const AuthForm = ({
       />
 
       {showDivider && (
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ flex: 1, height: '1px', bgcolor: 'grey.200' }} />
-          <Typography variant="caption" sx={{ px: 2, color: 'text.secondary', fontWeight: 600 }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+          <Box sx={{ flex: 1, height: "1px", bgcolor: "grey.200" }} />
+          <Typography
+            variant="caption"
+            sx={{ px: 2, color: "text.secondary", fontWeight: 600 }}
+          >
             OR EMAIL
           </Typography>
-          <Box sx={{ flex: 1, height: '1px', bgcolor: 'grey.200' }} />
+          <Box sx={{ flex: 1, height: "1px", bgcolor: "grey.200" }} />
         </Box>
       )}
 
@@ -123,25 +138,26 @@ const AuthForm = ({
             label={field.label}
             type={field.type}
             name={field.name}
-            value={formData[field.name] || ''}
+            value={formData[field.name] || ""}
             onChange={onChange}
             required
-            sx={{ mb: 2.5, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            sx={{ mb: 2.5, "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">
-                  {field.icon}
-                </InputAdornment>
+                <InputAdornment position="start">{field.icon}</InputAdornment>
               ),
               ...(field.showPasswordToggle && {
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => field.toggleSetter(!field.toggleState)} edge="end">
+                    <IconButton
+                      onClick={() => field.toggleSetter(!field.toggleState)}
+                      edge="end"
+                    >
                       {field.toggleState ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                )
-              })
+                ),
+              }),
             }}
           />
         ))}
@@ -168,9 +184,9 @@ const AuthForm = ({
               onClick={() => navigate(config.linkTo)}
               sx={{
                 fontWeight: 700,
-                color: '#7C3AED',
-                textDecoration: 'none',
-                '&:hover': { textDecoration: 'underline' }
+                color: "#7C3AED",
+                textDecoration: "none",
+                "&:hover": { textDecoration: "underline" },
               }}
             >
               {config.linkAction}

@@ -1,13 +1,21 @@
-import React from 'react';
-import { Paper, Box, Typography, Chip, Button, Alert, CircularProgress } from "@mui/material";
+import React from "react";
+import {
+  Paper,
+  Box,
+  Typography,
+  Chip,
+  Button,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import { CheckCircle, Psychology } from "@mui/icons-material";
 
-const ValidatedTopic = ({ 
-  searchQuery, 
-  error, 
-  generating, 
-  onResetSearch, 
-  onGenerateSubtopics 
+const ValidatedTopic = ({
+  searchQuery,
+  error,
+  generating,
+  onResetSearch,
+  onGenerateSubtopics,
 }) => {
   return (
     <Paper
@@ -17,7 +25,7 @@ const ValidatedTopic = ({
         borderRadius: "16px",
         background: "rgba(124, 58, 237, 0.05)",
         border: "1px solid rgba(124, 58, 237, 0.1)",
-        textAlign: "center"
+        textAlign: "center",
       }}
     >
       <CheckCircle sx={{ fontSize: 40, color: "#10b981", mb: 2 }} />
@@ -33,7 +41,7 @@ const ValidatedTopic = ({
           color: "white",
           fontWeight: 600,
           py: 1.5,
-          mb: 2
+          mb: 2,
         }}
       />
 
@@ -47,7 +55,13 @@ const ValidatedTopic = ({
         </Alert>
       )}
 
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: 2,
+        }}
+      >
         <Button
           variant="outlined"
           onClick={onResetSearch}
@@ -55,7 +69,7 @@ const ValidatedTopic = ({
             borderRadius: "12px",
             borderColor: "#7C3AED",
             color: "#7C3AED",
-            fontWeight: 600
+            fontWeight: 600,
           }}
         >
           Change Topic
@@ -66,12 +80,16 @@ const ValidatedTopic = ({
           onClick={onGenerateSubtopics}
           disabled={generating}
           startIcon={
-            generating ? <CircularProgress size={20} color="inherit" /> : <Psychology />
+            generating ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <Psychology />
+            )
           }
           sx={{
             borderRadius: "12px",
             background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-            fontWeight: 600
+            fontWeight: 600,
           }}
         >
           {generating ? "Generating..." : "Generate Learning Path"}

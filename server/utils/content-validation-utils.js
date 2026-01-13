@@ -21,8 +21,9 @@ function validateContentStructure(content, topic, subtopic) {
 
   // Merge preserving AI content - AI content takes priority
   const validatedContent = {
-    ...safeDefaults,  // Fill missing fields first
-    ...content        // Then overlay with AI content (preserves real data)
+  ...content  ,      // Then overlay with AI content (preserves real data)
+    ...safeDefaults  // Fill missing fields first
+    
   };
 
   // Debug: Check content preservation

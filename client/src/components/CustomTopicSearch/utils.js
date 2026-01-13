@@ -14,27 +14,27 @@ export const validateSearchQuery = (query) => {
   if (!query || query.trim().length === 0) {
     return {
       valid: false,
-      error: "Please enter a topic to search"
+      error: "Please enter a topic to search",
     };
   }
 
   if (query.trim().length < 3) {
     return {
       valid: false,
-      error: "Topic must be at least 3 characters long"
+      error: "Topic must be at least 3 characters long",
     };
   }
 
   return {
     valid: true,
-    error: null
+    error: null,
   };
 };
 
 export const extractSubtopicData = (response) => {
   try {
     const data = response?.data?.data;
-    
+
     if (!data) {
       throw new Error("No data received from server");
     }
@@ -42,7 +42,7 @@ export const extractSubtopicData = (response) => {
     return {
       subtopics: data.subTopics || [],
       generatedContent: response.data,
-      customTopic: data.topic || ""
+      customTopic: data.topic || "",
     };
   } catch (error) {
     throw new Error("Failed to extract subtopic data: " + error.message);

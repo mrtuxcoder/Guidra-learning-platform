@@ -5,14 +5,15 @@ export const setFrontendCookie = (token, days = 7) => {
 };
 
 export const removeFrontendCookie = () => {
-  document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=lax';
+  document.cookie =
+    "authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=lax";
 };
 
 export const getFrontendCookie = () => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; authToken=`);
   if (parts.length === 2) {
-    return parts.pop().split(';').shift();
+    return parts.pop().split(";").shift();
   }
   return null;
 };
@@ -23,7 +24,7 @@ export const getStoredToken = () => {
 
 export const createCache = (ttl = 60000) => {
   let cache = { timestamp: 0, value: null };
-  
+
   return {
     set: (value) => {
       cache = { timestamp: Date.now(), value };
@@ -39,7 +40,7 @@ export const createCache = (ttl = 60000) => {
     },
     has: () => {
       return Date.now() - cache.timestamp <= ttl && cache.value !== null;
-    }
+    },
   };
 };
 
@@ -52,14 +53,14 @@ export const clearAuthCache = () => {
 export const clearAllTokens = () => {
   removeFrontendCookie();
   authCache.clear();
-  
-  const domains = [window.location.hostname, '.' + window.location.hostname];
-  domains.forEach(domain => {
+
+  const domains = [window.location.hostname, "." + window.location.hostname];
+  domains.forEach((domain) => {
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
     document.cookie = `authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain};`;
   });
-  
-  ['token', 'auth', 'session', 'refreshToken'].forEach(cookieName => {
+
+  ["token", "auth", "session", "refreshToken"].forEach((cookieName) => {
     document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   });
 };

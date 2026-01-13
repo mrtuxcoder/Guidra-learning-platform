@@ -6,9 +6,12 @@ export const processQuizResults = (quizItems, quizAnswers) => {
 
   quizItems.forEach((question, index) => {
     if (quizAnswers[index] !== undefined) {
-      const currentQuestion = typeof question === 'string' ? { choices: [] } : question;
-      const correctAnswer = currentQuestion.choices?.[currentQuestion.correctIndex] || currentQuestion.answer;
-      
+      const currentQuestion =
+        typeof question === "string" ? { choices: [] } : question;
+      const correctAnswer =
+        currentQuestion.choices?.[currentQuestion.correctIndex] ||
+        currentQuestion.answer;
+
       if (quizAnswers[index] === correctAnswer) {
         correct++;
       } else {
@@ -28,9 +31,10 @@ export const validateQuizSubmission = (quizAnswers, totalQuestions) => {
 };
 
 export const getAnswerStatus = (question, userAnswer, option) => {
-  const correctAnswer = question.choices?.[question.correctIndex] || question.answer;
-  
-  if (option === correctAnswer) return 'correct';
-  if (option === userAnswer && userAnswer !== correctAnswer) return 'wrong';
-  return 'default';
+  const correctAnswer =
+    question.choices?.[question.correctIndex] || question.answer;
+
+  if (option === correctAnswer) return "correct";
+  if (option === userAnswer && userAnswer !== correctAnswer) return "wrong";
+  return "default";
 };

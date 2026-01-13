@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Box, Typography, Button, Fade } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 
@@ -22,7 +22,7 @@ const BasicLearningOption = ({ isValidTopic, generating, onClick }) => {
             fontWeight: 600,
             borderColor: "#7C3AED",
             color: "#7C3AED",
-            borderRadius: "16px"
+            borderRadius: "16px",
           }}
           endIcon={<ArrowForward />}
         >

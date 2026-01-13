@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 import { Box, InputBase, Button, CircularProgress } from "@mui/material";
 
-const SearchBox = ({ 
-  searchQuery, 
-  onQueryChange, 
-  onSearch, 
-  loading, 
-  error, 
-  isValidTopic 
+const SearchBox = ({
+  searchQuery,
+  onQueryChange,
+  onSearch,
+  loading,
+  error,
+  isValidTopic,
 }) => {
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       onSearch();
     }
   };
@@ -22,7 +22,7 @@ const SearchBox = ({
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
           gap: 1,
-          mb: 2
+          mb: 2,
         }}
       >
         <InputBase
@@ -42,7 +42,7 @@ const SearchBox = ({
                 : "rgba(126, 87, 194, 0.2)"
             }`,
             background: "white",
-            fontSize: "1rem"
+            fontSize: "1rem",
           }}
         />
 
@@ -54,10 +54,14 @@ const SearchBox = ({
             minWidth: { xs: "100%", sm: "120px" },
             borderRadius: "16px",
             background: "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
-            fontWeight: 600
+            fontWeight: 600,
           }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Validate"}
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            "Validate"
+          )}
         </Button>
       </Box>
     </Box>

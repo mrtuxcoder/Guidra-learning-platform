@@ -10,7 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,9 +21,9 @@ export default function Login() {
   useEffect(() => {
     const checkInitialAuth = () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const hasOAuthError = urlParams.get('error');
+      const hasOAuthError = urlParams.get("error");
       if (hasAuthCookie() && !hasOAuthError) {
-        navigate('/profile');
+        navigate("/profile");
       } else {
         setAuthChecked(true);
       }
@@ -34,11 +34,15 @@ export default function Login() {
   // Handle OAuth errors
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get('error');
+    const error = urlParams.get("error");
     if (error) {
       setAuthChecked(true);
-      setError('Authentication failed. Please try again.');
-      window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+      setError("Authentication failed. Please try again.");
+      window.history.replaceState(
+        {},
+        document.title,
+        window.location.origin + window.location.pathname
+      );
     }
   }, []);
 
@@ -52,7 +56,7 @@ export default function Login() {
     setError("");
     try {
       await loginUser({ email: formData.email, password: formData.password });
-      navigate('/profile', { replace: true });
+      navigate("/profile", { replace: true });
     } catch (err) {
       setError(err.response?.data?.error || "Login failed.");
     } finally {
@@ -68,8 +72,16 @@ export default function Login() {
 
   if (!authChecked) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: '#581C87', display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CircularProgress size={40} sx={{ color: 'white' }} />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          bgcolor: "#581C87",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress size={40} sx={{ color: "white" }} />
       </Box>
     );
   }

@@ -1,5 +1,4 @@
-// config/jwt.js
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
@@ -16,5 +15,5 @@ module.exports = {
   signJwt,
   verifyJwt,
   JWT_SECRET,
-  JWT_EXPIRES_IN
+  JWT_EXPIRES_IN,
 };

@@ -62,7 +62,7 @@ export default function CustomTopicSearch() {
       const personalizationData = {
         topic: searchQuery,
         learningStyle: "comprehensive",
-        depth: "intermediate"
+        depth: "intermediate",
       };
 
       const response = await personalizeAndGenerate(personalizationData);
@@ -72,12 +72,13 @@ export default function CustomTopicSearch() {
           customTopic: searchQuery,
           validated: true,
           subtopics: response.data.data.subTopics,
-          generatedContent: response.data
-        }
+          generatedContent: response.data,
+        },
       });
     } catch (err) {
       const errorMessage =
-        err.response?.data?.message || "Failed to generate subtopics. Please try again.";
+        err.response?.data?.message ||
+        "Failed to generate subtopics. Please try again.";
       setError(errorMessage);
     } finally {
       setGenerating(false);
@@ -89,8 +90,8 @@ export default function CustomTopicSearch() {
       navigate("/learn", {
         state: {
           customTopic: searchQuery,
-          validated: true
-        }
+          validated: true,
+        },
       });
     }
   };
@@ -114,12 +115,12 @@ export default function CustomTopicSearch() {
         background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
         display: "flex",
         alignItems: "center",
-        py: 4
+        py: 4,
       }}
     >
       <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
         <Header />
-        
+
         {!isValidTopic ? (
           <Box sx={{ mb: 3 }}>
             <SearchBox
@@ -130,9 +131,9 @@ export default function CustomTopicSearch() {
               error={error}
               isValidTopic={isValidTopic}
             />
-            
+
             <ErrorDisplay error={error} />
-            
+
             <Guidelines show={!isValidTopic} />
           </Box>
         ) : (
@@ -147,8 +148,8 @@ export default function CustomTopicSearch() {
           </Box>
         )}
 
-        <BasicLearningOption 
-          isValidTopic={isValidTopic} 
+        <BasicLearningOption
+          isValidTopic={isValidTopic}
           generating={generating}
           onClick={handleStartLearning}
         />

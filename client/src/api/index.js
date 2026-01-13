@@ -1,16 +1,10 @@
 // /src/api/index.js - UPDATED
-import API, { authHelpers } from './api.js';
-import * as authService from './auth.js';
-import * as learningService from './learning.js';
-import * as passwordService from './password.js';
+import API, { authHelpers } from "./api.js";
+import * as authService from "./auth.js";
+import * as learningService from "./learning.js";
+import * as passwordService from "./password.js";
 
-export {
-  API,
-  authHelpers,
-  authService,
-  learningService,
-  passwordService,
-};
+export { API, authHelpers, authService, learningService, passwordService };
 
 export const {
   loginUser,
@@ -61,11 +55,8 @@ export const {
   markTopicComplete,
 } = learningService;
 
-export const {
-  getPasswordStatus,
-  createPassword,
-  updatePassword,
-} = passwordService;
+export const { getPasswordStatus, createPassword, updatePassword } =
+  passwordService;
 
 export default {
   API,
@@ -73,7 +64,7 @@ export default {
   learning: learningService,
   password: passwordService,
   helpers: authHelpers,
-  
+
   loginUser,
   registerUser,
   logoutUser,

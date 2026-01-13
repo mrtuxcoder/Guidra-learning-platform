@@ -1,6 +1,4 @@
-const User = require('../../models/User');
-
-
+const User = require("../../models/User");
 
 // Update quiz results and auto-calculate understanding level
 exports.updateQuizMarks = async (req, res) => {
@@ -11,28 +9,28 @@ exports.updateQuizMarks = async (req, res) => {
     if (!topic || !subtopic) {
       return res.status(400).json({
         success: false,
-        message: "Topic and subtopic are required"
+        message: "Topic and subtopic are required",
       });
     }
 
     if (correct === undefined || wrong === undefined || total === undefined) {
       return res.status(400).json({
         success: false,
-        message: "Correct, wrong, and total counts are required"
+        message: "Correct, wrong, and total counts are required",
       });
     }
 
     if (correct < 0 || wrong < 0 || total < 0) {
       return res.status(400).json({
         success: false,
-        message: "Quiz counts cannot be negative"
+        message: "Quiz counts cannot be negative",
       });
     }
 
     if (correct + wrong > total) {
       return res.status(400).json({
         success: false,
-        message: "Correct + wrong cannot exceed total questions"
+        message: "Correct + wrong cannot exceed total questions",
       });
     }
 
@@ -40,29 +38,29 @@ exports.updateQuizMarks = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     const topicIndex = user.progress.findIndex(
-      progress => progress.topic.toLowerCase() === topic.toLowerCase()
+      (progress) => progress.topic.toLowerCase() === topic.toLowerCase()
     );
 
     if (topicIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: `Topic "${topic}" not found in user progress`
+        message: `Topic "${topic}" not found in user progress`,
       });
     }
 
     const subtopicIndex = user.progress[topicIndex].subTopics.findIndex(
-      sub => sub.name.toLowerCase() === subtopic.toLowerCase()
+      (sub) => sub.name.toLowerCase() === subtopic.toLowerCase()
     );
 
     if (subtopicIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: `Subtopic "${subtopic}" not found in topic "${topic}"`
+        message: `Subtopic "${subtopic}" not found in topic "${topic}"`,
       });
     }
 
@@ -75,7 +73,7 @@ exports.updateQuizMarks = async (req, res) => {
       wrong,
       total,
       percentage,
-      submittedAt: new Date()
+      submittedAt: new Date(),
     };
 
     // Auto-update understanding level based on quiz performance
@@ -86,14 +84,16 @@ exports.updateQuizMarks = async (req, res) => {
     else if (percentage >= 20) understandingLevel = 2; // Poor
     else understandingLevel = 1; // Very Poor
 
-    user.progress[topicIndex].subTopics[subtopicIndex].understandingLevel = understandingLevel;
-    
+    user.progress[topicIndex].subTopics[subtopicIndex].understandingLevel =
+      understandingLevel;
+
     // Auto-complete subtopic if score is good (70% or above)
     if (percentage >= 70) {
       user.progress[topicIndex].subTopics[subtopicIndex].completed = true;
     }
 
-    user.progress[topicIndex].subTopics[subtopicIndex].lastReviewed = new Date();
+    user.progress[topicIndex].subTopics[subtopicIndex].lastReviewed =
+      new Date();
     user.progress[topicIndex].lastAccessed = new Date();
 
     await user.save();
@@ -106,16 +106,15 @@ exports.updateQuizMarks = async (req, res) => {
         subtopic,
         quizMark: user.progress[topicIndex].subTopics[subtopicIndex].quizMark,
         understandingLevel,
-        completed: user.progress[topicIndex].subTopics[subtopicIndex].completed
-      }
+        completed: user.progress[topicIndex].subTopics[subtopicIndex].completed,
+      },
     });
-
   } catch (error) {
     console.error("Error updating quiz marks:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update quiz marks",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -129,7 +128,7 @@ exports.getQuizMarks = async (req, res) => {
     if (!topic || !subtopic) {
       return res.status(400).json({
         success: false,
-        message: "Topic and subtopic query parameters are required"
+        message: "Topic and subtopic query parameters are required",
       });
     }
 
@@ -137,29 +136,29 @@ exports.getQuizMarks = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     const topicProgress = user.progress.find(
-      progress => progress.topic.toLowerCase() === topic.toLowerCase()
+      (progress) => progress.topic.toLowerCase() === topic.toLowerCase()
     );
 
     if (!topicProgress) {
       return res.status(404).json({
         success: false,
-        message: `Topic "${topic}" not found in user progress`
+        message: `Topic "${topic}" not found in user progress`,
       });
     }
 
     const subtopicProgress = topicProgress.subTopics.find(
-      sub => sub.name.toLowerCase() === subtopic.toLowerCase()
+      (sub) => sub.name.toLowerCase() === subtopic.toLowerCase()
     );
 
     if (!subtopicProgress) {
       return res.status(404).json({
         success: false,
-        message: `Subtopic "${subtopic}" not found in topic "${topic}"`
+        message: `Subtopic "${subtopic}" not found in topic "${topic}"`,
       });
     }
 
@@ -169,16 +168,15 @@ exports.getQuizMarks = async (req, res) => {
         topic,
         subtopic,
         quizMark: subtopicProgress.quizMark || null,
-        hasQuizMarks: !!subtopicProgress.quizMark
-      }
+        hasQuizMarks: !!subtopicProgress.quizMark,
+      },
     });
-
   } catch (error) {
     console.error("Error getting quiz marks:", error);
     res.status(500).json({
       success: false,
       message: "Failed to get quiz marks",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -192,7 +190,7 @@ exports.clearQuizMarks = async (req, res) => {
     if (!topic || !subtopic) {
       return res.status(400).json({
         success: false,
-        message: "Topic and subtopic are required"
+        message: "Topic and subtopic are required",
       });
     }
 
@@ -200,29 +198,29 @@ exports.clearQuizMarks = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     const topicIndex = user.progress.findIndex(
-      progress => progress.topic.toLowerCase() === topic.toLowerCase()
+      (progress) => progress.topic.toLowerCase() === topic.toLowerCase()
     );
 
     if (topicIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: `Topic "${topic}" not found in user progress`
+        message: `Topic "${topic}" not found in user progress`,
       });
     }
 
     const subtopicIndex = user.progress[topicIndex].subTopics.findIndex(
-      sub => sub.name.toLowerCase() === subtopic.toLowerCase()
+      (sub) => sub.name.toLowerCase() === subtopic.toLowerCase()
     );
 
     if (subtopicIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: `Subtopic "${subtopic}" not found in topic "${topic}"`
+        message: `Subtopic "${subtopic}" not found in topic "${topic}"`,
       });
     }
 
@@ -237,17 +235,15 @@ exports.clearQuizMarks = async (req, res) => {
       message: `Quiz marks cleared for "${subtopic}"`,
       data: {
         topic,
-        subtopic
-      }
+        subtopic,
+      },
     });
-
   } catch (error) {
     console.error("Error clearing quiz marks:", error);
     res.status(500).json({
       success: false,
       message: "Failed to clear quiz marks",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
-

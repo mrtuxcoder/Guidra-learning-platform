@@ -1,5 +1,4 @@
-const User = require('../../models/User');
-
+const User = require("../../models/User");
 
 // Update understanding level (1-5 scale) for self-assessment
 exports.updateUnderstandingLevel = async (req, res) => {
@@ -10,14 +9,14 @@ exports.updateUnderstandingLevel = async (req, res) => {
     if (!topic || !subtopic || understandingLevel === undefined) {
       return res.status(400).json({
         success: false,
-        message: "Topic, subtopic, and understanding level are required"
+        message: "Topic, subtopic, and understanding level are required",
       });
     }
 
     if (understandingLevel < 1 || understandingLevel > 5) {
       return res.status(400).json({
         success: false,
-        message: "Understanding level must be between 1 and 5"
+        message: "Understanding level must be between 1 and 5",
       });
     }
 
@@ -25,34 +24,36 @@ exports.updateUnderstandingLevel = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     const topicIndex = user.progress.findIndex(
-      progress => progress.topic.toLowerCase() === topic.toLowerCase()
+      (progress) => progress.topic.toLowerCase() === topic.toLowerCase()
     );
 
     if (topicIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: `Topic "${topic}" not found in user progress`
+        message: `Topic "${topic}" not found in user progress`,
       });
     }
 
     const subtopicIndex = user.progress[topicIndex].subTopics.findIndex(
-      sub => sub.name.toLowerCase() === subtopic.toLowerCase()
+      (sub) => sub.name.toLowerCase() === subtopic.toLowerCase()
     );
 
     if (subtopicIndex === -1) {
       return res.status(404).json({
         success: false,
-        message: `Subtopic "${subtopic}" not found in topic "${topic}"`
+        message: `Subtopic "${subtopic}" not found in topic "${topic}"`,
       });
     }
 
-    user.progress[topicIndex].subTopics[subtopicIndex].understandingLevel = understandingLevel;
-    user.progress[topicIndex].subTopics[subtopicIndex].lastReviewed = new Date();
+    user.progress[topicIndex].subTopics[subtopicIndex].understandingLevel =
+      understandingLevel;
+    user.progress[topicIndex].subTopics[subtopicIndex].lastReviewed =
+      new Date();
     user.progress[topicIndex].lastAccessed = new Date();
 
     await user.save();
@@ -63,20 +64,15 @@ exports.updateUnderstandingLevel = async (req, res) => {
       data: {
         topic,
         subtopic,
-        understandingLevel
-      }
+        understandingLevel,
+      },
     });
-
   } catch (error) {
     console.error("Error updating understanding level:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update understanding level",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
-
-
-
-

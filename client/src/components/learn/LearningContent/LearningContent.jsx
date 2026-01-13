@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Component } from 'react';
 import { Box, useTheme, useMediaQuery } from "@mui/material";
 import MermaidDiagram from "../MermardDiagram/index";
 import WelcomeState from "../WelcomeState/index";
@@ -6,7 +6,7 @@ import LoadingState from "../LoadingState";
 import Header from "./Header";
 import ContentSection from "./ContentSection";
 import QuizSection from "./QuizSection";
-import { generateMermaidMindmap } from '../../../api/learning';
+import { generateComponent } from '../../../api/learning';
 
 const LearningContent = ({ 
   content, 
@@ -40,9 +40,10 @@ const LearningContent = ({
 
     try {
       setRegeneratingMindmap(true);
-      const response = await generateMermaidMindmap({
+      const response = await generateComponent({
         topic: selectedTopic,
-        subtopic: selectedSubtopic.name
+        subtopic: selectedSubtopic.name,
+        component: "mindmap" 
       });
       
       if (response?.data?.mindmap) {

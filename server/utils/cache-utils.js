@@ -9,14 +9,22 @@ async function getCachedContent(userId, topic, subtopic, learningStyle) {
     topic: topic.toLowerCase(),
     subtopic: subtopic.toLowerCase(),
     learningStyle,
-    isActive: true
+    isActive: true,
   }).sort({ version: -1 });
 }
 
 /**
  * Save to Cache - PRESERVES full structure
  */
-async function saveToCache({ userId, topic, subtopic, user, content, aiPrompt, crypto }) {
+async function saveToCache({
+  userId,
+  topic,
+  subtopic,
+  user,
+  content,
+  aiPrompt,
+  crypto,
+}) {
   // Deactivate previous versions
   await ContentCache.updateMany(
     {
@@ -24,7 +32,7 @@ async function saveToCache({ userId, topic, subtopic, user, content, aiPrompt, c
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
       learningStyle: user.learningStyle,
-      isActive: true
+      isActive: true,
     },
     { isActive: false }
   );
@@ -34,9 +42,9 @@ async function saveToCache({ userId, topic, subtopic, user, content, aiPrompt, c
     userId,
     topic: topic.toLowerCase(),
     subtopic: subtopic.toLowerCase(),
-    learningStyle: user.learningStyle
+    learningStyle: user.learningStyle,
   }).sort({ version: -1 });
-  
+
   const nextVersion = latestVersion ? latestVersion.version + 1 : 1;
 
   // Save the ENTIRE content structure as-is
@@ -46,15 +54,15 @@ async function saveToCache({ userId, topic, subtopic, user, content, aiPrompt, c
     subtopic: subtopic.toLowerCase(),
     learningStyle: user.learningStyle,
     learningMotivation: user.reasonForLearning,
-    difficultyLevel: user.difficultyPreference || 'beginner',
-    contentFormat: 'comprehensive',
+    difficultyLevel: user.difficultyPreference || "beginner",
+    contentFormat: "comprehensive",
     content: content,
     aiModelUsed: "gemini-huggingface-fallback",
-    aiPromptHash: crypto.createHash('md5').update(aiPrompt).digest('hex'),
+    aiPromptHash: crypto.createHash("md5").update(aiPrompt).digest("hex"),
     version: nextVersion,
     isActive: true,
     timesAccessed: 0,
-    lastAccessed: new Date()
+    lastAccessed: new Date(),
   });
 
   return cacheEntry;
@@ -62,5 +70,5 @@ async function saveToCache({ userId, topic, subtopic, user, content, aiPrompt, c
 
 module.exports = {
   getCachedContent,
-  saveToCache
+  saveToCache,
 };

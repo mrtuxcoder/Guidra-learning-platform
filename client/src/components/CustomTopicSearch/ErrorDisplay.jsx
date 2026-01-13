@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Alert, Typography, Box } from "@mui/material";
 
 const ErrorDisplay = ({ error }) => {
@@ -26,7 +26,7 @@ const ErrorDisplay = ({ error }) => {
           textAlign: "center",
           color: "#7C3AED",
           fontStyle: "italic",
-          fontWeight: 500
+          fontWeight: 500,
         }}
       >
         💡 {getRetrySuggestion()}

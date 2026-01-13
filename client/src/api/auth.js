@@ -1,18 +1,15 @@
 // /src/api/auth.js - DEDUPLICATED
-import API, { authHelpers } from './api';
-import { clearAllTokens, clearAuthCache } from './utils/cookies.js';
+import API, { authHelpers } from "./api";
+import { clearAllTokens, clearAuthCache } from "./utils/cookies.js";
 
-export const {
-  setFrontendCookie,
-  removeFrontendCookie,
-  getStoredToken
-} = authHelpers;
+export const { setFrontendCookie, removeFrontendCookie, getStoredToken } =
+  authHelpers;
 
 export const getFrontendCookie = () => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; authToken=`);
   if (parts.length === 2) {
-    return parts.pop().split(';').shift();
+    return parts.pop().split(";").shift();
   }
   return null;
 };
@@ -35,7 +32,9 @@ export const getProfile = async () => {
 };
 
 export const checkUserExists = async (email) => {
-  return await API.get(`/api/v1/users/check?email=${encodeURIComponent(email)}`);
+  return await API.get(
+    `/api/v1/users/check?email=${encodeURIComponent(email)}`
+  );
 };
 
 export const logoutUser = async () => {
@@ -45,9 +44,9 @@ export const logoutUser = async () => {
 export const isAuthenticated = async () => {
   try {
     const response = await API.get("/api/v1/users/me", {
-      validateStatus: (status) => status < 500
+      validateStatus: (status) => status < 500,
     });
-    
+
     const isAuth = response.status === 200;
 
     if (isAuth && response.data?.user) {
@@ -57,9 +56,8 @@ export const isAuthenticated = async () => {
       }
       return true;
     }
-    
+
     return false;
-    
   } catch (error) {
     if (error.response?.status === 401) {
       removeFrontendCookie();
@@ -71,39 +69,40 @@ export const isAuthenticated = async () => {
 export const isAuthenticatedWithInfo = async () => {
   try {
     const response = await API.get("/api/v1/users/me", {
-      validateStatus: (status) => status < 500
+      validateStatus: (status) => status < 500,
     });
-    
+
     const isAuth = response.status === 200;
 
     if (isAuth && response.data?.user) {
       let authInfo = null;
       try {
-        const passwordResponse = await API.get("/api/v1/users/me/password/status");
+        const passwordResponse = await API.get(
+          "/api/v1/users/me/password/status"
+        );
         authInfo = passwordResponse.data;
       } catch (passwordError) {
         authInfo = {
-          authProvider: 'unknown',
+          authProvider: "unknown",
           hasPassword: false,
-          needsPasswordSetup: false
+          needsPasswordSetup: false,
         };
       }
-      
+
       const token = getStoredToken();
       if (!token && response.data.token) {
         setFrontendCookie(response.data.token);
       }
-      
+
       return {
         authenticated: true,
         user: response.data.user,
         authInfo: authInfo,
-        token: response.data.token || token
+        token: response.data.token || token,
       };
     }
-    
+
     return { authenticated: false, user: null, authInfo: null, token: null };
-    
   } catch (error) {
     if (error.response?.status === 401) {
       removeFrontendCookie();
@@ -118,29 +117,32 @@ export const checkNeedsPasswordSetup = async () => {
     return {
       needsPasswordSetup: response.data.needsPasswordSetup || false,
       authProvider: response.data.authProvider,
-      hasPassword: response.data.hasPassword
+      hasPassword: response.data.hasPassword,
     };
   } catch (error) {
-    console.error('Error checking password setup:', error);
+    console.error("Error checking password setup:", error);
     return {
       needsPasswordSetup: false,
       authProvider: null,
-      hasPassword: false
+      hasPassword: false,
     };
   }
 };
 
 export const setupPassword = async (passwordData) => {
   try {
-    const response = await API.post("/api/v1/users/me/password/set", passwordData);
-    
+    const response = await API.post(
+      "/api/v1/users/me/password/set",
+      passwordData
+    );
+
     if (response.data.token) {
       setFrontendCookie(response.data.token);
     }
-    
+
     return response;
   } catch (error) {
-    console.error('Error setting password:', error);
+    console.error("Error setting password:", error);
     throw error;
   }
 };
@@ -151,9 +153,9 @@ export const changePassword = async (passwordData) => {
 
 export const completeLogout = async () => {
   removeFrontendCookie();
-  
-  window.location.href = '/login';
-  
+
+  window.location.href = "/login";
+
   API.post("/api/v1/auth/logout").catch(() => {});
 };
 
@@ -161,7 +163,7 @@ export const handleManualLogin = (token, userData = null) => {
   setFrontendCookie(token);
 };
 
-export const requireAuth = async (redirectPath = '/login') => {
+export const requireAuth = async (redirectPath = "/login") => {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     window.location.href = redirectPath;
@@ -170,7 +172,7 @@ export const requireAuth = async (redirectPath = '/login') => {
   return true;
 };
 
-export const requireGuest = async (redirectPath = '/profile') => {
+export const requireGuest = async (redirectPath = "/profile") => {
   const authenticated = await isAuthenticated();
   if (authenticated) {
     window.location.href = redirectPath;
@@ -182,18 +184,18 @@ export const requireGuest = async (redirectPath = '/profile') => {
 export const debugAuth = async () => {
   try {
     const response = await API.get("/api/v1/users/me", {
-      validateStatus: (status) => status < 500
+      validateStatus: (status) => status < 500,
     });
-    
+
     if (response.status !== 200) {
-      console.log('Not authenticated');
+      console.log("Not authenticated");
     } else {
-      console.log('Authenticated:', response.data.user);
+      console.log("Authenticated:", response.data.user);
     }
   } catch (error) {
-    console.log('🔧 Error Details:', {
+    console.log("🔧 Error Details:", {
       status: error.response?.status,
-      data: error.response?.data
+      data: error.response?.data,
     });
   }
 };
@@ -201,36 +203,35 @@ export const debugAuth = async () => {
 export const initializeAuth = async () => {
   try {
     const token = getStoredToken();
-    
+
     if (!token) {
       return {
         authenticated: false,
         user: null,
         authInfo: null,
-        token: null
+        token: null,
       };
     }
-    
+
     const authResponse = await isAuthenticatedWithInfo();
-    
+
     if (authResponse.authenticated) {
       return authResponse;
     }
-    
+
     return {
       authenticated: false,
       user: null,
       authInfo: null,
-      token: null
+      token: null,
     };
-    
   } catch (error) {
-    console.error('Auth initialization error:', error);
+    console.error("Auth initialization error:", error);
     return {
       authenticated: false,
       user: null,
       authInfo: null,
-      token: null
+      token: null,
     };
   }
 };
@@ -238,12 +239,12 @@ export const initializeAuth = async () => {
 export const startGoogleOAuth = () => {
   const popup = window.open(
     `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/google`,
-    'oauth_popup',
-    'width=600,height=700,scrollbars=no,resizable=no'
+    "oauth_popup",
+    "width=600,height=700,scrollbars=no,resizable=no"
   );
 
   if (!popup) {
-    alert('Popup blocked! Please allow popups for this site.');
+    alert("Popup blocked! Please allow popups for this site.");
     return;
   }
 
@@ -251,57 +252,62 @@ export const startGoogleOAuth = () => {
 
   const messageHandler = async (event) => {
     const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:5000',
-      'https://guidra.vercel.app',
-      'https://guidra-learning-platform.onrender.com',
+      "http://localhost:5173",
+      "http://localhost:5000",
+      "https://guidra.vercel.app",
+      "https://guidra-learning-platform.onrender.com",
       window.location.origin,
-    ].filter(origin => origin);
-    
-    if (!event.data || !event.data.type || !event.data.type.includes('OAUTH')) {
+    ].filter((origin) => origin);
+
+    if (!event.data || !event.data.type || !event.data.type.includes("OAUTH")) {
       return;
     }
-    
+
     if (!allowedOrigins.includes(event.origin)) {
       return;
     }
 
-    const { type, token, error, needsPersonalization, redirectPath } = event.data;
-    
-    if (type === 'OAUTH_SUCCESS' && token) {
+    const { type, token, error, needsPersonalization, redirectPath } =
+      event.data;
+
+    if (type === "OAUTH_SUCCESS" && token) {
       messageReceived = true;
-      
+
       try {
-        window.removeEventListener('message', messageHandler);
+        window.removeEventListener("message", messageHandler);
         if (timeoutId) clearTimeout(timeoutId);
-        
+
         const maxAge = 7 * 24 * 60 * 60;
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const secureFlag = isLocalhost ? '' : 'secure; ';
-        
+        const isLocalhost =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1";
+        const secureFlag = isLocalhost ? "" : "secure; ";
+
         document.cookie = `authToken=${token}; path=/; max-age=${maxAge}; ${secureFlag}samesite=lax`;
-        
-        const finalPath = needsPersonalization ? '/explore' : (redirectPath || '/profile');
+
+        const finalPath = needsPersonalization
+          ? "/explore"
+          : redirectPath || "/profile";
         window.location.href = finalPath;
-        
       } catch (err) {
-        window.location.href = '/login?error=oauth_processing_failed';
+        window.location.href = "/login?error=oauth_processing_failed";
       }
-      
-    } else if (type === 'OAUTH_ERROR') {
+    } else if (type === "OAUTH_ERROR") {
       messageReceived = true;
-      window.removeEventListener('message', messageHandler);
+      window.removeEventListener("message", messageHandler);
       if (timeoutId) clearTimeout(timeoutId);
-      window.location.href = `/login?error=oauth_failed&message=${encodeURIComponent(error || 'Unknown error')}`;
+      window.location.href = `/login?error=oauth_failed&message=${encodeURIComponent(
+        error || "Unknown error"
+      )}`;
     }
   };
 
-  window.addEventListener('message', messageHandler);
+  window.addEventListener("message", messageHandler);
 
   const timeoutId = setTimeout(() => {
     if (!messageReceived) {
-      window.removeEventListener('message', messageHandler);
-      window.location.href = '/login?error=oauth_timeout';
+      window.removeEventListener("message", messageHandler);
+      window.location.href = "/login?error=oauth_timeout";
     }
   }, 60000);
 };
@@ -315,28 +321,28 @@ export default {
   isAuthenticatedWithInfo,
   hasAuthCookie,
   initializeAuth,
-  
+
   loginUser,
   registerUser,
   logoutUser,
   completeLogout,
   getProfile,
   checkUserExists,
-  
+
   checkNeedsPasswordSetup,
   setupPassword,
   changePassword,
-  
+
   startGoogleOAuth,
-  
+
   requireAuth,
   requireGuest,
-  
+
   debugAuth,
   clearAllTokens,
   clearAuthCache,
   handleManualLogin,
-  
+
   setFrontendCookie,
   removeFrontendCookie,
 };

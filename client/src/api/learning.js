@@ -1,119 +1,121 @@
-import API from './api';
+import API from "./api";
 
 // Learning routes
 export const personalizeAndGenerate = async (personalizationData) => {
-  const response = await API.post('/api/v1/learning/topics', personalizationData);
+  const response = await API.post(
+    "/api/v1/learning/topics",
+    personalizationData
+  );
   return response;
 };
 
 export const getSubtopics = async (topic) => {
-  const response = await API.get(`/api/v1/learning/topics/${encodeURIComponent(topic)}/subtopics`);
+  const response = await API.get(
+    `/api/v1/learning/topics/${encodeURIComponent(topic)}/subtopics`
+  );
   return response;
 };
 
 export const validateTopic = async (topic) => {
-  const response = await API.post('/api/v1/learning/topics/validate', { topic });
+  const response = await API.post("/api/v1/learning/topics/validate", {
+    topic,
+  });
   return response;
 };
 
 export const updateLearningPreferences = async (preferencesData) => {
-  const response = await API.put('/api/v1/learning/preferences', preferencesData);
+  const response = await API.put(
+    "/api/v1/learning/preferences",
+    preferencesData
+  );
   return response;
 };
 
 // Content routes
 export const teachSubtopic = async (data) => {
-  const response = await API.post('/api/v1/content/teach', data);
+  const response = await API.post("/api/v1/content/teach", data);
   return response;
 };
 
 export const regenerateContent = async (data) => {
-  const response = await API.post('/api/v1/content/regenerate', data);
+  const response = await API.post("/api/v1/content/regenerate", data);
   return response;
 };
 
 export const updateSubtopicProgress = async (data) => {
-  const response = await API.put('/api/v1/content/subtopics/progress', data);
+  const response = await API.put("/api/v1/progress/subtopics/complete", data);
   return response;
 };
 
 export const generateTeachingContent = async (data) => {
-  const response = await API.post('/api/v1/content/teach', data);
+  const response = await API.post("/api/v1/content/teach", data);
   return response;
 };
 
-export const generateMermaidMindmap = async (data) => {
-  const response = await API.post('/api/v1/content/mindmaps', data);
-  return response;
-};
-
-export const fixMermaidSyntax = async (data) => {
-  const response = await API.post('/api/v1/content/mindmaps/fix-syntax', data);
+export const generateComponent = async (data) => {
+  const response = await API.post("/api/v1/content/component/regenerate", data);
   return response;
 };
 
 export const getContentHistory = async () => {
-  const response = await API.get('/api/v1/content/history');
+  const response = await API.get("/api/v1/content/history");
   return response;
 };
 
 export const clearContentCache = async () => {
-  const response = await API.delete('/api/v1/content/cache');
-  return response;
-};
-
-// Progress routes
-export const updateGenerationCount = async (data) => {
-  const response = await API.put('/api/v1/progress/generation-count', data);
+  const response = await API.delete("/api/v1/content/cache");
   return response;
 };
 
 export const incrementGenerationCount = async (data) => {
-  const response = await API.put('/api/v1/progress/generation-count/increment', data);
+  const response = await API.put(
+    "/api/v1/progress/generation-count/increment",
+    data
+  );
   return response;
 };
 
 export const getGenerationCount = async (topic, subtopic) => {
-  const response = await API.get(`/api/v1/progress/generation-count?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`);
+  const response = await API.get(
+    `/api/v1/progress/generation-count?topic=${encodeURIComponent(
+      topic
+    )}&subtopic=${encodeURIComponent(subtopic)}`
+  );
   return response;
 };
 
 export const updateQuizMarks = async (data) => {
-  const response = await API.put('/api/v1/progress/quizzes', data);
+  const response = await API.put("/api/v1/progress/quizzes", data);
   return response;
 };
 
 export const getQuizMarks = async (topic, subtopic) => {
-  const response = await API.get(`/api/v1/progress/quizzes?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`);
+  const response = await API.get(
+    `/api/v1/progress/quizzes?topic=${encodeURIComponent(
+      topic
+    )}&subtopic=${encodeURIComponent(subtopic)}`
+  );
   return response;
 };
 
 export const clearQuizMarks = async (data) => {
-  const response = await API.delete('/api/v1/progress/quizzes', { data });
-  return response;
-};
-
-export const addOrUpdateTopic = async (data) => {
-  const response = await API.post('/api/v1/progress/topics', data);
+  const response = await API.delete("/api/v1/progress/quizzes", { data });
   return response;
 };
 
 export const getUserProgress = async () => {
-  const response = await API.get('/api/v1/progress');
+  const response = await API.get("/api/v1/progress");
   return response;
 };
 
 export const updateUnderstandingLevel = async (data) => {
-  const response = await API.put('/api/v1/progress/understanding', data);
-  return response;
-};
-
-export const markSubtopicComplete = async (topic, subtopic) => {
-  const response = await API.put(`/api/v1/progress/subtopics/${encodeURIComponent(subtopic)}/complete`, { topic });
+  const response = await API.put("/api/v1/progress/understanding", data);
   return response;
 };
 
 export const markTopicComplete = async (topic) => {
-  const response = await API.put(`/api/v1/progress/topics/${encodeURIComponent(topic)}/complete`);
+  const response = await API.put(
+    `/api/v1/progress/topics/${encodeURIComponent(topic)}/complete`
+  );
   return response;
 };

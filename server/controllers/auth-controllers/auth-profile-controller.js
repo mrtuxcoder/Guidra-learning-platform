@@ -1,5 +1,4 @@
-const User = require('../../models/User');
-
+const User = require("../../models/User");
 
 // ===== PROFILE & UTILITY CONTROLLERS =====
 
@@ -8,23 +7,25 @@ const User = require('../../models/User');
  */
 exports.profileController = async (req, res) => {
   try {
-    const userId = (req.user && (req.user.id || req.user._id)) ? (req.user.id || req.user._id) : null;
+    const userId =
+      req.user && (req.user.id || req.user._id)
+        ? req.user.id || req.user._id
+        : null;
     if (!userId) {
-      return res.status(401).json({ error: 'Not authorized' });
+      return res.status(401).json({ error: "Not authorized" });
     }
 
-    const userData = await User.findById(userId).select('-password');
+    const userData = await User.findById(userId).select("-password");
     if (!userData) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     return res.status(200).json({ user: userData });
   } catch (err) {
-    console.error('error in profileController:', err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("error in profileController:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 /**
  * Check if user exists (for Google OAuth flow)
@@ -32,30 +33,31 @@ exports.profileController = async (req, res) => {
 exports.checkUserExists = async (req, res) => {
   try {
     const { email } = req.query;
-    
+
     if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+      return res.status(400).json({ error: "Email is required" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select('-password');
-    
+    const user = await User.findOne({ email: email.toLowerCase() }).select(
+      "-password"
+    );
+
     if (user) {
-      const hasPassword = !!user.password && !user.password.startsWith('google-oauth-');
-      
-      return res.status(200).json({ 
+      const hasPassword =
+        !!user.password && !user.password.startsWith("google-oauth-");
+
+      return res.status(200).json({
         exists: true,
         user: user,
-        hasPassword: hasPassword
+        hasPassword: hasPassword,
       });
     }
 
-    return res.status(200).json({ 
-      exists: false 
+    return res.status(200).json({
+      exists: false,
     });
-
   } catch (error) {
-    console.error('❌ [USER CHECK] Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("❌ [USER CHECK] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
-

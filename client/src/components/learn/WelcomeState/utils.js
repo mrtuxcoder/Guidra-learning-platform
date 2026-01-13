@@ -3,15 +3,19 @@
 export const calculateLearningInsights = (subtopics) => {
   const validSubtopics = Array.isArray(subtopics) ? subtopics : [];
   const totalSubtopics = validSubtopics.length;
-  const completedSubtopics = validSubtopics.filter(sub => sub?.completed).length;
-  const incompleteSubtopics = validSubtopics.filter(sub => !sub?.completed);
-  
+  const completedSubtopics = validSubtopics.filter(
+    (sub) => sub?.completed
+  ).length;
+  const incompleteSubtopics = validSubtopics.filter((sub) => !sub?.completed);
+
   // Consider topic completed when all subtopics are completed
-  const isTopicCompleted = totalSubtopics > 0 && completedSubtopics === totalSubtopics;
-  const progressPercentage = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
+  const isTopicCompleted =
+    totalSubtopics > 0 && completedSubtopics === totalSubtopics;
+  const progressPercentage =
+    totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0;
   const hasIncompleteTopics = incompleteSubtopics.length > 0;
   const firstIncompleteSubtopic = incompleteSubtopics[0] || null;
-  
+
   return {
     totalSubtopics,
     completedSubtopics,
@@ -19,13 +23,13 @@ export const calculateLearningInsights = (subtopics) => {
     progressPercentage,
     isTopicCompleted,
     hasIncompleteTopics,
-    firstIncompleteSubtopic
+    firstIncompleteSubtopic,
   };
 };
 
 export const getRecentlyAccessedSubtopics = (contentCache, subtopics) => {
   try {
-    if (!contentCache || typeof contentCache !== 'object') return [];
+    if (!contentCache || typeof contentCache !== "object") return [];
     if (!Array.isArray(subtopics)) return [];
 
     const cachedEntries = Object.entries(contentCache);
@@ -33,11 +37,11 @@ export const getRecentlyAccessedSubtopics = (contentCache, subtopics) => {
       .sort(([, a], [, b]) => (b.timestamp || 0) - (a.timestamp || 0))
       .slice(0, 3)
       .map(([key]) => {
-        const subtopicName = key.split('-')[1];
-        return subtopics.find(sub => sub && sub.name === subtopicName);
+        const subtopicName = key.split("-")[1];
+        return subtopics.find((sub) => sub && sub.name === subtopicName);
       })
       .filter(Boolean);
-    
+
     return recentlyAccessed;
   } catch (error) {
     return [];
@@ -49,11 +53,13 @@ export const getHighPrioritySubtopics = (subtopics, generationCounts) => {
     if (!Array.isArray(subtopics)) return [];
     const validGenerationCounts = generationCounts || {};
 
-    const incomplete = subtopics.filter(sub => sub && !sub.completed);
+    const incomplete = subtopics.filter((sub) => sub && !sub.completed);
     return incomplete
       .sort((a, b) => {
-        const aScore = (validGenerationCounts[a.name] || 0) + (a.understandingLevel || 0);
-        const bScore = (validGenerationCounts[b.name] || 0) + (b.understandingLevel || 0);
+        const aScore =
+          (validGenerationCounts[a.name] || 0) + (a.understandingLevel || 0);
+        const bScore =
+          (validGenerationCounts[b.name] || 0) + (b.understandingLevel || 0);
         return aScore - bScore;
       })
       .slice(0, 3);
@@ -66,20 +72,24 @@ export const getRecommendedTopics = (topics, currentTopic) => {
   try {
     if (!Array.isArray(topics)) return [];
     return topics
-      .filter(topic => topic && (topic.topic || topic.name) !== currentTopic)
+      .filter((topic) => topic && (topic.topic || topic.name) !== currentTopic)
       .slice(0, 3);
   } catch (error) {
     return [];
   }
 };
 
-export const getSubtopicForAction = (actionType, learningInsights, suggestions) => {
+export const getSubtopicForAction = (
+  actionType,
+  learningInsights,
+  suggestions
+) => {
   switch (actionType) {
-    case 'continue':
+    case "continue":
       return learningInsights.firstIncompleteSubtopic;
-    case 'recent':
+    case "recent":
       return suggestions.recentlyAccessed[0];
-    case 'priority':
+    case "priority":
       return suggestions.highPrioritySubtopics[0];
     default:
       return null;

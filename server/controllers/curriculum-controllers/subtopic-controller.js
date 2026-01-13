@@ -1,6 +1,10 @@
-const User = require('../../models/User');
-const { buildPrompt, cleanSubtopicOutput } = require("../../utils/build-prompt");
-const { isNonsense, normalizeInput, isSupportedTopic } = require('../../utils/simple-validator');
+const User = require("../../models/User");
+const { cleanSubtopicOutput } = require("../../utils/content-utils");
+const generateSubtopicPrompt = require("../../prompts/subtopic-generator");
+const {
+  isNonsense,
+  normalizeInput,
+} = require("../../utils/simple-topic-validator");
 const callAI = require("../../utils/call-AI");
 
 // Get all subtopics for a specific topic from user progress
@@ -30,7 +34,6 @@ exports.getSubtopicsController = async (req, res) => {
   }
 };
 
-
 // Main endpoint: Generate personalized learning path with subtopics for a new topic
 exports.subtopicGenerateController = async (req, res) => {
   try {
@@ -51,19 +54,12 @@ exports.subtopicGenerateController = async (req, res) => {
       });
     }
 
-    // // Check if topic is supported by the system
-    // if (!isSupportedTopic(topic)) {
-    //   return res.status(400).json({
-    //     message: "This topic isn't supported yet. Try topics like: HTML, CSS, JavaScript, React, Node.js, Git, or other web development topics.",
-    //   });
-    // }
-
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Prevent starting new topics while others are incomplete
-    const incompleteTopic = user.progress.find(
-      (p) => p.subTopics?.some((s) => !s.completed)
+    const incompleteTopic = user.progress.find((p) =>
+      p.subTopics?.some((s) => !s.completed)
     );
 
     if (incompleteTopic && incompleteTopic.topic !== topic) {
@@ -73,10 +69,7 @@ exports.subtopicGenerateController = async (req, res) => {
     }
 
     // Generate subtopics using the unified buildPrompt function
-    const aiPrompt = buildPrompt(user, { 
-      topic, 
-      taskType: "generateSubtopic" 
-    });
+    const aiPrompt = generateSubtopicPrompt(topic);
     const aiResponse = await callAI(aiPrompt);
 
     // Use the cleanSubtopicOutput function from the unified buildPrompt
@@ -94,8 +87,8 @@ exports.subtopicGenerateController = async (req, res) => {
         wrong: 0,
         total: 0,
         percentage: 0,
-        submittedAt: new Date()
-      }
+        submittedAt: new Date(),
+      },
     }));
 
     // Update or create topic progress
@@ -117,8 +110,8 @@ exports.subtopicGenerateController = async (req, res) => {
 
     res.status(200).json({
       message: "Learning path generated successfully!",
-      data: { 
-        topic, 
+      data: {
+        topic,
         subTopics: formattedSubtopics,
       },
     });

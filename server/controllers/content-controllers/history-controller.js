@@ -14,12 +14,14 @@ exports.getContentHistoryController = async (req, res) => {
 
     const history = await ContentCache.find(query)
       .sort({ createdAt: -1 })
-      .select('topic subtopic learningStyle version createdAt timesAccessed userRating contentFormat')
+      .select(
+        "topic subtopic learningStyle version createdAt timesAccessed userRating contentFormat"
+      )
       .limit(50);
 
     res.status(200).json({
       message: "Content history retrieved from cache",
-      data: history
+      data: history,
     });
   } catch (error) {
     console.error("Error in getContentHistoryController:", error);

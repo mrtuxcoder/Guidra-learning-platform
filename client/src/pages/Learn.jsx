@@ -11,13 +11,13 @@ import {
 } from "@mui/material";
 import { Menu, Refresh } from "@mui/icons-material";
 import { getProfile } from "../api";
-import { 
-  getSubtopics, 
-  teachSubtopic, 
-  regenerateContent, 
+import {
+  getSubtopics,
+  teachSubtopic,
+  regenerateContent,
   updateSubtopicProgress,
-  incrementGenerationCount, 
-  getGenerationCount 
+  incrementGenerationCount,
+  getGenerationCount,
 } from "../api/learning";
 import LearningSidebar from "../components/learn/LearningSidebar/index";
 import LearningHeader from "../components/learn/LearningHeader/index";
@@ -27,16 +27,16 @@ import LoadingState from "../components/learn/LoadingState/index";
 
 // Consistent color palette
 const purplePalette = {
-  50: '#FAF7FE',
-  100: '#F3E8FF',
-  200: '#E9D5FF',
-  300: '#D8B4FE',
-  400: '#C084FC',
-  500: '#A855F7',
-  600: '#9333EA',
-  700: '#7C3AED',
-  800: '#6B21A8',
-  900: '#581C87'
+  50: "#FAF7FE",
+  100: "#F3E8FF",
+  200: "#E9D5FF",
+  300: "#D8B4FE",
+  400: "#C084FC",
+  500: "#A855F7",
+  600: "#9333EA",
+  700: "#7C3AED",
+  800: "#6B21A8",
+  900: "#581C87",
 };
 
 export default function Learning() {
@@ -58,19 +58,21 @@ export default function Learning() {
   const [showError, setShowError] = useState(false);
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const MAX_GENERATIONS = 3;
 
   // Function to reorder topics - incomplete first
   const getOrderedTopics = useCallback((topicsArray) => {
     if (!Array.isArray(topicsArray)) return [];
-    
+
     const incompleteTopics = [];
     const completedTopics = [];
-    
-    topicsArray.forEach(topic => {
+
+    topicsArray.forEach((topic) => {
       if (topic && topic.subtopics) {
-        const hasIncomplete = topic.subtopics.some(sub => sub && !sub.completed);
+        const hasIncomplete = topic.subtopics.some(
+          (sub) => sub && !sub.completed
+        );
         if (hasIncomplete) {
           incompleteTopics.push(topic);
         } else {
@@ -81,7 +83,7 @@ export default function Learning() {
         incompleteTopics.push(topic);
       }
     });
-    
+
     return [...incompleteTopics, ...completedTopics];
   }, []);
 
@@ -93,16 +95,21 @@ export default function Learning() {
       const { data } = await getProfile();
       const orderedTopics = getOrderedTopics(data.user.progress || []);
       setTopics(orderedTopics);
-      
+
       if (orderedTopics.length > 0) {
         // Auto-select first incomplete topic
-        const firstIncompleteTopic = orderedTopics.find(topic => 
-          topic.subtopics?.some(sub => !sub.completed)
-        ) || orderedTopics[0];
-        
+        const firstIncompleteTopic =
+          orderedTopics.find((topic) =>
+            topic.subtopics?.some((sub) => !sub.completed)
+          ) || orderedTopics[0];
+
         if (firstIncompleteTopic) {
-          setSelectedTopic(firstIncompleteTopic.topic || firstIncompleteTopic.name);
-          await fetchSubtopics(firstIncompleteTopic.topic || firstIncompleteTopic.name);
+          setSelectedTopic(
+            firstIncompleteTopic.topic || firstIncompleteTopic.name
+          );
+          await fetchSubtopics(
+            firstIncompleteTopic.topic || firstIncompleteTopic.name
+          );
         }
       }
     } catch (err) {
@@ -114,42 +121,50 @@ export default function Learning() {
     }
   }, [getOrderedTopics]);
 
-  const fetchSubtopics = useCallback(async (topic) => {
-    try {
-      setLoading(true);
-      setError("");
-      setSelectedTopic(topic);
-      const { data } = await getSubtopics(topic);
-      
-      // Keep original order for navigation
-      const originalSubs = data.subTopics || [];
-      setOriginalSubtopics(originalSubs);
-      
-      // Create ordered version for display only
-      const orderedSubtopics = getOrderedSubtopics(originalSubs);
-      setSubtopics(orderedSubtopics);
-      
-      fetchGenerationCounts(originalSubs, topic);
-      
-      if (isMobile) {
-        setMobileDrawerOpen(false);
+  const fetchSubtopics = useCallback(
+    async (topic) => {
+      try {
+        setLoading(true);
+        setError("");
+        setSelectedTopic(topic);
+        const { data } = await getSubtopics(topic);
+
+        // Keep original order for navigation
+        const originalSubs = data.subTopics || [];
+        setOriginalSubtopics(originalSubs);
+
+        // Create ordered version for display only
+        const orderedSubtopics = getOrderedSubtopics(originalSubs);
+        setSubtopics(orderedSubtopics);
+
+        fetchGenerationCounts(originalSubs, topic);
+
+        if (isMobile) {
+          setMobileDrawerOpen(false);
+        }
+      } catch (err) {
+        const errorMsg =
+          err.response?.data?.message || "Failed to load subtopics";
+        setError(errorMsg);
+        setShowError(true);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to load subtopics";
-      setError(errorMsg);
-      setShowError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [isMobile]);
+    },
+    [isMobile]
+  );
 
   // Function to reorder subtopics - incomplete first
   const getOrderedSubtopics = useCallback((subtopicsArray) => {
     if (!Array.isArray(subtopicsArray)) return [];
-    
-    const incompleteSubtopics = subtopicsArray.filter(sub => sub && !sub.completed);
-    const completedSubtopics = subtopicsArray.filter(sub => sub && sub.completed);
-    
+
+    const incompleteSubtopics = subtopicsArray.filter(
+      (sub) => sub && !sub.completed
+    );
+    const completedSubtopics = subtopicsArray.filter(
+      (sub) => sub && sub.completed
+    );
+
     return [...incompleteSubtopics, ...completedSubtopics];
   }, []);
 
@@ -170,103 +185,127 @@ export default function Learning() {
     }
   }, []);
 
-  const handleIncrementGenerationCount = useCallback(async (subtopicName) => {
-    try {
-      await incrementGenerationCount({
-        topic: selectedTopic,
-        subtopic: subtopicName
-      });
-      
-      setGenerationCounts(prev => ({
-        ...prev,
-        [subtopicName]: Math.min((prev[subtopicName] || 0) + 1, MAX_GENERATIONS)
-      }));
-    } catch (err) {
-      console.error("Error incrementing generation count:", err);
-    }
-  }, [selectedTopic, MAX_GENERATIONS]);
+  const handleIncrementGenerationCount = useCallback(
+    async (subtopicName) => {
+      try {
+        await incrementGenerationCount({
+          topic: selectedTopic,
+          subtopic: subtopicName,
+        });
 
-  const handleGenerateContent = useCallback(async (subtopic = selectedSubtopic) => {
-    if (!subtopic || !selectedTopic) return;
-    
-    try {
-      setContentLoading(true);
+        setGenerationCounts((prev) => ({
+          ...prev,
+          [subtopicName]: Math.min(
+            (prev[subtopicName] || 0) + 1,
+            MAX_GENERATIONS
+          ),
+        }));
+      } catch (err) {
+        console.error("Error incrementing generation count:", err);
+      }
+    },
+    [selectedTopic, MAX_GENERATIONS]
+  );
+
+  const handleGenerateContent = useCallback(
+    async (subtopic = selectedSubtopic) => {
+      if (!subtopic || !selectedTopic) return;
+
+      try {
+        setContentLoading(true);
+        setContentError("");
+
+        const cacheKey = `${selectedTopic}-${subtopic.name}`;
+        if (contentCache[cacheKey]) {
+          setContent(contentCache[cacheKey].content);
+          setContentInfo(contentCache[cacheKey].info);
+          setContentLoading(false);
+          return;
+        }
+
+        const { data } = await teachSubtopic({
+          topic: selectedTopic,
+          subtopic: subtopic.name,
+        });
+
+        if (!data.cached) {
+          await handleIncrementGenerationCount(subtopic.name);
+        }
+
+        setContent(data.data);
+        setContentInfo({
+          cached: data.cached || false,
+          version: data.version || 1,
+          source: data.cached ? "cache" : "ai",
+        });
+
+        setContentCache((prev) => ({
+          ...prev,
+          [cacheKey]: {
+            content: data.data,
+            info: {
+              cached: data.cached || false,
+              version: data.version || 1,
+              source: data.cached ? "cache" : "ai",
+            },
+          },
+        }));
+      } catch (err) {
+        const errorMessage =
+          err.response?.data?.message || "Failed to generate content";
+        setContentError(errorMessage);
+        setShowError(true);
+      } finally {
+        setContentLoading(false);
+      }
+    },
+    [
+      selectedTopic,
+      selectedSubtopic,
+      contentCache,
+      handleIncrementGenerationCount,
+    ]
+  );
+
+  const handleSelectSubtopic = useCallback(
+    async (subtopic) => {
+      setSelectedSubtopic(subtopic);
       setContentError("");
-      
+
       const cacheKey = `${selectedTopic}-${subtopic.name}`;
       if (contentCache[cacheKey]) {
         setContent(contentCache[cacheKey].content);
         setContentInfo(contentCache[cacheKey].info);
-        setContentLoading(false);
-        return;
+      } else {
+        await handleGenerateContent(subtopic);
       }
-
-      const { data } = await teachSubtopic({
-        topic: selectedTopic,
-        subtopic: subtopic.name
-      });
-
-      if (!data.cached) {
-        await handleIncrementGenerationCount(subtopic.name);
+      if (isMobile) {
+        setMobileDrawerOpen(false);
       }
-      
-      setContent(data.data);
-      setContentInfo({
-        cached: data.cached || false,
-        version: data.version || 1,
-        source: data.cached ? "cache" : "ai"
-      });
-      
-      setContentCache(prev => ({
-        ...prev,
-        [cacheKey]: {
-          content: data.data,
-          info: {
-            cached: data.cached || false,
-            version: data.version || 1,
-            source: data.cached ? "cache" : "ai"
-          }
-        }
-      }));
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to generate content";
-      setContentError(errorMessage);
-      setShowError(true);
-    } finally {
-      setContentLoading(false);
-    }
-  }, [selectedTopic, selectedSubtopic, contentCache, handleIncrementGenerationCount]);
+    },
+    [selectedTopic, contentCache, handleGenerateContent, isMobile]
+  );
 
-  const handleSelectSubtopic = useCallback(async (subtopic) => {
-    setSelectedSubtopic(subtopic);
-    setContentError("");
-    
-    const cacheKey = `${selectedTopic}-${subtopic.name}`;
-    if (contentCache[cacheKey]) {
-      setContent(contentCache[cacheKey].content);
-      setContentInfo(contentCache[cacheKey].info);
-    } else {
-      await handleGenerateContent(subtopic);
-    }
-    if (isMobile) {
-      setMobileDrawerOpen(false);
-    }
-  }, [selectedTopic, contentCache, handleGenerateContent, isMobile]);
+  const getRemainingGenerations = useCallback(
+    (subtopicName) => {
+      const used = generationCounts[subtopicName] || 0;
+      return Math.max(0, MAX_GENERATIONS - used);
+    },
+    [generationCounts, MAX_GENERATIONS]
+  );
 
-  const getRemainingGenerations = useCallback((subtopicName) => {
-    const used = generationCounts[subtopicName] || 0;
-    return Math.max(0, MAX_GENERATIONS - used);
-  }, [generationCounts, MAX_GENERATIONS]);
-
-  const canGenerate = useCallback((subtopicName) => {
-    return getRemainingGenerations(subtopicName) > 0;
-  }, [getRemainingGenerations]);
+  const canGenerate = useCallback(
+    (subtopicName) => {
+      return getRemainingGenerations(subtopicName) > 0;
+    },
+    [getRemainingGenerations]
+  );
 
   const handleRegenerateContent = useCallback(async () => {
     if (!selectedSubtopic || !selectedTopic) return;
-    
+
     const subtopicName = selectedSubtopic.name;
-    
+
     if (!canGenerate(subtopicName)) {
       setContentError(`Generation limit reached (${MAX_GENERATIONS} times)`);
       setShowError(true);
@@ -278,141 +317,167 @@ export default function Learning() {
       setContentError("");
       const { data } = await regenerateContent({
         topic: selectedTopic,
-        subtopic: subtopicName
+        subtopic: subtopicName,
       });
-      
+
       await handleIncrementGenerationCount(subtopicName);
 
       setContent(data.data);
       setContentInfo({
         cached: false,
         version: data.version || 1,
-        source: "ai"
+        source: "ai",
       });
-      
+
       const cacheKey = `${selectedTopic}-${subtopicName}`;
-      setContentCache(prev => ({
+      setContentCache((prev) => ({
         ...prev,
         [cacheKey]: {
           content: data.data,
           info: {
             cached: false,
             version: data.version || 1,
-            source: "ai"
-          }
-        }
+            source: "ai",
+          },
+        },
       }));
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to regenerate content";
+      const errorMessage =
+        err.response?.data?.message || "Failed to regenerate content";
       setContentError(errorMessage);
       setShowError(true);
     } finally {
       setContentLoading(false);
     }
-  }, [selectedTopic, selectedSubtopic, canGenerate, handleIncrementGenerationCount]);
+  }, [
+    selectedTopic,
+    selectedSubtopic,
+    canGenerate,
+    handleIncrementGenerationCount,
+  ]);
 
-  const handleUpdateUnderstanding = useCallback(async (subtopic, newUnderstanding) => {
-    const previousUnderstanding = subtopic.understandingLevel;
-    
-    try {
-      setUpdatingSubtopic(subtopic.name);
-      setError("");
-      
-      const updatedSubtopic = { ...subtopic, understandingLevel: newUnderstanding };
-      
-      // Update both arrays
-      setSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name ? updatedSubtopic : sub
-      ));
-      setOriginalSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name ? updatedSubtopic : sub
-      ));
+  const handleUpdateUnderstanding = useCallback(
+    async (subtopic, newUnderstanding) => {
+      const previousUnderstanding = subtopic.understandingLevel;
 
-      if (selectedSubtopic?.name === subtopic.name) {
-        setSelectedSubtopic(updatedSubtopic);
-      }
+      try {
+        setUpdatingSubtopic(subtopic.name);
+        setError("");
 
-      await updateSubtopicProgress({
-        topic: selectedTopic,
-        subtopicName: subtopic.name,
-        completed: subtopic.completed,
-        understandingLevel: newUnderstanding
-      });
+        const updatedSubtopic = {
+          ...subtopic,
+          understandingLevel: newUnderstanding,
+        };
 
-    } catch (err) {
-      // Revert both arrays on error
-      setSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name 
-          ? { ...sub, understandingLevel: previousUnderstanding }
-          : sub
-      ));
-      setOriginalSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name 
-          ? { ...sub, understandingLevel: previousUnderstanding }
-          : sub
-      ));
-
-      if (selectedSubtopic?.name === subtopic.name) {
-        setSelectedSubtopic(prev => ({ ...prev, understandingLevel: previousUnderstanding }));
-      }
-
-      setError("Failed to update understanding");
-      setShowError(true);
-    } finally {
-      setUpdatingSubtopic(null);
-    }
-  }, [selectedTopic, selectedSubtopic]);
-
-  const handleCompleteSubtopic = useCallback(async (subtopic) => {
-    if (!subtopic.understandingLevel || subtopic.understandingLevel < 1) {
-      setContentError("Please rate your understanding first");
-      setShowError(true);
-      return;
-    }
-
-    try {
-      setUpdatingSubtopic(subtopic.name);
-      setError("");
-      
-      await updateSubtopicProgress({
-        topic: selectedTopic,
-        subtopicName: subtopic.name,
-        completed: true,
-        understandingLevel: subtopic.understandingLevel
-      });
-
-      // Create the updated subtopic object
-      const updatedSubtopic = { ...subtopic, completed: true };
-      
-      // Update ORIGINAL subtopics array
-      setOriginalSubtopics(prev => prev.map(sub => 
-        sub.name === subtopic.name ? updatedSubtopic : sub
-      ));
-
-      // Update SORTED subtopics array and re-sort it
-      setSubtopics(prev => {
-        const updatedArray = prev.map(sub => 
-          sub.name === subtopic.name ? updatedSubtopic : sub
+        // Update both arrays
+        setSubtopics((prev) =>
+          prev.map((sub) =>
+            sub.name === subtopic.name ? updatedSubtopic : sub
+          )
         );
-        return getOrderedSubtopics(updatedArray);
-      });
+        setOriginalSubtopics((prev) =>
+          prev.map((sub) =>
+            sub.name === subtopic.name ? updatedSubtopic : sub
+          )
+        );
 
-      // Update selected subtopic if it's the current one
-      if (selectedSubtopic?.name === subtopic.name) {
-        setSelectedSubtopic(updatedSubtopic);
+        if (selectedSubtopic?.name === subtopic.name) {
+          setSelectedSubtopic(updatedSubtopic);
+        }
+
+        await updateSubtopicProgress({
+          topic: selectedTopic,
+          subtopicName: subtopic.name,
+          completed: subtopic.completed,
+          understandingLevel: newUnderstanding,
+        });
+      } catch (err) {
+        // Revert both arrays on error
+        setSubtopics((prev) =>
+          prev.map((sub) =>
+            sub.name === subtopic.name
+              ? { ...sub, understandingLevel: previousUnderstanding }
+              : sub
+          )
+        );
+        setOriginalSubtopics((prev) =>
+          prev.map((sub) =>
+            sub.name === subtopic.name
+              ? { ...sub, understandingLevel: previousUnderstanding }
+              : sub
+          )
+        );
+
+        if (selectedSubtopic?.name === subtopic.name) {
+          setSelectedSubtopic((prev) => ({
+            ...prev,
+            understandingLevel: previousUnderstanding,
+          }));
+        }
+
+        setError("Failed to update understanding");
+        setShowError(true);
+      } finally {
+        setUpdatingSubtopic(null);
+      }
+    },
+    [selectedTopic, selectedSubtopic]
+  );
+
+  const handleCompleteSubtopic = useCallback(
+    async (subtopic) => {
+      if (!subtopic.understandingLevel || subtopic.understandingLevel < 1) {
+        setContentError("Please rate your understanding first");
+        setShowError(true);
+        return;
       }
 
-    } catch (err) {
-      setError("Failed to complete subtopic");
-      setShowError(true);
-    } finally {
-      setUpdatingSubtopic(null);
-    }
-  }, [selectedTopic, selectedSubtopic, getOrderedSubtopics]);
+      try {
+        setUpdatingSubtopic(subtopic.name);
+        setError("");
+
+        await updateSubtopicProgress({
+          topic: selectedTopic,
+          subtopicName: subtopic.name,
+          completed: true,
+          understandingLevel: subtopic.understandingLevel,
+        });
+
+        // Create the updated subtopic object
+        const updatedSubtopic = { ...subtopic, completed: true };
+
+        // Update ORIGINAL subtopics array
+        setOriginalSubtopics((prev) =>
+          prev.map((sub) =>
+            sub.name === subtopic.name ? updatedSubtopic : sub
+          )
+        );
+
+        // Update SORTED subtopics array and re-sort it
+        setSubtopics((prev) => {
+          const updatedArray = prev.map((sub) =>
+            sub.name === subtopic.name ? updatedSubtopic : sub
+          );
+          return getOrderedSubtopics(updatedArray);
+        });
+
+        // Update selected subtopic if it's the current one
+        if (selectedSubtopic?.name === subtopic.name) {
+          setSelectedSubtopic(updatedSubtopic);
+        }
+      } catch (err) {
+        setError("Failed to complete subtopic");
+        setShowError(true);
+      } finally {
+        setUpdatingSubtopic(null);
+      }
+    },
+    [selectedTopic, selectedSubtopic, getOrderedSubtopics]
+  );
 
   const calculateProgress = useCallback(() => {
     if (!subtopics.length) return 0;
-    const completed = subtopics.filter(sub => sub.completed).length;
+    const completed = subtopics.filter((sub) => sub.completed).length;
     return (completed / subtopics.length) * 100;
   }, [subtopics]);
 
@@ -441,26 +506,30 @@ export default function Learning() {
   }, [selectedSubtopic]);
 
   const currentError = contentError || error;
-  const handleNavigateSubtopic = useCallback((subtopic) => {
-    handleSelectSubtopic(subtopic);
-  }, [handleSelectSubtopic]);
-  
+  const handleNavigateSubtopic = useCallback(
+    (subtopic) => {
+      handleSelectSubtopic(subtopic);
+    },
+    [handleSelectSubtopic]
+  );
+
   const handleNavigateToFirstIncomplete = useCallback(() => {
-    const firstIncomplete = subtopics.find(sub => sub && !sub.completed);
+    const firstIncomplete = subtopics.find((sub) => sub && !sub.completed);
     if (firstIncomplete) {
       handleSelectSubtopic(firstIncomplete);
     }
   }, [subtopics, handleSelectSubtopic]);
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      height: '100vh', 
-      background: 'white',
-      flexDirection: { xs: 'column', md: 'row' },
-      overflow: 'hidden'
-    }}>
-
+    <Box
+      sx={{
+        display: "flex",
+        height: "100vh",
+        background: "white",
+        flexDirection: { xs: "column", md: "row" },
+        overflow: "hidden",
+      }}
+    >
       {/* Sidebar */}
       {isMobile ? (
         <Drawer
@@ -468,13 +537,13 @@ export default function Learning() {
           open={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}
           sx={{
-            '& .MuiDrawer-paper': {
-              width: '100%',
+            "& .MuiDrawer-paper": {
+              width: "100%",
               maxWidth: 300,
-              height: '100vh',
-              overflow: 'hidden',
-              background: 'white'
-            }
+              height: "100vh",
+              overflow: "hidden",
+              background: "white",
+            },
           }}
         >
           <LearningSidebar
@@ -493,11 +562,13 @@ export default function Learning() {
           />
         </Drawer>
       ) : (
-        <Box sx={{ 
-          width: 300,
-          flexShrink: 0,
-          borderRight: '1px solid rgba(126, 87, 194, 0.1)'
-        }}>
+        <Box
+          sx={{
+            width: 300,
+            flexShrink: 0,
+            borderRight: "1px solid rgba(126, 87, 194, 0.1)",
+          }}
+        >
           <LearningSidebar
             topics={topics}
             subtopics={subtopics}
@@ -516,14 +587,16 @@ export default function Learning() {
       )}
 
       {/* Main Content Area */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column',
-        minHeight: 0,
-        overflow: 'hidden',
-        pb: isMobile ? '0px' : 0
-      }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+          overflow: "hidden",
+          pb: isMobile ? "0px" : 0,
+        }}
+      >
         {/* Header */}
         <LearningHeader
           selectedTopic={selectedTopic}
@@ -532,7 +605,11 @@ export default function Learning() {
           displaySubtopics={subtopics}
           updatingSubtopic={updatingSubtopic}
           contentInfo={contentInfo}
-          remainingGenerations={selectedSubtopic ? getRemainingGenerations(selectedSubtopic.name) : 0}
+          remainingGenerations={
+            selectedSubtopic
+              ? getRemainingGenerations(selectedSubtopic.name)
+              : 0
+          }
           maxGenerations={MAX_GENERATIONS}
           contentLoading={contentLoading}
           onRegenerateContent={handleRegenerateContent}
@@ -545,31 +622,34 @@ export default function Learning() {
 
         {/* Error Alert */}
         {showError && currentError && (
-          <Box sx={{ 
-            flexShrink: 0,
-            px: { xs: 1, md: 1.5 },
-            pt: 0.5
-          }}>
-            <Alert 
-              severity="error" 
-              sx={{ 
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: { xs: 1, md: 1.5 },
+              pt: 0.5,
+            }}
+          >
+            <Alert
+              severity="error"
+              sx={{
                 borderRadius: 1,
-                fontSize: '0.875rem',
-                py: 0.5
-              }} 
+                fontSize: "0.875rem",
+                py: 0.5,
+              }}
               onClose={handleCloseError}
               action={
-                contentError && selectedSubtopic && (
-                  <Button 
-                    color="inherit" 
-                    size="small" 
+                contentError &&
+                selectedSubtopic && (
+                  <Button
+                    color="inherit"
+                    size="small"
                     startIcon={<Refresh />}
                     onClick={handleRetryContent}
-                    sx={{ 
-                      fontWeight: 600, 
-                      fontSize: '0.75rem',
-                      minWidth: 'auto',
-                      px: 1
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "0.75rem",
+                      minWidth: "auto",
+                      px: 1,
                     }}
                   >
                     Retry
@@ -583,15 +663,17 @@ export default function Learning() {
         )}
 
         {/* Content Area - NO PADDING */}
-        <Box sx={{ 
-          flex: 1,
-          minHeight: 0,
-          overflow: 'auto'
-        }}>
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflow: "auto",
+          }}
+        >
           {contentLoading ? (
-            <LoadingState 
-              isContentLoading={true} 
-              source={contentInfo?.source} 
+            <LoadingState
+              isContentLoading={true}
+              source={contentInfo?.source}
               colorPalette={purplePalette}
             />
           ) : content && selectedSubtopic && !contentError ? (
@@ -606,7 +688,7 @@ export default function Learning() {
               colorPalette={purplePalette}
             />
           ) : (
-            <WelcomeState 
+            <WelcomeState
               subtopicName={selectedSubtopic?.name}
               isReady={!!selectedSubtopic}
               onGenerateContent={() => handleGenerateContent(selectedSubtopic)}

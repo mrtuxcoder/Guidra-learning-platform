@@ -1,7 +1,6 @@
-const User = require('../../models/User');
-const { signJwt } = require('../../configs/jwt');
-const passport = require('../../configs/passport');
-const setTokenCookie = require('./set-token-cookie')
+const { signJwt } = require("../../configs/jwt");
+const passport = require("../../configs/passport");
+const setTokenCookie = require("./set-token-cookie");
 
 // ===== GOOGLE OAUTH CONTROLLERS =====
 
@@ -9,14 +8,16 @@ const setTokenCookie = require('./set-token-cookie')
  * Initiate Google OAuth flow
  */
 exports.googleAuthController = (req, res, next) => {
-  console.log('🔐 [GOOGLE AUTH] Initiating OAuth...');
-  console.log('🔐 [GOOGLE AUTH] Callback URL:', process.env.GOOGLE_CALLBACK_URL);
-  
-  passport.authenticate('google', {
-    scope: ['profile', 'email']
+  console.log("🔐 [GOOGLE AUTH] Initiating OAuth...");
+  console.log(
+    "🔐 [GOOGLE AUTH] Callback URL:",
+    process.env.GOOGLE_CALLBACK_URL
+  );
+
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
   })(req, res, next);
 };
-
 
 /**
  * Get Google OAuth token for frontend after successful authentication
@@ -25,40 +26,46 @@ exports.googleAuthController = (req, res, next) => {
 exports.googleSuccessController = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: 'Not authenticated' });
+      return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const token = signJwt({ id: req.user._id, email: req.user.email, name: req.user.name });
-    
+    const token = signJwt({
+      id: req.user._id,
+      email: req.user.email,
+      name: req.user.name,
+    });
+
     const userObj = req.user.toObject();
     delete userObj.password;
-    
+
     res.status(200).json({
-      message: 'Google authentication successful',
+      message: "Google authentication successful",
       user: userObj,
-      token: token // Send token to frontend to store in frontend cookie
+      token: token, // Send token to frontend to store in frontend cookie
     });
   } catch (error) {
-    console.error('❌ [GOOGLE SUCCESS] Error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
+    console.error("❌ [GOOGLE SUCCESS] Error:", error);
+    res.status(500).json({ error: "Authentication failed" });
   }
 };
 
-
 exports.googleCallbackController = (req, res, next) => {
-  console.log('🔐 [GOOGLE CALLBACK] Received callback');
-  
+  console.log("🔐 [GOOGLE CALLBACK] Received callback");
+
   // Add headers to handle COOP issues
-  res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
-  
-  passport.authenticate('google', { 
-    session: false
-  }, (err, user, info) => {
-    try {
-      if (err) {
-        console.error('❌ [GOOGLE CALLBACK] Auth error:', err);
-        return res.send(`
+  res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+
+  passport.authenticate(
+    "google",
+    {
+      session: false,
+    },
+    (err, user, info) => {
+      try {
+        if (err) {
+          console.error("❌ [GOOGLE CALLBACK] Auth error:", err);
+          return res.send(`
           <!DOCTYPE html>
           <html>
             <head>
@@ -81,11 +88,11 @@ exports.googleCallbackController = (req, res, next) => {
             </body>
           </html>
         `);
-      }
-      
-      if (!user) {
-        console.error('❌ [GOOGLE CALLBACK] No user returned');
-        return res.send(`
+        }
+
+        if (!user) {
+          console.error("❌ [GOOGLE CALLBACK] No user returned");
+          return res.send(`
           <!DOCTYPE html>
           <html>
             <head>
@@ -108,27 +115,35 @@ exports.googleCallbackController = (req, res, next) => {
             </body>
           </html>
         `);
-      }
+        }
 
-      console.log('✅ [GOOGLE CALLBACK] User authenticated:', user.email);
-      
-      // Generate token
-      const token = signJwt({ id: user._id, email: user.email, name: user.name });
-      
-      // Set backend cookie
-      setTokenCookie(res, user);
-      console.log('✅ [GOOGLE CALLBACK] Token set in backend cookie for user:', user._id);
-      
-      // Check if user needs to complete profile
-      const needsPersonalization = !user.learningStyle || 
-                                  user.learningStyle === 'visual' || 
-                                  !user.progress || 
-                                  user.progress.length === 0;
-      
-      const redirectPath = needsPersonalization ? '/explore' : '/profile';
-      
-      // Send HTML that communicates token to frontend via postMessage
-      res.send(`
+        console.log("✅ [GOOGLE CALLBACK] User authenticated:", user.email);
+
+        // Generate token
+        const token = signJwt({
+          id: user._id,
+          email: user.email,
+          name: user.name,
+        });
+
+        // Set backend cookie
+        setTokenCookie(res, user);
+        console.log(
+          "✅ [GOOGLE CALLBACK] Token set in backend cookie for user:",
+          user._id
+        );
+
+        // Check if user needs to complete profile
+        const needsPersonalization =
+          !user.learningStyle ||
+          user.learningStyle === "visual" ||
+          !user.progress ||
+          user.progress.length === 0;
+
+        const redirectPath = needsPersonalization ? "/explore" : "/profile";
+
+        // Send HTML that communicates token to frontend via postMessage
+        res.send(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -227,10 +242,9 @@ exports.googleCallbackController = (req, res, next) => {
           </body>
         </html>
       `);
-
-    } catch (error) {
-      console.error('❌ [GOOGLE CALLBACK] Error:', error);
-      res.send(`
+      } catch (error) {
+        console.error("❌ [GOOGLE CALLBACK] Error:", error);
+        res.send(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -253,6 +267,7 @@ exports.googleCallbackController = (req, res, next) => {
           </body>
         </html>
       `);
+      }
     }
-  })(req, res, next);
+  )(req, res, next);
 };

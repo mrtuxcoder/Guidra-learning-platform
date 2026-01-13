@@ -1,24 +1,28 @@
-import React from 'react';
+import React from "react";
 import { Stack, Card, CardContent, Box, Typography } from "@mui/material";
 
-const MobileQuickActions = ({ 
-  quickActions, 
-  learningInsights, 
-  suggestions, 
-  onQuickAction 
+const MobileQuickActions = ({
+  quickActions,
+  learningInsights,
+  suggestions,
+  onQuickAction,
 }) => {
   return (
     <Stack spacing={1}>
       {quickActions.map((action) => {
         const getSubtopic = () => {
           switch (action.type) {
-            case 'continue': return learningInsights.firstIncompleteSubtopic;
-            case 'recent': return suggestions.recentlyAccessed[0];
-            case 'priority': return suggestions.highPrioritySubtopics[0];
-            default: return null;
+            case "continue":
+              return learningInsights.firstIncompleteSubtopic;
+            case "recent":
+              return suggestions.recentlyAccessed[0];
+            case "priority":
+              return suggestions.highPrioritySubtopics[0];
+            default:
+              return null;
           }
         };
-        
+
         const subtopic = getSubtopic();
         if (!subtopic) return null;
 
@@ -26,59 +30,75 @@ const MobileQuickActions = ({
           <Card
             key={action.type}
             sx={{
-              cursor: 'pointer',
+              cursor: "pointer",
               border: `1px solid #e2e8f0`,
               borderRadius: 2,
-              transition: 'all 0.2s ease',
-              background: 'white',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                borderColor: action.color
-              }
+              transition: "all 0.2s ease",
+              background: "white",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                borderColor: action.color,
+              },
             }}
             onClick={() => {
               onQuickAction(action.type);
             }}
           >
-            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                 <Box
                   sx={{
                     width: 36,
                     height: 36,
-                    borderRadius: '10px',
+                    borderRadius: "10px",
                     background: action.gradient,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     mr: 2,
-                    flexShrink: 0
+                    flexShrink: 0,
                   }}
                 >
-                  {React.cloneElement(action.icon, { 
-                    sx: { color: 'white' } 
+                  {React.cloneElement(action.icon, {
+                    sx: { color: "white" },
                   })}
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="body2" fontWeight="600" color="#1e293b" noWrap>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mb: 0.5,
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      fontWeight="600"
+                      color="#1e293b"
+                      noWrap
+                    >
                       {action.name}
                     </Typography>
                   </Box>
-                  <Typography variant="caption" color="#64748b" sx={{ lineHeight: 1.2 }}>
+                  <Typography
+                    variant="caption"
+                    color="#64748b"
+                    sx={{ lineHeight: 1.2 }}
+                  >
                     {action.subtitle}
                   </Typography>
-                  <Typography 
-                    variant="caption" 
-                    color="#1e293b" 
-                    sx={{ 
-                      fontWeight: '500',
+                  <Typography
+                    variant="caption"
+                    color="#1e293b"
+                    sx={{
+                      fontWeight: "500",
                       mt: 0.5,
-                      display: 'block',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      display: "block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {subtopic.name}

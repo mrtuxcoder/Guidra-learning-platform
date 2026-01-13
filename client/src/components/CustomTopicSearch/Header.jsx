@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Box, Typography } from "@mui/material";
 import { AutoAwesome } from "@mui/icons-material";
 
@@ -14,7 +14,7 @@ const Header = () => {
             background: "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
         >
           <AutoAwesome sx={{ fontSize: 40, color: "white" }} />
@@ -29,7 +29,7 @@ const Header = () => {
           backgroundClip: "text",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
-          mb: 2
+          mb: 2,
         }}
       >
         Learn Anything
