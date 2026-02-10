@@ -29,7 +29,8 @@ const LearningContent = ({
     explanation: true,
     learningActions: true,
     examples: true,
-    practice: true
+    practice: true,
+    coreExample: true,
   });
 
   // Handle mindmap regeneration
@@ -64,22 +65,23 @@ const LearningContent = ({
     }
   };
 
-  // Safe content access with fallbacks
+
   const safeContent = useMemo(() => {
-    // Use the regenerated mindmap if available, otherwise use the original content
-    const currentMindmap = mindmapData?.mindmap || content?.mindmap;
-    
-    return {
-      concept: content?.concept || content?.keyConcepts?.[0] || '',
-      explanation: content?.explanation || '',
-      learningActions: Array.isArray(content?.learningActions) ? content.learningActions : [],
-      examples: Array.isArray(content?.examples) ? content.examples : [],
-      practice: content?.practice || '',
-      mindmap: currentMindmap,
-      quiz: Array.isArray(content?.quiz) ? content.quiz : [],
-      title: content?.title || selectedSubtopic?.name || ''
-    };
-  }, [content, selectedSubtopic, mindmapData]);
+  // Use the regenerated mindmap if available, otherwise use the original content
+  const currentMindmap = mindmapData?.mindmap || content?.mindmap;
+  
+  return {
+    concept: content?.concept || content?.keyConcepts?.[0] || '',
+    explanation: content?.explanation || '',
+    coreExample: content?.coreExample || '',  // ADD THIS LINE
+    learningActions: Array.isArray(content?.learningActions) ? content.learningActions : [],
+    examples: Array.isArray(content?.examples) ? content.examples : [],
+    practice: content?.practice || '',
+    mindmap: currentMindmap,
+    quiz: Array.isArray(content?.quiz) ? content.quiz : [],
+    title: content?.title || selectedSubtopic?.name || ''
+  };
+}, [content, selectedSubtopic, mindmapData]);
 
   // Initialize mindmap data when content changes
   React.useEffect(() => {
@@ -206,18 +208,19 @@ const LearningContent = ({
           />
         )}
 
-        {safeContent.examples.length > 0 && (
-          <ContentSection
-            title="Examples"
-            content={safeContent.examples}
-            emoji="💼"
-            isList={true}
-            isExpanded={expandedSections.examples}
-            onToggle={() => toggleSection('examples')}
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-          />
-        )}
+      {safeContent.coreExample && (
+  <ContentSection
+    title="Example"
+    content={safeContent.coreExample}
+    emoji="📝"
+    isExpanded={expandedSections.coreExample || true}
+    onToggle={() => toggleSection('coreExample')}
+    isMobile={isMobile}
+    colorPalette={colorPalette}
+ 
+  />
+)}
+
 
         {safeContent.practice && (
           <ContentSection

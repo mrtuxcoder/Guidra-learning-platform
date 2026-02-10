@@ -1,21 +1,6 @@
-const ContentCache = require("../models/Content-cache");
+const ContentCache = require("../../models/Content-cache");
 
-/**
- * Get cached content
- */
-async function getCachedContent(userId, topic, subtopic, learningStyle) {
-  return await ContentCache.findOne({
-    userId,
-    topic: topic.toLowerCase(),
-    subtopic: subtopic.toLowerCase(),
-    learningStyle,
-    isActive: true,
-  }).sort({ version: -1 });
-}
 
-/**
- * Save to Cache - PRESERVES full structure
- */
 async function saveToCache({
   userId,
   topic,
@@ -68,7 +53,4 @@ async function saveToCache({
   return cacheEntry;
 }
 
-module.exports = {
-  getCachedContent,
-  saveToCache,
-};
+module.exports = saveToCache

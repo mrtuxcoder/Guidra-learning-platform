@@ -118,7 +118,7 @@ function validateMermaidSyntax(mindmap) {
 }
 
 // Import from content-utils for fallback
-const { generateFallbackMindmap } = require("./content-utils");
+const generateFallbackMindmap  = require("./fallback/mindmap-fallback");
 
 module.exports = {
   isFallbackMindmap,

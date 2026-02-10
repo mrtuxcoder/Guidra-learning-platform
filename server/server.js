@@ -11,7 +11,7 @@ const userRoutes = require("./routes/v1/user-routes");
 const learningRoutes = require("./routes/v1/learning-routes");
 const progressRoutes = require("./routes/v1/progress-routes");
 const contentRoutes = require("./routes/v1/content-routes");
-const cacheRoute = require("./routes/v1/cache-debug");
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -71,7 +71,6 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/learning", learningRoutes);
 app.use("/api/v1/progress", progressRoutes);
 app.use("/api/v1/content", contentRoutes);
-app.use("/api/v1/cache", cacheRoute);
 
 // Health check
 app.get("/health", (req, res) => {

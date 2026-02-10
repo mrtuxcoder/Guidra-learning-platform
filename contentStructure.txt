@@ -1,0 +1,436 @@
+OLD CONTENT:
+
+OLD Unified Prompt:   Create exceptionally structured, personalized, and educational content for "Regression Analysis Models" under the broader topic "AI & Machine Learning".
+
+LEARNER PROFILE:
+- Name: test@guidra.com
+- Learning Level: beginner
+- Learning Style: theory
+- Motivation: “I want to build a strong foundation and actually understand what I’m learning, not just memorize it.”
+- Preferred Tone: neutral
+
+COMPONENT PROMPTS (FOLLOW EACH ONE'S SPECIFIC INSTRUCTIONS):
+
+TITLE:
+Create engaging title for "Regression Analysis Models" (topic: "AI & Machine Learning").
+OUTPUT ONLY JSON: {"title": "title text here"}
+3-8 words. Catchy, educational.
+
+CONCEPT:
+Define "Regression Analysis Models" (beginner level). 1-2 sentences.
+OUTPUT ONLY JSON: {"concept": "definition here"}
+Precise, clear, standalone. Focus on what it IS.
+Beginner=simple, Advanced=technical.
+
+EXPLANATION:
+Explain "Regression Analysis Models" for test@guidra.com. Tone: neutral. Style: theory.
+Include 1 personalized sentence for test@guidra.com. 3-4 paragraphs.
+OUTPUT ONLY JSON: {"explanation": "text here"}
+Practical=action steps, Conceptual=principles, Visual=patterns.
+
+
+CORE EXAMPLE:
+Create core example for "Regression Analysis Models" (beginner level).
+OUTPUT ONLY JSON: {"coreExample": "example and explanation here"}
+Include: 1) Working example/code, 2) One-paragraph explanation.
+Self-contained. Runnable if code.
+
+PRACTICE:
+Create 5-min practice for "Regression Analysis Models". Address test@guidra.com with neutral tone.
+OUTPUT ONLY JSON: {"practice": "exercise text here"}
+Include: 1) Motivational sentence, 2) Clear instructions, 3) Success criteria.
+Hands-on, reinforces concepts.
+
+LEARNING ACTIONS:
+Create 4 learning actions for "Regression Analysis Models".
+Format: JSON array ["Action1", "Action2", "Action3", "Action4"].
+Progressive: Identify → Understand → Apply → Create.
+Action verbs, clear steps. Output ONLY JSON.
+
+MINDMAP:
+Generate Mermaid.js mindmap for "Regression Analysis Models" (topic: "AI & Machine Learning").
+Learner style: theory.
+OUTPUT ONLY valid JSON: {"mindmap": "mermaid code here"}
+Mermaid format: graph TD\nA[Regression Analysis Models] --> B[Branch1]...
+Max 8 nodes. Labels: 2-5 words. No extra text.
+
+QUIZ:
+Create 3 quiz questions for "Regression Analysis Models" (beginner).
+Based on: {"topic":"AI & Machine Learning","subtopic":"Regression Analysis Models","userLevel":"beginner","lea...
+OUTPUT ONLY JSON array: [ {question, choices, answer, correctIndex, source}, ... ]
+3 questions: Q1=Conceptual, Q2=Applied, Q3=Scenario.
+Distractors = common misconceptions.
+
+INTEGRATION INSTRUCTIONS:
+1. Execute each prompt above independently and combine their outputs
+2. Ensure personalization elements address test@guidra.com using neutral tone
+3. Align all content with theory learning style
+4. All quiz questions MUST be derived from the generated content
+5. Maintain logical flow across all sections
+
+OUTPUT FORMAT (STRICT JSON):
+{
+  "title": "generated from title prompt",
+  "concept": "generated from concept prompt", 
+  "explanation": "generated from explanation prompt",
+  "coreExample": "generated from coreExample prompt",
+  "practice": "generated from practice prompt",
+  "mindmap": "generated from mindmap prompt",
+  "learningActions": ["generated from learningActions prompt"],
+  "quiz": [
+    {
+      "question": "Based on generated content",
+      "choices": ["Correct", "Distractor", "Distractor", "Distractor"],
+      "answer": "Correct",
+      "correctIndex": 0,
+      "source": "content source"
+    }
+  ]
+}
+
+RULES:
+- Execute each component prompt exactly as written above
+- Each component output must follow its own format instructions
+- Final JSON must be valid and parseable
+- Add "examples" array with 2 real-world scenarios
+- Quiz must have 3 questions derived from generated content
+- Mindmap must be valid Mermaid.js starting with 'graph TD'
+
+FINAL OUTPUT MUST BE THE COMPLETE JSON OBJECT ONLY — no other text.
+
+AI response for old prompt ```
+{
+  "title": "Regression Analysis Models",
+  "concept": "Regression Analysis Models are statistical techniques used to establish relationships between variables.",
+  "explanation": "Regression Analysis Models are fundamental concepts in machine learning, which enable us to analyze the relationship between a dependent variable and one or more independent variables. As test@guidra.com, you will find that understanding regression analysis models is crucial in building a strong foundation in AI and machine learning. Regression models can be used for predictive purposes, such as forecasting continuous outcomes. The goal of regression analysis is to create a mathematical model that can predict the value of a continuous outcome variable based on one or more predictor variables. There are several types of regression models, including simple linear regression, multiple linear regression, and logistic regression. Each type of regression model has its own strengths and weaknesses, and the choice of which one to use depends on the specific problem you are trying to solve.",
+  "coreExample": "Here is an example of a simple linear regression model in Python: \n# Import necessary libraries\nfrom sklearn.linear_model import LinearRegression\nimport numpy as np\n\n# Define the independent variable (x) and the dependent variable (y)\nx = np.array([1, 2, 3, 4, 5]).reshape((-1, 1))\ny = np.array([2, 3, 5, 7, 11])\n\n# Create a linear regression model and fit it to the data\nmodel = LinearRegression()\nmodel.fit(x, y)\n\n# Print the coefficients of the model\nprint('Intercept:', model.intercept_)\nprint('Slope:', model.coef_)\nThis example demonstrates how to create a simple linear regression model in Python using the scikit-learn library. The model is then fit to the data, and the coefficients of the model are printed.",
+  "practice": "Now it's your turn to practice, test@guidra.com! To reinforce your understanding of regression analysis models, try the following exercise: Using a dataset of your choice, create a simple linear regression model to predict a continuous outcome variable. First, import the necessary libraries and load the dataset. Then, define the independent variable(s) and the dependent variable. Next, create a linear regression model and fit it to the data. Finally, evaluate the performance of the model using metrics such as mean squared error or R-squared. You will have successfully completed this exercise when you can interpret the coefficients of the model and use it to make predictions on new, unseen data.",
+  "mindmap": "graph TD\nA[Regression Analysis Models] --> B[Simple Linear Regression]\nA --> C[Multiple Linear Regression]\nA --> D[Logistic Regression]\nB --> E[Predictive Modeling]\nC --> F[Feature Selection]\nD --> G[Classification]",
+  "learningActions": [
+    "Identify the key components of a regression analysis model",
+    "Understand the differences between various types of regression models",
+    "Apply regression analysis models to real-world problems",
+    "Create a regression analysis model using a programming language"
+  ],
+  "examples": [
+    "Predicting house prices based on features such as number of bedrooms and square footage",
+    "Analyzing the relationship between a company's stock price and various economic indicators"
+  ],
+  "quiz": [
+    {
+      "question": "What is the primary purpose of regression analysis models?",
+      "choices": [
+        "To classify categorical outcomes",
+        "To predict continuous outcomes",
+        "To identify clusters in data",
+        "To visualize relationships between variables"
+      ],
+      "answer": "To predict continuous outcomes",
+      "correctIndex": 1,
+      "source": "concept"
+    },
+    {
+      "question": "Which type of regression model is used to predict a continuous outcome variable based on one independent variable?",
+      "choices": [
+        "Simple Linear Regression",
+        "Multiple Linear Regression",
+        "Logistic Regression",
+        "Decision Trees"
+      ],
+      "answer": "Simple Linear Regression",
+      "correctIndex": 0,
+      "source": "explanation"
+    },
+    {
+      "question": "What is the name of the coefficient that represents the change in the dependent variable for a one-unit change in the independent variable, while holding all other independent variables constant?",
+      "choices": [
+        "Intercept",
+        "Slope",
+        "Coefficient of Determination",
+        "Mean Squared Error"
+      ],
+      "answer": "Slope",
+      "correctIndex": 1,
+      "source": "coreExample"
+    }
+  ]
+}
+```
+Old structuring the AI response (object) {
+  title: 'Regression Analysis Models',
+  concept: 'Regression Analysis Models are statistical techniques used to establish relationships between variables.',
+  explanation: 'Regression Analysis Models are fundamental concepts in machine learning, which enable us to analyze the relationship between a dependent variable and one or more independent variables. As test@guidra.com, you will find that understanding regression analysis models is crucial in building a strong foundation in AI and machine learning. Regression models can be used for predictive purposes, such as forecasting continuous outcomes. The goal of regression analysis is to create a mathematical model that can predict the value of a continuous outcome variable based on one or more predictor variables. There are several types of regression models, including simple linear regression, multiple linear regression, and logistic regression. Each type of regression model has its own strengths and weaknesses, and the choice of which one to use depends on the specific problem you are trying to solve.',
+  coreExample: 'Here is an example of a simple linear regression model in Python: \n' +
+    '# Import necessary libraries\n' +
+    'from sklearn.linear_model import LinearRegression\n' +
+    'import numpy as np\n' +
+    '\n' +
+    '# Define the independent variable (x) and the dependent variable (y)\n' +
+    'x = np.array([1, 2, 3, 4, 5]).reshape((-1, 1))\n' +
+    'y = np.array([2, 3, 5, 7, 11])\n' +
+    '\n' +
+    '# Create a linear regression model and fit it to the data\n' +
+    'model = LinearRegression()\n' +
+    'model.fit(x, y)\n' +
+    '\n' +
+    '# Print the coefficients of the model\n' +
+    "print('Intercept:', model.intercept_)\n" +
+    "print('Slope:', model.coef_)\n" +
+    'This example demonstrates how to create a simple linear regression model in Python using the scikit-learn library. The model is then fit to the data, and the coefficients of the model are printed.',
+  practice: "Now it's your turn to practice, test@guidra.com! To reinforce your understanding of regression analysis models, try the following exercise: Using a dataset of your choice, create a simple linear regression model to predict a continuous outcome variable. First, import the necessary libraries and load the dataset. Then, define the independent variable(s) and the dependent variable. Next, create a linear regression model and fit it to the data. Finally, evaluate the performance of the model using metrics such as mean squared error or R-squared. You will have successfully completed this exercise when you can interpret the coefficients of the model and use it to make predictions on new, unseen data.",
+  mindmap: 'graph TD\n' +
+    'A[Regression Analysis Models] --> B[Simple Linear Regression]\n' +
+    'A --> C[Multiple Linear Regression]\n' +
+    'A --> D[Logistic Regression]\n' +
+    'B --> E[Predictive Modeling]\n' +
+    'C --> F[Feature Selection]\n' +
+    'D --> G[Classification]',
+  learningActions: [
+    'Identify the key components of a regression analysis model',
+    'Understand the differences between various types of regression models',
+    'Apply regression analysis models to real-world problems',
+    'Create a regression analysis model using a programming language'
+  ],
+  examples: [
+    'Predicting house prices based on features such as number of bedrooms and square footage',
+    "Analyzing the relationship between a company's stock price and various economic indicators"
+  ],
+  quiz: [
+    {
+      question: 'What is the primary purpose of regression analysis models?',
+      choices: [Array],
+      answer: 'To predict continuous outcomes',
+      correctIndex: 1,
+      source: 'concept'
+    },
+    {
+      question: 'Which type of regression model is used to predict a continuous outcome variable based on one independent variable?',
+      choices: [Array],
+      answer: 'Simple Linear Regression',
+      correctIndex: 0,
+      source: 'explanation'
+    },
+    {
+      question: 'What is the name of the coefficient that represents the change in the dependent variable for a one-unit change in the independent variable, while holding all other independent variables constant?',
+      choices: [Array],
+      answer: 'Slope',
+      correctIndex: 1,
+      source: 'coreExample'
+    }
+  ]
+}
+
+
+NEW CONTENT:
+
+New Unified Prompt:   Create comprehensive educational content about "Model Evaluation Metrics" within the topic "AI & Machine Learning".
+
+STUDENT PROFILE:
+- Name: test@guidra.com
+- Skill Level: beginner
+- Learning Style: theory
+- Motivation: “I want to build a strong foundation and actually understand what I’m learning, not just memorize it.”
+- Preferred Tone: neutral
+
+CRITICAL FORMATTING RULES - READ CAREFULLY:
+1. Use EXACTLY these section labels with colons:
+   TITLE:
+   CONCEPT:
+   EXPLANATION:
+   CORE EXAMPLE:
+   PRACTICE:
+   LEARNING ACTIONS:
+   MINDMAP:
+   QUIZ:
+   REAL-WORLD EXAMPLES:
+
+2. DO NOT use markdown (no ###, no **bold**, no # headers)
+3. DO NOT use bullet points (* or -)
+4. DO NOT use code blocks (```)
+5. Put ONE blank line between sections
+6. Use ONLY plain text
+
+CONTENT REQUIREMENTS:
+
+TITLE:
+Create an engaging title (3-8 words) for this lesson.
+
+CONCEPT:
+Define "Model Evaluation Metrics" clearly at beginner level in 1-2 sentences.
+
+EXPLANATION:
+Explain "Model Evaluation Metrics" in 3-4 paragraphs. Use neutral tone.
+Include one personalized sentence for test@guidra.com.
+Focus on: patterns.
+
+CORE EXAMPLE:
+Provide a practical example or code demonstration.
+Include the example and a one-paragraph explanation.
+
+PRACTICE:
+Create a 5-minute practice activity.
+Include motivation for test@guidra.com, clear instructions, and success criteria.
+
+LEARNING ACTIONS:
+List 4 progressive learning actions as a numbered list:
+1. Identify: [action]
+2. Understand: [action]
+3. Apply: [action]
+4. Create: [action]
+
+MINDMAP:
+Create a Mermaid.js mindmap. Start with "graph TD" and show 3-4 main branches from "Model Evaluation Metrics".
+
+QUIZ:
+Create 3 multiple-choice questions in this EXACT format:
+Q1: [Conceptual question]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [Letter] - [Brief explanation]
+
+Q2: [Applied question]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [Letter] - [Brief explanation]
+
+Q3: [Scenario question]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [Letter] - [Brief explanation]
+
+REAL-WORLD EXAMPLES:
+1. [First example]
+2. [Second example]
+
+IMPORTANT: 
+- Follow ALL formatting rules above
+- Use ONLY the section labels shown
+- Sections must be separated by one blank line
+- Respond with complete content using plain text only
+🚀 Trying Groq: llama-3.3-70b-versatile
+AI response for New prompt TITLE:
+Model Evaluation Metrics Explained
+
+CONCEPT:
+Model Evaluation Metrics refer to the criteria used to assess the performance of a machine learning model. These metrics help determine how well a model is able to make predictions or classify data by identifying patterns.
+
+EXPLANATION:
+Model Evaluation Metrics are essential in machine learning as they provide a way to measure the accuracy and reliability of a model. These metrics can be used to compare the performance of different models and to identify areas where a model needs improvement. As test@guidra.com begins to learn about model evaluation metrics, it is important to understand that these metrics are used to identify patterns in data and to evaluate how well a model is able to recognize and replicate these patterns. 
+Model evaluation metrics can be broadly categorized into two types: metrics for classification problems and metrics for regression problems. For classification problems, metrics such as accuracy, precision, and recall are commonly used. For regression problems, metrics such as mean squared error and mean absolute error are commonly used. 
+The choice of evaluation metric depends on the specific problem being addressed and the type of data being used. For example, in a classification problem where the classes are imbalanced, metrics such as precision and recall may be more useful than accuracy. 
+In addition to these metrics, other factors such as computational resources and model interpretability may also be important considerations when evaluating a model.
+
+CORE EXAMPLE:
+The example is a classification problem where we are trying to predict whether a person has a certain disease based on their symptoms. 
+The explanation is that in this example, we would use metrics such as accuracy, precision, and recall to evaluate the performance of our model. For instance, accuracy would tell us how often the model correctly predicted whether a person had the disease, while precision would tell us how often the model correctly predicted that a person had the disease when they actually did.
+
+PRACTICE:
+For this 5-minute practice activity, test@guidra.com should try to identify the evaluation metrics that would be most appropriate for a given problem. To do this, read a brief description of a machine learning problem and then write down the metrics that you think would be most useful for evaluating the performance of a model. The success criteria for this activity is that you are able to identify at least two relevant metrics for the problem.
+
+LEARNING ACTIONS:
+1. Identify the different types of model evaluation metrics and their uses
+2. Understand how to calculate and interpret each metric
+3. Apply model evaluation metrics to a real-world problem
+4. Create a plan for evaluating the performance of a machine learning model using multiple metrics
+
+MINDMAP:
+graph TD
+    A[Model Evaluation Metrics] --> B[Classification Metrics]
+    A --> C[Regression Metrics]
+    B --> D[Accuracy]
+    B --> E[Precision]
+    C --> F[Mean Squared Error]
+    C --> G[Mean Absolute Error]
+
+QUIZ:
+Q1: What is the primary purpose of model evaluation metrics
+A) To compare the performance of different models
+B) To identify patterns in data
+C) To evaluate the performance of a machine learning model
+D) To select the best features for a model
+Correct: C - To evaluate the performance of a machine learning model
+
+Q2: Which metric is commonly used to evaluate the performance of a model in a classification problem where the classes are imbalanced
+A) Accuracy
+B) Precision
+C) Recall
+D) Mean Squared Error
+Correct: B - Precision
+
+Q3: What is the difference between precision and recall in a classification problem
+A) Precision measures the proportion of true positives, while recall measures the proportion of false positives
+B) Precision measures the proportion of true positives, while recall measures the proportion of true positives among all actual positive instances
+C) Precision measures the proportion of false positives, while recall measures the proportion of true positives
+D) Precision measures the proportion of true negatives, while recall measures the proportion of false negatives
+Correct: B - Precision measures the proportion of true positives, while recall measures the proportion of true positives among all actual positive instances
+
+REAL-WORLD EXAMPLES:
+1. A company uses model evaluation metrics to evaluate the performance of a machine learning model that predicts customer churn. The company uses metrics such as accuracy and precision to determine how well the model is able to identify customers who are likely to churn.
+2. A healthcare organization uses model evaluation metrics to evaluate the performance of a machine learning model that predicts the likelihood of a patient having a certain disease. The organization uses metrics such as recall and mean squared error to determine how well the model is able to identify patients who actually have the disease.
+=== DEBUG: processAIResponses called ===
+Input type: string
+Error in handleRegenerateContent: TypeError: Cannot use 'in' operator to search for 'unified' in TITLE:
+Model Evaluation Metrics Explained
+
+CONCEPT:
+Model Evaluation Metrics refer to the criteria used to assess the performance of a machine learning model. These metrics help determine how well a model is able to make predictions or classify data by identifying patterns.
+
+EXPLANATION:
+Model Evaluation Metrics are essential in machine learning as they provide a way to measure the accuracy and reliability of a model. These metrics can be used to compare the performance of different models and to identify areas where a model needs improvement. As test@guidra.com begins to learn about model evaluation metrics, it is important to understand that these metrics are used to identify patterns in data and to evaluate how well a model is able to recognize and replicate these patterns. 
+Model evaluation metrics can be broadly categorized into two types: metrics for classification problems and metrics for regression problems. For classification problems, metrics such as accuracy, precision, and recall are commonly used. For regression problems, metrics such as mean squared error and mean absolute error are commonly used. 
+The choice of evaluation metric depends on the specific problem being addressed and the type of data being used. For example, in a classification problem where the classes are imbalanced, metrics such as precision and recall may be more useful than accuracy. 
+In addition to these metrics, other factors such as computational resources and model interpretability may also be important considerations when evaluating a model.
+
+CORE EXAMPLE:
+The example is a classification problem where we are trying to predict whether a person has a certain disease based on their symptoms. 
+The explanation is that in this example, we would use metrics such as accuracy, precision, and recall to evaluate the performance of our model. For instance, accuracy would tell us how often the model correctly predicted whether a person had the disease, while precision would tell us how often the model correctly predicted that a person had the disease when they actually did.
+
+PRACTICE:
+For this 5-minute practice activity, test@guidra.com should try to identify the evaluation metrics that would be most appropriate for a given problem. To do this, read a brief description of a machine learning problem and then write down the metrics that you think would be most useful for evaluating the performance of a model. The success criteria for this activity is that you are able to identify at least two relevant metrics for the problem.
+
+LEARNING ACTIONS:
+1. Identify the different types of model evaluation metrics and their uses
+2. Understand how to calculate and interpret each metric
+3. Apply model evaluation metrics to a real-world problem
+4. Create a plan for evaluating the performance of a machine learning model using multiple metrics
+
+MINDMAP:
+graph TD
+    A[Model Evaluation Metrics] --> B[Classification Metrics]
+    A --> C[Regression Metrics]
+    B --> D[Accuracy]
+    B --> E[Precision]
+    C --> F[Mean Squared Error]
+    C --> G[Mean Absolute Error]
+
+QUIZ:
+Q1: What is the primary purpose of model evaluation metrics
+A) To compare the performance of different models
+B) To identify patterns in data
+C) To evaluate the performance of a machine learning model
+D) To select the best features for a model
+Correct: C - To evaluate the performance of a machine learning model
+
+Q2: Which metric is commonly used to evaluate the performance of a model in a classification problem where the classes are imbalanced
+A) Accuracy
+B) Precision
+C) Recall
+D) Mean Squared Error
+Correct: B - Precision
+
+Q3: What is the difference between precision and recall in a classification problem
+A) Precision measures the proportion of true positives, while recall measures the proportion of false positives
+B) Precision measures the proportion of true positives, while recall measures the proportion of true positives among all actual positive instances
+C) Precision measures the proportion of false positives, while recall measures the proportion of true positives
+D) Precision measures the proportion of true negatives, while recall measures the proportion of false negatives
+Correct: B - Precision measures the proportion of true positives, while recall measures the proportion of true positives among all actual positive instances
+
+REAL-WORLD EXAMPLES:
+1. A company uses model evaluation metrics to evaluate the performance of a machine learning model that predicts customer churn. The company uses metrics such as accuracy and precision to determine how well the model is able to identify customers who are likely to churn.
+2. A healthcare organization uses model evaluation metrics to evaluate the performance of a machine learning model that predicts the likelihood of a patient having a certain disease. The organization uses metrics such as recall and mean squared error to determine how well the model is able to identify patients who actually have the disease.

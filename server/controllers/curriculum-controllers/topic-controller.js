@@ -1,7 +1,7 @@
 const User = require("../../models/User");
 const callAI = require("../../utils/call-AI");
 const { buildTopicValidatorPrompt } = require("../../prompts/topic-validator");
-const { isObviouslyInvalid } = require("../../utils/simple-topic-validator");
+const { isObviouslyInvalid } = require("../../utils/curriculum/simple-topic-validator");
 
 // new feature
 /**

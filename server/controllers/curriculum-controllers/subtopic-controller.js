@@ -1,10 +1,10 @@
 const User = require("../../models/User");
-const { cleanSubtopicOutput } = require("../../utils/content-utils");
+const cleanSubtopicOutput = require("../../utils/curriculum/clean-subtopic")
 const generateSubtopicPrompt = require("../../prompts/subtopic-generator");
 const {
   isNonsense,
   normalizeInput,
-} = require("../../utils/simple-topic-validator");
+} = require("../../utils/curriculum/simple-topic-validator");
 const callAI = require("../../utils/call-AI");
 
 // Get all subtopics for a specific topic from user progress
