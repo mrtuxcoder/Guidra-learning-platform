@@ -1,56 +1,105 @@
-const ContentCache = require("../../models/Content-cache");
+const mongoose = require("mongoose");
+const ContentCache = require("../../models/Content-cache"); 
 
+
+/* Save content to cache - flexible function */
 
 async function saveToCache({
   userId,
   topic,
   subtopic,
-  user,
   content,
-  aiPrompt,
-  crypto,
 }) {
-  // Deactivate previous versions
-  await ContentCache.updateMany(
-    {
+  const query = {
+    userId,
+    topic: topic.toLowerCase(),
+    subtopic: subtopic.toLowerCase(),
+  };
+
+  let cacheDoc = await ContentCache.findOne(query);
+
+  if (!cacheDoc) {
+    // Create new cache document
+    cacheDoc = new ContentCache({
       userId,
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
-      learningStyle: user.learningStyle,
-      isActive: true,
-    },
-    { isActive: false }
-  );
+      content: {
+        versions: [],
+        latestVersion: 0,
+      },
+    });
+  }
 
-  // Get next version
-  const latestVersion = await ContentCache.findOne({
-    userId,
-    topic: topic.toLowerCase(),
-    subtopic: subtopic.toLowerCase(),
-    learningStyle: user.learningStyle,
-  }).sort({ version: -1 });
+  // Increment version number (full content only)
+  const newVersionNumber = (cacheDoc.content.latestVersion || 0) + 1;
 
-  const nextVersion = latestVersion ? latestVersion.version + 1 : 1;
-
-  // Save the ENTIRE content structure as-is
-  const cacheEntry = await ContentCache.create({
-    userId,
-    topic: topic.toLowerCase(),
-    subtopic: subtopic.toLowerCase(),
-    learningStyle: user.learningStyle,
-    learningMotivation: user.reasonForLearning,
-    difficultyLevel: user.difficultyPreference || "beginner",
-    contentFormat: "comprehensive",
-    content: content,
-    aiModelUsed: "gemini-huggingface-fallback",
-    aiPromptHash: crypto.createHash("md5").update(aiPrompt).digest("hex"),
-    version: nextVersion,
-    isActive: true,
-    timesAccessed: 0,
-    lastAccessed: new Date(),
+  // Add new version entry
+  cacheDoc.content.versions.push({
+    version: newVersionNumber,
+    contentType: "full",
+    data: content,
   });
 
-  return cacheEntry;
+  // Update latest version number (full content only)
+  cacheDoc.content.latestVersion = newVersionNumber;
+
+  await cacheDoc.save();
+
+  return { cacheDoc, versionEntry: { versionNumber: newVersionNumber, contentType: "full" } };
 }
 
-module.exports = saveToCache
+async function saveComponentToCache({
+  userId,
+  topic,
+  subtopic,
+  componentName,
+  componentContent,
+}) {
+  const query = {
+    userId,
+    topic: topic.toLowerCase(),
+    subtopic: subtopic.toLowerCase(),
+  };
+
+  let cacheDoc = await ContentCache.findOne(query);
+
+  if (!cacheDoc) {
+    // Create new cache document
+    cacheDoc = new ContentCache({
+      userId,
+      topic: topic.toLowerCase(),
+      subtopic: subtopic.toLowerCase(),
+      content: {
+        versions: [],
+        latestVersion: 0,
+        components: {},
+      },
+    });
+  }
+
+  // Keep a separate version number for components (do not touch latestVersion)
+  const newVersionNumber = (cacheDoc.content.versions?.length || 0) + 1;
+
+  // Update component content
+  cacheDoc.content.components[componentName] = componentContent;
+
+  // Add new version entry
+  cacheDoc.content.versions.push({
+    version: newVersionNumber,
+    contentType: "component",
+    data: { componentName, componentContent },
+  });
+
+  // Do NOT update latestVersion here
+
+  await cacheDoc.save();
+
+  return { cacheDoc, versionEntry: { versionNumber: newVersionNumber, contentType: "component", componentName } };
+} 
+
+
+module.exports = {
+  saveToCache,
+  saveComponentToCache,
+}

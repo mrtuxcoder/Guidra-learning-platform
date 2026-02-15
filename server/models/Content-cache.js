@@ -18,60 +18,25 @@ const contentCacheSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    learningStyle: {
-      type: String,
-      enum: ["visual", "practical", "theory"],
-      required: true,
-    },
-    learningMotivation: { type: String },
-    difficultyLevel: {
-      type: String,
-      enum: ["beginner", "intermediate", "advanced"],
-      default: "beginner",
-    },
-    contentFormat: {
-      type: String,
-      enum: [
-        "comprehensive",
-        "theory_only",
-        "practice_only",
-        "examples_only",
-        "visual_heavy",
-      ],
-      default: "comprehensive",
-    },
-    // FIXED: Use Mixed type to store ANY JSON structure from AI
     content: {
-      type: mongoose.Schema.Types.Mixed, // ← CHANGE THIS LINE
-      required: true,
+      versions: [
+        {
+          version: { type: Number, required: true }, // Incremental version number
+          contentType: { type: String, required: true }, // "full" or "component"
+          componentName: { type: String }, // Only for component versions
+          data: { type: mongoose.Schema.Types.Mixed, required: true }, // The actual content data (can be full content or component content)
+          createdAt: { type: Date, default: Date.now } 
+        }
+      ],
+      latestVersion: { type: Number }
     },
-    aiModelUsed: { type: String },
-    aiPromptHash: { type: String },
-    version: { type: Number, default: 1 },
-    isActive: { type: Boolean, default: true },
     timesAccessed: { type: Number, default: 0 },
     lastAccessed: { type: Date },
-    userRating: { type: Number, min: 1, max: 5 },
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,
   }
 );
-
-// Compound index for efficient cache lookups
-contentCacheSchema.index({
-  userId: 1,
-  topic: 1,
-  subtopic: 1,
-  learningStyle: 1,
-});
-
-contentCacheSchema.index({
-  userId: 1,
-  topic: 1,
-  subtopic: 1,
-  learningStyle: 1,
-  isActive: 1,
-});
 
 module.exports = mongoose.model("ContentCache", contentCacheSchema);

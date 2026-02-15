@@ -1,21 +1,17 @@
+
 const User = require("../../../models/User");
 const ContentCache = require("../../../models/Content-cache");
 const callAIAPI = require("../../../utils/call-AI");
 const generateUnifiedPrompt = require("../../../utils/prompt/unified-prompt-generator");
-const buildContentFromAI = require('../../../utils/content/response/buildContentFromAI')
+const buildContentFromAI = require('../../../utils/content/response/buildContentFromAI');
 const crypto = require("crypto");
 const validateContentStructure = require("../../../utils/content/validation/validate-content-structure");
-const saveToCache = require("../../../utils/cache/save-cache");
-const getCachedContent = require('../../../utils/cache/get-cache');
-const handleRegenerateContent = require('./handle-regeneration')
+const { saveToCache, saveComponentToCache } = require("../../../utils/cache/save-cache");
 
-/**
- * 🧠 Personalized Teaching for a Subtopic WITH CACHING - UPDATED
- */
-exports.teachSubtopicController = async (req, res) => {
+exports.generateContentController = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { topic, subtopic, regenerate = false } = req.body;
+    const { topic, subtopic } = req.body;
 
     if (!topic || !subtopic)
       return res
@@ -25,86 +21,73 @@ exports.teachSubtopicController = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (regenerate) {
-      return await handleRegenerateContent(userId, user, topic, subtopic, res);
-    }
-
-    // Check cache first using utility
-    const cachedContent = await getCachedContent(
+    // Generate prompt for content generation
+    const prompt = await generateUnifiedPrompt({
       userId,
       topic,
       subtopic,
-      user.learningStyle
-    );
+      isRegeneration: false,
+    });
 
-    if (cachedContent) {
-      console.log("📂 Loading from cache - Checking mindmap...");
+    // Call AI API with generation prompt
+    const aiResponse = await callAIAPI(prompt);
 
-      // Enhanced validation - specifically check for mindmap
-      if (!cachedContent.content || typeof cachedContent.content !== "object") {
-        console.error("❌ Invalid cache content structure, regenerating...");
-        await ContentCache.deleteOne({ _id: cachedContent._id });
-      } else if (!cachedContent.content.mindmap) {
-        console.error("❌ Cache missing mindmap, regenerating...");
-        await ContentCache.deleteOne({ _id: cachedContent._id });
-      } else {
-        cachedContent.timesAccessed += 1;
-        cachedContent.lastAccessed = new Date();
-        await cachedContent.save();
+    // Build content from AI response
+    const contentData = buildContentFromAI(aiResponse);
 
-        return res.status(200).json({
-          message: `Cached teaching content for "${subtopic}"`,
-          topic,
-          subtopic,
-          learningStyle: user.learningStyle,
-          cached: true,
-          version: cachedContent.version,
-          data: cachedContent.content,
-        });
-      }
+    // Validate content structure
+    const validationErrors = validateContentStructure(contentData);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ error: "Invalid content structure", details: validationErrors });
     }
 
-    // Generate and process content with new system
-    const aiPrompt = generateUnifiedPrompt(user, topic, subtopic);
-    console.log("📝 Generated prompt:", aiPrompt.substring(0, 200) + "...");
-
-    const aiResponse = await callAIAPI(aiPrompt);
-    console.log("🤖 AI response length:", aiResponse.length);
-    
-    // Process using new unified function
-    const structuredContent = await  buildContentFromAI(aiResponse, topic, subtopic, user);
-
-    // Enhanced validation - PRESERVES AI CONTENT
-    const validatedContent = validateContentStructure(
-      structuredContent,
-      topic,
-      subtopic
-    );
-
-    // Save to cache with FULL content
-    const newCacheEntry = await saveToCache({
-      userId: String(userId),
+    // Save generated content to cache
+    await saveToCache({
+      userId,
       topic,
       subtopic,
-      user,
-      content: validatedContent,
-      aiPrompt,
-      crypto,
+      content: contentData,
     });
 
-    res.status(200).json({
-      message: `Personalized teaching content generated for "${subtopic}"`,
-      topic,
-      subtopic,
-      learningStyle: user.learningStyle,
-      cached: false,
-      version: newCacheEntry.version,
-      data: validatedContent,
-    });
+    res.json({ message: "Content generated and saved to cache successfully" });
   } catch (error) {
-    console.error("Error in teachSubtopicController:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to generate personalized teaching content" });
+    console.error("Error in generateContentController:", error);
+    res.status(500).json({ message: "Failed to generate content" });
   }
-};
+};    
+
+
+
+  exports.getVersionContentController = async (req, res) => {
+    try {
+      const userId = req.user._id;
+      const { topic, subtopic, versionNumber } = req.body;
+  
+      if (!topic || !subtopic || !versionNumber) {
+        return res.status(400).json({ message: "Topic, subtopic, and version number are required." });
+      }
+  
+      const cacheDoc = await ContentCache.findOne({
+        userId,
+        topic: topic.toLowerCase(),
+        subtopic: subtopic.toLowerCase(),
+        isActive: true,
+      });
+  
+      if (!cacheDoc) {
+        return res.status(404).json({ message: "No cached content found for the specified topic and subtopic." });
+      }
+  
+      const versionEntry = cacheDoc.content.versions.find(v => v.version === versionNumber);
+  
+      if (!versionEntry) {
+        return res.status(404).json({ message: "Specified version not found in cache." });
+      }
+  
+      res.json({ content: versionEntry.data });
+    } catch (error) {
+      console.error("Error in getVersionContentController:", error);
+      res.status(500).json({ message: "Failed to retrieve content version" });
+    }
+  };
+
