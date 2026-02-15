@@ -23,8 +23,6 @@ async function getCachedContent(userId, topic, subtopic) {
   return cacheDoc;
 }
 
-module.exports = getCachedContent;
-
 async function getCachedComponent(userId, topic, subtopic, componentName) {
   const cacheDoc = await ContentCache.findOne({
     userId,
@@ -39,7 +37,12 @@ async function getCachedComponent(userId, topic, subtopic, componentName) {
 
   // Find the latest version of the specified component
   const componentVersions = cacheDoc.content.versions
-    .filter(v => v.contentType === "component" && v.componentName === componentName)
+    .filter(
+      (v) =>
+        v.contentType === "component" &&
+        (v.componentName === componentName ||
+          v.data?.componentName === componentName)
+    )
     .sort((a, b) => b.version - a.version); // Sort by version descending
 
   if (componentVersions.length === 0) {
@@ -53,7 +56,10 @@ async function getCachedComponent(userId, topic, subtopic, componentName) {
   cacheDoc.lastAccessed = new Date();
   await cacheDoc.save();
 
-  return latestComponent.data; // Return the component content data
-} 
+  return {
+    version: latestComponent.version,
+    componentContent: latestComponent.data?.componentContent,
+  };
+}
 
-module.exports = {  getCachedContent, getCachedComponent };
+module.exports = { getCachedContent, getCachedComponent };

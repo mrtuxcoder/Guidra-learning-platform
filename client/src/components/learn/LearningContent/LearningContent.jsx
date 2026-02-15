@@ -1,12 +1,32 @@
-import React, { useState, useMemo, Component } from 'react';
-import { Box, useTheme, useMediaQuery } from "@mui/material";
-import MermaidDiagram from "../MermardDiagram/index";
+import React, { useState, useMemo } from 'react';
+import {
+  Box,
+  useTheme,
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
+  Alert,
+} from "@mui/material";
 import WelcomeState from "../WelcomeState/index";
 import LoadingState from "../LoadingState";
 import Header from "./Header";
 import ContentSection from "./ContentSection";
 import QuizSection from "./QuizSection";
-import { generateComponent } from '../../../api/learning';
+import {
+  generateComponent,
+  getComponentVersions,
+  getComponentVersion,
+} from '../../../api/learning';
 
 const LearningContent = ({ 
   content, 
@@ -32,6 +52,19 @@ const LearningContent = ({
     practice: true,
     coreExample: true,
   });
+  const [componentOverrides, setComponentOverrides] = useState({});
+  const [regeneratingComponents, setRegeneratingComponents] = useState({});
+  const [componentVersions, setComponentVersions] = useState({});
+  const [selectedVersions, setSelectedVersions] = useState({});
+  const [loadingVersions, setLoadingVersions] = useState({});
+  const [versionDialogOpen, setVersionDialogOpen] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState("concept");
+  const [limitMessage, setLimitMessage] = useState("");
+
+  const getComponentGenerationCount = (componentName) =>
+    (componentVersions[componentName] || []).filter(
+      (version) => version.source === "component"
+    ).length;
 
   // Handle mindmap regeneration
   const handleManualMindmapRegenerate = async () => {
@@ -65,23 +98,165 @@ const LearningContent = ({
     }
   };
 
+  const handleComponentRegenerate = async (componentName) => {
+    if (!selectedTopic || !selectedSubtopic?.name) {
+      return;
+    }
+
+    if (getComponentGenerationCount(componentName) >= 3) {
+      setLimitMessage("Generation limit reached (max 3)");
+      return;
+    }
+
+    try {
+      setRegeneratingComponents((prev) => ({
+        ...prev,
+        [componentName]: true,
+      }));
+
+      const response = await generateComponent({
+        topic: selectedTopic,
+        subtopic: selectedSubtopic.name,
+        component: componentName,
+      });
+
+      const newValue = response?.data?.[componentName];
+      if (newValue !== undefined) {
+        setComponentOverrides((prev) => ({
+          ...prev,
+          [componentName]: newValue,
+        }));
+      }
+
+      setLimitMessage("");
+
+      await loadComponentVersions(componentName);
+
+    } catch (error) {
+      console.error(`Failed to regenerate ${componentName}:`, error);
+    } finally {
+      setRegeneratingComponents((prev) => ({
+        ...prev,
+        [componentName]: false,
+      }));
+    }
+  };
+
+  const loadComponentVersions = async (componentName) => {
+    if (!selectedTopic || !selectedSubtopic?.name) {
+      return;
+    }
+
+    try {
+      setLoadingVersions((prev) => ({
+        ...prev,
+        [componentName]: true,
+      }));
+      const response = await getComponentVersions({
+        topic: selectedTopic,
+        subtopic: selectedSubtopic.name,
+        component: componentName,
+      });
+
+      const versions = response?.data?.versions || [];
+      setComponentVersions((prev) => ({
+        ...prev,
+        [componentName]: versions,
+      }));
+
+      setSelectedVersions((prev) => ({
+        ...prev,
+        [componentName]: versions.length > 0 ? versions[0].version : null,
+      }));
+    } catch (error) {
+      setComponentVersions((prev) => ({
+        ...prev,
+        [componentName]: [],
+      }));
+      setSelectedVersions((prev) => ({
+        ...prev,
+        [componentName]: null,
+      }));
+    } finally {
+      setLoadingVersions((prev) => ({
+        ...prev,
+        [componentName]: false,
+      }));
+    }
+  };
+
+  const handleComponentVersionSelect = async (componentName, versionNumber) => {
+    if (!selectedTopic || !selectedSubtopic?.name) {
+      return;
+    }
+
+    try {
+      console.log(
+        `[UI] Toggle version: ${componentName} -> v${versionNumber} (${selectedTopic} / ${selectedSubtopic.name})`
+      );
+      setSelectedVersions((prev) => ({
+        ...prev,
+        [componentName]: versionNumber,
+      }));
+
+      const response = await getComponentVersion({
+        topic: selectedTopic,
+        subtopic: selectedSubtopic.name,
+        component: componentName,
+        versionNumber,
+      });
+
+      const versionData = response?.data?.data;
+      if (versionData !== undefined) {
+        if (componentName === "mindmap") {
+          setMindmapData({ mindmap: versionData, hasError: false });
+        } else {
+          setComponentOverrides((prev) => ({
+            ...prev,
+            [componentName]: versionData,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to load ${componentName} version:`, error);
+    }
+  };
+
 
   const safeContent = useMemo(() => {
   // Use the regenerated mindmap if available, otherwise use the original content
   const currentMindmap = mindmapData?.mindmap || content?.mindmap;
   
   return {
-    concept: content?.concept || content?.keyConcepts?.[0] || '',
-    explanation: content?.explanation || '',
-    coreExample: content?.coreExample || '',  // ADD THIS LINE
-    learningActions: Array.isArray(content?.learningActions) ? content.learningActions : [],
-    examples: Array.isArray(content?.examples) ? content.examples : [],
-    practice: content?.practice || '',
+    concept:
+      componentOverrides.concept ??
+      (content?.concept || content?.keyConcepts?.[0] || ''),
+    explanation:
+      componentOverrides.explanation ?? (content?.explanation || ''),
+    coreExample:
+      componentOverrides.coreExample ?? (content?.coreExample || ''),
+    learningActions: Array.isArray(componentOverrides.learningActions)
+      ? componentOverrides.learningActions
+      : Array.isArray(content?.learningActions)
+      ? content.learningActions
+      : [],
+    examples: Array.isArray(componentOverrides.examples)
+      ? componentOverrides.examples
+      : Array.isArray(content?.examples)
+      ? content.examples
+      : [],
+    practice: componentOverrides.practice ?? (content?.practice || ''),
     mindmap: currentMindmap,
-    quiz: Array.isArray(content?.quiz) ? content.quiz : [],
-    title: content?.title || selectedSubtopic?.name || ''
+    quiz: Array.isArray(componentOverrides.quiz)
+      ? componentOverrides.quiz
+      : Array.isArray(content?.quiz)
+      ? content.quiz
+      : [],
+    title:
+      componentOverrides.title ??
+      (content?.title || selectedSubtopic?.name || '')
   };
-}, [content, selectedSubtopic, mindmapData]);
+}, [content, selectedSubtopic, mindmapData, componentOverrides]);
 
   // Initialize mindmap data when content changes
   React.useEffect(() => {
@@ -95,6 +270,10 @@ const LearningContent = ({
 
   // Reset quiz when content changes
   React.useEffect(() => {
+    setComponentOverrides({});
+    setComponentVersions({});
+    setSelectedVersions({});
+    setLimitMessage("");
     setExpandedSections({
       concept: true,
       explanation: true,
@@ -103,6 +282,66 @@ const LearningContent = ({
       practice: true
     });
   }, [content]);
+
+  React.useEffect(() => {
+    if (!selectedTopic || !selectedSubtopic?.name) {
+      return;
+    }
+
+    let isMounted = true;
+    const componentKeys = [
+      "concept",
+      "explanation",
+      "learningActions",
+      "coreExample",
+      "practice",
+      "quiz",
+      "mindmap",
+    ];
+
+    const loadVersions = async () => {
+      await Promise.all(
+        componentKeys.map(async (componentName) => {
+          if (!isMounted) return;
+          await loadComponentVersions(componentName);
+        })
+      );
+    };
+
+    loadVersions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedTopic, selectedSubtopic]);
+
+  const componentOptions = [
+    { value: "concept", label: "Core Concept" },
+    { value: "explanation", label: "Detailed Explanation" },
+    { value: "learningActions", label: "Learning Steps" },
+    { value: "coreExample", label: "Example" },
+    { value: "practice", label: "Practice" },
+    { value: "quiz", label: "Quiz" },
+    { value: "mindmap", label: "Mind Map" },
+  ];
+
+  const dialogVersions = componentVersions[selectedComponent] || [];
+  const dialogSelectedVersion = selectedVersions[selectedComponent] ?? null;
+  const dialogVersionCount = getComponentGenerationCount(selectedComponent);
+  const dialogCachedCount = dialogVersions.length;
+
+  const handleDialogComponentChange = async (nextComponent) => {
+    setSelectedComponent(nextComponent);
+    await loadComponentVersions(nextComponent);
+  };
+
+  React.useEffect(() => {
+    if (!versionDialogOpen) {
+      return;
+    }
+
+    loadComponentVersions(selectedComponent);
+  }, [versionDialogOpen, selectedComponent]);
 
   if (contentLoading) {
     return <LoadingState isContentLoading={true} source={contentInfo?.source} colorPalette={colorPalette} />;
@@ -163,7 +402,101 @@ const LearningContent = ({
         topic={selectedTopic}
         isMobile={isMobile}
         colorPalette={colorPalette}
+        onOpenVersions={() => setVersionDialogOpen(true)}
       />
+
+      <Dialog
+        open={versionDialogOpen}
+        onClose={() => setVersionDialogOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Content Versions</DialogTitle>
+        <DialogContent dividers>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Pick a cached version to preview. Regeneration stays on the
+              section buttons.
+            </Typography>
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+            <InputLabel id="component-select-label">Component</InputLabel>
+            <Select
+              labelId="component-select-label"
+              value={selectedComponent}
+              label="Component"
+              onChange={(e) => handleDialogComponentChange(e.target.value)}
+            >
+              {componentOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="caption" color="text.secondary">
+              Versions
+            </Typography>
+            {loadingVersions[selectedComponent] ? (
+              <Box
+                sx={{
+                  mt: 1,
+                  p: 2,
+                  borderRadius: 1,
+                  border: `1px dashed ${colorPalette[200]}`,
+                  color: colorPalette[600],
+                  background: colorPalette[50],
+                  fontSize: isMobile ? "0.75rem" : "0.85rem",
+                }}
+              >
+                Checking versions...
+              </Box>
+            ) : dialogVersions.length === 0 ? (
+              <Box
+                sx={{
+                  mt: 1,
+                  p: 2,
+                  borderRadius: 1,
+                  border: `1px dashed ${colorPalette[200]}`,
+                  color: colorPalette[600],
+                  background: colorPalette[50],
+                  fontSize: isMobile ? "0.75rem" : "0.85rem",
+                }}
+              >
+                No available versions yet. Generate or regenerate this
+                component first.
+              </Box>
+            ) : (
+              <ToggleButtonGroup
+                size="small"
+                exclusive
+                value={dialogSelectedVersion}
+                onChange={(e, nextValue) => {
+                  if (nextValue !== null) {
+                    handleComponentVersionSelect(selectedComponent, nextValue);
+                  }
+                }}
+                sx={{ mt: 1 }}
+              >
+                {dialogVersions.map((option) => (
+                  <ToggleButton key={option.version} value={option.version}>
+                    V{option.displayVersion ?? option.version}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            )}
+          </Box>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="caption" color="text.secondary">
+              Component generations: {dialogVersionCount}/3 · Cached versions: {dialogCachedCount}
+            </Typography>
+          </Box>
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setVersionDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Content */}
       <Box sx={{ 
@@ -171,6 +504,11 @@ const LearningContent = ({
         overflow: 'auto',
         p: isMobile ? 1.5 : 2
       }}>
+        {limitMessage && (
+          <Alert severity="warning" onClose={() => setLimitMessage("")} sx={{ mb: 2 }}>
+            {limitMessage}
+          </Alert>
+        )}
         {safeContent.concept && (
           <ContentSection
             title="Core Concept"
@@ -178,6 +516,9 @@ const LearningContent = ({
             emoji="💡"
             isExpanded={expandedSections.concept}
             onToggle={() => toggleSection('concept')}
+            onRegenerate={() => handleComponentRegenerate("concept")}
+            isRegenerating={!!regeneratingComponents.concept}
+            isRegenerateDisabled={getComponentGenerationCount("concept") >= 3}
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -190,6 +531,9 @@ const LearningContent = ({
             emoji="📚"
             isExpanded={expandedSections.explanation}
             onToggle={() => toggleSection('explanation')}
+            onRegenerate={() => handleComponentRegenerate("explanation")}
+            isRegenerating={!!regeneratingComponents.explanation}
+            isRegenerateDisabled={getComponentGenerationCount("explanation") >= 3}
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -203,6 +547,9 @@ const LearningContent = ({
             isList={true}
             isExpanded={expandedSections.learningActions}
             onToggle={() => toggleSection('learningActions')}
+            onRegenerate={() => handleComponentRegenerate("learningActions")}
+            isRegenerating={!!regeneratingComponents.learningActions}
+            isRegenerateDisabled={getComponentGenerationCount("learningActions") >= 3}
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -215,6 +562,9 @@ const LearningContent = ({
     emoji="📝"
     isExpanded={expandedSections.coreExample || true}
     onToggle={() => toggleSection('coreExample')}
+    onRegenerate={() => handleComponentRegenerate("coreExample")}
+    isRegenerating={!!regeneratingComponents.coreExample}
+    isRegenerateDisabled={getComponentGenerationCount("coreExample") >= 3}
     isMobile={isMobile}
     colorPalette={colorPalette}
  
@@ -229,6 +579,9 @@ const LearningContent = ({
             emoji="💪"
             isExpanded={expandedSections.practice}
             onToggle={() => toggleSection('practice')}
+            onRegenerate={() => handleComponentRegenerate("practice")}
+            isRegenerating={!!regeneratingComponents.practice}
+            isRegenerateDisabled={getComponentGenerationCount("practice") >= 3}
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -243,7 +596,10 @@ const LearningContent = ({
             selectedSubtopic={selectedSubtopic}
             handleManualMindmapRegenerate={handleManualMindmapRegenerate}
             regeneratingMindmap={regeneratingMindmap}
-            userRemainingGenerations={userRemainingGenerations}
+            userRemainingGenerations={Math.max(
+              0,
+              3 - getComponentGenerationCount("mindmap")
+            )}
             mindmapData={mindmapData}
           />
         )}
@@ -255,6 +611,9 @@ const LearningContent = ({
             selectedSubtopic={selectedSubtopic}
             isMobile={isMobile}
             colorPalette={colorPalette}
+            onRegenerate={() => handleComponentRegenerate("quiz")}
+            isRegenerating={!!regeneratingComponents.quiz}
+            isRegenerateDisabled={getComponentGenerationCount("quiz") >= 3}
           />
         )}
       </Box>

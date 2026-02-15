@@ -6,8 +6,9 @@ import {
   CardContent,
   Fade,
   IconButton,
+  Tooltip,
 } from "@mui/material";
-import { ExpandMore } from "@mui/icons-material";
+import { ExpandMore, Refresh } from "@mui/icons-material";
 import MermaidDiagram from "../MermardDiagram/index";
 
 const ContentSection = ({
@@ -17,6 +18,9 @@ const ContentSection = ({
   isList = false,
   isExpanded = true,
   onToggle,
+  onRegenerate,
+  isRegenerating = false,
+  isRegenerateDisabled = false,
   isMobile,
   colorPalette,
 }) => {
@@ -72,21 +76,56 @@ const ContentSection = ({
               {title}
             </Typography>
           </Box>
-          <IconButton
-            size="small"
-            sx={{ color: colorPalette[500] }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle();
-            }}
-          >
-            <ExpandMore
-              sx={{
-                transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.3s ease",
+          <Box sx={{ display: "flex", gap: 0.5 }}>
+            {onRegenerate && (
+              <Tooltip
+                title={
+                  isRegenerateDisabled
+                    ? "Generation limit reached (max 3)"
+                    : "Regenerate section"
+                }
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    sx={{ color: colorPalette[500] }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRegenerate();
+                    }}
+                    disabled={isRegenerating || isRegenerateDisabled}
+                  >
+                    <Refresh
+                      sx={{
+                        animation: isRegenerating
+                          ? "spin 1s linear infinite"
+                          : "none",
+                        "@keyframes spin": {
+                          "0%": { transform: "rotate(0deg)" },
+                          "100%": { transform: "rotate(360deg)" },
+                        },
+                      }}
+                    />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            <IconButton
+              size="small"
+              sx={{ color: colorPalette[500] }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
               }}
-            />
-          </IconButton>
+            >
+              <ExpandMore
+                sx={{
+                  transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
+              />
+            </IconButton>
+          </Box>
         </Box>
 
         {isExpanded && (
@@ -192,13 +231,15 @@ ContentSection.MindmapSection = ({
 }) => (
   <Card sx={{ mb: 3, borderRadius: 2 }}>
     <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
-      <Typography
-        variant={isMobile ? "subtitle1" : "h6"}
-        fontWeight="600"
-        sx={{ mb: 2, color: colorPalette[700] }}
-      >
-        Mind Map
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Typography
+          variant={isMobile ? "subtitle1" : "h6"}
+          fontWeight="600"
+          sx={{ color: colorPalette[700] }}
+        >
+          Mind Map
+        </Typography>
+      </Box>
       <MermaidDiagram
         chart={safeContent.mindmap}
         topic={selectedTopic}

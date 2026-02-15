@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const ContentCache = require("../../models/Content-cache"); 
 
 
@@ -70,12 +69,16 @@ async function saveComponentToCache({
       userId,
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
-      content: {
-        versions: [],
-        latestVersion: 0,
-        components: {},
-      },
+        content: {
+          versions: [],
+          latestVersion: 0,
+          components: {},
+        },
     });
+  }
+
+  if (!cacheDoc.content.components) {
+    cacheDoc.content.components = {};
   }
 
   // Keep a separate version number for components (do not touch latestVersion)
@@ -88,12 +91,17 @@ async function saveComponentToCache({
   cacheDoc.content.versions.push({
     version: newVersionNumber,
     contentType: "component",
+    componentName,
     data: { componentName, componentContent },
   });
 
   // Do NOT update latestVersion here
 
   await cacheDoc.save();
+
+  console.log(
+    `✅ [CACHE] Saved component ${componentName} v${newVersionNumber} for ${topic} / ${subtopic}`
+  );
 
   return { cacheDoc, versionEntry: { versionNumber: newVersionNumber, contentType: "component", componentName } };
 } 

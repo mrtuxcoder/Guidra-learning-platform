@@ -49,7 +49,7 @@ const LearningSidebar = ({
     }
 
     // Then select the subtopic
-    onSubtopicSelect(subtopic);
+    onSubtopicSelect(subtopic, parentTopic);
 
     // Close the topic when a subtopic is selected on mobile
     if (isMobile) {

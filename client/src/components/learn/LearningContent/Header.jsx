@@ -1,7 +1,7 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 
-const Header = ({ title, topic, isMobile, colorPalette }) => (
+const Header = ({ title, topic, isMobile, colorPalette, onOpenVersions }) => (
   <Box
     sx={{
       p: isMobile ? 1 : 1.5,
@@ -9,7 +9,8 @@ const Header = ({ title, topic, isMobile, colorPalette }) => (
       background: "white",
     }}
   >
-    <Box sx={{ flex: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ flex: 1 }}>
       <Typography
         variant={isMobile ? "subtitle2" : "h6"}
         fontWeight="600"
@@ -32,6 +33,14 @@ const Header = ({ title, topic, isMobile, colorPalette }) => (
       >
         {topic}
       </Typography>
+      </Box>
+      <Button
+        size={isMobile ? "small" : "medium"}
+        variant="outlined"
+        onClick={onOpenVersions}
+      >
+        Versions
+      </Button>
     </Box>
   </Box>
 );

@@ -186,10 +186,11 @@ export default function Learning() {
   }, []);
 
   const handleIncrementGenerationCount = useCallback(
-    async (subtopicName) => {
+    async (subtopicName, topicOverride) => {
+      const effectiveTopic = topicOverride || selectedTopic;
       try {
         await incrementGenerationCount({
-          topic: selectedTopic,
+          topic: effectiveTopic,
           subtopic: subtopicName,
         });
 
@@ -208,14 +209,15 @@ export default function Learning() {
   );
 
   const handleGenerateContent = useCallback(
-    async (subtopic = selectedSubtopic) => {
-      if (!subtopic || !selectedTopic) return;
+    async (subtopic = selectedSubtopic, topicOverride) => {
+      const effectiveTopic = topicOverride || selectedTopic;
+      if (!subtopic || !effectiveTopic) return;
 
       try {
         setContentLoading(true);
         setContentError("");
 
-        const cacheKey = `${selectedTopic}-${subtopic.name}`;
+        const cacheKey = `${effectiveTopic}-${subtopic.name}`;
         if (contentCache[cacheKey]) {
           setContent(contentCache[cacheKey].content);
           setContentInfo(contentCache[cacheKey].info);
@@ -224,12 +226,12 @@ export default function Learning() {
         }
 
         const { data } = await teachSubtopic({
-          topic: selectedTopic,
+          topic: effectiveTopic,
           subtopic: subtopic.name,
         });
 
         if (!data.cached) {
-          await handleIncrementGenerationCount(subtopic.name);
+          await handleIncrementGenerationCount(subtopic.name, effectiveTopic);
         }
 
         setContent(data.data);
@@ -268,16 +270,20 @@ export default function Learning() {
   );
 
   const handleSelectSubtopic = useCallback(
-    async (subtopic) => {
+    async (subtopic, topicOverride) => {
+      if (topicOverride) {
+        setSelectedTopic(topicOverride);
+      }
       setSelectedSubtopic(subtopic);
       setContentError("");
 
-      const cacheKey = `${selectedTopic}-${subtopic.name}`;
+      const effectiveTopic = topicOverride || selectedTopic;
+      const cacheKey = `${effectiveTopic}-${subtopic.name}`;
       if (contentCache[cacheKey]) {
         setContent(contentCache[cacheKey].content);
         setContentInfo(contentCache[cacheKey].info);
       } else {
-        await handleGenerateContent(subtopic);
+        await handleGenerateContent(subtopic, effectiveTopic);
       }
       if (isMobile) {
         setMobileDrawerOpen(false);
@@ -320,7 +326,7 @@ export default function Learning() {
         subtopic: subtopicName,
       });
 
-      await handleIncrementGenerationCount(subtopicName);
+      await handleIncrementGenerationCount(subtopicName, selectedTopic);
 
       setContent(data.data);
       setContentInfo({

@@ -1,9 +1,15 @@
 const User = require("../../../models/User");
 const callAIAPI = require("../../../utils/call-AI");
 const generateSpecificPrompts = require("../../../utils/prompt/specific-prompt-generator");
-const crypto = require("crypto");
-const getCachedContent = require("../../../utils/cache/get-cache");
-const saveToCache = require("../../../utils/cache/save-cache");
+const {
+  getCachedContent,
+  getCachedComponent,
+} = require("../../../utils/cache/get-cache");
+const {
+  saveComponentToCache,
+  saveToCache,
+} = require("../../../utils/cache/save-cache");
+const ContentCache = require("../../../models/Content-cache");
 const {
   cleanComponentData,
   extractComponentFromAIResponse
@@ -62,51 +68,90 @@ exports.generateComponentController = async (req, res) => {
     }
 
     // Check existing cache
+    let cachedContentDoc = null;
     if (!regenerate) {
-      const cachedContent = await getCachedContent(
+      const cachedComponent = await getCachedComponent(
         userId,
         topic,
         subtopic,
-        user.learningStyle
+        component
       );
 
-      if (
-        cachedContent &&
-        cachedContent.content &&
-        cachedContent.content[component]
-      ) {
-        console.log(`📂 Loading "${component}" from existing cache`);
+      if (cachedComponent?.componentContent !== undefined) {
+        console.log(`📂 Loading "${component}" from component cache`);
 
-        // Get and clean component data
-        let componentData = cleanComponentData(
-          cachedContent.content[component],
+        const componentData = cleanComponentData(
+          cachedComponent.componentContent,
           component
         );
 
-        // Update cache access
-        cachedContent.timesAccessed += 1;
-        cachedContent.lastAccessed = new Date();
-        await cachedContent.save();
-
-        // Build response
-        const response = {
+        return res.status(200).json({
           message: `Cached ${component} retrieved for "${subtopic}"`,
           topic,
           subtopic,
           component,
           learningStyle: user.learningStyle,
           cached: true,
-          version: cachedContent.version,
+          version: cachedComponent.version,
           [component]: componentData,
-        };
-
-        response.metadata = {
-          generatedAt: cachedContent.createdAt,
-          timesAccessed: cachedContent.timesAccessed,
-        };
-
-        return res.status(200).json(response);
+        });
       }
+
+      cachedContentDoc = await getCachedContent(userId, topic, subtopic);
+      if (cachedContentDoc?.content?.latestVersion) {
+        const versionEntry = cachedContentDoc.content.versions.find(
+          (v) =>
+            v.version === cachedContentDoc.content.latestVersion &&
+            v.contentType === "full"
+        );
+
+        if (versionEntry?.data?.[component]) {
+          console.log(`📂 Loading "${component}" from full cache`);
+
+          const componentData = cleanComponentData(
+            versionEntry.data[component],
+            component
+          );
+
+          return res.status(200).json({
+            message: `Cached ${component} retrieved for "${subtopic}"`,
+            topic,
+            subtopic,
+            component,
+            learningStyle: user.learningStyle,
+            cached: true,
+            version: versionEntry.version,
+            [component]: componentData,
+          });
+        }
+      }
+    }
+
+    const cacheDoc = await ContentCache.findOne({
+      userId,
+      topic: topic.toLowerCase(),
+      subtopic: subtopic.toLowerCase(),
+      isActive: true,
+    });
+
+    const existingVersions = Array.isArray(cacheDoc?.content?.versions)
+      ? cacheDoc.content.versions
+      : [];
+
+    const componentVersionCount = existingVersions.filter(
+      (v) =>
+        v.contentType === "component" &&
+        (v.componentName === component || v.data?.componentName === component)
+    ).length;
+
+    if (componentVersionCount >= 3) {
+      return res.status(429).json({
+        message: "Generation limit reached for this component (max 3)",
+        topic,
+        subtopic,
+        component,
+        limit: 3,
+      });
     }
 
     // Generate prompt for the single component
@@ -151,53 +196,38 @@ exports.generateComponentController = async (req, res) => {
       component
     );
 
-    // Get existing cache to update it
-    const existingCache = await getCachedContent(
-      userId,
+    const { versionEntry } = await saveComponentToCache({
+      userId: userId.toString(),
       topic,
       subtopic,
-      user.learningStyle
+      componentName: component,
+      componentContent,
+    });
+
+    console.log(
+      `✅ [COMPONENT GENERATED] ${topic} / ${subtopic} / ${component} -> v${versionEntry.versionNumber}`
     );
 
-    let updatedContent;
-    let newVersion;
+    if (cachedContentDoc?.content?.latestVersion) {
+      const latestFullEntry = cachedContentDoc.content.versions.find(
+        (v) =>
+          v.version === cachedContentDoc.content.latestVersion &&
+          v.contentType === "full"
+      );
 
-    if (existingCache) {
-      // Update existing cache content
-      updatedContent = {
-        ...existingCache.content,
-        [component]: componentContent,
-      };
+      if (latestFullEntry?.data) {
+        const updatedFullContent = {
+          ...latestFullEntry.data,
+          [component]: componentContent,
+        };
 
-      // Create new cache entry
-      const newCacheEntry = await saveToCache({
-        userId: userId.toString(),
-        topic,
-        subtopic,
-        user,
-        content: updatedContent,
-        aiPrompt: componentPrompt.prompt,
-        crypto,
-      });
-
-      newVersion = newCacheEntry.version;
-    } else {
-      // Create new cache with just this component
-      updatedContent = {
-        [component]: componentContent,
-      };
-
-      const newCacheEntry = await saveToCache({
-        userId: userId.toString(),
-        topic,
-        subtopic,
-        user,
-        content: updatedContent,
-        aiPrompt: componentPrompt.prompt,
-        crypto,
-      });
-
-      newVersion = newCacheEntry.version;
+        await saveToCache({
+          userId: userId.toString(),
+          topic,
+          subtopic,
+          content: updatedFullContent,
+        });
+      }
     }
 
     // Build response
@@ -210,7 +240,7 @@ exports.generateComponentController = async (req, res) => {
       component,
       learningStyle: user.learningStyle,
       cached: false,
-      version: newVersion,
+      version: versionEntry.versionNumber,
       [component]: componentContent,
     };
 

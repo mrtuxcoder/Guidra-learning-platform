@@ -28,7 +28,8 @@ const contentCacheSchema = new mongoose.Schema(
           createdAt: { type: Date, default: Date.now } 
         }
       ],
-      latestVersion: { type: Number }
+      latestVersion: { type: Number },
+      components: { type: mongoose.Schema.Types.Mixed, default: {} },
     },
     timesAccessed: { type: Number, default: 0 },
     lastAccessed: { type: Date },

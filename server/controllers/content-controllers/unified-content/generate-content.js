@@ -8,63 +8,139 @@ const crypto = require("crypto");
 const validateContentStructure = require("../../../utils/content/validation/validate-content-structure");
 const { saveToCache, saveComponentToCache } = require("../../../utils/cache/save-cache");
 
+
+
 exports.generateContentController = async (req, res) => {
   try {
     const userId = req.user._id;
     const { topic, subtopic } = req.body;
 
-    if (!topic || !subtopic)
-      return res
-        .status(400)
-        .json({ message: "Topic and subtopic are required." });
+    if (!topic || !subtopic) {
+      return res.status(400).json({ message: "Topic and subtopic are required." });
+    }
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Generate prompt for content generation
-    const prompt = await generateUnifiedPrompt({
+    const topicProgress = user.progress?.find(
+      (progress) => progress.topic?.toLowerCase() === topic.toLowerCase()
+    );
+
+    const subtopicProgress = topicProgress?.subTopics?.find(
+      (sub) => sub.name?.toLowerCase() === subtopic.toLowerCase()
+    );
+
+    if (!subtopicProgress) {
+      return res.status(404).json({
+        message: `Subtopic "${subtopic}" not found in topic "${topic}"`,
+      });
+    }
+
+    // Check cache first
+    const cacheDoc = await ContentCache.findOne({
       userId,
-      topic,
-      subtopic,
-      isRegeneration: false,
+      topic: topic.toLowerCase(),
+      subtopic: subtopic.toLowerCase(),
+      isActive: true,
     });
+
+    if (cacheDoc?.content?.latestVersion) {
+      const versionEntry = cacheDoc.content.versions.find(
+        (v) => v.version === cacheDoc.content.latestVersion && v.contentType === "full"
+      );
+
+      if (versionEntry) {
+        cacheDoc.timesAccessed += 1;
+        cacheDoc.lastAccessed = new Date();
+        await cacheDoc.save();
+
+        console.log(
+          `📦 [CONTENT] Cache hit for ${topic} / ${subtopic} (v${versionEntry.version})`
+        );
+
+        return res.status(200).json({
+          message: `Cached teaching content for "${subtopic}"`,
+          topic,
+          subtopic,
+          cached: true,
+          version: versionEntry.version,
+          data: versionEntry.data,
+        });
+      }
+    }
+
+    if (subtopicProgress.generationCount >= 3) {
+      return res.status(429).json({
+        message: "Generation limit reached for this subtopic (max 3)",
+        topic,
+        subtopic,
+        limit: 3,
+      });
+    }
+
+    // Generate prompt for content generation
+    const prompt = generateUnifiedPrompt(user, topic, subtopic);
 
     // Call AI API with generation prompt
     const aiResponse = await callAIAPI(prompt);
 
-    // Build content from AI response
-    const contentData = buildContentFromAI(aiResponse);
+    console.log(`🤖 [CONTENT] Generated from AI for ${topic} / ${subtopic}`);
 
-    // Validate content structure
-    const validationErrors = validateContentStructure(contentData);
-    if (validationErrors.length > 0) {
-      return res.status(400).json({ error: "Invalid content structure", details: validationErrors });
+    // Count this generation (first generation included)
+    subtopicProgress.generationCount += 1;
+    subtopicProgress.lastReviewed = new Date();
+    if (topicProgress) {
+      topicProgress.lastAccessed = new Date();
     }
+    await user.save();
+
+    // Build content from AI response
+    const contentData = await buildContentFromAI(
+      aiResponse,
+      topic,
+      subtopic,
+      user
+    );
+
+    // Validate and normalize content structure
+    const validatedContent = validateContentStructure(
+      contentData,
+      topic,
+      subtopic
+    );
 
     // Save generated content to cache
-    await saveToCache({
+    const { versionEntry } = await saveToCache({
       userId,
       topic,
       subtopic,
-      content: contentData,
+      content: validatedContent,
     });
 
-    res.json({ message: "Content generated and saved to cache successfully" });
+    return res.status(200).json({
+      message: `Cached teaching content for "${subtopic}"`,
+      topic,
+      subtopic,
+      cached: false,
+      version: versionEntry.versionNumber,
+      data: validatedContent,
+    });
   } catch (error) {
     console.error("Error in generateContentController:", error);
     res.status(500).json({ message: "Failed to generate content" });
   }
-};    
-
-
+}
 
   exports.getVersionContentController = async (req, res) => {
     try {
       const userId = req.user._id;
       const { topic, subtopic, versionNumber } = req.body;
+      const parsedVersion = Number(versionNumber);
   
-      if (!topic || !subtopic || !versionNumber) {
-        return res.status(400).json({ message: "Topic, subtopic, and version number are required." });
+      if (!topic || !subtopic || !Number.isFinite(parsedVersion)) {
+        return res.status(400).json({
+          message: "Topic, subtopic, and a valid version number are required.",
+        });
       }
   
       const cacheDoc = await ContentCache.findOne({
@@ -78,13 +154,21 @@ exports.generateContentController = async (req, res) => {
         return res.status(404).json({ message: "No cached content found for the specified topic and subtopic." });
       }
   
-      const versionEntry = cacheDoc.content.versions.find(v => v.version === versionNumber);
+      const versionEntry = cacheDoc.content.versions.find(
+        (v) => v.version === parsedVersion && v.contentType === "full"
+      );
   
       if (!versionEntry) {
         return res.status(404).json({ message: "Specified version not found in cache." });
       }
   
-      res.json({ content: versionEntry.data });
+      res.json({
+        message: `Retrieved version ${parsedVersion} for "${subtopic}"`,
+        topic,
+        subtopic,
+        version: parsedVersion,
+        data: versionEntry.data,
+      });
     } catch (error) {
       console.error("Error in getVersionContentController:", error);
       res.status(500).json({ message: "Failed to retrieve content version" });

@@ -6,8 +6,10 @@ import {
   Typography,
   Alert,
   Button,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import { Quiz } from "@mui/icons-material";
+import { Quiz, Refresh } from "@mui/icons-material";
 import QuizQuestion from "./QuizQuestion";
 import QuizProgress from "./QuizProgress";
 import { updateQuizMarks } from "../../../api";
@@ -18,6 +20,9 @@ const QuizSection = ({
   selectedSubtopic,
   isMobile,
   colorPalette,
+  onRegenerate,
+  isRegenerating = false,
+  isRegenerateDisabled = false,
 }) => {
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -129,6 +134,36 @@ const QuizSection = ({
               Knowledge Check
             </Typography>
           </Box>
+          {onRegenerate && (
+            <Tooltip
+              title={
+                isRegenerateDisabled
+                  ? "Generation limit reached (max 3)"
+                  : "Regenerate quiz"
+              }
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  sx={{ color: colorPalette[500], ml: "auto" }}
+                  onClick={onRegenerate}
+                  disabled={isRegenerating || isRegenerateDisabled}
+                >
+                  <Refresh
+                    sx={{
+                      animation: isRegenerating
+                        ? "spin 1s linear infinite"
+                        : "none",
+                      "@keyframes spin": {
+                        "0%": { transform: "rotate(0deg)" },
+                        "100%": { transform: "rotate(360deg)" },
+                      },
+                    }}
+                  />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </Box>
 
         {/* Progress */}

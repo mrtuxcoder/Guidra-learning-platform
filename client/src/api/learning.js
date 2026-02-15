@@ -59,6 +59,16 @@ export const generateComponent = async (data) => {
   return response;
 };
 
+export const getComponentVersions = async (data) => {
+  const response = await API.post("/api/v1/content/component/versions", data);
+  return response;
+};
+
+export const getComponentVersion = async (data) => {
+  const response = await API.post("/api/v1/content/component/version", data);
+  return response;
+};
+
 export const getContentHistory = async () => {
   const response = await API.get("/api/v1/content/history");
   return response;
