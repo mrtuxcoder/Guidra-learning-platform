@@ -8,7 +8,7 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { ExpandMore, Refresh } from "@mui/icons-material";
+import { ExpandMore, Refresh, Lock } from "@mui/icons-material";
 import MermaidDiagram from "../MermardDiagram/index";
 
 const ContentSection = ({
@@ -76,7 +76,7 @@ const ContentSection = ({
               {title}
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 0.5 }}>
+          <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
             {onRegenerate && (
               <Tooltip
                 title={
@@ -88,24 +88,32 @@ const ContentSection = ({
                 <span>
                   <IconButton
                     size="small"
-                    sx={{ color: colorPalette[500] }}
+                    sx={{
+                      color: isRegenerateDisabled
+                        ? "#ef4444"
+                        : colorPalette[500],
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onRegenerate();
                     }}
                     disabled={isRegenerating || isRegenerateDisabled}
                   >
-                    <Refresh
-                      sx={{
-                        animation: isRegenerating
-                          ? "spin 1s linear infinite"
-                          : "none",
-                        "@keyframes spin": {
-                          "0%": { transform: "rotate(0deg)" },
-                          "100%": { transform: "rotate(360deg)" },
-                        },
-                      }}
-                    />
+                    {isRegenerateDisabled ? (
+                      <Lock sx={{ fontSize: 18 }} />
+                    ) : (
+                      <Refresh
+                        sx={{
+                          animation: isRegenerating
+                            ? "spin 1s linear infinite"
+                            : "none",
+                          "@keyframes spin": {
+                            "0%": { transform: "rotate(0deg)" },
+                            "100%": { transform: "rotate(360deg)" },
+                          },
+                        }}
+                      />
+                    )}
                   </IconButton>
                 </span>
               </Tooltip>

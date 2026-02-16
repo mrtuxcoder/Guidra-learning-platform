@@ -21,7 +21,6 @@ exports.getComponentVersionsController = async (req, res) => {
       userId,
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
-      isActive: true,
     });
 
     if (!cacheDoc) {
@@ -34,51 +33,19 @@ exports.getComponentVersionsController = async (req, res) => {
       ? cacheDoc.content.versions
       : [];
 
-    let componentVersions = allVersions
+    const componentVersions = allVersions
       .filter(
         (v) =>
           v.contentType === "component" &&
           (v.componentName === component || v.data?.componentName === component)
       )
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((v, index) => ({
+      .sort((a, b) => a.version - b.version)
+      .map((v) => ({
         version: v.version,
-        displayVersion: index + 1,
+        displayVersion: v.version,
         createdAt: v.createdAt,
         source: "component",
       }));
-
-    if (componentVersions.length === 0) {
-      componentVersions = allVersions
-        .filter(
-          (v) =>
-            v.contentType === "full" &&
-            v.data &&
-            Object.prototype.hasOwnProperty.call(v.data, component)
-        )
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-        .map((v, index) => ({
-          version: v.version,
-          displayVersion: index + 1,
-          createdAt: v.createdAt,
-          source: "full",
-        }));
-    }
-
-    if (
-      componentVersions.length === 0 &&
-      cacheDoc.content?.components?.[component]
-    ) {
-      const fallbackVersion = cacheDoc.content?.latestVersion || 1;
-      componentVersions = [
-        {
-          version: fallbackVersion,
-          displayVersion: 1,
-          createdAt: cacheDoc.updatedAt,
-          source: "components",
-        },
-      ];
-    }
 
     if (Number.isFinite(parsedLimit) && parsedLimit > 0) {
       componentVersions = componentVersions.slice(-parsedLimit);
@@ -123,7 +90,6 @@ exports.getComponentVersionController = async (req, res) => {
       userId,
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
-      isActive: true,
     });
 
     if (!cacheDoc) {
@@ -136,38 +102,16 @@ exports.getComponentVersionController = async (req, res) => {
       ? cacheDoc.content.versions
       : [];
 
-    let versionEntry = allVersions.find(
+    const versionEntry = allVersions.find(
       (v) =>
         v.version === parsedVersion &&
         v.contentType === "component" &&
         (v.componentName === component || v.data?.componentName === component)
     );
 
-    let responseData = versionEntry?.data?.componentContent;
+    const responseData = versionEntry?.data?.componentContent;
 
-    if (!versionEntry) {
-      const fullEntry = allVersions.find(
-        (v) =>
-          v.version === parsedVersion &&
-          v.contentType === "full" &&
-          v.data &&
-          Object.prototype.hasOwnProperty.call(v.data, component)
-      );
-
-      if (fullEntry) {
-        versionEntry = fullEntry;
-        responseData = fullEntry.data[component];
-      }
-    }
-
-    if (!versionEntry && cacheDoc.content?.components?.[component]) {
-      const fallbackVersion = cacheDoc.content?.latestVersion || 1;
-      if (parsedVersion === fallbackVersion) {
-        responseData = cacheDoc.content.components[component];
-      }
-    }
-
-    if (!versionEntry && responseData === undefined) {
+    if (!versionEntry || responseData === undefined) {
       return res.status(404).json({
         message: "Specified component version not found in cache.",
       });

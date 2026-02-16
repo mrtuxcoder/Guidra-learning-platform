@@ -131,18 +131,25 @@ exports.generateComponentController = async (req, res) => {
       userId,
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
-      isActive: true,
-    });
+    })
+      .select("content.versions content.componentVersionCounters")
+      .lean();
 
     const existingVersions = Array.isArray(cacheDoc?.content?.versions)
       ? cacheDoc.content.versions
       : [];
 
-    const componentVersionCount = existingVersions.filter(
+    const counterValue = Number(
+      cacheDoc?.content?.componentVersionCounters?.[component] || 0
+    );
+
+    const arrayCount = existingVersions.filter(
       (v) =>
         v.contentType === "component" &&
         (v.componentName === component || v.data?.componentName === component)
     ).length;
+
+    const componentVersionCount = Math.max(counterValue, arrayCount);
 
     if (componentVersionCount >= 3) {
       return res.status(429).json({

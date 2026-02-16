@@ -16,7 +16,9 @@ import {
   ToggleButton,
   Typography,
   Alert,
+  IconButton,
 } from "@mui/material";
+import { Close } from "@mui/icons-material";
 import WelcomeState from "../WelcomeState/index";
 import LoadingState from "../LoadingState";
 import Header from "./Header";
@@ -410,9 +412,55 @@ const LearningContent = ({
         onClose={() => setVersionDialogOpen(false)}
         fullWidth
         maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            background: `linear-gradient(135deg, ${colorPalette[50]} 0%, #ffffff 100%)`,
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.12)",
+            border: `1px solid ${colorPalette[200]}`,
+            overflow: "hidden",
+          },
+        }}
       >
-        <DialogTitle>Content Versions</DialogTitle>
-        <DialogContent dividers>
+        <DialogTitle
+          sx={{
+            p: 2,
+            background: `linear-gradient(135deg, ${
+              colorPalette[600]
+            } 0%, ${colorPalette[700]} 100%)`,
+            color: "white",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
+          >
+            <Typography variant="subtitle1" fontWeight={700}>
+              Content Versions
+            </Typography>
+            <IconButton
+              onClick={() => setVersionDialogOpen(false)}
+              size="small"
+              sx={{
+                color: "white",
+                background: "rgba(255, 255, 255, 0.15)",
+                "&:hover": { background: "rgba(255, 255, 255, 0.25)" },
+              }}
+            >
+              <Close sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent
+          dividers
+          sx={{
+            background: colorPalette[50],
+          }}
+        >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Pick a cached version to preview. Regeneration stays on the
               section buttons.
@@ -493,8 +541,21 @@ const LearningContent = ({
           </Box>
 
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setVersionDialogOpen(false)}>Close</Button>
+        <DialogActions sx={{ px: 2, pb: 2 }}>
+          <Button
+            onClick={() => setVersionDialogOpen(false)}
+            variant="outlined"
+            sx={{
+              borderColor: colorPalette[400],
+              color: colorPalette[600],
+              "&:hover": {
+                borderColor: colorPalette[500],
+                background: colorPalette[50],
+              },
+            }}
+          >
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
 

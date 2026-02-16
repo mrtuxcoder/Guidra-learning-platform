@@ -28,16 +28,18 @@ const contentCacheSchema = new mongoose.Schema(
           createdAt: { type: Date, default: Date.now } 
         }
       ],
-      latestVersion: { type: Number },
+      latestVersion: { type: Number, default: 0 },
       components: { type: mongoose.Schema.Types.Mixed, default: {} },
+      componentVersionCounters: { type: mongoose.Schema.Types.Mixed, default: {} },
     },
     timesAccessed: { type: Number, default: 0 },
     lastAccessed: { type: Date },
-    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,
   }
 );
+
+contentCacheSchema.index({ userId: 1, topic: 1, subtopic: 1 }, { unique: true });
 
 module.exports = mongoose.model("ContentCache", contentCacheSchema);

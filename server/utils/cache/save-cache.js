@@ -15,19 +15,31 @@ async function saveToCache({
     subtopic: subtopic.toLowerCase(),
   };
 
-  let cacheDoc = await ContentCache.findOne(query);
-
-  if (!cacheDoc) {
-    // Create new cache document
-    cacheDoc = new ContentCache({
-      userId,
-      topic: topic.toLowerCase(),
-      subtopic: subtopic.toLowerCase(),
-      content: {
-        versions: [],
-        latestVersion: 0,
+  let cacheDoc;
+  try {
+    cacheDoc = await ContentCache.findOneAndUpdate(
+      query,
+      {
+        $setOnInsert: {
+          userId,
+          topic: query.topic,
+          subtopic: query.subtopic,
+          content: {
+            versions: [],
+            latestVersion: 0,
+            components: {},
+            componentVersionCounters: {},
+          },
+        },
       },
-    });
+      { new: true, upsert: true }
+    );
+  } catch (error) {
+    if (error?.code === 11000) {
+      cacheDoc = await ContentCache.findOne(query);
+    } else {
+      throw error;
+    }
   }
 
   // Increment version number (full content only)
@@ -61,35 +73,72 @@ async function saveComponentToCache({
     subtopic: subtopic.toLowerCase(),
   };
 
-  let cacheDoc = await ContentCache.findOne(query);
-
-  if (!cacheDoc) {
-    // Create new cache document
-    cacheDoc = new ContentCache({
-      userId,
-      topic: topic.toLowerCase(),
-      subtopic: subtopic.toLowerCase(),
-        content: {
-          versions: [],
-          latestVersion: 0,
-          components: {},
+  let cacheDoc;
+  try {
+    cacheDoc = await ContentCache.findOneAndUpdate(
+      query,
+      {
+        $setOnInsert: {
+          userId,
+          topic: query.topic,
+          subtopic: query.subtopic,
+          content: {
+            versions: [],
+            latestVersion: 0,
+            components: {},
+            componentVersionCounters: {},
+          },
         },
-    });
+      },
+      { new: true, upsert: true }
+    );
+  } catch (error) {
+    if (error?.code === 11000) {
+      cacheDoc = await ContentCache.findOne(query);
+    } else {
+      throw error;
+    }
   }
 
   if (!cacheDoc.content.components) {
     cacheDoc.content.components = {};
   }
 
-  // Keep a separate version number for components (do not touch latestVersion)
-  const newVersionNumber = (cacheDoc.content.versions?.length || 0) + 1;
+  if (!cacheDoc.content.componentVersionCounters) {
+    cacheDoc.content.componentVersionCounters = {};
+  }
+
+  const existingComponentVersions = (cacheDoc.content.versions || [])
+    .filter(
+      (v) =>
+        v.contentType === "component" &&
+        (v.componentName === componentName ||
+          v.data?.componentName === componentName)
+    )
+    .map((v) => Number(v.version))
+    .filter((v) => Number.isFinite(v));
+
+  const maxExistingComponentVersion = existingComponentVersions.length
+    ? Math.max(...existingComponentVersions)
+    : 0;
+
+  // Keep version numbers per component to avoid ambiguity
+  const baseComponentVersion = Math.max(
+    Number(cacheDoc.content.componentVersionCounters[componentName] || 0),
+    maxExistingComponentVersion
+  );
+
+  const currentComponentVersion = baseComponentVersion + 1;
 
   // Update component content
   cacheDoc.content.components[componentName] = componentContent;
 
+  cacheDoc.content.componentVersionCounters[componentName] =
+    currentComponentVersion;
+
   // Add new version entry
   cacheDoc.content.versions.push({
-    version: newVersionNumber,
+    version: currentComponentVersion,
     contentType: "component",
     componentName,
     data: { componentName, componentContent },
@@ -100,10 +149,10 @@ async function saveComponentToCache({
   await cacheDoc.save();
 
   console.log(
-    `✅ [CACHE] Saved component ${componentName} v${newVersionNumber} for ${topic} / ${subtopic}`
+    `✅ [CACHE] Saved component ${componentName} v${currentComponentVersion} for ${topic} / ${subtopic}`
   );
 
-  return { cacheDoc, versionEntry: { versionNumber: newVersionNumber, contentType: "component", componentName } };
+  return { cacheDoc, versionEntry: { versionNumber: currentComponentVersion, contentType: "component", componentName } };
 } 
 
 

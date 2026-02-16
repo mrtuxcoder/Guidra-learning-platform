@@ -41,7 +41,6 @@ exports.generateContentController = async (req, res) => {
       userId,
       topic: topic.toLowerCase(),
       subtopic: subtopic.toLowerCase(),
-      isActive: true,
     });
 
     if (cacheDoc?.content?.latestVersion) {
@@ -147,7 +146,6 @@ exports.generateContentController = async (req, res) => {
         userId,
         topic: topic.toLowerCase(),
         subtopic: subtopic.toLowerCase(),
-        isActive: true,
       });
   
       if (!cacheDoc) {

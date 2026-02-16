@@ -8,7 +8,6 @@ async function getCachedContent(userId, topic, subtopic) {
     userId,
     topic: topic.toLowerCase(),
     subtopic: subtopic.toLowerCase(),
-    isActive: true,
   });
 
   if (!cacheDoc) {
@@ -28,7 +27,6 @@ async function getCachedComponent(userId, topic, subtopic, componentName) {
     userId,
     topic: topic.toLowerCase(),
     subtopic: subtopic.toLowerCase(),
-    isActive: true,
   });
 
   if (!cacheDoc) {

@@ -100,7 +100,6 @@ const MermaidDiagram = ({
     }
   }, [onManualRegenerate, remainingGenerations]);
 
-  // Simple cleaning function
   const cleanMermaidSyntax = useCallback((inputChart) => {
     if (!inputChart) return "";
 
@@ -109,10 +108,33 @@ const MermaidDiagram = ({
     cleaned = cleaned.replace(/(graph [A-Z]+)\s*(graph [A-Z]+)/g, "$1");
     cleaned = cleaned
       .replace(/[–—‑−]/g, "-")
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[`$®©™]/g, "")
       .replace(/[{}]/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
       .replace(/;/g, "");
 
+    if (
+      !cleaned.trim().startsWith("graph") &&
+      !cleaned.trim().startsWith("mindmap")
+    ) {
+      cleaned = `graph TD\n${cleaned}`;
+    }
+
     return cleaned;
+  }, []);
+
+  const buildFallbackMindmap = useCallback(() => {
+    return [
+      "graph TD",
+      "A[Main Idea] --> B[Key Point 1]",
+      "A --> C[Key Point 2]",
+      "A --> D[Key Point 3]",
+    ].join("\n");
   }, []);
 
   // Render diagram effect
@@ -156,18 +178,30 @@ const MermaidDiagram = ({
           const result = await mermaid.render(id, cleanedChart);
           finalSvg = result.svg;
         } catch (renderError) {
-          if (
-            !autoRegenerated &&
-            onManualRegenerate &&
-            remainingGenerations > 0 &&
-            isMounted
-          ) {
-            setAutoRegenerated(true);
-            await handleManualRegenerate();
-            return;
-          }
+          try {
+            const fallbackChart = buildFallbackMindmap();
+            const fallbackId = `mermaid-${Math.random()
+              .toString(36)
+              .slice(2, 11)}`;
+            const fallbackResult = await mermaid.render(
+              fallbackId,
+              fallbackChart
+            );
+            finalSvg = fallbackResult.svg;
+          } catch (fallbackError) {
+            if (
+              !autoRegenerated &&
+              onManualRegenerate &&
+              remainingGenerations > 0 &&
+              isMounted
+            ) {
+              setAutoRegenerated(true);
+              await handleManualRegenerate();
+              return;
+            }
 
-          throw new Error("Unable to render diagram");
+            throw new Error("Mindmap unavailable");
+          }
         } finally {
           if (consoleErrorOriginal) {
             console.error = consoleErrorOriginal;
@@ -218,13 +252,12 @@ const MermaidDiagram = ({
         }
 
         if (isMounted) {
+          setError(null);
           setIsLoading(false);
         }
       } catch (renderError) {
         if (isMounted) {
-          setError(
-            "This mindmap cannot be displayed. You can try regenerating it."
-          );
+          setError("Mindmap unavailable");
           setIsLoading(false);
 
           if (ref.current) {

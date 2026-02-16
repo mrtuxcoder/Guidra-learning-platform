@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
+import { History } from "@mui/icons-material";
 
 const Header = ({ title, topic, isMobile, colorPalette, onOpenVersions }) => (
   <Box
@@ -38,6 +39,22 @@ const Header = ({ title, topic, isMobile, colorPalette, onOpenVersions }) => (
         size={isMobile ? "small" : "medium"}
         variant="outlined"
         onClick={onOpenVersions}
+        startIcon={<History sx={{ fontSize: 18 }} />}
+        sx={{
+          borderColor: colorPalette[300],
+          color: colorPalette[600],
+          background: colorPalette[50],
+          fontWeight: 600,
+          borderRadius: 2,
+          px: 2,
+          "&:hover": {
+            borderColor: colorPalette[500],
+            background: colorPalette[100],
+            transform: "translateY(-1px)",
+            boxShadow: "0 4px 12px rgba(126, 87, 194, 0.12)",
+          },
+          transition: "all 0.2s ease",
+        }}
       >
         Versions
       </Button>

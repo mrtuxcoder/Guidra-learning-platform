@@ -9,7 +9,7 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { Quiz, Refresh } from "@mui/icons-material";
+import { Quiz, Refresh, Lock } from "@mui/icons-material";
 import QuizQuestion from "./QuizQuestion";
 import QuizProgress from "./QuizProgress";
 import { updateQuizMarks } from "../../../api";
@@ -142,24 +142,32 @@ const QuizSection = ({
                   : "Regenerate quiz"
               }
             >
-              <span>
+              <span style={{ marginLeft: "auto" }}>
                 <IconButton
                   size="small"
-                  sx={{ color: colorPalette[500], ml: "auto" }}
+                  sx={{
+                    color: isRegenerateDisabled
+                      ? "#ef4444"
+                      : colorPalette[500],
+                  }}
                   onClick={onRegenerate}
                   disabled={isRegenerating || isRegenerateDisabled}
                 >
-                  <Refresh
-                    sx={{
-                      animation: isRegenerating
-                        ? "spin 1s linear infinite"
-                        : "none",
-                      "@keyframes spin": {
-                        "0%": { transform: "rotate(0deg)" },
-                        "100%": { transform: "rotate(360deg)" },
-                      },
-                    }}
-                  />
+                  {isRegenerateDisabled ? (
+                    <Lock sx={{ fontSize: 18 }} />
+                  ) : (
+                    <Refresh
+                      sx={{
+                        animation: isRegenerating
+                          ? "spin 1s linear infinite"
+                          : "none",
+                        "@keyframes spin": {
+                          "0%": { transform: "rotate(0deg)" },
+                          "100%": { transform: "rotate(360deg)" },
+                        },
+                      }}
+                    />
+                  )}
                 </IconButton>
               </span>
             </Tooltip>
