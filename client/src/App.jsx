@@ -2,12 +2,12 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { useState, useEffect } from "react";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
+import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
 import Learn from "./pages/Learn";
 import Explore from "./pages/Explore";
 import CustomTopicSearch from "./pages/CustomTopicSearch";
+import Settings from "./pages/Settings";
 import Layout from "./components/Layout";
 import PasswordSetupModal from "./components/PasswordSetupModal";
 import { hasAuthCookie, isAuthenticated } from "./api";
@@ -139,15 +139,15 @@ export default function App() {
         {/* Public routes - only accessible when not logged in */}
         <Route
           path="/"
-          element={!isAuth ? <Login /> : <Navigate to="/profile" replace />}
+          element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
         />
         <Route
           path="/login"
-          element={!isAuth ? <Login /> : <Navigate to="/profile" replace />}
+          element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
         />
         <Route
           path="/register"
-          element={!isAuth ? <Register /> : <Navigate to="/profile" replace />}
+          element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
         />
 
         {/* Protected routes - only accessible when logged in */}
@@ -193,6 +193,18 @@ export default function App() {
             isAuth ? (
               <Layout>
                 <CustomTopicSearch />
+              </Layout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            isAuth ? (
+              <Layout>
+                <Settings />
               </Layout>
             ) : (
               <Navigate to="/login" replace />

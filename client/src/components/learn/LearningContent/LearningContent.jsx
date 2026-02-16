@@ -272,6 +272,7 @@ const LearningContent = ({
 
   // Reset quiz when content changes
   React.useEffect(() => {
+    setMindmapData(null);
     setComponentOverrides({});
     setComponentVersions({});
     setSelectedVersions({});
@@ -281,7 +282,8 @@ const LearningContent = ({
       explanation: true,
       learningActions: true,
       examples: true,
-      practice: true
+      coreExample: true,
+      practice: true,
     });
   }, [content]);
 
@@ -524,13 +526,73 @@ const LearningContent = ({
                     handleComponentVersionSelect(selectedComponent, nextValue);
                   }
                 }}
-                sx={{ mt: 1 }}
+                sx={{
+                  mt: 1,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  "& .MuiToggleButton-root": {
+                    borderRadius: 2,
+                    border: `1px solid ${colorPalette[300]}`,
+                    color: colorPalette[700],
+                    fontWeight: 600,
+                    textTransform: "none",
+                    px: 1.5,
+                    py: 0.6,
+                    background: "white",
+                    transition: "all 0.2s ease",
+                  },
+                  "& .MuiToggleButton-root:hover": {
+                    background: colorPalette[100],
+                    borderColor: colorPalette[500],
+                  },
+                  "& .MuiToggleButton-root.Mui-selected": {
+                    background: colorPalette[600],
+                    color: "white",
+                    borderColor: colorPalette[600],
+                    boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
+                  },
+                  "& .MuiToggleButton-root.Mui-selected:hover": {
+                    background: colorPalette[700],
+                  },
+                }}
               >
-                {dialogVersions.map((option) => (
-                  <ToggleButton key={option.version} value={option.version}>
-                    V{option.displayVersion ?? option.version}
-                  </ToggleButton>
-                ))}
+                {dialogVersions.map((option) => {
+                  const isSelected =
+                    dialogSelectedVersion === option.version;
+
+                  return (
+                    <ToggleButton key={option.version} value={option.version}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.75,
+                        }}
+                      >
+                        <Box component="span">
+                          V{option.displayVersion ?? option.version}
+                        </Box>
+                        {isSelected && (
+                          <Box
+                            component="span"
+                            sx={{
+                              fontSize: "0.65rem",
+                              fontWeight: 700,
+                              px: 0.75,
+                              py: 0.2,
+                              borderRadius: 999,
+                              background: "rgba(255, 255, 255, 0.2)",
+                              border: "1px solid rgba(255, 255, 255, 0.35)",
+                            }}
+                          >
+                            Current
+                          </Box>
+                        )}
+                      </Box>
+                    </ToggleButton>
+                  );
+                })}
               </ToggleButtonGroup>
             )}
           </Box>
@@ -621,7 +683,7 @@ const LearningContent = ({
     title="Example"
     content={safeContent.coreExample}
     emoji="📝"
-    isExpanded={expandedSections.coreExample || true}
+    isExpanded={expandedSections.coreExample ?? true}
     onToggle={() => toggleSection('coreExample')}
     onRegenerate={() => handleComponentRegenerate("coreExample")}
     isRegenerating={!!regeneratingComponents.coreExample}

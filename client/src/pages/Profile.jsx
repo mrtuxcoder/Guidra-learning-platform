@@ -17,6 +17,7 @@ import AuthenticationCard from "../components/profile/AuthenticationCard";
 import QuickStatsCard from "../components/profile/QuickStatsCard";
 import LearningJourneyCard from "../components/profile/LearningJourneyCard";
 import QuickActions from "../components/profile/QuickActions";
+import CompletedTopicsCard from "../components/profile/CompletedTopicsCard";
 
 // Import logic
 import {
@@ -119,6 +120,13 @@ export default function Profile() {
               />
 
               <QuickStatsCard stats={stats} />
+
+              <CompletedTopicsCard
+                progress={user?.progress || []}
+                onRecall={(topicName) =>
+                  navigate(`/learn?topic=${encodeURIComponent(topicName)}`)
+                }
+              />
 
               <QuickActions
                 isMobile={isMobile}

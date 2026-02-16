@@ -6,6 +6,9 @@ const {
   checkUserExists,
 } = require("../../controllers/auth-controllers/auth-profile-controller");
 const passwordController = require("../../controllers/password-controller");
+const {
+  updateLearningPreferences,
+} = require("../../controllers/user-controller");
 
 // User profile
 router.get("/me", authMiddleware, profileController);
@@ -25,5 +28,8 @@ router.put(
   authMiddleware,
   passwordController.changePassword
 );
+
+// Learning preferences
+router.put("/me/preferences", authMiddleware, updateLearningPreferences);
 
 module.exports = router;

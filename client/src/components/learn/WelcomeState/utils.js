@@ -95,3 +95,18 @@ export const getSubtopicForAction = (
       return null;
   }
 };
+
+export const getMostRecentIncompleteSubtopic = (subtopics) => {
+  if (!Array.isArray(subtopics) || subtopics.length === 0) return null;
+
+  const incomplete = subtopics.filter((sub) => sub && !sub.completed);
+  if (incomplete.length === 0) return null;
+
+  return incomplete
+    .slice()
+    .sort((a, b) => {
+      const aTime = new Date(a.lastReviewed || a.updatedAt || 0).getTime();
+      const bTime = new Date(b.lastReviewed || b.updatedAt || 0).getTime();
+      return bTime - aTime;
+    })[0];
+};

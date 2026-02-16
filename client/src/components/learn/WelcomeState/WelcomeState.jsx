@@ -1,5 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Box, Container, Fade } from "@mui/material";
+import {
+  Box,
+  Container,
+  Fade,
+  Typography,
+  Paper,
+  Button,
+  Stack,
+  Chip,
+} from "@mui/material";
+import { AutoAwesome, SmartToy } from "@mui/icons-material";
 import Header from "./Header";
 import TopicSelector from "./TopicSelector";
 import ProgressCard from "./ProgressCard";
@@ -12,6 +22,7 @@ import {
   getHighPrioritySubtopics,
   getRecommendedTopics,
   calculateLearningInsights,
+  getMostRecentIncompleteSubtopic,
 } from "./utils";
 
 const WelcomeState = ({
@@ -28,6 +39,8 @@ const WelcomeState = ({
   progress = 0,
   generationCounts = {},
   contentCache = {},
+  isRecalledTopic = false,
+  isMobile = false,
   colorPalette = {
     50: "#faf5ff",
     100: "#f3e8ff",
@@ -69,6 +82,31 @@ const WelcomeState = ({
     };
   }, [contentCache, subtopics, generationCounts, topics, selectedTopic]);
 
+  const mostRecentIncompleteSubtopic = useMemo(() => {
+    return (
+      getMostRecentIncompleteSubtopic(subtopics) ||
+      learningInsights.firstIncompleteSubtopic
+    );
+  }, [subtopics, learningInsights.firstIncompleteSubtopic]);
+
+  const inProgressTopicName = useMemo(() => {
+    if (!Array.isArray(topics) || topics.length === 0) {
+      return selectedTopic || "";
+    }
+
+    const inProgressTopic = topics.find((topic) => {
+      const subtopicList = topic?.subTopics || topic?.subtopics || [];
+      return subtopicList.some((sub) => sub && !sub.completed);
+    });
+
+    return (
+      inProgressTopic?.topic ||
+      inProgressTopic?.name ||
+      selectedTopic ||
+      ""
+    );
+  }, [topics, selectedTopic]);
+
   // Check if we have any topics at all
   const hasTopics = Array.isArray(topics) && topics.length > 0;
   const hasSelectedTopic = !!selectedTopic;
@@ -109,10 +147,6 @@ const WelcomeState = ({
             flexDirection: "column",
           }}
         >
-          <MobileMenuButton
-            onOpenSidebar={onOpenSidebar}
-            colorPalette={colorPalette}
-          />
           <Header
             hasTopics={hasTopics}
             selectedTopic={selectedTopic}
@@ -120,6 +154,9 @@ const WelcomeState = ({
             isReady={isReady}
             learningInsights={learningInsights}
             colorPalette={colorPalette}
+            isMobile={isMobile}
+            onOpenSidebar={onOpenSidebar}
+            isRecalledTopic={isRecalledTopic}
           />
           <EmptyState colorPalette={colorPalette} />
         </Box>
@@ -137,11 +174,6 @@ const WelcomeState = ({
           flexDirection: "column",
         }}
       >
-        <MobileMenuButton
-          onOpenSidebar={onOpenSidebar}
-          colorPalette={colorPalette}
-        />
-
         {/* Full-screen content */}
         <Box
           sx={{
@@ -160,6 +192,9 @@ const WelcomeState = ({
             isReady={isReady}
             learningInsights={learningInsights}
             colorPalette={colorPalette}
+            isMobile={isMobile}
+            onOpenSidebar={onOpenSidebar}
+            isRecalledTopic={isRecalledTopic}
           />
 
           <Container
@@ -189,6 +224,125 @@ const WelcomeState = ({
                 learningInsights={learningInsights}
                 colorPalette={colorPalette}
               />
+
+              {/* Continue where you left off */}
+              {selectedTopic && mostRecentIncompleteSubtopic && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: { xs: 2, md: 2.5 },
+                    mb: 3,
+                    borderRadius: 2,
+                    border: "1px solid #e2e8f0",
+                    background: "white",
+                  }}
+                >
+                  <Stack
+                    spacing={1.5}
+                    direction={{ xs: "column", sm: "row" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    justifyContent="space-between"
+                  >
+                    <Box>
+                      <Typography variant="h6" fontWeight={700}>
+                        Continue where you left off
+                      </Typography>
+                      <Typography variant="body2" color="#64748b">
+                        In progress: {inProgressTopicName || selectedTopic}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="#1e293b"
+                        sx={{ fontWeight: 600, mt: 0.5 }}
+                      >
+                        Next up: {mostRecentIncompleteSubtopic.name}
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        onSubtopicSelect?.(mostRecentIncompleteSubtopic)
+                      }
+                      sx={{
+                        textTransform: "none",
+                        borderRadius: 2,
+                        fontWeight: 700,
+                        px: 3,
+                        background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
+                      }}
+                    >
+                      Continue
+                    </Button>
+                  </Stack>
+                </Paper>
+              )}
+
+              {/* Subtopic Picker */}
+              {selectedTopic && learningInsights.incompleteSubtopics.length > 0 && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: { xs: 2, md: 2.5 },
+                    mb: 3,
+                    borderRadius: 2,
+                    border: "1px solid #e2e8f0",
+                    background: "white",
+                  }}
+                >
+                  <Stack spacing={2}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 2,
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="h6" fontWeight={700}>
+                          Pick a subtopic
+                        </Typography>
+                        <Typography variant="body2" color="#64748b">
+                          Jump directly to any incomplete subtopic.
+                        </Typography>
+                      </Box>
+                      <Button
+                        variant="outlined"
+                        onClick={onOpenSidebar}
+                        sx={{
+                          textTransform: "none",
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          borderColor: colorPalette[200],
+                          color: colorPalette[700],
+                        }}
+                      >
+                        Open Sidebar
+                      </Button>
+                    </Box>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {learningInsights.incompleteSubtopics.map((subtopic) => (
+                        <Chip
+                          key={subtopic.name}
+                          label={subtopic.name}
+                          onClick={() => onSubtopicSelect?.(subtopic)}
+                          variant="outlined"
+                          sx={{
+                            mb: 1,
+                            borderColor: colorPalette[200],
+                            color: "#475569",
+                            fontWeight: 600,
+                            "&:hover": {
+                              background: colorPalette[50],
+                              borderColor: colorPalette[400],
+                            },
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Stack>
+                </Paper>
+              )}
 
               {/* Quick Actions */}
               <QuickActions

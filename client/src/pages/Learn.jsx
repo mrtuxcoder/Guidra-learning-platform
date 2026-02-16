@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -10,6 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import { Menu, Refresh } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
 import { getProfile } from "../api";
 import {
   getSubtopics,
@@ -56,27 +57,26 @@ export default function Learning() {
   const [contentCache, setContentCache] = useState({});
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showError, setShowError] = useState(false);
+  const location = useLocation();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const MAX_GENERATIONS = 3;
 
-  // Function to reorder topics - incomplete first
+  // Function to filter and reorder topics - incomplete only
   const getOrderedTopics = useCallback((topicsArray) => {
     if (!Array.isArray(topicsArray)) return [];
 
     const incompleteTopics = [];
-    const completedTopics = [];
 
     topicsArray.forEach((topic) => {
-      if (topic && topic.subtopics) {
-        const hasIncomplete = topic.subtopics.some(
+      const subtopicList = topic?.subTopics || topic?.subtopics || [];
+      if (subtopicList.length > 0) {
+        const hasIncomplete = subtopicList.some(
           (sub) => sub && !sub.completed
         );
         if (hasIncomplete) {
           incompleteTopics.push(topic);
-        } else {
-          completedTopics.push(topic);
         }
       } else {
         // If no subtopics info, treat as incomplete
@@ -84,42 +84,13 @@ export default function Learning() {
       }
     });
 
-    return [...incompleteTopics, ...completedTopics];
+    return incompleteTopics;
   }, []);
 
-  // Memoized fetch functions
-  const fetchUserTopics = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const { data } = await getProfile();
-      const orderedTopics = getOrderedTopics(data.user.progress || []);
-      setTopics(orderedTopics);
-
-      if (orderedTopics.length > 0) {
-        // Auto-select first incomplete topic
-        const firstIncompleteTopic =
-          orderedTopics.find((topic) =>
-            topic.subtopics?.some((sub) => !sub.completed)
-          ) || orderedTopics[0];
-
-        if (firstIncompleteTopic) {
-          setSelectedTopic(
-            firstIncompleteTopic.topic || firstIncompleteTopic.name
-          );
-          await fetchSubtopics(
-            firstIncompleteTopic.topic || firstIncompleteTopic.name
-          );
-        }
-      }
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to load topics";
-      setError(errorMsg);
-      setShowError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [getOrderedTopics]);
+  const preferredTopic = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("topic");
+  }, [location.search]);
 
   const fetchSubtopics = useCallback(
     async (topic) => {
@@ -153,6 +124,66 @@ export default function Learning() {
     },
     [isMobile]
   );
+
+  // Memoized fetch functions
+  const fetchUserTopics = useCallback(
+    async (preferredTopicName) => {
+    try {
+      setLoading(true);
+      setError("");
+      const { data } = await getProfile();
+      const progressTopics = data.user.progress || [];
+      const orderedTopics = getOrderedTopics(progressTopics);
+
+      if (preferredTopicName) {
+        const recalledTopic = progressTopics.find(
+          (topic) =>
+            (topic?.topic || topic?.name) === preferredTopicName
+        );
+
+        if (recalledTopic) {
+          const mergedTopics = [
+            recalledTopic,
+            ...orderedTopics.filter(
+              (topic) =>
+                (topic?.topic || topic?.name) !== preferredTopicName
+            ),
+          ];
+          setTopics(mergedTopics);
+        } else {
+          setTopics(orderedTopics);
+        }
+      } else {
+        setTopics(orderedTopics);
+      }
+
+      if (preferredTopicName) {
+        setSelectedTopic(preferredTopicName);
+        await fetchSubtopics(preferredTopicName);
+        return;
+      }
+
+      if (orderedTopics.length > 0) {
+        // Auto-select first incomplete topic
+        const firstIncompleteTopic = orderedTopics[0];
+
+        if (firstIncompleteTopic) {
+          setSelectedTopic(
+            firstIncompleteTopic.topic || firstIncompleteTopic.name
+          );
+          await fetchSubtopics(
+            firstIncompleteTopic.topic || firstIncompleteTopic.name
+          );
+        }
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Failed to load topics";
+      setError(errorMsg);
+      setShowError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [getOrderedTopics, fetchSubtopics]);
 
   // Function to reorder subtopics - incomplete first
   const getOrderedSubtopics = useCallback((subtopicsArray) => {
@@ -501,8 +532,8 @@ export default function Learning() {
 
   // Effects
   useEffect(() => {
-    fetchUserTopics();
-  }, [fetchUserTopics]);
+    fetchUserTopics(preferredTopic);
+  }, [fetchUserTopics, preferredTopic]);
 
   useEffect(() => {
     if (selectedSubtopic) {
@@ -709,6 +740,8 @@ export default function Learning() {
               generationCounts={generationCounts}
               contentCache={contentCache}
               colorPalette={purplePalette}
+              isRecalledTopic={!!preferredTopic}
+              isMobile={isMobile}
             />
           )}
         </Box>

@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 
 const AuthenticationCard = ({ user, onPasswordSetup }) => {
-  if (!user?.authProvider === "google" || user?.password) {
+  if (user?.authProvider !== "google" || user?.password) {
     return null;
   }
 

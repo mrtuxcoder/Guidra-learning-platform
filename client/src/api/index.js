@@ -17,6 +17,7 @@ export const {
   hasAuthCookie,
   isAuthenticated,
   isAuthenticatedWithInfo,
+  updateUserPreferences,
   checkNeedsPasswordSetup,
   setupPassword,
   completeLogout,

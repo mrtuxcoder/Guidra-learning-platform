@@ -37,6 +37,10 @@ export const checkUserExists = async (email) => {
   );
 };
 
+export const updateUserPreferences = async (preferencesData) => {
+  return await API.put("/api/v1/users/me/preferences", preferencesData);
+};
+
 export const logoutUser = async () => {
   return await API.post("/api/v1/auth/logout");
 };

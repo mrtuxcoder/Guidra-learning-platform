@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Typography, useMediaQuery } from "@mui/material";
+import { Box, Typography, useMediaQuery, IconButton, Chip } from "@mui/material";
+import { Menu } from "@mui/icons-material";
 
 const Header = ({
   hasTopics,
@@ -8,12 +9,17 @@ const Header = ({
   isReady,
   learningInsights,
   colorPalette,
+  isMobile: isMobileProp,
+  onOpenSidebar,
+  isRecalledTopic = false,
 }) => {
-  const isMobile = useMediaQuery("(max-width: 600px)");
+  const isMobileMedia = useMediaQuery("(max-width: 600px)");
+  const isMobile = isMobileProp !== undefined ? isMobileProp : isMobileMedia;
   const isDesktop = useMediaQuery("(min-width: 1200px)");
 
   const getHeaderText = () => {
     if (!hasTopics) return "Welcome to Guidra!";
+    if (isRecalledTopic) return "Recalling Completed Topic";
     if (learningInsights.isTopicCompleted) return "Course Completed! 🎉";
     if (isReady) return "Ready to Learn";
     return "Continue Learning";
@@ -22,6 +28,8 @@ const Header = ({
   const getSubtitleText = () => {
     if (!hasTopics)
       return "Start your learning journey with personalized AI-powered courses";
+    if (isRecalledTopic)
+      return `Review ${selectedTopic} - select a subtopic to refresh your knowledge`;
     if (learningInsights.isTopicCompleted)
       return `You've mastered ${selectedTopic}`;
     if (isReady) return `Start learning "${subtopicName}"`;
@@ -39,6 +47,29 @@ const Header = ({
         overflow: "hidden",
       }}
     >
+      {/* Mobile Menu Button */}
+      {isMobile && onOpenSidebar && (
+        <IconButton
+          onClick={onOpenSidebar}
+          sx={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+            width: 44,
+            height: 44,
+            background: "rgba(255, 255, 255, 0.15)",
+            color: "white",
+            zIndex: 2,
+            backdropFilter: "blur(10px)",
+            "&:hover": {
+              background: "rgba(255, 255, 255, 0.25)",
+            },
+          }}
+        >
+          <Menu sx={{ fontSize: 20 }} />
+        </IconButton>
+      )}
+
       <Box
         sx={{
           position: "absolute",
@@ -58,6 +89,20 @@ const Header = ({
           textAlign: "center",
         }}
       >
+        {isRecalledTopic && (
+          <Chip
+            label="Recall Mode"
+            size="small"
+            sx={{
+              mb: 1.5,
+              background: "rgba(255, 255, 255, 0.2)",
+              color: "white",
+              fontWeight: 600,
+              fontSize: "0.75rem",
+              backdropFilter: "blur(10px)",
+            }}
+          />
+        )}
         <Typography
           variant={isMobile ? "h5" : isDesktop ? "h4" : "h5"}
           fontWeight="800"

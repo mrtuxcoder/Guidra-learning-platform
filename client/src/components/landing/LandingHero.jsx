@@ -1,0 +1,260 @@
+import React from "react";
+import {
+  Box,
+  Button,
+  Container,
+  Typography,
+  Stack,
+  Chip,
+} from "@mui/material";
+
+const LandingHero = ({
+  onStartLearning,
+  onLogin,
+  onRegister,
+  onNavLogin,
+  onNavRegister,
+  isMobile,
+}) => {
+  return (
+    <Box
+      sx={{
+        pt: { xs: 3, md: 6 },
+        pb: { xs: 5, md: 8 },
+        background:
+          "linear-gradient(180deg, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0) 60%)",
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: { xs: 4, md: 6 },
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 2,
+                background:
+                  "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontWeight: 700,
+                fontFamily: '"Space Grotesk", sans-serif',
+              }}
+            >
+              G
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                letterSpacing: 0.2,
+                fontFamily: '"Space Grotesk", sans-serif',
+              }}
+            >
+              Guidra
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1}>
+            <Button
+              onClick={onNavLogin}
+              size="small"
+              variant="text"
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                color: "#4B5563",
+              }}
+            >
+              Login
+            </Button>
+            <Button
+              onClick={onNavRegister}
+              size="small"
+              variant="outlined"
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "rgba(124,58,237,0.4)",
+                color: "#5E35B1",
+              }}
+            >
+              Register
+            </Button>
+          </Stack>
+        </Box>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1.1fr 0.9fr" },
+            gap: { xs: 4, md: 6 },
+            alignItems: "center",
+          }}
+        >
+          <Box>
+            <Chip
+              label="Structured AI learning"
+              size="small"
+              sx={{
+                mb: 2,
+                bgcolor: "rgba(124,58,237,0.1)",
+                color: "#5E35B1",
+                fontWeight: 600,
+              }}
+            />
+            <Typography
+              variant={isMobile ? "h4" : "h2"}
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.1,
+                mb: 2,
+                fontFamily: '"Space Grotesk", sans-serif',
+              }}
+            >
+              Guidra is structured learning, not chat.
+            </Typography>
+            <Typography
+              variant={isMobile ? "h5" : "h4"}
+              sx={{
+                fontWeight: 600,
+                color: "#5E35B1",
+                mb: 2,
+                fontFamily: '"Space Grotesk", sans-serif',
+              }}
+            >
+              A calm, predictable study flow built for real understanding.
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#4B5563",
+                maxWidth: 520,
+                mb: 3,
+                fontSize: { xs: "0.95rem", md: "1.05rem" },
+              }}
+            >
+              Guidra is not a chatbot. It is a structured AI-powered learning
+              platform that organizes topics into subtopics, explanations,
+              mindmaps, quizzes, and practice so you can study without noise.
+            </Typography>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+              <Button
+                variant="contained"
+                onClick={onStartLearning}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  px: 3,
+                  background:
+                    "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+                }}
+              >
+                Get Started
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={onLogin}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  borderColor: "rgba(124,58,237,0.4)",
+                  color: "#5E35B1",
+                }}
+              >
+                Login
+              </Button>
+            </Stack>
+          </Box>
+
+          <Box
+            sx={{
+              position: "relative",
+              height: { xs: 220, md: 320 },
+              borderRadius: 3,
+              border: "1px solid rgba(124,58,237,0.2)",
+              background:
+                "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(94,53,177,0.02) 100%)",
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                top: 16,
+                left: 16,
+                right: 16,
+                height: 12,
+                borderRadius: 999,
+                bgcolor: "rgba(124,58,237,0.12)",
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: 1.5,
+                p: 3,
+              }}
+            >
+              {Array.from({ length: 12 }).map((_, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    borderRadius: 2,
+                    border: "1px solid rgba(124,58,237,0.2)",
+                    bgcolor:
+                      index % 3 === 0
+                        ? "rgba(124,58,237,0.18)"
+                        : "rgba(255,255,255,0.6)",
+                  }}
+                />
+              ))}
+            </Box>
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 16,
+                left: 16,
+                right: 16,
+                display: "flex",
+                gap: 1,
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  height: 10,
+                  borderRadius: 999,
+                  bgcolor: "rgba(124,58,237,0.3)",
+                }}
+              />
+              <Box
+                sx={{
+                  width: 40,
+                  height: 10,
+                  borderRadius: 999,
+                  bgcolor: "rgba(124,58,237,0.15)",
+                }}
+              />
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  );
+};
+
+export default LandingHero;
