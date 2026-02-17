@@ -10,4 +10,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </BrowserRouter>
 );
 
-registerSW({ immediate: true });
+if (import.meta.env.PROD) {
+  registerSW({ immediate: true });
+}

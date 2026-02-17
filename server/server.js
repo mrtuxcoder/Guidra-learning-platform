@@ -29,6 +29,7 @@ app.use(
         process.env.CLIENT_URL,
         "http://localhost:5173", // Vite default
         "http://localhost:5174",
+          "http://localhost:4173",
       ];
 
       if (!origin) return callback(null, true);
