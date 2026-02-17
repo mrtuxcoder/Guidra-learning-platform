@@ -37,6 +37,19 @@ exports.markSubtopicComplete = async (req, res) => {
         .status(404)
         .json({ message: "Subtopic not found under this topic." });
 
+    if (completed === true) {
+      const quizMark = subtopic.quizMark || {};
+      const answeredCount =
+        (quizMark.correct || 0) + (quizMark.wrong || 0);
+      const hasQuizAttempt = (quizMark.total || 0) > 0 && answeredCount > 0;
+
+      if (!hasQuizAttempt) {
+        return res.status(400).json({
+          message: "Please complete the quiz before marking this subtopic as complete.",
+        });
+      }
+    }
+
     // Update subtopic properties if provided
     if (completed !== undefined) subtopic.completed = completed;
     if (understandingLevel !== undefined)

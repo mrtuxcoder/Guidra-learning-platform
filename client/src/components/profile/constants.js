@@ -31,6 +31,24 @@ export const learningStyles = [
   },
 ];
 
+export const profileTheme = {
+  primary: "#7E57C2",
+  primaryLight: "#B39DDB",
+  primaryDark: "#5E35B1",
+  gradient: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+  lightBg: "#F3E5F5",
+  subtleBg: "#FAF7FE",
+  border: "rgba(126, 87, 194, 0.12)",
+  softShadow: "0 8px 24px rgba(30, 41, 59, 0.08)",
+};
+
+export const cardSx = {
+  borderRadius: 3,
+  border: `1px solid ${profileTheme.border}`,
+  background: "white",
+  boxShadow: profileTheme.softShadow,
+};
+
 export const understandingLevels = {
   1: { label: "Beginner", color: "default", icon: "RadioButtonUnchecked" },
   2: { label: "Basic", color: "info", icon: "PlayArrow" },

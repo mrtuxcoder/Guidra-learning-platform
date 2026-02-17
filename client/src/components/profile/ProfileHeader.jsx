@@ -9,33 +9,26 @@ import {
   alpha,
 } from "@mui/material";
 import { Email, RocketLaunch } from "@mui/icons-material";
+import { profileTheme } from "./constants";
 
 const ProfileHeader = ({ user, styleInfo }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
-  const purpleTheme = {
-    primary: "#7E57C2",
-    primaryLight: "#B39DDB",
-    primaryDark: "#5E35B1",
-    gradient: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
-    lightBg: "#F3E5F5",
-    subtleBg: "#FAF7FE",
-  };
-
   return (
     <Paper
       elevation={0}
       sx={{
         p: isMobile ? 2 : 3,
-        background: purpleTheme.gradient,
+        background: "rgba(255, 255, 255, 0.08)",
         color: "white",
         borderRadius: 3,
         position: "relative",
         overflow: "hidden",
-        border: `1px solid ${alpha(purpleTheme.primaryLight, 0.3)}`,
-        boxShadow: `0 8px 32px ${alpha(purpleTheme.primaryDark, 0.15)}`,
+        border: `1px solid ${alpha("#fff", 0.2)}`,
+        boxShadow: `0 12px 32px ${alpha(profileTheme.primaryDark, 0.2)}`,
+        backdropFilter: "blur(10px)",
         "&::before": {
           content: '""',
           position: "absolute",
@@ -101,7 +94,7 @@ const ProfileHeader = ({ user, styleInfo }) => {
               fontSize: isMobile ? "1.25rem" : "1.5rem",
               fontWeight: "bold",
               position: "relative",
-              boxShadow: `0 4px 16px ${alpha(purpleTheme.primaryDark, 0.3)}`,
+              boxShadow: `0 4px 16px ${alpha(profileTheme.primaryDark, 0.3)}`,
             }}
           >
             {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -116,10 +109,7 @@ const ProfileHeader = ({ user, styleInfo }) => {
             gutterBottom
             sx={{
               textShadow: "0 1px 3px rgba(0,0,0,0.3)",
-              background: "linear-gradient(45deg, #fff 30%, #f8f9fa 90%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
+              color: "white",
               lineHeight: 1.2,
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -180,7 +170,7 @@ const ProfileHeader = ({ user, styleInfo }) => {
                 sx={{
                   opacity: 0.85,
                   fontWeight: 500,
-                  background: alpha("#fff", 0.1),
+                  background: alpha("#fff", 0.12),
                   px: 1,
                   py: 0.25,
                   borderRadius: 1,

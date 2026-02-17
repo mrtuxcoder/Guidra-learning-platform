@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Container, Typography, Grid } from "@mui/material";
+import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const problemPoints = [
   "Chatbot replies are long and unstructured.",
@@ -9,31 +10,44 @@ const problemPoints = [
 ];
 
 const LandingProblem = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box sx={{ py: { xs: 5, md: 7 }, background: "white" }}>
       <Container maxWidth="lg">
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
             mb: 3,
-            fontFamily: '"Space Grotesk", sans-serif',
           }}
         >
           The Problem
         </Typography>
         <Grid container spacing={2.5}>
           {problemPoints.map((point) => (
-            <Grid item xs={12} sm={6} key={point}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              key={point}
+              sx={isMobile ? { width: "100%" } : undefined}
+            >
               <Box
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
-                  border: "1px solid rgba(124,58,237,0.12)",
-                  background: "rgba(124,58,237,0.03)",
+                  border: `1px solid ${profileTheme.border}`,
+                  background: "rgba(126,87,194,0.05)",
+                  ...(isMobile && {
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                  }),
                 }}
               >
-                <Typography sx={{ color: "#4B5563" }}>{point}</Typography>
+                <Typography sx={{ color: "#475569" }}>{point}</Typography>
               </Box>
             </Grid>
           ))}

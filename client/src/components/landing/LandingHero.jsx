@@ -7,6 +7,7 @@ import {
   Stack,
   Chip,
 } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const LandingHero = ({
   onStartLearning,
@@ -22,7 +23,7 @@ const LandingHero = ({
         pt: { xs: 3, md: 6 },
         pb: { xs: 5, md: 8 },
         background:
-          "linear-gradient(180deg, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0) 60%)",
+          "linear-gradient(180deg, rgba(126,87,194,0.12) 0%, rgba(126,87,194,0) 60%)",
       }}
     >
       <Container maxWidth="lg">
@@ -40,14 +41,12 @@ const LandingHero = ({
                 width: 36,
                 height: 36,
                 borderRadius: 2,
-                background:
-                  "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+                background: profileTheme.gradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "white",
                 fontWeight: 700,
-                fontFamily: '"Space Grotesk", sans-serif',
               }}
             >
               G
@@ -57,7 +56,6 @@ const LandingHero = ({
               sx={{
                 fontWeight: 700,
                 letterSpacing: 0.2,
-                fontFamily: '"Space Grotesk", sans-serif',
               }}
             >
               Guidra
@@ -71,7 +69,7 @@ const LandingHero = ({
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                color: "#4B5563",
+                color: "#475569",
               }}
             >
               Login
@@ -83,8 +81,8 @@ const LandingHero = ({
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                borderColor: "rgba(124,58,237,0.4)",
-                color: "#5E35B1",
+                borderColor: "rgba(126,87,194,0.4)",
+                color: profileTheme.primaryDark,
               }}
             >
               Register
@@ -106,18 +104,17 @@ const LandingHero = ({
               size="small"
               sx={{
                 mb: 2,
-                bgcolor: "rgba(124,58,237,0.1)",
-                color: "#5E35B1",
+                bgcolor: "rgba(126,87,194,0.12)",
+                color: profileTheme.primaryDark,
                 fontWeight: 600,
               }}
             />
             <Typography
               variant={isMobile ? "h4" : "h2"}
               sx={{
-                fontWeight: 700,
+                fontWeight: 800,
                 lineHeight: 1.1,
                 mb: 2,
-                fontFamily: '"Space Grotesk", sans-serif',
               }}
             >
               Guidra is structured learning, not chat.
@@ -125,10 +122,9 @@ const LandingHero = ({
             <Typography
               variant={isMobile ? "h5" : "h4"}
               sx={{
-                fontWeight: 600,
-                color: "#5E35B1",
+                fontWeight: 700,
+                color: profileTheme.primaryDark,
                 mb: 2,
-                fontFamily: '"Space Grotesk", sans-serif',
               }}
             >
               A calm, predictable study flow built for real understanding.
@@ -136,7 +132,7 @@ const LandingHero = ({
             <Typography
               variant="body1"
               sx={{
-                color: "#4B5563",
+                color: "#475569",
                 maxWidth: 520,
                 mb: 3,
                 fontSize: { xs: "0.95rem", md: "1.05rem" },
@@ -155,8 +151,7 @@ const LandingHero = ({
                   borderRadius: 2,
                   fontWeight: 700,
                   px: 3,
-                  background:
-                    "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+                  background: profileTheme.gradient,
                 }}
               >
                 Get Started
@@ -168,8 +163,8 @@ const LandingHero = ({
                   textTransform: "none",
                   borderRadius: 2,
                   fontWeight: 600,
-                  borderColor: "rgba(124,58,237,0.4)",
-                  color: "#5E35B1",
+                  borderColor: "rgba(126,87,194,0.4)",
+                  color: profileTheme.primaryDark,
                 }}
               >
                 Login
@@ -182,9 +177,9 @@ const LandingHero = ({
               position: "relative",
               height: { xs: 220, md: 320 },
               borderRadius: 3,
-              border: "1px solid rgba(124,58,237,0.2)",
+              border: "1px solid rgba(126,87,194,0.2)",
               background:
-                "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(94,53,177,0.02) 100%)",
+                "linear-gradient(135deg, rgba(126,87,194,0.12) 0%, rgba(94,53,177,0.04) 100%)",
               overflow: "hidden",
             }}
           >
@@ -196,7 +191,7 @@ const LandingHero = ({
                 right: 16,
                 height: 12,
                 borderRadius: 999,
-                bgcolor: "rgba(124,58,237,0.12)",
+                bgcolor: "rgba(126,87,194,0.16)",
               }}
             />
             <Box
@@ -214,10 +209,10 @@ const LandingHero = ({
                   key={index}
                   sx={{
                     borderRadius: 2,
-                    border: "1px solid rgba(124,58,237,0.2)",
+                    border: "1px solid rgba(126,87,194,0.2)",
                     bgcolor:
                       index % 3 === 0
-                        ? "rgba(124,58,237,0.18)"
+                        ? "rgba(126,87,194,0.18)"
                         : "rgba(255,255,255,0.6)",
                   }}
                 />
@@ -238,7 +233,7 @@ const LandingHero = ({
                   flex: 1,
                   height: 10,
                   borderRadius: 999,
-                  bgcolor: "rgba(124,58,237,0.3)",
+                  bgcolor: "rgba(126,87,194,0.35)",
                 }}
               />
               <Box
@@ -246,7 +241,7 @@ const LandingHero = ({
                   width: 40,
                   height: 10,
                   borderRadius: 999,
-                  bgcolor: "rgba(124,58,237,0.15)",
+                  bgcolor: "rgba(126,87,194,0.15)",
                 }}
               />
             </Box>

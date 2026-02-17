@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Container, Typography, Button, Stack } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const LandingCTA = ({ onCreateAccount, onLogin }) => {
   return (
@@ -7,21 +8,20 @@ const LandingCTA = ({ onCreateAccount, onLogin }) => {
       sx={{
         py: { xs: 6, md: 8 },
         background:
-          "linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(94,53,177,0.08) 100%)",
+          "linear-gradient(135deg, rgba(126,87,194,0.16) 0%, rgba(94,53,177,0.1) 100%)",
       }}
     >
       <Container maxWidth="md" sx={{ textAlign: "center" }}>
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
             mb: 2,
-            fontFamily: '"Space Grotesk", sans-serif',
           }}
         >
           Start Learning Smarter
         </Typography>
-        <Typography sx={{ color: "#4B5563", mb: 3 }}>
+        <Typography sx={{ color: "#475569", mb: 3 }}>
           Build a calm, structured study flow that saves progress and versions.
         </Typography>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="center">
@@ -33,8 +33,7 @@ const LandingCTA = ({ onCreateAccount, onLogin }) => {
               borderRadius: 2,
               fontWeight: 700,
               px: 3,
-              background:
-                "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+              background: profileTheme.gradient,
             }}
           >
             Register
@@ -47,8 +46,8 @@ const LandingCTA = ({ onCreateAccount, onLogin }) => {
               borderRadius: 2,
               fontWeight: 600,
               px: 3,
-              borderColor: "rgba(124,58,237,0.4)",
-              color: "#5E35B1",
+              borderColor: "rgba(126,87,194,0.4)",
+              color: profileTheme.primaryDark,
             }}
           >
             Login

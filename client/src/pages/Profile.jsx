@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Grid, Box, useTheme, useMediaQuery } from "@mui/material";
+import { Container, Box, useTheme, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 // Import existing components
@@ -30,7 +30,7 @@ import PasswordSetupModal from "../components/PasswordSetupModal";
 
 export default function Profile() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
 
   const {
@@ -108,54 +108,62 @@ export default function Profile() {
           mt: -1,
         }}
       >
-        <Grid container spacing={3}>
-          {/* Left Column - Personal & Quick Stats */}
-          <Grid item xs={12} lg={4}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "minmax(280px, 1fr) minmax(360px, 1.3fr) minmax(260px, 0.9fr)",
+            },
+            gap: 3,
+            alignItems: "stretch",
+          }}
+        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateRows: { xs: "auto", md: "minmax(0, 1fr) auto" },
+              gap: 3,
+              height: "100%",
+              alignItems: "stretch",
+            }}
+          >
+            <Box sx={{ height: "100%", minHeight: 0 }}>
               <PersonalInfo user={user} />
-
-              <AuthenticationCard
-                user={user}
-                onPasswordSetup={handlePasswordSetupClick}
-              />
-
-              <QuickStatsCard stats={stats} />
-
-              <CompletedTopicsCard
-                progress={user?.progress || []}
-                onRecall={(topicName) =>
-                  navigate(`/learn?topic=${encodeURIComponent(topicName)}`)
-                }
-              />
-
-              <QuickActions
-                isMobile={isMobile}
-                onNavigate={navigate}
-                onLogout={handleLogout}
-              />
             </Box>
-          </Grid>
 
-          {/* Right Column - Progress & Main Content */}
-          <Grid item xs={12} lg={8}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <ProgressStats stats={stats} />
+            <AuthenticationCard
+              user={user}
+              onPasswordSetup={handlePasswordSetupClick}
+            />
+          </Box>
 
-              <LearningJourneyCard
-                stats={stats}
-                onLaunchLesson={() => navigate("/learn")}
-              />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <ProgressStats stats={stats} />
 
-              {!isMobile && (
-                <QuickActions
-                  isMobile={false}
-                  onNavigate={navigate}
-                  onLogout={handleLogout}
-                />
-              )}
-            </Box>
-          </Grid>
-        </Grid>
+            <LearningJourneyCard
+              stats={stats}
+              onLaunchLesson={() => navigate("/learn")}
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <QuickStatsCard stats={stats} />
+
+            <CompletedTopicsCard
+              progress={user?.progress || []}
+              onRecall={(topicName) =>
+                navigate(`/learn?topic=${encodeURIComponent(topicName)}`)
+              }
+            />
+
+            <QuickActions
+              isMobile={isMobile}
+              onNavigate={navigate}
+              onLogout={handleLogout}
+            />
+          </Box>
+        </Box>
       </Container>
 
       {/* Password Setup Modal */}

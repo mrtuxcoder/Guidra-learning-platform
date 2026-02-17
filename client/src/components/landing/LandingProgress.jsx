@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Container, Typography, Grid } from "@mui/material";
+import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const progressItems = [
   {
@@ -17,41 +18,54 @@ const progressItems = [
 ];
 
 const LandingProgress = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box
       sx={{
         py: { xs: 5, md: 7 },
         background:
-          "linear-gradient(180deg, rgba(124,58,237,0.06) 0%, rgba(124,58,237,0.02) 100%)",
+          "linear-gradient(180deg, rgba(126,87,194,0.08) 0%, rgba(126,87,194,0.02) 100%)",
       }}
     >
       <Container maxWidth="lg">
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
             mb: 3,
-            fontFamily: '"Space Grotesk", sans-serif',
           }}
         >
           Progress Tracking
         </Typography>
-        <Grid container spacing={2.5}>
+        <Grid container spacing={2.5} alignItems="stretch">
           {progressItems.map((item) => (
-            <Grid item xs={12} md={4} key={item.title}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              key={item.title}
+              sx={isMobile ? { width: "100%" } : undefined}
+            >
               <Box
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
-                  border: "1px solid rgba(124,58,237,0.15)",
+                  border: `1px solid ${profileTheme.border}`,
                   background: "white",
                   height: "100%",
+                  ...(isMobile && {
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                  }),
                 }}
               >
                 <Typography sx={{ fontWeight: 600, mb: 1 }}>
                   {item.title}
                 </Typography>
-                <Typography sx={{ color: "#4B5563" }}>{item.detail}</Typography>
+                <Typography sx={{ color: "#475569" }}>{item.detail}</Typography>
               </Box>
             </Grid>
           ))}

@@ -16,14 +16,9 @@ import {
   PlayCircle,
   ListAlt,
 } from "@mui/icons-material";
+import { profileTheme, cardSx } from "./constants";
 
 const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
-  const purpleTheme = {
-    primary: "#7E57C2",
-    primaryLight: "#B39DDB",
-    primaryDark: "#5E35B1",
-  };
-
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
@@ -42,7 +37,7 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
         size={size}
         thickness={thickness}
         sx={{
-          color: value === 100 ? "#10b981" : purpleTheme.primary,
+          color: value === 100 ? "#10b981" : profileTheme.primary,
         }}
       />
       <Box
@@ -62,7 +57,7 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
           component="div"
           fontWeight="700"
           sx={{
-            background: `linear-gradient(135deg, ${purpleTheme.primary} 0%, ${purpleTheme.primaryDark} 100%)`,
+            background: `linear-gradient(135deg, ${profileTheme.primary} 0%, ${profileTheme.primaryDark} 100%)`,
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -78,13 +73,18 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
 const StatBox = ({ icon: Icon, value, label, color, isMobile }) => (
   <Box
     sx={{
-      textAlign: "center",
-      p: isMobile ? 0.5 : 1,
+      textAlign: "left",
+      p: isMobile ? 1.25 : 1.5,
       height: "100%",
+      width: "100%",
+      maxWidth: "100%",
+      boxSizing: "border-box",
       display: "flex",
-      flexDirection: "column",
       alignItems: "center",
-      justifyContent: "center",
+      gap: 1.25,
+      borderRadius: 2,
+      border: `1px solid ${profileTheme.border}`,
+      background: "rgba(126, 87, 194, 0.04)",
     }}
   >
     <Box
@@ -92,37 +92,39 @@ const StatBox = ({ icon: Icon, value, label, color, isMobile }) => (
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: isMobile ? 28 : 36,
-        height: isMobile ? 28 : 36,
+        width: isMobile ? 30 : 36,
+        height: isMobile ? 30 : 36,
         borderRadius: "50%",
         bgcolor: alpha(color, 0.1),
         color: color,
-        mb: 0.5,
+        flexShrink: 0,
       }}
     >
       <Icon sx={{ fontSize: isMobile ? 14 : 18 }} />
     </Box>
-    <Typography
-      variant={isMobile ? "body2" : "h6"}
-      fontWeight="600"
-      sx={{
-        mb: 0.25,
-        lineHeight: 1.2,
-        background: `linear-gradient(135deg, ${color} 0%, ${color}99 100%)`,
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-      }}
-    >
-      {value}
-    </Typography>
-    <Typography
-      variant="caption"
-      color="text.secondary"
-      sx={{ lineHeight: 1.2, fontSize: isMobile ? "0.7rem" : "0.75rem" }}
-    >
-      {label}
-    </Typography>
+    <Box>
+      <Typography
+        variant={isMobile ? "body2" : "h6"}
+        fontWeight="700"
+        sx={{
+          mb: 0.25,
+          lineHeight: 1.2,
+          background: `linear-gradient(135deg, ${color} 0%, ${color}99 100%)`,
+          backgroundClip: "text",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        {value}
+      </Typography>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ lineHeight: 1.2, fontSize: isMobile ? "0.7rem" : "0.75rem" }}
+      >
+        {label}
+      </Typography>
+    </Box>
   </Box>
 );
 
@@ -130,14 +132,6 @@ const ProgressStats = ({ stats }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
-
-  const purpleTheme = {
-    primary: "#7E57C2",
-    primaryLight: "#B39DDB",
-    primaryDark: "#5E35B1",
-    gradient: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
-    lightBg: "#F3E5F5",
-  };
 
   const safeStats = stats || {
     progressPercentage: 0,
@@ -153,7 +147,7 @@ const ProgressStats = ({ stats }) => {
       icon: ListAlt,
       value: safeStats.totalTopics || 0,
       label: "Topics",
-      color: purpleTheme.primary,
+      color: profileTheme.primary,
     },
     {
       icon: CheckCircle,
@@ -178,92 +172,96 @@ const ProgressStats = ({ stats }) => {
   ];
 
   return (
-    <Card
-      sx={{
-        background: "white",
-        border: "1px solid",
-        borderColor: "rgba(126, 87, 194, 0.12)",
-        boxShadow: "none",
-        borderRadius: 3,
-        overflow: "visible",
-      }}
-    >
+    <Card sx={{ ...cardSx, overflow: "visible" }}>
       <CardContent
         sx={{
           p: isMobile ? 2 : 2.5,
           "&:last-child": { pb: isMobile ? 2 : 2.5 },
         }}
       >
-        {/* Header - Compact */}
+        {/* Header */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 1.5,
-            mb: isMobile ? 2 : 2.5,
+            mb: isMobile ? 2 : 3,
+            justifyContent: "space-between",
           }}
         >
-          <Box
-            sx={{
-              width: isMobile ? 32 : 40,
-              height: isMobile ? 32 : 40,
-              borderRadius: 2,
-              background: purpleTheme.gradient,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <TrendingUp sx={{ fontSize: isMobile ? 16 : 20, color: "white" }} />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant={isMobile ? "subtitle1" : "h6"}
-              fontWeight="700"
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
               sx={{
-                background: purpleTheme.gradient,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                lineHeight: 1.2,
+                width: isMobile ? 32 : 40,
+                height: isMobile ? 32 : 40,
+                borderRadius: 2,
+                background: profileTheme.gradient,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
               }}
             >
-              Progress
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontSize: isMobile ? "0.7rem" : "0.75rem" }}
-            >
-              Your learning journey
-            </Typography>
+              <TrendingUp sx={{ fontSize: isMobile ? 16 : 20, color: "white" }} />
+            </Box>
+            <Box>
+              <Typography
+                variant={isMobile ? "subtitle1" : "h6"}
+                fontWeight="700"
+                sx={{
+                  background: profileTheme.gradient,
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  lineHeight: 1.2,
+                }}
+              >
+                Progress Overview
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontSize: isMobile ? "0.7rem" : "0.75rem" }}
+              >
+                Keep your learning streak alive
+              </Typography>
+            </Box>
           </Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontSize: "0.7rem", display: { xs: "none", sm: "block" } }}
+          >
+            Updated today
+          </Typography>
         </Box>
 
         {/* Progress Circle and Stats Side by Side on larger screens */}
         <Box
           sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            alignItems: "center",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "auto 1fr",
             gap: isMobile ? 2 : 3,
-            mb: isMobile ? 2 : 2.5,
+            alignItems: "center",
+            mb: isMobile ? 2 : 3,
           }}
         >
-          {/* Progress Circle */}
-          <Box sx={{ flexShrink: 0 }}>
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
             <CircularProgressWithLabel
               value={safeStats.progressPercentage || 0}
-              size={isMobile ? 80 : isTablet ? 90 : 100}
+              size={isMobile ? 84 : isTablet ? 96 : 110}
               thickness={isMobile ? 4 : 5}
             />
           </Box>
 
-          {/* Stats Grid - Compact */}
-          <Grid container spacing={0.5} sx={{ flex: 1 }}>
+          <Grid
+            container
+            spacing={1.5}
+            alignItems="stretch"
+            sx={{ width: "100%" }}
+          >
             {statItems.map((item, index) => (
-              <Grid item xs={6} key={index}>
+              <Grid item xs={12} sm={6} md={3} key={index} sx={{ width: "100%" }}>
                 <StatBox
                   icon={item.icon}
                   value={item.value}
@@ -298,7 +296,7 @@ const ProgressStats = ({ stats }) => {
               variant="caption"
               fontWeight="700"
               sx={{
-                background: purpleTheme.gradient,
+                background: profileTheme.gradient,
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -313,7 +311,7 @@ const ProgressStats = ({ stats }) => {
               width: "100%",
               height: isMobile ? 6 : 8,
               borderRadius: 4,
-              backgroundColor: "rgba(126, 87, 194, 0.1)",
+              backgroundColor: alpha(profileTheme.primary, 0.12),
               overflow: "hidden",
             }}
           >
@@ -321,10 +319,10 @@ const ProgressStats = ({ stats }) => {
               sx={{
                 height: "100%",
                 borderRadius: 4,
-                background: purpleTheme.gradient,
+                background: profileTheme.gradient,
                 width: `${safeStats.progressPercentage || 0}%`,
                 transition: "width 0.5s ease-in-out",
-                boxShadow: "0 2px 8px rgba(126, 87, 194, 0.3)",
+                boxShadow: "0 2px 8px rgba(126, 87, 194, 0.25)",
               }}
             />
           </Box>

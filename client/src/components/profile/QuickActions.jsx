@@ -8,6 +8,7 @@ import {
   Grid,
 } from "@mui/material";
 import { School, Explore, Logout } from "@mui/icons-material";
+import { profileTheme, cardSx } from "./constants";
 
 const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
   const actions = [
@@ -34,14 +35,7 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
 
   if (isMobile) {
     return (
-      <Card
-        sx={{
-          borderRadius: 3,
-          border: "1px solid rgba(126, 87, 194, 0.15)",
-          background: "white",
-          boxShadow: "0 8px 32px rgba(126, 87, 194, 0.08)",
-        }}
-      >
+      <Card sx={cardSx}>
         <CardContent sx={{ p: 3 }}>
           <Typography
             variant="h6"
@@ -49,7 +43,7 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
               fontWeight: 700,
               mb: 2,
               fontSize: { xs: "1rem", sm: "1.125rem" },
-              background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+              background: profileTheme.gradient,
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -57,19 +51,19 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
           >
             Quick Actions
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
             {actions.map((action, index) => (
               <Button
                 key={index}
                 variant={action.variant}
                 startIcon={action.icon}
                 onClick={action.action}
+                fullWidth
                 sx={{
                   borderRadius: 2,
                   ...(action.variant === "contained"
                     ? {
-                        background:
-                          "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+                        background: profileTheme.gradient,
                         fontWeight: 600,
                       }
                     : {
@@ -77,10 +71,13 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
                           action.color === "error"
                             ? "rgba(211, 47, 47, 0.3)"
                             : "rgba(126, 87, 194, 0.3)",
-                        color: action.color === "error" ? "#d32f2f" : "#7E57C2",
+                        color:
+                          action.color === "error"
+                            ? "#d32f2f"
+                            : profileTheme.primary,
                         fontWeight: 600,
                       }),
-                  py: 1.5,
+                  py: 1.4,
                   fontSize: { xs: "0.9rem", sm: "1rem" },
                 }}
               >
@@ -94,22 +91,15 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
   }
 
   return (
-    <Card
-      sx={{
-        borderRadius: 3,
-        border: "1px solid rgba(126, 87, 194, 0.15)",
-        background: "white",
-        boxShadow: "0 8px 32px rgba(126, 87, 194, 0.08)",
-      }}
-    >
+    <Card sx={cardSx}>
       <CardContent sx={{ p: 3 }}>
         <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
-            mb: 3,
+            mb: 2.5,
             fontSize: "1.125rem",
-            background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+            background: profileTheme.gradient,
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -117,25 +107,71 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
         >
           Quick Navigation
         </Typography>
-        <Grid container spacing={2}>
-          {actions.slice(0, 2).map((action, index) => (
-            <Grid item xs={6} key={index}>
-              <Button
-                variant="outlined"
-                fullWidth
-                startIcon={action.icon}
-                onClick={action.action}
+        <Grid container spacing={2} sx={{ width: "100%" }}>
+          {actions.map((action, index) => (
+            <Grid item xs={12} md={4} key={index} sx={{ width: "100%" }}>
+              <Box
                 sx={{
                   borderRadius: 2,
-                  borderColor: "rgba(126, 87, 194, 0.3)",
-                  color: "#7E57C2",
-                  fontWeight: 600,
-                  py: 1.5,
-                  fontSize: "0.9rem",
+                  border: `1px solid ${profileTheme.border}`,
+                  background: "rgba(126, 87, 194, 0.04)",
+                  p: 2,
+                  height: "100%",
+                  width: "100%",
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: 1.5,
                 }}
               >
-                {action.label.replace("Continue ", "").replace("Explore ", "")}
-              </Button>
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 2,
+                    background: action.variant === "contained"
+                      ? profileTheme.gradient
+                      : "rgba(126, 87, 194, 0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: action.variant === "contained" ? "white" : profileTheme.primary,
+                  }}
+                >
+                  {action.icon}
+                </Box>
+                <Typography sx={{ fontWeight: 700, color: "#1e293b" }}>
+                  {action.label}
+                </Typography>
+                <Button
+                  variant={action.variant === "contained" ? "contained" : "outlined"}
+                  onClick={action.action}
+                  fullWidth
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    ...(action.variant === "contained"
+                      ? {
+                          background: profileTheme.gradient,
+                        }
+                      : {
+                          borderColor:
+                            action.color === "error"
+                              ? "rgba(211, 47, 47, 0.3)"
+                              : "rgba(126, 87, 194, 0.3)",
+                          color:
+                            action.color === "error"
+                              ? "#d32f2f"
+                              : profileTheme.primary,
+                        }),
+                  }}
+                >
+                  {action.label}
+                </Button>
+              </Box>
             </Grid>
           ))}
         </Grid>

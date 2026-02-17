@@ -17,6 +17,7 @@ const LearningHeader = ({
   onCompleteSubtopic,
   onNavigateSubtopic,
   onOpenSidebar,
+  onOpenVersions,
   colorPalette,
 }) => {
   const theme = useTheme();
@@ -66,6 +67,8 @@ const LearningHeader = ({
         onRegenerateContent={onRegenerateContent}
         updatingSubtopic={updatingSubtopic}
         onCompleteSubtopic={onCompleteSubtopic}
+        contentInfo={contentInfo}
+        onOpenVersions={onOpenVersions}
         colorPalette={colorPalette}
       />
     );
@@ -87,6 +90,7 @@ const LearningHeader = ({
       onRegenerateContent={onRegenerateContent}
       updatingSubtopic={updatingSubtopic}
       onCompleteSubtopic={onCompleteSubtopic}
+      onOpenVersions={onOpenVersions}
       colorPalette={colorPalette}
     />
   );

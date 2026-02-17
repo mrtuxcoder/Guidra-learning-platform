@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Container, Typography, Stack, Chip } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const LandingNavPreview = () => {
   return (
@@ -8,14 +9,13 @@ const LandingNavPreview = () => {
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
             mb: 3,
-            fontFamily: '"Space Grotesk", sans-serif',
           }}
         >
           Minimal Navigation
         </Typography>
-        <Typography sx={{ color: "#4B5563", mb: 2 }}>
+        <Typography sx={{ color: "#475569", mb: 2 }}>
           Only three main sections keep the interface focused.
         </Typography>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
@@ -25,8 +25,8 @@ const LandingNavPreview = () => {
               label={item}
               sx={{
                 fontWeight: 700,
-                bgcolor: "rgba(124,58,237,0.12)",
-                color: "#4B5563",
+                bgcolor: "rgba(126,87,194,0.14)",
+                color: profileTheme.primaryDark,
                 px: 1.5,
                 py: 1.25,
                 fontSize: "0.95rem",

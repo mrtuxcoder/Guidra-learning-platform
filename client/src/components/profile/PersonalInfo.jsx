@@ -5,35 +5,31 @@ import {
   Typography,
   Box,
   Chip,
+  Grid,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import { Email, CalendarToday, Lightbulb, Person } from "@mui/icons-material";
+import { profileTheme, cardSx } from "./constants";
 
 const PersonalInfo = ({ user }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const purpleTheme = {
-    primary: "#7E57C2",
-    primaryLight: "#B39DDB",
-    primaryDark: "#5E35B1",
-    gradient: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
-    lightBg: "#F3E5F5",
-    subtleBg: "#FAF7FE",
-  };
-
-  const InfoItem = ({ icon, label, value, isLast = false }) => (
+  const InfoItem = ({ icon, label, value }) => (
     <Box
       sx={{
         display: "flex",
-        alignItems: "flex-start",
-        gap: 2,
-        py: 2,
-        ...(!isLast && {
-          borderBottom: "1px solid",
-          borderColor: "rgba(126, 87, 194, 0.1)",
-        }),
+        alignItems: "center",
+        gap: 1.5,
+        p: 2,
+        borderRadius: 2,
+        border: `1px solid ${profileTheme.border}`,
+        background: "rgba(126, 87, 194, 0.04)",
+        height: "100%",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box",
       }}
     >
       <Box
@@ -41,12 +37,11 @@ const PersonalInfo = ({ user }) => {
           width: 36,
           height: 36,
           borderRadius: 2,
-          background: purpleTheme.gradient,
+          background: profileTheme.gradient,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
-          mt: 0.25,
         }}
       >
         {React.cloneElement(icon, {
@@ -59,10 +54,10 @@ const PersonalInfo = ({ user }) => {
           variant="caption"
           sx={{
             color: "text.secondary",
-            fontWeight: 600,
+            fontWeight: 700,
             textTransform: "uppercase",
-            letterSpacing: 0.5,
-            fontSize: "0.7rem",
+            letterSpacing: 0.6,
+            fontSize: "0.65rem",
             display: "block",
             mb: 0.5,
           }}
@@ -73,7 +68,7 @@ const PersonalInfo = ({ user }) => {
           variant="body2"
           sx={{
             color: "text.primary",
-            fontWeight: 500,
+            fontWeight: 600,
             wordBreak: "break-word",
           }}
         >
@@ -87,17 +82,20 @@ const PersonalInfo = ({ user }) => {
     <Card
       elevation={0}
       sx={{
-        borderRadius: 3,
-        border: "1px solid",
-        borderColor: "rgba(126, 87, 194, 0.12)",
-        background: "white",
+        ...cardSx,
         overflow: "visible",
+        height: { md: "100%" },
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <CardContent
         sx={{
           p: isMobile ? 2 : 2.5,
           "&:last-child": { pb: isMobile ? 2 : 2.5 },
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* Header */}
@@ -105,70 +103,87 @@ const PersonalInfo = ({ user }) => {
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 1.5,
-            mb: 2,
-            pb: 2,
-            borderBottom: "1px solid",
-            borderColor: "rgba(126, 87, 194, 0.1)",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 2.5,
           }}
         >
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: 2,
-              background: purpleTheme.gradient,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Person sx={{ fontSize: 18, color: "white" }} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 2,
+                background: profileTheme.gradient,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Person sx={{ fontSize: 18, color: "white" }} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: isMobile ? "1.05rem" : "1.2rem",
+                  background: profileTheme.gradient,
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Personal Info
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontSize: "0.75rem" }}
+              >
+                Profile details and preferences
+              </Typography>
+            </Box>
           </Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: isMobile ? "1.1rem" : "1.2rem",
-              background: purpleTheme.gradient,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Personal Info
-          </Typography>
         </Box>
 
-        {/* Info Items - Compact */}
-        <Box sx={{ mt: 1 }}>
-          <InfoItem
-            icon={<Email />}
-            label="Email Address"
-            value={user?.email}
-          />
-
-          <InfoItem
-            icon={<CalendarToday />}
-            label="Member Since"
-            value={
-              user?.createdAt
-                ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })
-                : null
-            }
-          />
-
-          <InfoItem
-            icon={<Lightbulb />}
-            label="Learning Goal"
-            value={user?.reasonForLearning || user?.learningMotivation}
-            isLast={true}
-          />
-        </Box>
+        {/* Info Items - Responsive Grid */}
+        <Grid
+          container
+          spacing={2}
+          alignItems="flex-start"
+          sx={{ width: "100%" }}
+        >
+          <Grid item xs={12} sm={6} sx={{ width: "100%" }}>
+            <InfoItem
+              icon={<Email />}
+              label="Email Address"
+              value={user?.email}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} sx={{ width: "100%" }}>
+            <InfoItem
+              icon={<CalendarToday />}
+              label="Member Since"
+              value={
+                user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : null
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ width: "100%" }}>
+            <InfoItem
+              icon={<Lightbulb />}
+              label="Learning Goal"
+              value={user?.reasonForLearning || user?.learningMotivation}
+            />
+          </Grid>
+        </Grid>
 
         {/* Learning Style Chip if available */}
         {user?.learningStyle && (
@@ -177,9 +192,20 @@ const PersonalInfo = ({ user }) => {
               mt: 2,
               pt: 2,
               borderTop: "1px solid",
-              borderColor: "rgba(126, 87, 194, 0.1)",
+              borderColor: profileTheme.border,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
             }}
           >
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 600, fontSize: "0.75rem" }}
+            >
+              Learning Style
+            </Typography>
             <Chip
               icon={<Lightbulb sx={{ fontSize: 16 }} />}
               label={`${
@@ -188,12 +214,12 @@ const PersonalInfo = ({ user }) => {
               } Learner`}
               variant="filled"
               sx={{
-                background: purpleTheme.lightBg,
-                color: purpleTheme.primaryDark,
+                background: profileTheme.lightBg,
+                color: profileTheme.primaryDark,
                 fontWeight: 600,
                 fontSize: "0.75rem",
-                border: `1px solid ${purpleTheme.primaryLight}`,
-                "& .MuiChip-icon": { color: purpleTheme.primary },
+                border: `1px solid ${profileTheme.primaryLight}`,
+                "& .MuiChip-icon": { color: profileTheme.primary },
               }}
             />
           </Box>

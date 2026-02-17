@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Container, Typography, Grid } from "@mui/material";
+import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const solutionSteps = [
   {
@@ -25,40 +26,53 @@ const solutionSteps = [
 ];
 
 const LandingSolution = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box
       sx={{
         py: { xs: 5, md: 7 },
         background:
-          "linear-gradient(180deg, rgba(124,58,237,0.03) 0%, rgba(124,58,237,0.08) 100%)",
+          "linear-gradient(180deg, rgba(126,87,194,0.05) 0%, rgba(126,87,194,0.1) 100%)",
       }}
     >
       <Container maxWidth="lg">
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
             mb: 3,
-            fontFamily: '"Space Grotesk", sans-serif',
           }}
         >
           How Guidra Works
         </Typography>
         <Grid container spacing={2.5}>
           {solutionSteps.map((step, index) => (
-            <Grid item xs={12} md={6} key={step.title}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              key={step.title}
+              sx={isMobile ? { width: "100%" } : undefined}
+            >
               <Box
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
                   background: "white",
-                  border: "1px solid rgba(124,58,237,0.15)",
+                  border: `1px solid ${profileTheme.border}`,
                   height: "100%",
+                  ...(isMobile && {
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                  }),
                 }}
               >
                 <Typography
                   variant="overline"
-                  sx={{ color: "#5E35B1", fontWeight: 600 }}
+                  sx={{ color: profileTheme.primaryDark, fontWeight: 600 }}
                 >
                   Step {index + 1}
                 </Typography>
@@ -68,7 +82,7 @@ const LandingSolution = () => {
                 >
                   {step.title}
                 </Typography>
-                <Typography sx={{ color: "#4B5563" }}>{step.detail}</Typography>
+                <Typography sx={{ color: "#475569" }}>{step.detail}</Typography>
               </Box>
             </Grid>
           ))}

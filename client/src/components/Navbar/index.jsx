@@ -1,5 +1,13 @@
 import React from "react";
-import { AppBar, Toolbar, Box, useMediaQuery, useTheme } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  useMediaQuery,
+  useTheme,
+  IconButton,
+} from "@mui/material";
+import { Settings } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // Import custom components
@@ -95,6 +103,25 @@ const Navbar = () => {
                 minWidth: isLoading ? "40px" : "auto", // Maintain consistent width while loading
               }}
             >
+              {!isLoading && user && (
+                <IconButton
+                  size="small"
+                  aria-label="settings"
+                  onClick={() => navigate("/settings")}
+                  sx={{
+                    border: `2px solid ${purpleTheme.primaryLight}30`,
+                    bgcolor: "white",
+                    width: { xs: 36, sm: 40 },
+                    height: { xs: 36, sm: 40 },
+                    color: purpleTheme.primaryDark,
+                    "&:hover": {
+                      bgcolor: purpleTheme.lightBg,
+                    },
+                  }}
+                >
+                  <Settings sx={{ fontSize: 20 }} />
+                </IconButton>
+              )}
               <UserAvatar
                 isLoading={isLoading}
                 user={user}

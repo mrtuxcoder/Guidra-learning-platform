@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Container, Typography, Grid } from "@mui/material";
+import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const regenerationPoints = [
   "Regenerate only the explanation, quiz, mindmap, or examples.",
@@ -8,32 +9,45 @@ const regenerationPoints = [
 ];
 
 const LandingRegeneration = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Box sx={{ py: { xs: 5, md: 7 }, background: "white" }}>
       <Container maxWidth="lg">
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 800,
             mb: 3,
-            fontFamily: '"Space Grotesk", sans-serif',
           }}
         >
           Smart Regeneration
         </Typography>
-        <Grid container spacing={2.5}>
+        <Grid container spacing={2.5} alignItems="stretch">
           {regenerationPoints.map((point) => (
-            <Grid item xs={12} md={4} key={point}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              key={point}
+              sx={isMobile ? { width: "100%" } : undefined}
+            >
               <Box
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
-                  border: "1px solid rgba(124,58,237,0.15)",
-                  background: "rgba(124,58,237,0.03)",
+                  border: `1px solid ${profileTheme.border}`,
+                  background: "rgba(126,87,194,0.05)",
                   height: "100%",
+                  ...(isMobile && {
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                  }),
                 }}
               >
-                <Typography sx={{ color: "#4B5563" }}>{point}</Typography>
+                <Typography sx={{ color: "#475569" }}>{point}</Typography>
               </Box>
             </Grid>
           ))}

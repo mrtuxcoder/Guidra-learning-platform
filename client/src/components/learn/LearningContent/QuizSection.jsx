@@ -23,6 +23,7 @@ const QuizSection = ({
   onRegenerate,
   isRegenerating = false,
   isRegenerateDisabled = false,
+  onQuizSubmitted,
 }) => {
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -76,6 +77,11 @@ const QuizSection = ({
         wrong,
         total,
       });
+
+      // Notify parent component that quiz was submitted successfully
+      if (onQuizSubmitted) {
+        onQuizSubmitted();
+      }
     } catch (error) {
       console.error("Failed to save quiz marks:", error);
     } finally {

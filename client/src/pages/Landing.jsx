@@ -146,9 +146,8 @@ const Landing = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "#FDFBFF",
-        color: "#111827",
-        fontFamily: '"Manrope", sans-serif',
+        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        color: "#0f172a",
       }}
     >
       <Fade in={mounted} timeout={800}>

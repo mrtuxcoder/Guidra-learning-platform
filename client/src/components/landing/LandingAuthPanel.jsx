@@ -9,6 +9,7 @@ import {
   ToggleButton,
   Divider,
 } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const LandingAuthPanel = ({
   activeTab,
@@ -28,7 +29,7 @@ const LandingAuthPanel = ({
       elevation={0}
       sx={{
         borderRadius: 3,
-        border: "1px solid rgba(124,58,237,0.15)",
+        border: `1px solid ${profileTheme.border}`,
         background: "white",
         p: { xs: 2.5, md: 3 },
       }}
@@ -38,7 +39,6 @@ const LandingAuthPanel = ({
         sx={{
           fontWeight: 700,
           mb: 2,
-          fontFamily: '"Space Grotesk", sans-serif',
         }}
       >
         {isRegister ? "Create your account" : "Sign in to Guidra"}
@@ -56,6 +56,12 @@ const LandingAuthPanel = ({
           "& .MuiToggleButton-root": {
             textTransform: "none",
             fontWeight: 600,
+            borderColor: profileTheme.border,
+            color: "#475569",
+            "&.Mui-selected": {
+              background: "rgba(126,87,194,0.12)",
+              color: profileTheme.primaryDark,
+            },
           },
         }}
       >
@@ -126,8 +132,7 @@ const LandingAuthPanel = ({
             textTransform: "none",
             borderRadius: 2,
             fontWeight: 700,
-            background:
-              "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+            background: profileTheme.gradient,
           }}
         >
           {loading
@@ -149,8 +154,8 @@ const LandingAuthPanel = ({
           textTransform: "none",
           borderRadius: 2,
           fontWeight: 600,
-          borderColor: "rgba(124,58,237,0.4)",
-          color: "#5E35B1",
+          borderColor: "rgba(126,87,194,0.4)",
+          color: profileTheme.primaryDark,
         }}
       >
         {googleLoading ? "Connecting..." : "Continue with Google"}

@@ -38,7 +38,9 @@ const LearningContent = ({
   contentLoading, 
   onGenerateContent,
   colorPalette,
-  userRemainingGenerations = 5
+  userRemainingGenerations = 5,
+  onQuizSubmitted,
+  onVersionDialogOpen,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -62,6 +64,13 @@ const LearningContent = ({
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState("concept");
   const [limitMessage, setLimitMessage] = useState("");
+
+  // Register the open function with parent on mount
+  React.useEffect(() => {
+    if (typeof onVersionDialogOpen === "function") {
+      onVersionDialogOpen(setVersionDialogOpen);
+    }
+  }, []);
 
   const getComponentGenerationCount = (componentName) =>
     (componentVersions[componentName] || []).filter(
@@ -406,7 +415,6 @@ const LearningContent = ({
         topic={selectedTopic}
         isMobile={isMobile}
         colorPalette={colorPalette}
-        onOpenVersions={() => setVersionDialogOpen(true)}
       />
 
       <Dialog
@@ -737,6 +745,7 @@ const LearningContent = ({
             onRegenerate={() => handleComponentRegenerate("quiz")}
             isRegenerating={!!regeneratingComponents.quiz}
             isRegenerateDisabled={getComponentGenerationCount("quiz") >= 3}
+            onQuizSubmitted={onQuizSubmitted}
           />
         )}
       </Box>

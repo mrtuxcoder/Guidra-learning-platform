@@ -4,6 +4,7 @@ import StatusChips from "./StatusChips";
 import NavigationControls from "./NavigationControls";
 import RegenerationBadge from "./RegenerationBadge";
 import CompleteButton from "./CompleteButton";
+import VersionButton from "./VersionButton";
 
 const DesktopHeader = ({
   selectedTopic,
@@ -20,6 +21,7 @@ const DesktopHeader = ({
   onRegenerateContent,
   updatingSubtopic,
   onCompleteSubtopic,
+  onOpenVersions,
   colorPalette,
 }) => {
   return (
@@ -99,6 +101,16 @@ const DesktopHeader = ({
               contentInfo={contentInfo}
               colorPalette={colorPalette}
             />
+
+            {/* Version button */}
+            {onOpenVersions && (
+              <VersionButton
+                contentInfo={contentInfo}
+                onOpenVersions={onOpenVersions}
+                colorPalette={colorPalette}
+                variant="desktop"
+              />
+            )}
 
             {/* Regenerate button */}
             <RegenerationBadge

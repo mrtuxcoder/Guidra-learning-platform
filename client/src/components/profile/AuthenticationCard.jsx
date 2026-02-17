@@ -4,9 +4,10 @@ import {
   CardContent,
   Box,
   Typography,
-  Alert,
   Button,
+  Stack,
 } from "@mui/material";
+import { profileTheme, cardSx } from "./constants";
 
 const AuthenticationCard = ({ user, onPasswordSetup }) => {
   if (user?.authProvider !== "google" || user?.password) {
@@ -16,78 +17,81 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
   return (
     <Card
       sx={{
-        borderRadius: 3,
-        border: "1px solid rgba(126, 87, 194, 0.15)",
+        ...cardSx,
         background:
-          "linear-gradient(135deg, rgba(126, 87, 194, 0.05) 0%, rgba(94, 53, 177, 0.05) 100%)",
-        boxShadow: "0 8px 32px rgba(126, 87, 194, 0.08)",
+          "linear-gradient(135deg, rgba(126, 87, 194, 0.06) 0%, rgba(94, 53, 177, 0.06) 100%)",
       }}
     >
       <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography
-              sx={{ color: "white", fontWeight: 700, fontSize: "0.9rem" }}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          justifyContent="space-between"
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                background: profileTheme.gradient,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
             >
-              🔐
-            </Typography>
+              <Typography
+                sx={{ color: "white", fontWeight: 700, fontSize: "0.9rem" }}
+              >
+                🔐
+              </Typography>
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                  background: profileTheme.gradient,
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Authentication Status
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontSize: "0.85rem" }}
+              >
+                Signed in with Google. Add a password for email login.
+              </Typography>
+            </Box>
           </Box>
-          <Typography
-            variant="h6"
+
+          <Button
+            variant="contained"
+            size="small"
+            onClick={onPasswordSetup}
             sx={{
-              fontWeight: 700,
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-              background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              borderRadius: 2,
+              background: profileTheme.gradient,
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              fontSize: "0.85rem",
+              "&:hover": {
+                transform: "translateY(-1px)",
+                boxShadow: "0 8px 20px rgba(126, 87, 194, 0.3)",
+              },
             }}
           >
-            Authentication Status
-          </Typography>
-        </Box>
-
-        <Alert
-          severity="info"
-          sx={{
-            borderRadius: 2,
-            mb: 2,
-            bgcolor: "rgba(126, 87, 194, 0.08)",
-            border: "1px solid rgba(126, 87, 194, 0.2)",
-          }}
-        >
-          You're signed in with Google. Set a password to also login with email.
-        </Alert>
-
-        <Button
-          variant="contained"
-          fullWidth
-          size="small"
-          onClick={onPasswordSetup}
-          sx={{
-            borderRadius: 2,
-            background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
-            fontWeight: 600,
-            py: 1,
-            fontSize: "0.85rem",
-            "&:hover": {
-              transform: "translateY(-1px)",
-              boxShadow: "0 8px 20px rgba(126, 87, 194, 0.3)",
-            },
-          }}
-        >
-          Set Password
-        </Button>
+            Set Password
+          </Button>
+        </Stack>
       </CardContent>
     </Card>
   );

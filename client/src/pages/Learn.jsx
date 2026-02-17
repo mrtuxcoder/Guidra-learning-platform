@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Box,
   Typography,
@@ -8,6 +8,11 @@ import {
   Drawer,
   IconButton,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { Menu, Refresh } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
@@ -57,11 +62,28 @@ export default function Learning() {
   const [contentCache, setContentCache] = useState({});
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [quizPromptOpen, setQuizPromptOpen] = useState(false);
+  const [quizPromptMessage, setQuizPromptMessage] = useState("");
+  
+  // Ref to store the version dialog opener from LearningContent
+  const versionDialogOpenerRef = useRef(null);
   const location = useLocation();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const MAX_GENERATIONS = 3;
+
+  // Register the version dialog opener from LearningContent
+  const handleRegisterVersionDialogOpener = useCallback((openerFn) => {
+    versionDialogOpenerRef.current = openerFn;
+  }, []);
+
+  // Create a stable function that uses the ref to call the dialog opener
+  const handleOpenVersionDialog = useCallback(() => {
+    if (versionDialogOpenerRef.current) {
+      versionDialogOpenerRef.current(true);
+    }
+  }, []);
 
   // Function to filter and reorder topics - incomplete only
   const getOrderedTopics = useCallback((topicsArray) => {
@@ -469,6 +491,18 @@ export default function Learning() {
         return;
       }
 
+      const quizMark = subtopic.quizMark || {};
+      const answeredCount = (quizMark.correct || 0) + (quizMark.wrong || 0);
+      const hasQuizAttempt = (quizMark.total || 0) > 0 && answeredCount > 0;
+
+      if (!hasQuizAttempt) {
+        setQuizPromptMessage(
+          "Please complete the quiz before marking this subtopic as complete."
+        );
+        setQuizPromptOpen(true);
+        return;
+      }
+
       try {
         setUpdatingSubtopic(subtopic.name);
         setError("");
@@ -503,14 +537,46 @@ export default function Learning() {
           setSelectedSubtopic(updatedSubtopic);
         }
       } catch (err) {
-        setError("Failed to complete subtopic");
-        setShowError(true);
+        const errorMessage =
+          err.response?.data?.message || "Failed to complete subtopic";
+        if (errorMessage.toLowerCase().includes("complete the quiz")) {
+          setQuizPromptMessage(errorMessage);
+          setQuizPromptOpen(true);
+        } else {
+          setError(errorMessage);
+          setShowError(true);
+        }
       } finally {
         setUpdatingSubtopic(null);
       }
     },
     [selectedTopic, selectedSubtopic, getOrderedSubtopics]
   );
+
+  const handleQuizSubmitted = useCallback(async () => {
+    // Refresh the subtopic data to get the updated quiz marks
+    if (selectedSubtopic && selectedTopic) {
+      try {
+        const { data } = await getSubtopics(selectedTopic);
+        const updatedSubtopics = data.subTopics || [];
+        
+        // Find the updated version of the current subtopic
+        const updatedSubtopic = updatedSubtopics.find(
+          (sub) => sub.name === selectedSubtopic.name
+        );
+        
+        if (updatedSubtopic) {
+          setSelectedSubtopic(updatedSubtopic);
+          
+          // Update the subtopics list with the refreshed data
+          setOriginalSubtopics(updatedSubtopics);
+          setSubtopics(getOrderedSubtopics(updatedSubtopics));
+        }
+      } catch (error) {
+        console.error("Failed to refresh subtopic data after quiz submission:", error);
+      }
+    }
+  }, [selectedSubtopic, selectedTopic, getOrderedSubtopics]);
 
   const calculateProgress = useCallback(() => {
     if (!subtopics.length) return 0;
@@ -654,6 +720,7 @@ export default function Learning() {
           onUpdateUnderstanding={handleUpdateUnderstanding}
           onNavigateSubtopic={handleNavigateSubtopic}
           onOpenSidebar={() => setMobileDrawerOpen(true)}
+          onOpenVersions={handleOpenVersionDialog}
           colorPalette={purplePalette}
         />
 
@@ -699,6 +766,30 @@ export default function Learning() {
           </Box>
         )}
 
+        <Dialog
+          open={quizPromptOpen}
+          onClose={() => setQuizPromptOpen(false)}
+          aria-labelledby="quiz-required-title"
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle id="quiz-required-title">Quiz Required</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {quizPromptMessage ||
+                "Please complete the quiz before marking this subtopic as complete."}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setQuizPromptOpen(false)}
+              sx={{ textTransform: "none", fontWeight: 600 }}
+            >
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         {/* Content Area - NO PADDING */}
         <Box
           sx={{
@@ -723,6 +814,8 @@ export default function Learning() {
               contentError={contentError}
               onRetry={handleRetryContent}
               colorPalette={purplePalette}
+              onQuizSubmitted={handleQuizSubmitted}
+              onVersionDialogOpen={handleRegisterVersionDialogOpener}
             />
           ) : (
             <WelcomeState

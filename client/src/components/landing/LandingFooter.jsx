@@ -1,9 +1,10 @@
 import React from "react";
 import { Box, Container, Typography, Stack, Link } from "@mui/material";
+import { profileTheme } from "../profile/constants";
 
 const LandingFooter = () => {
   return (
-    <Box sx={{ py: 4, borderTop: "1px solid rgba(124,58,237,0.12)" }}>
+    <Box sx={{ py: 4, borderTop: `1px solid ${profileTheme.border}` }}>
       <Container maxWidth="lg">
         <Stack
           direction={{ xs: "column", sm: "row" }}
@@ -32,7 +33,7 @@ const LandingFooter = () => {
               GitHub
             </Link>
           </Stack>
-          <Typography sx={{ color: "#6B7280", fontSize: "0.85rem" }}>
+          <Typography sx={{ color: "#64748b", fontSize: "0.85rem" }}>
             v1.x
           </Typography>
         </Stack>

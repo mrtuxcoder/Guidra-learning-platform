@@ -22,6 +22,7 @@ import {
   createPassword,
   updatePassword,
 } from "../api";
+import { profileTheme, cardSx } from "../components/profile/constants";
 
 const toneOptions = [
   { value: "neutral", label: "Neutral" },
@@ -201,39 +202,57 @@ const Settings = () => {
           justifyContent: "center",
         }}
       >
-        <CircularProgress />
+        <CircularProgress sx={{ color: profileTheme.primary }} />
       </Box>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 700,
-          mb: 3,
-          fontFamily: '"Space Grotesk", sans-serif',
-        }}
-      >
-        Settings
-      </Typography>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        py: { xs: 3, md: 5 },
+      }}
+    >
+      <Container maxWidth="md">
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+              fontSize: { xs: "1.6rem", sm: "2rem" },
+              background: profileTheme.gradient,
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Settings
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 0.5 }}
+          >
+            Manage your learning preferences and account security.
+          </Typography>
+        </Box>
 
-      {profileError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {profileError}
-        </Alert>
-      )}
+        {profileError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {profileError}
+          </Alert>
+        )}
 
-      <Paper
-        elevation={0}
-        sx={{
-          p: { xs: 2.5, md: 3 },
-          borderRadius: 3,
-          border: "1px solid rgba(124,58,237,0.12)",
-          mb: 3,
-        }}
-      >
+        <Paper
+          elevation={0}
+          sx={{
+            ...cardSx,
+            p: { xs: 2.5, md: 3 },
+            mb: 3,
+          }}
+        >
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
           Learning Preferences
         </Typography>
@@ -276,24 +295,22 @@ const Settings = () => {
                 textTransform: "none",
                 borderRadius: 2,
                 fontWeight: 700,
-                background:
-                  "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+                background: profileTheme.gradient,
               }}
             >
               {isSaving ? "Saving..." : "Save Preferences"}
             </Button>
           </Box>
         </Stack>
-      </Paper>
+        </Paper>
 
-      <Paper
-        elevation={0}
-        sx={{
-          p: { xs: 2.5, md: 3 },
-          borderRadius: 3,
-          border: "1px solid rgba(124,58,237,0.12)",
-        }}
-      >
+        <Paper
+          elevation={0}
+          sx={{
+            ...cardSx,
+            p: { xs: 2.5, md: 3 },
+          }}
+        >
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
           Password
         </Typography>
@@ -346,16 +363,17 @@ const Settings = () => {
                 textTransform: "none",
                 borderRadius: 2,
                 fontWeight: 600,
-                borderColor: "rgba(124,58,237,0.4)",
-                color: "#5E35B1",
+                borderColor: "rgba(126, 87, 194, 0.4)",
+                color: profileTheme.primaryDark,
               }}
             >
               {isUpdatingPassword ? "Updating..." : "Update Password"}
             </Button>
           </Box>
         </Stack>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

@@ -13,7 +13,6 @@ import {
   Explore,
   Search,
   Person,
-  Settings,
 } from "@mui/icons-material";
 
 // Array of 10 random icons with colors
@@ -48,11 +47,6 @@ export const navItems = [
     path: "/profile",
     label: "Profile",
     icon: <Person sx={{ fontSize: 20 }} />,
-  },
-  {
-    path: "/settings",
-    label: "Settings",
-    icon: <Settings sx={{ fontSize: 20 }} />,
   },
 ];
 
