@@ -46,6 +46,7 @@ export const {
   updateGenerationCount,
   incrementGenerationCount,
   getGenerationCount,
+  getGenerationCounts,
   updateQuizMarks,
   getQuizMarks,
   clearQuizMarks,

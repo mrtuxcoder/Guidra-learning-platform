@@ -71,7 +71,8 @@ const LearningSidebar = ({
     <Card
       sx={{
         width: "100%",
-        height: "100%",
+        height: isMobile ? "100dvh" : "100%",
+        minHeight: isMobile ? "100dvh" : "auto",
         borderRadius: { xs: 0, md: 2 },
         boxShadow: { xs: "none", md: "0 2px 24px rgba(126, 87, 194, 0.08)" },
         display: "flex",

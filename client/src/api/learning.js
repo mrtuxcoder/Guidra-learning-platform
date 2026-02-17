@@ -96,6 +96,13 @@ export const getGenerationCount = async (topic, subtopic) => {
   return response;
 };
 
+export const getGenerationCounts = async (topic) => {
+  const response = await API.get(
+    `/api/v1/progress/generation-counts?topic=${encodeURIComponent(topic)}`
+  );
+  return response;
+};
+
 export const updateQuizMarks = async (data) => {
   const response = await API.put("/api/v1/progress/quizzes", data);
   return response;

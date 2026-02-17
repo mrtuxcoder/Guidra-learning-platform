@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Container,
@@ -39,6 +39,7 @@ const WelcomeState = ({
   progress = 0,
   generationCounts = {},
   contentCache = {},
+  isDataLoading = false,
   isRecalledTopic = false,
   isMobile = false,
   colorPalette = {
@@ -55,16 +56,6 @@ const WelcomeState = ({
   },
 }) => {
   const [activeSuggestion, setActiveSuggestion] = useState("continue");
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Add loading delay to prevent flash of wrong content
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // Memoized calculations
   const learningInsights = useMemo(() => {
@@ -132,8 +123,8 @@ const WelcomeState = ({
   };
 
   // Show loader first, then content
-  if (isLoading) {
-    return <LoadingState isDesktop={false} colorPalette={colorPalette} />;
+  if (isDataLoading) {
+    return <LoadingState isDesktop={!isMobile} colorPalette={colorPalette} />;
   }
 
   if (!hasTopics) {

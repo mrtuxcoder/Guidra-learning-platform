@@ -7,6 +7,7 @@ const {
 const {
   incrementGenerationCount,
   getGenerationCount,
+  getGenerationCounts,
 } = require("../../controllers/progress-controllers/gen-count-controller");
 const {
   updateQuizMarks,
@@ -36,6 +37,7 @@ router.put("/understanding", authMiddleware, updateUnderstandingLevel);
 
 // Generation count
 router.get("/generation-count", authMiddleware, getGenerationCount);
+router.get("/generation-counts", authMiddleware, getGenerationCounts);
 router.put(
   "/generation-count/increment",
   authMiddleware,

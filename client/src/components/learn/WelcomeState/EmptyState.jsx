@@ -1,74 +1,135 @@
 import React from "react";
-import { Box, Typography, Button, Avatar } from "@mui/material";
-import { Explore, School } from "@mui/icons-material";
+import { Box, Typography, Button, Avatar, Stack } from "@mui/material";
+import { Explore, School, AutoAwesome } from "@mui/icons-material";
 
 const EmptyState = ({ colorPalette }) => {
   return (
     <Box
       sx={{
+        position: "relative",
         textAlign: "center",
-        py: 8,
-        px: 2,
+        py: { xs: 6, md: 8 },
+        px: { xs: 2, md: 3 },
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: -80,
+          right: -120,
+          width: 240,
+          height: 240,
+          background: `radial-gradient(circle, ${colorPalette[200]} 0%, transparent 65%)`,
+          opacity: 0.8,
+        },
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          bottom: -120,
+          left: -80,
+          width: 260,
+          height: 260,
+          background: `radial-gradient(circle, ${colorPalette[100]} 0%, transparent 70%)`,
+          opacity: 0.9,
+        },
       }}
     >
-      <Avatar
-        sx={{
-          width: 120,
-          height: 120,
-          background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-          margin: "0 auto 24px",
-          border: "3px solid white",
-          boxShadow: "0 8px 32px rgba(126, 87, 194, 0.3)",
-        }}
-      >
-        <School sx={{ fontSize: 50 }} />
-      </Avatar>
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <Stack spacing={2.5} alignItems="center">
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 999,
+              background: "rgba(255, 255, 255, 0.85)",
+              border: "1px solid rgba(148, 163, 184, 0.25)",
+              boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "#334155",
+              fontFamily: '"Space Grotesk", "Manrope", "Segoe UI", sans-serif',
+            }}
+          >
+            <AutoAwesome sx={{ fontSize: 18, color: colorPalette[600] }} />
+            Your learning hub
+          </Box>
 
-      <Typography
-        variant="h3"
-        fontWeight="800"
-        color="#1e293b"
-        gutterBottom
-        sx={{ mb: 2 }}
-      >
-        Welcome to Guidra!
-      </Typography>
+          <Avatar
+            sx={{
+              width: { xs: 96, sm: 110 },
+              height: { xs: 96, sm: 110 },
+              background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
+              border: "3px solid white",
+              boxShadow: "0 10px 30px rgba(126, 87, 194, 0.35)",
+            }}
+          >
+            <School sx={{ fontSize: 46 }} />
+          </Avatar>
 
-      <Typography
-        variant="h6"
-        color="#64748b"
-        sx={{
-          maxWidth: "500px",
-          margin: "0 auto 32px",
-          lineHeight: 1.6,
-        }}
-      >
-        It looks like you don't have any courses yet. Start your learning
-        journey by exploring available courses and topics.
-      </Typography>
+          <Box>
+            <Typography
+              variant="h3"
+              fontWeight={800}
+              color="#0f172a"
+              sx={{
+                mb: 1.2,
+                fontSize: { xs: "2rem", sm: "2.4rem" },
+                lineHeight: 1.1,
+                fontFamily:
+                  '"Space Grotesk", "Manrope", "Segoe UI", sans-serif',
+              }}
+            >
+              Start with your first course
+            </Typography>
+            <Typography
+              variant="body1"
+              color="#475569"
+              sx={{
+                maxWidth: 520,
+                margin: "0 auto",
+                lineHeight: 1.6,
+                fontSize: { xs: "0.98rem", sm: "1.05rem" },
+                fontFamily: '"Manrope", "Segoe UI", sans-serif',
+              }}
+            >
+              We will build a path around your goals. Pick a topic and Guidra
+              will craft a personalized learning plan with guided lessons.
+            </Typography>
+          </Box>
 
-      <Button
-        variant="contained"
-        size="large"
-        onClick={() => (window.location.href = "/explore")}
-        startIcon={<Explore />}
-        sx={{
-          py: 2,
-          px: 4,
-          borderRadius: 2,
-          fontSize: "1.1rem",
-          fontWeight: "700",
-          background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-          boxShadow: `0 8px 24px ${colorPalette[300]}`,
-          "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: `0 12px 32px ${colorPalette[400]}`,
-          },
-          transition: "all 0.3s ease",
-        }}
-      >
-        Explore Available Courses
-      </Button>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1.5}
+            sx={{ width: "100%", maxWidth: 360 }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => (window.location.href = "/explore")}
+              startIcon={<Explore />}
+              sx={{
+                py: 1.6,
+                px: 3,
+                borderRadius: 2,
+                fontSize: "1rem",
+                fontWeight: 700,
+                background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
+                boxShadow: `0 10px 24px ${colorPalette[300]}`,
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: `0 14px 32px ${colorPalette[400]}`,
+                },
+                transition: "all 0.3s ease",
+              }}
+              fullWidth
+            >
+              Explore courses
+            </Button>
+          </Stack>
+        </Stack>
+      </Box>
     </Box>
   );
 };

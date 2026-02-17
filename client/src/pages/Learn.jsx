@@ -23,7 +23,7 @@ import {
   regenerateContent,
   updateSubtopicProgress,
   incrementGenerationCount,
-  getGenerationCount,
+  getGenerationCounts,
 } from "../api/learning";
 import LearningSidebar from "../components/learn/LearningSidebar/index";
 import LearningHeader from "../components/learn/LearningHeader/index";
@@ -223,16 +223,16 @@ export default function Learning() {
 
   const fetchGenerationCounts = useCallback(async (subtopics, topic) => {
     try {
-      const counts = {};
-      for (const subtopic of subtopics) {
-        try {
-          const { data } = await getGenerationCount(topic, subtopic.name);
-          counts[subtopic.name] = data.data.generationCount;
-        } catch (err) {
-          counts[subtopic.name] = 0;
+      const { data } = await getGenerationCounts(topic);
+      const apiCounts = data?.data?.counts || {};
+      const mergedCounts = (subtopics || []).reduce((acc, subtopic) => {
+        if (subtopic?.name) {
+          acc[subtopic.name] = apiCounts[subtopic.name] || 0;
         }
-      }
-      setGenerationCounts(counts);
+        return acc;
+      }, {});
+
+      setGenerationCounts(mergedCounts);
     } catch (err) {
       console.error("Error fetching generation counts:", err);
     }
@@ -643,8 +643,9 @@ export default function Learning() {
             "& .MuiDrawer-paper": {
               width: "100%",
               maxWidth: 300,
-              height: "100vh",
-              overflow: "hidden",
+              height: "100dvh",
+              overflow: "auto",
+              WebkitOverflowScrolling: "touch",
               background: "white",
             },
           }}
@@ -825,6 +826,7 @@ export default function Learning() {
               subtopics={subtopics}
               topics={topics}
               selectedTopic={selectedTopic}
+              isDataLoading={loading}
               onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
               onTopicSelect={fetchSubtopics}
               onSubtopicSelect={handleSelectSubtopic}
