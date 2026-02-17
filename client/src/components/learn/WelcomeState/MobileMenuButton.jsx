@@ -15,12 +15,12 @@ const MobileMenuButton = ({ onOpenSidebar, colorPalette }) => {
           left: 12,
           width: 44,
           height: 44,
-          background: "white",
+          bgcolor: "background.paper",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           color: colorPalette[600],
           zIndex: 1000,
           "&:hover": {
-            background: "#f8fafc",
+            background: (theme) => theme.palette.action.hover,
           },
         }}
       >

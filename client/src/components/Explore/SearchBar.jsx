@@ -12,9 +12,13 @@ const SearchBar = ({ searchQuery, setSearchQuery }) => {
             display: "flex",
             alignItems: "center",
             borderRadius: 2,
-            background: "white",
-            boxShadow: "0 4px 20px rgba(126, 87, 194, 0.08)",
-            border: "1px solid rgba(126, 87, 194, 0.1)",
+            bgcolor: "background.paper",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 4px 20px rgba(0, 0, 0, 0.3)"
+                : "0 4px 20px rgba(126, 87, 194, 0.08)",
+            border: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Search

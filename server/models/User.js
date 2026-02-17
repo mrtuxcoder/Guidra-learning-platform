@@ -111,6 +111,10 @@ const userSchema = new mongoose.Schema(
         date: { type: Date, default: Date.now },
       },
     ],
+
+    // 🔁 Daily regeneration limit (shared across full + component regenerations)
+    regenDailyCount: { type: Number, min: 0, default: 0 },
+    regenDailyResetAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

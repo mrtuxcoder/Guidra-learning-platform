@@ -43,6 +43,7 @@ export const {
   fixMermaidSyntax,
   getContentHistory,
   clearContentCache,
+  getCachedSubtopics,
   updateGenerationCount,
   incrementGenerationCount,
   getGenerationCount,

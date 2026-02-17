@@ -1,5 +1,13 @@
 import React from "react";
-import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  useTheme,
+  useMediaQuery,
+  alpha,
+} from "@mui/material";
 import { profileTheme } from "../profile/constants";
 
 const solutionSteps = [
@@ -28,13 +36,19 @@ const solutionSteps = [
 const LandingSolution = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isDark = theme.palette.mode === "dark";
 
   return (
     <Box
       sx={{
         py: { xs: 5, md: 7 },
         background:
-          "linear-gradient(180deg, rgba(126,87,194,0.05) 0%, rgba(126,87,194,0.1) 100%)",
+          theme.palette.mode === "dark"
+            ? `linear-gradient(180deg, ${alpha(
+                theme.palette.primary.main,
+                0.16
+              )} 0%, ${alpha(theme.palette.primary.main, 0.06)} 100%)`
+            : "linear-gradient(180deg, rgba(126,87,194,0.05) 0%, rgba(126,87,194,0.1) 100%)",
       }}
     >
       <Container maxWidth="lg">
@@ -60,7 +74,7 @@ const LandingSolution = () => {
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
-                  background: "white",
+                  background: "background.paper",
                   border: `1px solid ${profileTheme.border}`,
                   height: "100%",
                   ...(isMobile && {
@@ -72,7 +86,12 @@ const LandingSolution = () => {
               >
                 <Typography
                   variant="overline"
-                  sx={{ color: profileTheme.primaryDark, fontWeight: 600 }}
+                  sx={{
+                    color: isDark
+                      ? profileTheme.primaryLight
+                      : profileTheme.primaryDark,
+                    fontWeight: 600,
+                  }}
                 >
                   Step {index + 1}
                 </Typography>
@@ -82,7 +101,9 @@ const LandingSolution = () => {
                 >
                   {step.title}
                 </Typography>
-                <Typography sx={{ color: "#475569" }}>{step.detail}</Typography>
+                <Typography sx={{ color: "text.secondary" }}>
+                  {step.detail}
+                </Typography>
               </Box>
             </Grid>
           ))}

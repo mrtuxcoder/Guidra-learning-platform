@@ -30,7 +30,7 @@ const AuthLayout = ({ children, formType, features, sidebarTitle }) => {
 
   return (
     <Fade in={true} timeout={800}>
-      <Box sx={{ minHeight: "100vh", bgcolor: "#FAF7FE", overflowX: "hidden" }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", overflowX: "hidden" }}>
         {isMobile && <AuthHeader title="Guidra" subtitle={config.greeting} />}
 
         <Container

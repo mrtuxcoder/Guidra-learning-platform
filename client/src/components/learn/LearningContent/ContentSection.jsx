@@ -7,6 +7,8 @@ import {
   Fade,
   IconButton,
   Tooltip,
+  useTheme,
+  alpha,
 } from "@mui/material";
 import { ExpandMore, Refresh, Lock } from "@mui/icons-material";
 import MermaidDiagram from "../MermardDiagram/index";
@@ -24,6 +26,7 @@ const ContentSection = ({
   isMobile,
   colorPalette,
 }) => {
+  const theme = useTheme();
   if (!content || (Array.isArray(content) && content.length === 0)) {
     return null;
   }
@@ -32,9 +35,9 @@ const ContentSection = ({
     <Card
       sx={{
         mb: 3,
-        background: "white",
+        bgcolor: "background.paper",
         border: "1px solid",
-        borderColor: colorPalette[200],
+        borderColor: "divider",
         borderRadius: 2,
         boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
         overflow: "visible",
@@ -71,7 +74,7 @@ const ContentSection = ({
             <Typography
               variant={isMobile ? "subtitle1" : "h6"}
               fontWeight="600"
-              sx={{ color: colorPalette[700] }}
+              sx={{ color: "text.primary" }}
             >
               {title}
             </Typography>
@@ -150,9 +153,10 @@ const ContentSection = ({
                         mb: 2,
                         p: isMobile ? 1.5 : 2,
                         borderRadius: 1,
-                        background:
-                          index % 2 === 0 ? colorPalette[50] : "transparent",
-                        border: `1px solid ${colorPalette[100]}`,
+                        bgcolor:
+                          index % 2 === 0 ? (theme.palette.mode === "dark" ? alpha(theme.palette.primary.main, 0.05) : colorPalette[50]) : "transparent",
+                        border: "1px solid",
+                        borderColor: "divider",
                       }}
                     >
                       <Box
@@ -199,8 +203,9 @@ const ContentSection = ({
                   sx={{
                     p: isMobile ? 1.5 : 2,
                     borderRadius: 1,
-                    background: colorPalette[50],
-                    border: `1px solid ${colorPalette[100]}`,
+                    bgcolor: theme.palette.mode === "dark" ? alpha(theme.palette.primary.main, 0.05) : colorPalette[50],
+                    border: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
                   <Typography
@@ -243,7 +248,7 @@ ContentSection.MindmapSection = ({
         <Typography
           variant={isMobile ? "subtitle1" : "h6"}
           fontWeight="600"
-          sx={{ color: colorPalette[700] }}
+          sx={{ color: "text.primary" }}
         >
           Mind Map
         </Typography>

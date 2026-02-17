@@ -95,7 +95,7 @@ const CompletedTopicsCard = ({ progress = [], onRecall }) => {
                     <Typography
                       sx={{
                         fontWeight: 700,
-                        color: "#1e293b",
+                        color: "text.primary",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",

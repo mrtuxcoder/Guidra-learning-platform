@@ -6,6 +6,8 @@ import {
   Box,
   Typography,
   Button,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import {
   RocketLaunch,
@@ -52,6 +54,9 @@ const OnboardingTour = ({
   handleTourComplete,
   randomIcon,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   return (
     <Dialog
       open={open}
@@ -61,7 +66,17 @@ const OnboardingTour = ({
       PaperProps={{
         sx: {
           borderRadius: 3,
-          background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+          background: isDark
+            ? `linear-gradient(135deg, ${alpha(
+                theme.palette.primary.main,
+                0.16
+              )} 0%, ${theme.palette.background.paper} 100%)`
+            : "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: isDark
+            ? "0 18px 50px rgba(0, 0, 0, 0.45)"
+            : "0 18px 50px rgba(15, 23, 42, 0.12)",
         },
       }}
     >
@@ -109,7 +124,12 @@ const OnboardingTour = ({
                 width: 8,
                 height: 8,
                 borderRadius: "50%",
-                bgcolor: index === activeTourStep ? "#7E57C2" : "grey.300",
+                bgcolor:
+                  index === activeTourStep
+                    ? theme.palette.primary.main
+                    : isDark
+                      ? alpha(theme.palette.common.white, 0.24)
+                      : "grey.300",
                 transition: "all 0.3s ease",
               }}
             />
@@ -135,7 +155,7 @@ const OnboardingTour = ({
             onClick={handleTourBack}
             startIcon={<NavigateBefore />}
             sx={{
-              color: "#7E57C2",
+              color: theme.palette.primary.main,
               fontWeight: "600",
             }}
           >

@@ -12,6 +12,7 @@ import {
   CircularProgress,
   IconButton,
   alpha,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
@@ -39,6 +40,8 @@ const purplePalette = {
 };
 
 const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -138,9 +141,13 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
       PaperProps={{
         sx: {
           borderRadius: 3,
-          background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
-          boxShadow: `0 20px 60px ${alpha(purplePalette[600], 0.15)}`,
-          border: `1px solid ${alpha(purplePalette[300], 0.2)}`,
+          bgcolor: "background.paper",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? `0 20px 60px rgba(0, 0, 0, 0.4)`
+              : `0 20px 60px ${alpha(purplePalette[600], 0.15)}`,
+          border: (theme) =>
+            `1px solid ${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : alpha(purplePalette[300], 0.2)}`,
           overflow: "hidden",
         },
       }}
@@ -222,10 +229,10 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
               sx={{
                 mb: 3,
                 borderRadius: 2,
-                border: `1px solid ${alpha("#d32f2f", 0.2)}`,
-                background: "rgba(211, 47, 47, 0.05)",
+                border: `1px solid ${alpha(theme.palette.error.main, 0.25)}`,
+                background: alpha(theme.palette.error.main, 0.12),
                 "& .MuiAlert-icon": {
-                  color: "#d32f2f",
+                  color: theme.palette.error.main,
                 },
               }}
             >
@@ -239,7 +246,7 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
               mb: 4,
               borderRadius: 2,
               border: `1px solid ${alpha(purplePalette[500], 0.2)}`,
-              background: "rgba(126, 87, 194, 0.08)",
+              background: alpha(purplePalette[500], isDark ? 0.22 : 0.08),
               "& .MuiAlert-icon": {
                 color: purplePalette[600],
               },
@@ -282,7 +289,9 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
                 ),
                 sx: {
                   borderRadius: 2,
-                  background: "white",
+                  background: isDark
+                    ? alpha(theme.palette.common.white, 0.06)
+                    : "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: alpha(purplePalette[300], 0.5),
                   },
@@ -328,7 +337,9 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
                 ),
                 sx: {
                   borderRadius: 2,
-                  background: "white",
+                  background: isDark
+                    ? alpha(theme.palette.common.white, 0.06)
+                    : "white",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: alpha(purplePalette[300], 0.5),
                   },
@@ -350,8 +361,8 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
               mt: 3,
               p: 2,
               borderRadius: 2,
-              background: alpha(purplePalette[50], 0.5),
-              border: `1px solid ${alpha(purplePalette[200], 0.3)}`,
+              background: alpha(purplePalette[500], isDark ? 0.12 : 0.08),
+              border: `1px solid ${alpha(purplePalette[200], isDark ? 0.4 : 0.3)}`,
             }}
           >
             <Typography
@@ -384,8 +395,8 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
           px: { xs: 2.5, sm: 3.5 },
           py: 3,
           gap: 2,
-          background: alpha(purplePalette[50], 0.3),
-          borderTop: `1px solid ${alpha(purplePalette[200], 0.2)}`,
+          background: alpha(purplePalette[500], isDark ? 0.12 : 0.06),
+          borderTop: `1px solid ${alpha(purplePalette[200], isDark ? 0.4 : 0.2)}`,
         }}
       >
         <Button
@@ -397,18 +408,22 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
             py: 1,
             fontSize: "0.95rem",
             fontWeight: 600,
-            color: purplePalette[700],
-            border: `1px solid ${alpha(purplePalette[400], 0.3)}`,
-            background: "white",
+            color: isDark ? "text.primary" : purplePalette[700],
+            border: `1px solid ${alpha(purplePalette[400], isDark ? 0.5 : 0.3)}`,
+            background: isDark
+              ? alpha(theme.palette.common.white, 0.06)
+              : "white",
             textTransform: "none",
             "&:hover": {
-              background: alpha(purplePalette[50], 0.8),
+              background: isDark
+                ? alpha(theme.palette.common.white, 0.12)
+                : alpha(purplePalette[50], 0.8),
               borderColor: purplePalette[500],
               transform: "translateY(-1px)",
               boxShadow: `0 4px 12px ${alpha(purplePalette[400], 0.15)}`,
             },
             "&:disabled": {
-              color: alpha(purplePalette[700], 0.5),
+              color: alpha(theme.palette.text.primary, 0.5),
               borderColor: alpha(purplePalette[400], 0.2),
             },
           }}

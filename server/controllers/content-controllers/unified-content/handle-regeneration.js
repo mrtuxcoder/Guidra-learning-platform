@@ -11,7 +11,8 @@ async function handleRegeneration(
   topic,
   subtopic,
   res,
-  componentName
+  componentName,
+  options = {}
 ) {
   try {
     const topicProgress = user.progress?.find(
@@ -78,7 +79,14 @@ async function handleRegeneration(
       if (topicProgress) {
         topicProgress.lastAccessed = new Date();
       }
+      user.regenDailyCount = Number(user.regenDailyCount || 0) + 1;
       await user.save();
+
+      const dailyLimit = options.dailyLimit || 6;
+      const dailyRemaining = Math.max(
+        0,
+        dailyLimit - Number(user.regenDailyCount || 0)
+      );
 
       return res.status(200).json({
         message: `${componentName} regenerated for "${subtopic}"`,
@@ -86,6 +94,9 @@ async function handleRegeneration(
         subtopic,
         component: componentName,
         cached: false,
+        dailyLimit,
+        dailyRemaining,
+        dailyResetAt: user.regenDailyResetAt,
         [componentName]: componentContent,
       });
     }
@@ -105,7 +116,14 @@ async function handleRegeneration(
     if (topicProgress) {
       topicProgress.lastAccessed = new Date();
     }
+    user.regenDailyCount = Number(user.regenDailyCount || 0) + 1;
     await user.save();
+
+    const dailyLimit = options.dailyLimit || 6;
+    const dailyRemaining = Math.max(
+      0,
+      dailyLimit - Number(user.regenDailyCount || 0)
+    );
 
     return res.status(200).json({
       message: `Regenerated teaching content for "${subtopic}"`,
@@ -113,6 +131,9 @@ async function handleRegeneration(
       subtopic,
       cached: false,
       version: versionEntry.versionNumber,
+      dailyLimit,
+      dailyRemaining,
+      dailyResetAt: user.regenDailyResetAt,
       data: validatedContent,
     });
   } catch (error) {

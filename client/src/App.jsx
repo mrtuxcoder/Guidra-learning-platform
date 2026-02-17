@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
 import { useState, useEffect } from "react";
+import { Box, CircularProgress, Typography, alpha, useTheme } from "@mui/material";
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
 import Learn from "./pages/Learn";
@@ -12,41 +11,42 @@ import Layout from "./components/Layout";
 import PasswordSetupModal from "./components/PasswordSetupModal";
 import { hasAuthCookie, isAuthenticated } from "./api";
 import { usePasswordCheck } from "./hooks/usePasswordCheck";
-
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: {
-      main: "#1976d2",
-    },
-    secondary: {
-      main: "#dc004e",
-    },
-    background: {
-      default: "#f5f5f5",
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
-});
+import { DailyRegenProvider } from "./contexts/DailyRegenContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 // Loading component
-const LoadingSpinner = () => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      flexDirection: "column",
-      gap: "10px",
-    }}
-  >
-    <div>Checking authentication...</div>
-    <div style={{ fontSize: "12px", color: "#666" }}>Please wait</div>
-  </div>
-);
+const LoadingSpinner = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        flexDirection: "column",
+        gap: 1.5,
+        background: isDark
+          ? `radial-gradient(circle at top, ${alpha(
+              theme.palette.primary.main,
+              0.2
+            )} 0%, ${theme.palette.background.default} 55%)`
+          : "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        color: "text.primary",
+      }}
+    >
+      <CircularProgress sx={{ color: theme.palette.primary.main }} />
+      <Typography variant="h6" fontWeight={700}>
+        Checking authentication...
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        Please wait
+      </Typography>
+    </Box>
+  );
+};
 
 export default function App() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -120,22 +120,20 @@ export default function App() {
   };
 
   // Show loading while checking auth
-  if (!authChecked) {
-    return <LoadingSpinner />;
-  }
-
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeProvider>
+      {!authChecked ? (
+        <LoadingSpinner />
+      ) : (
+        <DailyRegenProvider>
+          {/* Password Setup Modal */}
+          <PasswordSetupModal
+            open={showPasswordModal}
+            onClose={() => setShowPasswordModal(false)}
+            onSuccess={handlePasswordSetupSuccess}
+          />
 
-      {/* Password Setup Modal */}
-      <PasswordSetupModal
-        open={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        onSuccess={handlePasswordSetupSuccess}
-      />
-
-      <Routes>
+          <Routes>
         {/* Public routes - only accessible when not logged in */}
         <Route
           path="/"
@@ -217,7 +215,9 @@ export default function App() {
           path="*"
           element={<Navigate to={isAuth ? "/profile" : "/login"} replace />}
         />
-      </Routes>
+          </Routes>
+        </DailyRegenProvider>
+      )}
     </ThemeProvider>
   );
 }

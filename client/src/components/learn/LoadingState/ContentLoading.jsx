@@ -1,10 +1,12 @@
 import React from "react";
-import { Box, Typography, Fade } from "@mui/material";
+import { Box, Typography, Fade, alpha, useTheme } from "@mui/material";
 import GradientLoader from "./GradientLoader";
 import FloatingParticles from "./FloatingParticles";
 import ProgressDots from "./ProgressDots";
 
 const ContentLoading = ({ source, isMobile, colorPalette }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const gradientColors = colorPalette
     ? {
         start: colorPalette[700] || "#7C3AED",
@@ -19,9 +21,16 @@ const ContentLoading = ({ source, isMobile, colorPalette }) => {
         light: "#C4B5FD",
       };
 
-  const backgroundGradient = colorPalette
-    ? `linear-gradient(135deg, ${colorPalette[50]} 0%, ${colorPalette[100]} 50%, ${colorPalette[200]} 100%)`
-    : "linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 50%, #E9D5FF 100%)";
+  const backgroundGradient = isDark
+    ? `linear-gradient(135deg, ${alpha(
+        theme.palette.primary.main,
+        0.18
+      )} 0%, ${alpha(theme.palette.background.paper, 0.9)} 55%, ${
+        theme.palette.background.default
+      } 100%)`
+    : colorPalette
+      ? `linear-gradient(135deg, ${colorPalette[50]} 0%, ${colorPalette[100]} 50%, ${colorPalette[200]} 100%)`
+      : "linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 50%, #E9D5FF 100%)";
 
   return (
     <Fade in={true} timeout={600}>
@@ -40,8 +49,14 @@ const ContentLoading = ({ source, isMobile, colorPalette }) => {
           p: isMobile ? 2 : 4,
           position: "relative",
           overflow: "hidden",
-          border: `1px solid ${colorPalette?.[400] || "#7C3AED"}20`,
-          boxShadow: `0 8px 32px ${colorPalette?.[400] || "#7C3AED"}20`,
+          border: `1px solid ${alpha(
+            theme.palette.primary.main,
+            isDark ? 0.3 : 0.2
+          )}`,
+          boxShadow: `0 8px 32px ${alpha(
+            theme.palette.primary.main,
+            isDark ? 0.35 : 0.2
+          )}`,
           boxSizing: "border-box",
         }}
       >
@@ -121,7 +136,7 @@ const ContentLoading = ({ source, isMobile, colorPalette }) => {
           <Typography
             variant={isMobile ? "body2" : "body1"}
             sx={{
-              color: "#6B7280",
+              color: "text.secondary",
               maxWidth: isMobile ? 280 : 300,
               lineHeight: 1.6,
               margin: "0 auto",

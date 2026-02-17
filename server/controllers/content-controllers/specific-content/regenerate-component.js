@@ -8,6 +8,11 @@ const {
 } = require("../../../utils/cache/save-cache");
 const { getCachedContent } = require("../../../utils/cache/get-cache");
 const ContentCache = require("../../../models/Content-cache");
+const {
+  DAILY_REGEN_LIMIT,
+  ensureDailyRegenWindow,
+  getDailyRegenRemaining,
+} = require("../../../utils/daily-regen");
 
 // IMPORT THE UTILITY FUNCTIONS
 const {
@@ -66,6 +71,17 @@ exports.regenerateComponentController = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    ensureDailyRegenWindow(user);
+    const dailyRemaining = getDailyRegenRemaining(user);
+    if (dailyRemaining <= 0) {
+      return res.status(429).json({
+        message: "Daily regeneration limit reached (max 6 per day)",
+        limit: DAILY_REGEN_LIMIT,
+        dailyRemaining: 0,
+        dailyResetAt: user.regenDailyResetAt,
+      });
     }
 
     const cacheDoc = await ContentCache.findOne({
@@ -184,6 +200,9 @@ exports.regenerateComponentController = async (req, res) => {
     }
 
     // Build response
+    user.regenDailyCount = Number(user.regenDailyCount || 0) + 1;
+    await user.save();
+
     const response = {
       message: `${
         component.charAt(0).toUpperCase() + component.slice(1)
@@ -195,6 +214,12 @@ exports.regenerateComponentController = async (req, res) => {
       cached: false,
       regenerated: true,
       version: versionEntry.versionNumber,
+      dailyLimit: DAILY_REGEN_LIMIT,
+      dailyRemaining: Math.max(
+        0,
+        DAILY_REGEN_LIMIT - Number(user.regenDailyCount || 0)
+      ),
+      dailyResetAt: user.regenDailyResetAt,
       [component]: componentContent,
     };
 

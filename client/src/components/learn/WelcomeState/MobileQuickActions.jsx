@@ -31,10 +31,11 @@ const MobileQuickActions = ({
             key={action.type}
             sx={{
               cursor: "pointer",
-              border: `1px solid #e2e8f0`,
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: 2,
               transition: "all 0.2s ease",
-              background: "white",
+              bgcolor: "background.paper",
               "&:hover": {
                 transform: "translateY(-2px)",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
@@ -76,7 +77,7 @@ const MobileQuickActions = ({
                     <Typography
                       variant="body2"
                       fontWeight="600"
-                      color="#1e293b"
+                      color="text.primary"
                       noWrap
                     >
                       {action.name}
@@ -84,14 +85,14 @@ const MobileQuickActions = ({
                   </Box>
                   <Typography
                     variant="caption"
-                    color="#64748b"
+                    color="text.secondary"
                     sx={{ lineHeight: 1.2 }}
                   >
                     {action.subtitle}
                   </Typography>
                   <Typography
                     variant="caption"
-                    color="#1e293b"
+                    color="text.primary"
                     sx={{
                       fontWeight: "500",
                       mt: 0.5,

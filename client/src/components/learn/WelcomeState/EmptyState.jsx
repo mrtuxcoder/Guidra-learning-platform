@@ -43,12 +43,13 @@ const EmptyState = ({ colorPalette }) => {
               px: 1.5,
               py: 0.5,
               borderRadius: 999,
-              background: "rgba(255, 255, 255, 0.85)",
-              border: "1px solid rgba(148, 163, 184, 0.25)",
+              bgcolor: (theme) => theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.85)",
+              border: "1px solid",
+              borderColor: "divider",
               boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
               fontSize: "0.85rem",
               fontWeight: 600,
-              color: "#334155",
+              color: "text.primary",
               fontFamily: '"Space Grotesk", "Manrope", "Segoe UI", sans-serif',
             }}
           >
@@ -61,7 +62,7 @@ const EmptyState = ({ colorPalette }) => {
               width: { xs: 96, sm: 110 },
               height: { xs: 96, sm: 110 },
               background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-              border: "3px solid white",
+              border: (theme) => theme.palette.mode === "dark" ? "3px solid rgba(255,255,255,0.1)" : "3px solid white",
               boxShadow: "0 10px 30px rgba(126, 87, 194, 0.35)",
             }}
           >
@@ -72,7 +73,7 @@ const EmptyState = ({ colorPalette }) => {
             <Typography
               variant="h3"
               fontWeight={800}
-              color="#0f172a"
+              color="text.primary"
               sx={{
                 mb: 1.2,
                 fontSize: { xs: "2rem", sm: "2.4rem" },
@@ -85,7 +86,7 @@ const EmptyState = ({ colorPalette }) => {
             </Typography>
             <Typography
               variant="body1"
-              color="#475569"
+              color="text.secondary"
               sx={{
                 maxWidth: 520,
                 margin: "0 auto",

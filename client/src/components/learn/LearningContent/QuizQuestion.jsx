@@ -38,8 +38,9 @@ const QuizQuestion = ({
       sx={{
         mb: 1,
         borderRadius: 1,
-        border: `1px solid ${colorPalette[100]}`,
-        background: "white",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
         "&:before": { display: "none" },
       }}
     >

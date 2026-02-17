@@ -47,7 +47,7 @@ const CompletionIndicator = ({ completed, isSelected, colorPalette }) => {
             height: 14,
             borderRadius: "50%",
             border: `2px solid ${colorPalette[200]}`,
-            backgroundColor: "white",
+            bgcolor: (theme) => theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "white",
             transition: "all 0.2s ease",
             "&:hover": {
               borderColor: colorPalette[300],

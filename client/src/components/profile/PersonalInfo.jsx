@@ -7,6 +7,7 @@ import {
   Chip,
   Grid,
   useTheme,
+  alpha,
   useMediaQuery,
 } from "@mui/material";
 import { Email, CalendarToday, Lightbulb, Person } from "@mui/icons-material";
@@ -14,6 +15,7 @@ import { profileTheme, cardSx } from "./constants";
 
 const PersonalInfo = ({ user }) => {
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const InfoItem = ({ icon, label, value }) => (
@@ -214,12 +216,24 @@ const PersonalInfo = ({ user }) => {
               } Learner`}
               variant="filled"
               sx={{
-                background: profileTheme.lightBg,
-                color: profileTheme.primaryDark,
+                background: alpha(
+                  theme.palette.primary.main,
+                  isDark ? 0.2 : 0.12
+                ),
+                color: isDark
+                  ? theme.palette.primary.light
+                  : profileTheme.primaryDark,
                 fontWeight: 600,
                 fontSize: "0.75rem",
-                border: `1px solid ${profileTheme.primaryLight}`,
-                "& .MuiChip-icon": { color: profileTheme.primary },
+                border: `1px solid ${alpha(
+                  theme.palette.primary.main,
+                  isDark ? 0.4 : 0.2
+                )}`,
+                "& .MuiChip-icon": {
+                  color: isDark
+                    ? theme.palette.primary.light
+                    : profileTheme.primary,
+                },
               }}
             />
           </Box>

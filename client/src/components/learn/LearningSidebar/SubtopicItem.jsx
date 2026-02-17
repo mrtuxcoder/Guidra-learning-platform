@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, ListItem, Typography, Tooltip } from "@mui/material";
+import { Box, ListItem, Typography, Tooltip, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import CompletionIndicator from "./CompletionIndicator";
 
@@ -13,6 +13,8 @@ const SubtopicItem = ({
   onSubtopicClick,
   colorPalette,
 }) => {
+  const theme = useTheme();
+  
   return (
     <ListItem
       selected={isSelected}
@@ -23,13 +25,17 @@ const SubtopicItem = ({
         py: 1.25,
         px: 3,
         backgroundColor: isSelected
-          ? alpha(colorPalette[50], 0.8)
+          ? theme.palette.mode === "dark"
+            ? alpha(colorPalette[500], 0.15)
+            : alpha(colorPalette[50], 0.8)
           : "transparent",
         color: "text.primary",
         border: "none",
         position: "relative",
         "&:hover": {
-          backgroundColor: alpha(colorPalette[50], 0.6),
+          backgroundColor: theme.palette.mode === "dark"
+            ? alpha(colorPalette[500], 0.08)
+            : alpha(colorPalette[50], 0.6),
         },
         "&.Mui-disabled": {
           opacity: 0.5,
@@ -70,7 +76,7 @@ const SubtopicItem = ({
               whiteSpace: "nowrap",
               flex: 1,
               fontSize: "0.85rem",
-              color: isSelected ? colorPalette[700] : "text.primary",
+              color: "text.primary",
               lineHeight: 1.4,
             }}
           >

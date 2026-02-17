@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
+import { Box, Card, CardContent, Typography, Chip, alpha, useTheme } from "@mui/material";
 
 const DesktopQuickActions = ({
   quickActions,
@@ -9,6 +9,9 @@ const DesktopQuickActions = ({
   onSetActiveSuggestion,
   onQuickAction,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   return (
     <Box
       sx={{
@@ -40,10 +43,11 @@ const DesktopQuickActions = ({
             key={action.type}
             sx={{
               cursor: "pointer",
-              border: `2px solid #f1f5f9`,
+              border: "2px solid",
+              borderColor: "divider",
               borderRadius: 3,
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              background: "white",
+              bgcolor: "background.paper",
               display: "flex",
               flexDirection: "column",
               height: "100%",
@@ -143,12 +147,12 @@ const DesktopQuickActions = ({
                   label={action.type.toUpperCase()}
                   size="small"
                   sx={{
-                    background: "rgba(126, 87, 194, 0.08)",
-                    color: "#7e57c2",
+                    background: alpha(theme.palette.primary.main, isDark ? 0.22 : 0.08),
+                    color: theme.palette.primary.main,
                     fontWeight: "800",
                     fontSize: "0.65rem",
                     height: 22,
-                    border: "1px solid rgba(126, 87, 194, 0.2)",
+                    border: `1px solid ${alpha(theme.palette.primary.main, isDark ? 0.4 : 0.2)}`,
                   }}
                 />
               </Box>
@@ -168,7 +172,7 @@ const DesktopQuickActions = ({
                     variant="h6"
                     fontWeight="800"
                     sx={{
-                      color: "#1e293b",
+                      color: "text.primary",
                       lineHeight: 1.3,
                       mb: 1,
                       fontSize: "1.1rem",
@@ -185,7 +189,7 @@ const DesktopQuickActions = ({
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "#64748b",
+                      color: "text.secondary",
                       lineHeight: 1.4,
                       fontSize: "0.85rem",
                       display: "-webkit-box",
@@ -211,7 +215,7 @@ const DesktopQuickActions = ({
                   <Typography
                     variant="caption"
                     sx={{
-                      color: "#64748b",
+                      color: "text.secondary",
                       fontWeight: "600",
                       fontSize: "0.7rem",
                       textTransform: "uppercase",
@@ -227,9 +231,13 @@ const DesktopQuickActions = ({
                     className="subtopic-box"
                     sx={{
                       p: 2,
-                      background: "#f8fafc",
+                      background: alpha(
+                        theme.palette.primary.main,
+                        isDark ? 0.14 : 0.06
+                      ),
                       borderRadius: 2,
-                      border: "2px solid #f1f5f9",
+                      border: "2px solid",
+                      borderColor: "divider",
                       transition: "all 0.3s ease",
                       position: "relative",
                       overflow: "hidden",
@@ -253,7 +261,7 @@ const DesktopQuickActions = ({
                       variant="body2"
                       sx={{
                         fontWeight: "700",
-                        color: "#1e293b",
+                        color: "text.primary",
                         lineHeight: 1.3,
                         fontSize: "0.9rem",
                         display: "-webkit-box",
@@ -309,7 +317,7 @@ const DesktopQuickActions = ({
                           <Box
                             sx={{
                               height: "100%",
-                              background: "white",
+                              bgcolor: (theme) => theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "white",
                               borderRadius: 2,
                               width: `${subtopic.progress * 100}%`,
                               transition: "width 0.5s ease",

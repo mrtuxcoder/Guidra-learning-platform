@@ -1,16 +1,17 @@
 import React from "react";
-import { Card, CardContent, Typography, Chip, Box, Fade } from "@mui/material";
+import { Card, CardContent, Typography, Chip, Box, Fade, useTheme } from "@mui/material";
 import { alpha } from "@mui/material";
 import { CATEGORY_DATA } from "./constants.jsx";
 import { cardStyles } from "./styles";
 
 const CourseCard = ({ topic, isSelected, onSelect, index }) => {
+  const theme = useTheme();
   const categoryData = CATEGORY_DATA[topic.category];
 
   return (
     <Fade in timeout={400 + index * 50}>
       <Card
-        sx={cardStyles.card(isSelected, categoryData.color)}
+        sx={cardStyles.card(isSelected, categoryData.color, theme)}
         onClick={() => onSelect(topic.id)}
       >
         <CardContent sx={cardStyles.cardContent}>

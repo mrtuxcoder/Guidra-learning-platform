@@ -1,21 +1,26 @@
 import { alpha } from "@mui/material";
 
 export const cardStyles = {
-  card: (isSelected, categoryColor) => ({
+  card: (isSelected, categoryColor, theme) => ({
     cursor: "pointer",
     transition: "all 0.2s ease",
     border: isSelected
       ? `2px solid ${categoryColor}`
-      : "1px solid rgba(126, 87, 194, 0.1)",
-    background: isSelected
+      : "1px solid",
+    borderColor: isSelected ? categoryColor : theme?.palette?.divider || "rgba(126, 87, 194, 0.1)",
+    bgcolor: isSelected
       ? `linear-gradient(135deg, ${alpha(categoryColor, 0.08)} 0%, ${alpha(
           categoryColor,
           0.02
         )} 100%)`
-      : "white",
+      : "background.paper",
     transform: isSelected ? "translateY(-2px)" : "none",
     boxShadow: isSelected
-      ? "0 8px 25px rgba(126, 87, 194, 0.15)"
+      ? theme?.palette?.mode === "dark"
+        ? "0 8px 25px rgba(0, 0, 0, 0.4)"
+        : "0 8px 25px rgba(126, 87, 194, 0.15)"
+      : theme?.palette?.mode === "dark"
+      ? "0 2px 8px rgba(0, 0, 0, 0.2)"
       : "0 2px 8px rgba(126, 87, 194, 0.06)",
     borderRadius: 3,
     height: "100%",
@@ -24,7 +29,9 @@ export const cardStyles = {
     flexDirection: "column",
     "&:hover": {
       transform: "translateY(-2px)",
-      boxShadow: "0 8px 20px rgba(126, 87, 194, 0.1)",
+      boxShadow: theme?.palette?.mode === "dark"
+        ? "0 8px 20px rgba(0, 0, 0, 0.3)"
+        : "0 8px 20px rgba(126, 87, 194, 0.1)",
     },
   }),
   cardContent: {

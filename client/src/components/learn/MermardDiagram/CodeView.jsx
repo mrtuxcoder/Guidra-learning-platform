@@ -52,7 +52,7 @@ const CodeView = ({
     </Box>
     <Box
       sx={{
-        background: "white",
+        bgcolor: "background.paper",
         padding: isMobile ? 2 : 3,
         borderRadius: 2,
         boxShadow: "0 4px 20px rgba(0,0,0,0.1)",

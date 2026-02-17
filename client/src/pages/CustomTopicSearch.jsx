@@ -112,7 +112,7 @@ export default function CustomTopicSearch() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        bgcolor: "background.default",
         display: "flex",
         alignItems: "center",
         py: 4,

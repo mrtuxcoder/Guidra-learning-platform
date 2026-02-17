@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Stack, Chip } from "@mui/material";
+import { Box, Container, Typography, Stack, Chip, alpha, useTheme } from "@mui/material";
 
 const audience = [
   "Last-minute exam students",
@@ -8,8 +8,10 @@ const audience = [
 ];
 
 const LandingAudience = () => {
+  const theme = useTheme();
+
   return (
-    <Box sx={{ py: { xs: 5, md: 7 }, background: "white" }}>
+    <Box sx={{ py: { xs: 5, md: 7 }, background: "background.paper" }}>
       <Container maxWidth="lg">
         <Typography
           variant="h4"
@@ -28,8 +30,11 @@ const LandingAudience = () => {
               label={item}
               sx={{
                 fontWeight: 600,
-                bgcolor: "rgba(124,58,237,0.08)",
-                color: "#4B5563",
+                bgcolor: alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.2 : 0.08
+                ),
+                color: "text.secondary",
                 px: 1.5,
                 py: 1.25,
               }}

@@ -14,6 +14,8 @@ import {
   Stack,
   Alert,
   CircularProgress,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import {
   getProfile,
@@ -23,6 +25,7 @@ import {
   updatePassword,
 } from "../api";
 import { profileTheme, cardSx } from "../components/profile/constants";
+import { useThemeMode } from "../contexts/ThemeContext";
 
 const toneOptions = [
   { value: "neutral", label: "Neutral" },
@@ -32,6 +35,7 @@ const toneOptions = [
 ];
 
 const Settings = () => {
+  const { mode, toggleTheme } = useThemeMode();
   const [isLoading, setIsLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
@@ -211,7 +215,7 @@ const Settings = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        bgcolor: "background.default",
         py: { xs: 3, md: 5 },
       }}
     >
@@ -302,6 +306,50 @@ const Settings = () => {
             </Button>
           </Box>
         </Stack>
+        </Paper>
+
+        {/* Appearance Settings */}
+        <Paper
+          elevation={0}
+          sx={{
+            ...cardSx,
+            p: { xs: 2.5, md: 3 },
+            mb: 3,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+            Appearance
+          </Typography>
+          <Stack spacing={2}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                py: 1,
+              }}
+            >
+              <Box>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  Dark Mode
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Switch between light and dark theme
+                </Typography>
+              </Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={mode === "dark"}
+                    onChange={toggleTheme}
+                    color="primary"
+                  />
+                }
+                label=""
+                sx={{ m: 0 }}
+              />
+            </Box>
+          </Stack>
         </Paper>
 
         <Paper

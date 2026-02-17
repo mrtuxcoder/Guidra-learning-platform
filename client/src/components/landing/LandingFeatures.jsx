@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Grid } from "@mui/material";
+import { Box, Container, Typography, Grid, alpha, useTheme } from "@mui/material";
 
 const features = [
   "Structured Content Generation",
@@ -11,12 +11,19 @@ const features = [
 ];
 
 const LandingFeatures = () => {
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
         py: { xs: 5, md: 7 },
         background:
-          "linear-gradient(180deg, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0.02) 100%)",
+          theme.palette.mode === "dark"
+            ? `linear-gradient(180deg, ${alpha(
+                theme.palette.primary.main,
+                0.16
+              )} 0%, ${alpha(theme.palette.primary.main, 0.04)} 100%)`
+            : "linear-gradient(180deg, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0.02) 100%)",
       }}
     >
       <Container maxWidth="lg">
@@ -37,12 +44,15 @@ const LandingFeatures = () => {
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
-                  background: "white",
-                  border: "1px solid rgba(124,58,237,0.15)",
+                  background: "background.paper",
+                  border: `1px solid ${alpha(
+                    theme.palette.primary.main,
+                    theme.palette.mode === "dark" ? 0.3 : 0.15
+                  )}`,
                   height: "100%",
                 }}
               >
-                <Typography sx={{ fontWeight: 600, color: "#1F2937" }}>
+                <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
                   {feature}
                 </Typography>
               </Box>

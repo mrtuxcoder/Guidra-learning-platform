@@ -16,7 +16,12 @@ const AuthHeader = ({ title, subtitle }) => {
         }}
       >
         <Avatar
-          sx={{ bgcolor: "white", color: "#7C3AED", width: 40, height: 40 }}
+          sx={{
+            bgcolor: "background.paper",
+            color: "primary.main",
+            width: 40,
+            height: 40,
+          }}
         >
           <Psychology />
         </Avatar>

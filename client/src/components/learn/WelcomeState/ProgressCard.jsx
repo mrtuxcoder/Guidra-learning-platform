@@ -6,6 +6,7 @@ import {
   Chip,
   LinearProgress,
   useMediaQuery,
+  alpha,
 } from "@mui/material";
 
 const ProgressCard = ({ selectedTopic, learningInsights, colorPalette }) => {
@@ -18,8 +19,9 @@ const ProgressCard = ({ selectedTopic, learningInsights, colorPalette }) => {
       sx={{
         mb: 3,
         p: isMobile ? 2 : 3,
-        background: "white",
-        border: "1px solid #e2e8f0",
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 2,
         boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
       }}
@@ -36,12 +38,15 @@ const ProgressCard = ({ selectedTopic, learningInsights, colorPalette }) => {
           <Typography
             variant={isMobile ? "subtitle1" : "h6"}
             fontWeight="700"
-            color="#1e293b"
+            color="text.primary"
             gutterBottom
           >
             {selectedTopic}
           </Typography>
-          <Typography variant={isMobile ? "caption" : "body2"} color="#64748b">
+          <Typography
+            variant={isMobile ? "caption" : "body2"}
+            color="text.secondary"
+          >
             {learningInsights.isTopicCompleted
               ? "Course Completed"
               : "Progress"}
@@ -68,7 +73,10 @@ const ProgressCard = ({ selectedTopic, learningInsights, colorPalette }) => {
           sx={{
             height: isMobile ? 6 : 8,
             borderRadius: 4,
-            backgroundColor: "#f1f5f9",
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark"
+                ? alpha(theme.palette.common.white, 0.12)
+                : "#f1f5f9",
             "& .MuiLinearProgress-bar": {
               background: learningInsights.isTopicCompleted
                 ? "linear-gradient(90deg, #10b981 0%, #059669 100%)"
@@ -81,7 +89,7 @@ const ProgressCard = ({ selectedTopic, learningInsights, colorPalette }) => {
 
       <Typography
         variant="caption"
-        color="#64748b"
+        color="text.secondary"
         sx={{ display: "flex", alignItems: "center" }}
       >
         {learningInsights.isTopicCompleted ? (

@@ -8,6 +8,8 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Divider,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import { profileTheme } from "../profile/constants";
 
@@ -23,6 +25,8 @@ const LandingAuthPanel = ({
   error,
 }) => {
   const isRegister = activeTab === "register";
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
 
   return (
     <Paper
@@ -30,7 +34,7 @@ const LandingAuthPanel = ({
       sx={{
         borderRadius: 3,
         border: `1px solid ${profileTheme.border}`,
-        background: "white",
+        background: "background.paper",
         p: { xs: 2.5, md: 3 },
       }}
     >
@@ -57,10 +61,12 @@ const LandingAuthPanel = ({
             textTransform: "none",
             fontWeight: 600,
             borderColor: profileTheme.border,
-            color: "#475569",
+            color: "text.secondary",
             "&.Mui-selected": {
-              background: "rgba(126,87,194,0.12)",
-              color: profileTheme.primaryDark,
+              background: alpha(profileTheme.primary, isDark ? 0.24 : 0.12),
+              color: isDark
+                ? profileTheme.primaryLight
+                : profileTheme.primaryDark,
             },
           },
         }}
@@ -115,8 +121,8 @@ const LandingAuthPanel = ({
             sx={{
               p: 1.5,
               borderRadius: 2,
-              background: "rgba(220,38,38,0.08)",
-              color: "#B91C1C",
+              background: alpha(theme.palette.error.main, 0.12),
+              color: "error.main",
               fontSize: "0.9rem",
             }}
           >
@@ -155,7 +161,7 @@ const LandingAuthPanel = ({
           borderRadius: 2,
           fontWeight: 600,
           borderColor: "rgba(126,87,194,0.4)",
-          color: profileTheme.primaryDark,
+          color: isDark ? profileTheme.primaryLight : profileTheme.primaryDark,
         }}
       >
         {googleLoading ? "Connecting..." : "Continue with Google"}

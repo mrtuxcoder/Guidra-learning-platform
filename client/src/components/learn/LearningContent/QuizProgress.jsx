@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, LinearProgress } from "@mui/material";
+import { Box, Typography, LinearProgress, useTheme, alpha } from "@mui/material";
 
 const QuizProgress = ({
   answeredCount,
@@ -8,6 +8,7 @@ const QuizProgress = ({
   colorPalette,
   isMobile,
 }) => {
+  const theme = useTheme();
   const progressPercentage =
     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
@@ -42,7 +43,9 @@ const QuizProgress = ({
         sx={{
           height: 6,
           borderRadius: 3,
-          backgroundColor: colorPalette[100],
+          backgroundColor: theme.palette.mode === "dark" 
+            ? alpha(colorPalette[500], 0.2)
+            : colorPalette[100],
           "& .MuiLinearProgress-bar": {
             backgroundColor: allQuestionsAnswered
               ? "#10b981"

@@ -45,7 +45,7 @@ const MermaidDiagram = ({
     try {
       mermaid.initialize({
         startOnLoad: false,
-        theme: "default",
+        theme: theme.palette.mode === "dark" ? "dark" : "default",
         securityLevel: "loose",
         fontFamily: "Arial, sans-serif",
         flowchart: {
@@ -56,7 +56,7 @@ const MermaidDiagram = ({
         themeCSS: `
           .mermaid {
             font-size: ${isMobile ? "18px" : "16px"} !important;
-            background: white;
+            background: transparent;
           }
           .node rect, .node circle, .node ellipse, .node polygon {
             stroke-width: 2px !important;
@@ -137,10 +137,34 @@ const MermaidDiagram = ({
     ].join("\n");
   }, []);
 
+  const isMermaidSyntaxValid = useCallback(async (input) => {
+    if (!input || !input.trim()) return false;
+
+    try {
+      await mermaid.parse(input);
+      return true;
+    } catch (parseError) {
+      return false;
+    }
+  }, []);
+
+  const sanitizeMermaidSvg = useCallback((svg) => {
+    if (!svg || typeof svg !== "string") return svg;
+
+    return svg
+      .replace(
+        /<text[^>]*>[^]*?(Syntax error in text|mermaid version)[^]*?<\/text>/gi,
+        ""
+      )
+      .replace(/Syntax error in text/gi, "")
+      .replace(/mermaid version\s*\d+\.\d+\.\d+/gi, "");
+  }, []);
+
   // Render diagram effect
   useEffect(() => {
     let isMounted = true;
     let consoleErrorOriginal = null;
+    let consoleWarnOriginal = null;
 
     const renderDiagram = async () => {
       if (!isMounted || !ref.current || !chart) {
@@ -163,23 +187,44 @@ const MermaidDiagram = ({
         let finalSvg;
 
         try {
+          const shouldSuppress = (message) =>
+            typeof message === "string" &&
+            (message.includes("mermaid") ||
+              message.includes("Syntax error in text"));
+
           consoleErrorOriginal = console.error;
+          consoleWarnOriginal = console.warn;
+
           console.error = (...args) => {
-            if (
-              args[0] &&
-              typeof args[0] === "string" &&
-              args[0].includes("mermaid")
-            ) {
+            const firstArg = args[0];
+            if (shouldSuppress(firstArg) || shouldSuppress(firstArg?.message)) {
               return;
             }
             consoleErrorOriginal.apply(console, args);
           };
 
+          console.warn = (...args) => {
+            const firstArg = args[0];
+            if (shouldSuppress(firstArg) || shouldSuppress(firstArg?.message)) {
+              return;
+            }
+            consoleWarnOriginal.apply(console, args);
+          };
+
+          const isValid = await isMermaidSyntaxValid(cleanedChart);
+          if (!isValid) {
+            throw new Error("Invalid mermaid syntax");
+          }
+
           const result = await mermaid.render(id, cleanedChart);
-          finalSvg = result.svg;
+          finalSvg = sanitizeMermaidSvg(result.svg);
         } catch (renderError) {
           try {
             const fallbackChart = buildFallbackMindmap();
+            const fallbackValid = await isMermaidSyntaxValid(fallbackChart);
+            if (!fallbackValid) {
+              throw new Error("Fallback mermaid syntax invalid");
+            }
             const fallbackId = `mermaid-${Math.random()
               .toString(36)
               .slice(2, 11)}`;
@@ -187,7 +232,7 @@ const MermaidDiagram = ({
               fallbackId,
               fallbackChart
             );
-            finalSvg = fallbackResult.svg;
+            finalSvg = sanitizeMermaidSvg(fallbackResult.svg);
           } catch (fallbackError) {
             if (
               !autoRegenerated &&
@@ -206,6 +251,9 @@ const MermaidDiagram = ({
           if (consoleErrorOriginal) {
             console.error = consoleErrorOriginal;
           }
+          if (consoleWarnOriginal) {
+            console.warn = consoleWarnOriginal;
+          }
         }
 
         if (finalSvg && isMounted) {
@@ -214,6 +262,24 @@ const MermaidDiagram = ({
           svgContainer.style.width = "100%";
           svgContainer.style.textAlign = "center";
           svgContainer.style.cursor = "pointer";
+
+          const shouldStripNode = (node) => {
+            if (!node || !node.textContent) return false;
+            const text = node.textContent.toLowerCase();
+            return (
+              text.includes("syntax error in text") ||
+              text.includes("mermaid version") ||
+              text.includes("💣")
+            );
+          };
+
+          svgContainer
+            .querySelectorAll("text, tspan, foreignObject, div, span")
+            .forEach((node) => {
+              if (shouldStripNode(node)) {
+                node.remove();
+              }
+            });
 
           const svgElement = svgContainer.querySelector("svg");
           if (svgElement) {
@@ -281,6 +347,9 @@ const MermaidDiagram = ({
       if (consoleErrorOriginal) {
         console.error = consoleErrorOriginal;
       }
+      if (consoleWarnOriginal) {
+        console.warn = consoleWarnOriginal;
+      }
     };
   }, [
     chart,
@@ -314,7 +383,7 @@ const MermaidDiagram = ({
           borderColor: error ? colors[300] : colors[100],
           borderRadius: 3,
           padding: isMobile ? 2 : 3,
-          background: "white",
+          bgcolor: "background.paper",
           transition: "all 0.3s ease",
           cursor: "pointer",
           minHeight: isMobile ? "480px" : "380px",

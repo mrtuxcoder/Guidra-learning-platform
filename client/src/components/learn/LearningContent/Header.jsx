@@ -5,8 +5,9 @@ const Header = ({ title, topic, isMobile, colorPalette }) => (
   <Box
     sx={{
       p: isMobile ? 1 : 1.5,
-      borderBottom: `1px solid ${colorPalette[100]}`,
-      background: "white",
+      borderBottom: "1px solid",
+      borderColor: "divider",
+      bgcolor: "background.paper",
     }}
   >
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -15,7 +16,7 @@ const Header = ({ title, topic, isMobile, colorPalette }) => (
         variant={isMobile ? "subtitle2" : "h6"}
         fontWeight="600"
         sx={{
-          color: colorPalette[700],
+          color: "text.primary",
           fontSize: isMobile ? "0.9rem" : "1.25rem",
           lineHeight: 1.2,
           mb: 0.25,

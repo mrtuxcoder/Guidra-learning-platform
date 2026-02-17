@@ -1,4 +1,7 @@
 const User = require("../../models/User");
+const {
+  ensureDailyRegenWindow,
+} = require("../../utils/daily-regen");
 
 // ===== PROFILE & UTILITY CONTROLLERS =====
 
@@ -18,6 +21,14 @@ exports.profileController = async (req, res) => {
     const userData = await User.findById(userId).select("-password");
     if (!userData) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    ensureDailyRegenWindow(userData);
+    if (
+      userData.isModified("regenDailyCount") ||
+      userData.isModified("regenDailyResetAt")
+    ) {
+      await userData.save({ validateBeforeSave: false });
     }
 
     return res.status(200).json({ user: userData });

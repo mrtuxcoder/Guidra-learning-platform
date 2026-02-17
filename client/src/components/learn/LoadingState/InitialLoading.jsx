@@ -1,10 +1,12 @@
 import React from "react";
-import { Box, Typography, Fade } from "@mui/material";
+import { Box, Typography, Fade, alpha, useTheme } from "@mui/material";
 import GradientLoader from "./GradientLoader";
 import FloatingParticles from "./FloatingParticles";
 import AnimatedProgressBar from "./AnimatedProgressBar";
 
 const InitialLoading = ({ isMobile, colorPalette }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const gradientColors = colorPalette
     ? {
         start: colorPalette[700] || "#7C3AED",
@@ -19,9 +21,16 @@ const InitialLoading = ({ isMobile, colorPalette }) => {
         light: "#C4B5FD",
       };
 
-  const backgroundGradient = colorPalette
-    ? `linear-gradient(135deg, ${colorPalette[50]} 0%, ${colorPalette[100]} 30%, #FFFFFF 70%)`
-    : "linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 30%, #FFFFFF 70%)";
+  const backgroundGradient = isDark
+    ? `linear-gradient(135deg, ${alpha(
+        theme.palette.primary.main,
+        0.18
+      )} 0%, ${alpha(theme.palette.background.default, 0.95)} 55%, ${
+        theme.palette.background.default
+      } 100%)`
+    : colorPalette
+      ? `linear-gradient(135deg, ${colorPalette[50]} 0%, ${colorPalette[100]} 30%, #FFFFFF 70%)`
+      : "linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 30%, #FFFFFF 70%)";
 
   return (
     <Fade in={true} timeout={800}>
@@ -161,7 +170,7 @@ const InitialLoading = ({ isMobile, colorPalette }) => {
             <Typography
               variant={isMobile ? "body1" : "h6"}
               sx={{
-                color: "#6B7280",
+                color: "text.secondary",
                 fontWeight: "400",
                 mb: isMobile ? 2 : 3,
                 lineHeight: 1.6,

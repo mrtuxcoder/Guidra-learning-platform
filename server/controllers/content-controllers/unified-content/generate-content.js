@@ -7,6 +7,11 @@ const buildContentFromAI = require('../../../utils/content/response/buildContent
 const crypto = require("crypto");
 const validateContentStructure = require("../../../utils/content/validation/validate-content-structure");
 const { saveToCache, saveComponentToCache } = require("../../../utils/cache/save-cache");
+const {
+  DAILY_REGEN_LIMIT,
+  ensureDailyRegenWindow,
+  getDailyRegenRemaining,
+} = require("../../../utils/daily-regen");
 
 
 
@@ -77,6 +82,18 @@ exports.generateContentController = async (req, res) => {
       });
     }
 
+    // Check daily regeneration limit for new content generation
+    ensureDailyRegenWindow(user);
+    const dailyRemaining = getDailyRegenRemaining(user);
+    if (dailyRemaining <= 0) {
+      return res.status(429).json({
+        message: "Daily regeneration limit reached (max 6 per day)",
+        limit: DAILY_REGEN_LIMIT,
+        dailyRemaining: 0,
+        dailyResetAt: user.regenDailyResetAt,
+      });
+    }
+
     // Generate prompt for content generation
     const prompt = generateUnifiedPrompt(user, topic, subtopic);
 
@@ -91,7 +108,12 @@ exports.generateContentController = async (req, res) => {
     if (topicProgress) {
       topicProgress.lastAccessed = new Date();
     }
+    
+    // Increment daily regeneration count
+    user.regenDailyCount = Number(user.regenDailyCount || 0) + 1;
     await user.save();
+    
+    const newDailyRemaining = getDailyRegenRemaining(user);
 
     // Build content from AI response
     const contentData = await buildContentFromAI(
@@ -123,6 +145,9 @@ exports.generateContentController = async (req, res) => {
       cached: false,
       version: versionEntry.versionNumber,
       data: validatedContent,
+      dailyLimit: DAILY_REGEN_LIMIT,
+      dailyRemaining: newDailyRemaining,
+      dailyResetAt: user.regenDailyResetAt,
     });
   } catch (error) {
     console.error("Error in generateContentController:", error);

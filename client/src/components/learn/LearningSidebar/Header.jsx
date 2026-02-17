@@ -7,15 +7,16 @@ const Header = ({ colorPalette }) => {
     <Box
       sx={{
         p: 3,
-        borderBottom: `1px solid ${colorPalette[100]}`,
-        background: "white",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
       }}
     >
       <Typography
         variant="h6"
         fontWeight="700"
         sx={{
-          color: colorPalette[700],
+          color: "text.primary",
           display: "flex",
           alignItems: "center",
           gap: 1.5,

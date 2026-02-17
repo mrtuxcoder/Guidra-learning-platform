@@ -142,7 +142,7 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
                 >
                   {action.icon}
                 </Box>
-                <Typography sx={{ fontWeight: 700, color: "#1e293b" }}>
+                <Typography sx={{ fontWeight: 700, color: "text.primary" }}>
                   {action.label}
                 </Typography>
                 <Button

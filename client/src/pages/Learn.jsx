@@ -24,12 +24,14 @@ import {
   updateSubtopicProgress,
   incrementGenerationCount,
   getGenerationCounts,
+  getCachedSubtopics,
 } from "../api/learning";
 import LearningSidebar from "../components/learn/LearningSidebar/index";
 import LearningHeader from "../components/learn/LearningHeader/index";
 import LearningContent from "../components/learn/LearningContent/index";
 import WelcomeState from "../components/learn/WelcomeState/index";
 import LoadingState from "../components/learn/LoadingState/index";
+import { useDailyRegen } from "../contexts/DailyRegenContext";
 
 // Consistent color palette
 const purplePalette = {
@@ -60,6 +62,11 @@ export default function Learning() {
   const [contentInfo, setContentInfo] = useState({ cached: false, version: 1 });
   const [generationCounts, setGenerationCounts] = useState({});
   const [contentCache, setContentCache] = useState({});
+  const [cachedSubtopics, setCachedSubtopics] = useState([]);
+  
+  // Use daily regen context
+  const { dailyRegenRemaining, dailyRegenResetAt, updateDailyRegen } = useDailyRegen();
+  
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showError, setShowError] = useState(false);
   const [quizPromptOpen, setQuizPromptOpen] = useState(false);
@@ -155,6 +162,8 @@ export default function Learning() {
       setError("");
       const { data } = await getProfile();
       const progressTopics = data.user.progress || [];
+      const dailyUsed = Number(data.user.regenDailyCount || 0);
+      updateDailyRegen(Math.max(0, 6 - dailyUsed), data.user.regenDailyResetAt || null);
       const orderedTopics = getOrderedTopics(progressTopics);
 
       if (preferredTopicName) {
@@ -269,7 +278,6 @@ export default function Learning() {
       try {
         setContentLoading(true);
         setContentError("");
-
         const cacheKey = `${effectiveTopic}-${subtopic.name}`;
         if (contentCache[cacheKey]) {
           setContent(contentCache[cacheKey].content);
@@ -285,6 +293,12 @@ export default function Learning() {
 
         if (!data.cached) {
           await handleIncrementGenerationCount(subtopic.name, effectiveTopic);
+          // Update daily regen count for initial generation
+          if (typeof data.dailyRemaining === "number") {
+            updateDailyRegen(data.dailyRemaining, data.dailyResetAt);
+          } else {
+            updateDailyRegen();
+          }
         }
 
         setContent(data.data);
@@ -308,6 +322,13 @@ export default function Learning() {
       } catch (err) {
         const errorMessage =
           err.response?.data?.message || "Failed to generate content";
+        // Update daily regen count if returned in error response (e.g., when limit reached)
+        if (typeof err.response?.data?.dailyRemaining === "number") {
+          updateDailyRegen(
+            err.response.data.dailyRemaining,
+            err.response.data.dailyResetAt || null
+          );
+        }
         setContentError(errorMessage);
         setShowError(true);
       } finally {
@@ -319,19 +340,37 @@ export default function Learning() {
       selectedSubtopic,
       contentCache,
       handleIncrementGenerationCount,
+      updateDailyRegen,
     ]
   );
 
   const handleSelectSubtopic = useCallback(
     async (subtopic, topicOverride) => {
+      const effectiveTopic = topicOverride || selectedTopic;
+      const cacheKey = `${effectiveTopic}-${subtopic.name}`;
+      const cachedSet = new Set(
+        cachedSubtopics.map((name) => String(name).toLowerCase())
+      );
+      const normalizedName = String(subtopic?.name || "").toLowerCase();
+
+      if (
+        dailyRegenRemaining <= 0 &&
+        !contentCache[cacheKey] &&
+        !cachedSet.has(normalizedName)
+      ) {
+        setContentError(
+          "Daily regeneration limit reached. Cached subtopics only."
+        );
+        setShowError(true);
+        return;
+      }
+
       if (topicOverride) {
         setSelectedTopic(topicOverride);
       }
       setSelectedSubtopic(subtopic);
       setContentError("");
 
-      const effectiveTopic = topicOverride || selectedTopic;
-      const cacheKey = `${effectiveTopic}-${subtopic.name}`;
       if (contentCache[cacheKey]) {
         setContent(contentCache[cacheKey].content);
         setContentInfo(contentCache[cacheKey].info);
@@ -342,15 +381,22 @@ export default function Learning() {
         setMobileDrawerOpen(false);
       }
     },
-    [selectedTopic, contentCache, handleGenerateContent, isMobile]
+    [
+      selectedTopic,
+      contentCache,
+      handleGenerateContent,
+      isMobile,
+      dailyRegenRemaining,
+      cachedSubtopics,
+    ]
   );
 
   const getRemainingGenerations = useCallback(
     (subtopicName) => {
       const used = generationCounts[subtopicName] || 0;
-      return Math.max(0, MAX_GENERATIONS - used);
+      return Math.max(0, Math.min(MAX_GENERATIONS - used, dailyRegenRemaining));
     },
-    [generationCounts, MAX_GENERATIONS]
+    [generationCounts, MAX_GENERATIONS, dailyRegenRemaining]
   );
 
   const canGenerate = useCallback(
@@ -360,6 +406,50 @@ export default function Learning() {
     [getRemainingGenerations]
   );
 
+  const cachedSubtopicSet = useMemo(() => {
+    return new Set(cachedSubtopics.map((name) => name.toLowerCase()));
+  }, [cachedSubtopics]);
+
+  const displayedSubtopics = useMemo(() => {
+    if (dailyRegenRemaining > 0) {
+      return subtopics;
+    }
+
+    return subtopics.filter((sub) =>
+      cachedSubtopicSet.has(sub?.name?.toLowerCase())
+    );
+  }, [dailyRegenRemaining, subtopics, cachedSubtopicSet]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchCached = async () => {
+      if (!selectedTopic || dailyRegenRemaining > 0) {
+        setCachedSubtopics([]);
+        return;
+      }
+
+      try {
+        const { data } = await getCachedSubtopics(selectedTopic);
+        const serverSubtopics = data?.subtopics || data?.data?.subtopics || [];
+        if (isActive) {
+          setCachedSubtopics(serverSubtopics);
+        }
+      } catch (err) {
+        console.error("Failed to fetch cached subtopics:", err);
+        if (isActive) {
+          setCachedSubtopics([]);
+        }
+      }
+    };
+
+    fetchCached();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedTopic, dailyRegenRemaining]);
+
   const handleRegenerateContent = useCallback(async () => {
     if (!selectedSubtopic || !selectedTopic) return;
 
@@ -367,6 +457,12 @@ export default function Learning() {
 
     if (!canGenerate(subtopicName)) {
       setContentError(`Generation limit reached (${MAX_GENERATIONS} times)`);
+      setShowError(true);
+      return;
+    }
+
+    if (dailyRegenRemaining <= 0) {
+      setContentError("Daily regeneration limit reached (max 6 per day)");
       setShowError(true);
       return;
     }
@@ -388,6 +484,12 @@ export default function Learning() {
         source: "ai",
       });
 
+      if (typeof data.dailyRemaining === "number") {
+        updateDailyRegen(data.dailyRemaining, data.dailyResetAt);
+      } else {
+        updateDailyRegen();
+      }
+
       const cacheKey = `${selectedTopic}-${subtopicName}`;
       setContentCache((prev) => ({
         ...prev,
@@ -403,6 +505,12 @@ export default function Learning() {
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || "Failed to regenerate content";
+      if (typeof err.response?.data?.dailyRemaining === "number") {
+        updateDailyRegen(
+          err.response.data.dailyRemaining,
+          err.response.data.dailyResetAt || null
+        );
+      }
       setContentError(errorMessage);
       setShowError(true);
     } finally {
@@ -413,7 +521,12 @@ export default function Learning() {
     selectedSubtopic,
     canGenerate,
     handleIncrementGenerationCount,
+    dailyRegenRemaining,
   ]);
+
+  const handleDailyRegenUpdate = useCallback((nextRemaining, nextResetAt) => {
+    updateDailyRegen(nextRemaining, nextResetAt);
+  }, [updateDailyRegen]);
 
   const handleUpdateUnderstanding = useCallback(
     async (subtopic, newUnderstanding) => {
@@ -579,10 +692,10 @@ export default function Learning() {
   }, [selectedSubtopic, selectedTopic, getOrderedSubtopics]);
 
   const calculateProgress = useCallback(() => {
-    if (!subtopics.length) return 0;
-    const completed = subtopics.filter((sub) => sub.completed).length;
-    return (completed / subtopics.length) * 100;
-  }, [subtopics]);
+    if (!originalSubtopics.length) return 0;
+    const completed = originalSubtopics.filter((sub) => sub.completed).length;
+    return (completed / originalSubtopics.length) * 100;
+  }, [originalSubtopics]);
 
   const handleCloseError = useCallback(() => {
     setShowError(false);
@@ -617,18 +730,20 @@ export default function Learning() {
   );
 
   const handleNavigateToFirstIncomplete = useCallback(() => {
-    const firstIncomplete = subtopics.find((sub) => sub && !sub.completed);
+    const firstIncomplete = displayedSubtopics.find(
+      (sub) => sub && !sub.completed
+    );
     if (firstIncomplete) {
       handleSelectSubtopic(firstIncomplete);
     }
-  }, [subtopics, handleSelectSubtopic]);
+  }, [displayedSubtopics, handleSelectSubtopic]);
 
   return (
     <Box
       sx={{
         display: "flex",
         height: "100vh",
-        background: "white",
+        bgcolor: "background.default",
         flexDirection: { xs: "column", md: "row" },
         overflow: "hidden",
       }}
@@ -646,13 +761,13 @@ export default function Learning() {
               height: "100dvh",
               overflow: "auto",
               WebkitOverflowScrolling: "touch",
-              background: "white",
+              bgcolor: "background.paper",
             },
           }}
         >
           <LearningSidebar
             topics={topics}
-            subtopics={subtopics}
+            subtopics={displayedSubtopics}
             selectedTopic={selectedTopic}
             selectedSubtopic={selectedSubtopic}
             updatingSubtopic={updatingSubtopic}
@@ -670,12 +785,13 @@ export default function Learning() {
           sx={{
             width: 300,
             flexShrink: 0,
-            borderRight: "1px solid rgba(126, 87, 194, 0.1)",
+            borderRight: "1px solid",
+            borderColor: "divider",
           }}
         >
           <LearningSidebar
             topics={topics}
-            subtopics={subtopics}
+            subtopics={displayedSubtopics}
             selectedTopic={selectedTopic}
             selectedSubtopic={selectedSubtopic}
             updatingSubtopic={updatingSubtopic}
@@ -706,7 +822,7 @@ export default function Learning() {
           selectedTopic={selectedTopic}
           selectedSubtopic={selectedSubtopic}
           subtopics={originalSubtopics}
-          displaySubtopics={subtopics}
+          displaySubtopics={displayedSubtopics}
           updatingSubtopic={updatingSubtopic}
           contentInfo={contentInfo}
           remainingGenerations={
@@ -773,10 +889,27 @@ export default function Learning() {
           aria-labelledby="quiz-required-title"
           maxWidth="xs"
           fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 2.5,
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 18px 50px rgba(0, 0, 0, 0.45)"
+                  : "0 18px 50px rgba(15, 23, 42, 0.12)",
+            },
+          }}
         >
-          <DialogTitle id="quiz-required-title">Quiz Required</DialogTitle>
+          <DialogTitle
+            id="quiz-required-title"
+            sx={{ fontWeight: 700, color: "text.primary" }}
+          >
+            Quiz Required
+          </DialogTitle>
           <DialogContent>
-            <DialogContentText>
+            <DialogContentText sx={{ color: "text.secondary" }}>
               {quizPromptMessage ||
                 "Please complete the quiz before marking this subtopic as complete."}
             </DialogContentText>
@@ -784,7 +917,7 @@ export default function Learning() {
           <DialogActions>
             <Button
               onClick={() => setQuizPromptOpen(false)}
-              sx={{ textTransform: "none", fontWeight: 600 }}
+              sx={{ textTransform: "none", fontWeight: 600, color: "text.primary" }}
             >
               OK
             </Button>
@@ -817,13 +950,15 @@ export default function Learning() {
               colorPalette={purplePalette}
               onQuizSubmitted={handleQuizSubmitted}
               onVersionDialogOpen={handleRegisterVersionDialogOpener}
+              dailyRemaining={dailyRegenRemaining}
+              onDailyRegenUpdate={handleDailyRegenUpdate}
             />
           ) : (
             <WelcomeState
               subtopicName={selectedSubtopic?.name}
               isReady={!!selectedSubtopic}
               onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
-              subtopics={subtopics}
+              subtopics={displayedSubtopics}
               topics={topics}
               selectedTopic={selectedTopic}
               isDataLoading={loading}

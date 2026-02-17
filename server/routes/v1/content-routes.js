@@ -13,6 +13,9 @@ const {
   getVersionContentController,
 } = require('../../controllers/content-controllers/unified-content/generate-content')
 const {regenerateContentController} = require('../../controllers/content-controllers/unified-content/regenerate-content')
+const {
+  getCachedSubtopicsController,
+} = require("../../controllers/content-controllers/content-cache-controller");
 
 
 // Content teaching
@@ -35,6 +38,9 @@ router.post(
   authMiddleware,
   getComponentVersionController
 );
+
+// Cache metadata
+router.get("/cache/subtopics", authMiddleware, getCachedSubtopicsController);
 
 
 module.exports = router;

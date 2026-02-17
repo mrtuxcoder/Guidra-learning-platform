@@ -1,5 +1,13 @@
 import React from "react";
-import { Box, Container, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  useTheme,
+  useMediaQuery,
+  alpha,
+} from "@mui/material";
 import { profileTheme } from "../profile/constants";
 
 const problemPoints = [
@@ -14,7 +22,7 @@ const LandingProblem = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
-    <Box sx={{ py: { xs: 5, md: 7 }, background: "white" }}>
+    <Box sx={{ py: { xs: 5, md: 7 }, background: "background.paper" }}>
       <Container maxWidth="lg">
         <Typography
           variant="h4"
@@ -39,7 +47,10 @@ const LandingProblem = () => {
                   p: 2.5,
                   borderRadius: 2,
                   border: `1px solid ${profileTheme.border}`,
-                  background: "rgba(126,87,194,0.05)",
+                  background: alpha(
+                    theme.palette.primary.main,
+                    theme.palette.mode === "dark" ? 0.18 : 0.05
+                  ),
                   ...(isMobile && {
                     width: "100%",
                     maxWidth: "100%",
@@ -47,7 +58,9 @@ const LandingProblem = () => {
                   }),
                 }}
               >
-                <Typography sx={{ color: "#475569" }}>{point}</Typography>
+                <Typography sx={{ color: "text.secondary" }}>
+                  {point}
+                </Typography>
               </Box>
             </Grid>
           ))}

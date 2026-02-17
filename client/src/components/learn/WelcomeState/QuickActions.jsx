@@ -49,7 +49,7 @@ const QuickActions = ({
       <Typography
         variant="h6"
         fontWeight="700"
-        sx={{ mb: 3, color: "#1e293b" }}
+        sx={{ mb: 3, color: "text.primary" }}
       >
         Learning Suggestions
       </Typography>

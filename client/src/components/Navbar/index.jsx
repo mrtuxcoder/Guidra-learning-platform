@@ -18,6 +18,7 @@ import UserAvatar from "./components/UserAvatar";
 import AuthButtons from "./components/AuthButtons";
 import UserMenu from "./components/UserMenu";
 import OnboardingTour from "./components/OnboardingTour";
+import DailyRegenBadge from "./components/DailyRegenBadge";
 
 // Import hooks and constants
 import { useNavbar } from "./hooks/useNavbar";
@@ -36,6 +37,7 @@ const Navbar = () => {
     randomIcon,
     tourOpen,
     activeTourStep,
+    dailyRegenRemaining,
     getUserInitial,
     handleUserMenu,
     handleMenuClose,
@@ -54,12 +56,14 @@ const Navbar = () => {
           position="sticky"
           sx={{
             bgcolor: "background.paper",
-            background: `linear-gradient(135deg, ${purpleTheme.subtleBg} 0%, #FFFFFF 100%)`,
             color: "text.primary",
-            boxShadow: "0 1px 8px rgba(126, 87, 194, 0.08)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 1px 8px rgba(0, 0, 0, 0.3)"
+                : "0 1px 8px rgba(126, 87, 194, 0.08)",
             backdropFilter: "blur(12px)",
             borderBottom: "1px solid",
-            borderColor: "rgba(126, 87, 194, 0.12)",
+            borderColor: "divider",
           }}
         >
           <Toolbar
@@ -104,23 +108,38 @@ const Navbar = () => {
               }}
             >
               {!isLoading && user && (
-                <IconButton
-                  size="small"
-                  aria-label="settings"
-                  onClick={() => navigate("/settings")}
-                  sx={{
-                    border: `2px solid ${purpleTheme.primaryLight}30`,
-                    bgcolor: "white",
-                    width: { xs: 36, sm: 40 },
-                    height: { xs: 36, sm: 40 },
-                    color: purpleTheme.primaryDark,
-                    "&:hover": {
-                      bgcolor: purpleTheme.lightBg,
-                    },
-                  }}
-                >
-                  <Settings sx={{ fontSize: 20 }} />
-                </IconButton>
+                <>
+                  <DailyRegenBadge
+                    remaining={dailyRegenRemaining}
+                    isLoading={isLoading}
+                  />
+                  <IconButton
+                    size="small"
+                    aria-label="settings"
+                    onClick={() => navigate("/settings")}
+                    sx={{
+                      border: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "2px solid rgba(149, 117, 205, 0.3)"
+                          : `2px solid ${purpleTheme.primaryLight}30`,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(149, 117, 205, 0.1)"
+                          : "white",
+                      width: { xs: 36, sm: 40 },
+                      height: { xs: 36, sm: 40 },
+                      color: "primary.main",
+                      "&:hover": {
+                        bgcolor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(149, 117, 205, 0.2)"
+                            : purpleTheme.lightBg,
+                      },
+                    }}
+                  >
+                    <Settings sx={{ fontSize: 20 }} />
+                  </IconButton>
+                </>
               )}
               <UserAvatar
                 isLoading={isLoading}

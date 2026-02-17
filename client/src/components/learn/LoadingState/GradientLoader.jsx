@@ -30,7 +30,7 @@ const GradientLoader = ({ size = 80, speed = 2, colors }) => {
           position: "absolute",
           inset: 4,
           borderRadius: "50%",
-          background: "white",
+          bgcolor: "background.paper",
         },
         "@keyframes spin": {
           "0%": { transform: "rotate(0deg)" },

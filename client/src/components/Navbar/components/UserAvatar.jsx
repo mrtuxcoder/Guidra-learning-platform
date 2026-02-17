@@ -1,5 +1,12 @@
 import React from "react";
-import { IconButton, Avatar, Badge, CircularProgress } from "@mui/material";
+import {
+  IconButton,
+  Avatar,
+  Badge,
+  CircularProgress,
+  alpha,
+  useTheme,
+} from "@mui/material";
 import { getThemeGradient, purpleTheme } from "../constants.jsx";
 
 const UserAvatar = ({
@@ -9,14 +16,23 @@ const UserAvatar = ({
   getUserInitial,
   handleUserMenu,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   if (isLoading) {
     return (
       <IconButton
         size="small"
         disabled
         sx={{
-          border: `2px solid ${purpleTheme.primaryLight}20`,
-          bgcolor: "white",
+          border: `2px solid ${
+            isDark
+              ? alpha(theme.palette.primary.main, 0.35)
+              : `${purpleTheme.primaryLight}20`
+          }`,
+          bgcolor: isDark
+            ? alpha(theme.palette.common.white, 0.06)
+            : "white",
           width: { xs: 36, sm: 40 },
           height: { xs: 36, sm: 40 },
         }}
@@ -39,12 +55,20 @@ const UserAvatar = ({
         onClick={handleUserMenu}
         data-tour="user-menu"
         sx={{
-          border: `2px solid ${purpleTheme.primaryLight}30`,
-          bgcolor: "white",
+          border: `2px solid ${
+            isDark
+              ? alpha(theme.palette.primary.main, 0.4)
+              : `${purpleTheme.primaryLight}30`
+          }`,
+          bgcolor: isDark
+            ? alpha(theme.palette.common.white, 0.08)
+            : "white",
           width: { xs: 36, sm: 40 },
           height: { xs: 36, sm: 40 },
           "&:hover": {
-            bgcolor: purpleTheme.lightBg,
+            bgcolor: isDark
+              ? alpha(theme.palette.common.white, 0.16)
+              : purpleTheme.lightBg,
           },
           cursor: "pointer",
         }}

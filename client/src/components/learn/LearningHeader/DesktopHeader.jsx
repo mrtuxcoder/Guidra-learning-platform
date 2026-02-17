@@ -30,7 +30,7 @@ const DesktopHeader = ({
       sx={{
         borderRadius: 3,
         boxShadow: "0 4px 24px rgba(126, 87, 194, 0.08)",
-        background: "white",
+        bgcolor: "background.paper",
         border: "1px solid rgba(126, 87, 194, 0.1)",
         overflow: "visible",
         mb: 3,

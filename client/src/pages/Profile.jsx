@@ -68,7 +68,7 @@ export default function Profile() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        bgcolor: "background.default",
       }}
     >
       {/* Enhanced Header */}
@@ -92,7 +92,7 @@ export default function Profile() {
             left: 0,
             right: 0,
             height: 20,
-            background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+            bgcolor: "background.default",
             borderTopLeftRadius: 40,
             borderTopRightRadius: 40,
           }}

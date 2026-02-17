@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getProfile } from '../../../api';
 import { completeLogout } from '../../../api';
 import { iconSet } from '../constants.jsx';
+import { useDailyRegen } from '../../../contexts/DailyRegenContext';
 
 export const useNavbar = (navigate, location, isMobile) => {
   const [user, setUser] = useState(null);
@@ -10,6 +11,9 @@ export const useNavbar = (navigate, location, isMobile) => {
   const [randomIcon, setRandomIcon] = useState(null);
   const [tourOpen, setTourOpen] = useState(false);
   const [activeTourStep, setActiveTourStep] = useState(0);
+  
+  // Use daily regen context
+  const { dailyRegenRemaining } = useDailyRegen();
 
   // Set random icon on component mount
   useEffect(() => {
@@ -111,6 +115,7 @@ export const useNavbar = (navigate, location, isMobile) => {
     randomIcon,
     tourOpen,
     activeTourStep,
+    dailyRegenRemaining,
     getUserInitial,
     handleUserMenu,
     handleMenuClose,

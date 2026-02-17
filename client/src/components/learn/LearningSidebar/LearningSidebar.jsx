@@ -74,11 +74,15 @@ const LearningSidebar = ({
         height: isMobile ? "100dvh" : "100%",
         minHeight: isMobile ? "100dvh" : "auto",
         borderRadius: { xs: 0, md: 2 },
-        boxShadow: { xs: "none", md: "0 2px 24px rgba(126, 87, 194, 0.08)" },
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "none"
+            : { xs: "none", md: "0 2px 24px rgba(126, 87, 194, 0.08)" },
         display: "flex",
         flexDirection: "column",
-        background: "white",
-        border: { xs: "none", md: `1px solid ${colorPalette[100]}` },
+        bgcolor: "background.paper",
+        border: { xs: "none", md: "1px solid" },
+        borderColor: { xs: "none", md: "divider" },
         position: "relative",
         overflow: "hidden",
         "& ::-webkit-scrollbar": {

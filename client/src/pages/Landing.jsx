@@ -5,6 +5,7 @@ import {
   Fade,
   Slide,
   Typography,
+  alpha,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -23,6 +24,7 @@ import LandingAuthPanel from "../components/landing/LandingAuthPanel";
 const Landing = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isDark = theme.palette.mode === "dark";
   const location = useLocation();
   const navigate = useNavigate();
   const authRef = useRef(null);
@@ -146,8 +148,13 @@ const Landing = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
-        color: "#0f172a",
+        background: isDark
+          ? `radial-gradient(circle at top, ${alpha(
+              theme.palette.primary.main,
+              0.2
+            )} 0%, ${theme.palette.background.default} 55%)`
+          : "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        color: theme.palette.text.primary,
       }}
     >
       <Fade in={mounted} timeout={800}>
@@ -182,7 +189,10 @@ const Landing = () => {
           <LandingProgress />
           <LandingNavPreview />
 
-          <Box ref={authRef} sx={{ py: { xs: 5, md: 7 }, background: "white" }}>
+          <Box
+            ref={authRef}
+            sx={{ py: { xs: 5, md: 7 }, background: "background.paper" }}
+          >
             <Container maxWidth="lg">
               <Slide in={mounted} direction="up" timeout={700}>
                 <Box
@@ -204,11 +214,13 @@ const Landing = () => {
                     >
                       Start with a structured account
                     </Typography>
-                    <Typography sx={{ color: "#4B5563", mb: 2 }}>
+                    <Typography sx={{ color: "text.secondary", mb: 2 }}>
                       Your dashboard keeps lessons, versions, and revision paths
                       in one place. Switch between login and register any time.
                     </Typography>
-                    <Typography sx={{ color: "#6B7280", fontSize: "0.95rem" }}>
+                    <Typography
+                      sx={{ color: "text.secondary", fontSize: "0.95rem" }}
+                    >
                       Built for focused study sessions and exam preparation.
                     </Typography>
                   </Box>

@@ -45,7 +45,7 @@ export const profileTheme = {
 export const cardSx = {
   borderRadius: 3,
   border: `1px solid ${profileTheme.border}`,
-  background: "white",
+  bgcolor: "background.paper",
   boxShadow: profileTheme.softShadow,
 };
 

@@ -25,7 +25,7 @@ const DiagramView = ({
         transform: `scale(${zoomLevel})`,
         transformOrigin: "center center",
         transition: "transform 0.2s ease",
-        background: "white",
+        bgcolor: "background.paper",
         borderRadius: "12px",
         padding: isMobile ? "15px" : "25px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.15)",

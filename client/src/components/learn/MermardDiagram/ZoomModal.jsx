@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@mui/material";
+import { Dialog, DialogContent, useTheme } from "@mui/material";
 import DiagramControls from "./DiagramControls";
 import CodeView from "./CodeView";
 import DiagramView from "./DiagramView";
@@ -17,6 +17,8 @@ const ZoomModal = ({
   isRegenerating,
   remainingGenerations,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isRotated, setIsRotated] = useState(false);
   const [showCode, setShowCode] = useState(false);
@@ -43,8 +45,12 @@ const ZoomModal = ({
       fullScreen={isMobile}
       sx={{
         "& .MuiDialog-paper": {
-          background: "rgba(255, 255, 255, 0.98)",
+          background: isDark
+            ? "rgba(15, 23, 42, 0.92)"
+            : "rgba(255, 255, 255, 0.98)",
           backdropFilter: "blur(20px)",
+          color: theme.palette.text.primary,
+          border: `1px solid ${theme.palette.divider}`,
           maxHeight: "90vh",
           ...(isMobile && {
             margin: 0,
@@ -79,7 +85,7 @@ const ZoomModal = ({
           alignItems: "center",
           justifyContent: "center",
           minHeight: isMobile ? "calc(100vh - 80px)" : "70vh",
-          background: colors[50],
+          background: isDark ? theme.palette.background.default : colors[50],
           overflow: "auto",
           gap: 2,
           position: "relative",

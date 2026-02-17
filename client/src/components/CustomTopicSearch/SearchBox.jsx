@@ -41,7 +41,7 @@ const SearchBox = ({
                 ? "#4CAF50"
                 : "rgba(126, 87, 194, 0.2)"
             }`,
-            background: "white",
+            bgcolor: "background.paper",
             fontSize: "1rem",
           }}
         />

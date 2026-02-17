@@ -1,8 +1,11 @@
 import React from "react";
-import { Box, Button, Chip } from "@mui/material";
+import { Box, Button, Chip, alpha, useTheme } from "@mui/material";
 import { navItems, purpleTheme } from "../constants.jsx";
 
 const NavigationItems = ({ isMobile, isActive, navigate, user }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   if (!user) return null;
 
   if (isMobile) {
@@ -32,19 +35,33 @@ const NavigationItems = ({ isMobile, isActive, navigate, user }) => {
             px: 2,
             py: 0.75,
             color: isActive(item.path)
-              ? purpleTheme.primaryDark
+              ? isDark
+                ? theme.palette.primary.light
+                : purpleTheme.primaryDark
               : "text.secondary",
-            bgcolor: isActive(item.path) ? purpleTheme.lightBg : "transparent",
+            bgcolor: isActive(item.path)
+              ? isDark
+                ? alpha(theme.palette.primary.main, 0.18)
+                : purpleTheme.lightBg
+              : "transparent",
             border: isActive(item.path)
-              ? `1px solid ${purpleTheme.primaryLight}20`
+              ? `1px solid ${
+                  isDark
+                    ? alpha(theme.palette.primary.main, 0.35)
+                    : `${purpleTheme.primaryLight}20`
+                }`
               : "1px solid transparent",
             minWidth: "auto",
             fontSize: "0.9rem",
             position: "relative",
             "&:hover": {
               bgcolor: isActive(item.path)
-                ? purpleTheme.lightBg
-                : "rgba(126, 87, 194, 0.04)",
+                ? isDark
+                  ? alpha(theme.palette.primary.main, 0.22)
+                  : purpleTheme.lightBg
+                : isDark
+                  ? alpha(theme.palette.primary.main, 0.12)
+                  : "rgba(126, 87, 194, 0.04)",
             },
           }}
         >

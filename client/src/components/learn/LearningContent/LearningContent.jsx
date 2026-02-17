@@ -39,6 +39,8 @@ const LearningContent = ({
   onGenerateContent,
   colorPalette,
   userRemainingGenerations = 5,
+  dailyRemaining = 6,
+  onDailyRegenUpdate,
   onQuizSubmitted,
   onVersionDialogOpen,
 }) => {
@@ -64,6 +66,7 @@ const LearningContent = ({
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState("concept");
   const [limitMessage, setLimitMessage] = useState("");
+  const dailyLimitReached = dailyRemaining <= 0;
 
   // Register the open function with parent on mount
   React.useEffect(() => {
@@ -83,6 +86,11 @@ const LearningContent = ({
       return;
     }
 
+    if (dailyLimitReached) {
+      setLimitMessage("Daily regeneration limit reached (max 6 per day)");
+      return;
+    }
+
     try {
       setRegeneratingMindmap(true);
       const response = await generateComponent({
@@ -90,6 +98,15 @@ const LearningContent = ({
         subtopic: selectedSubtopic.name,
         component: "mindmap" 
       });
+
+      if (response?.data?.dailyRemaining !== undefined) {
+        onDailyRegenUpdate?.(
+          response.data.dailyRemaining,
+          response.data.dailyResetAt
+        );
+      } else {
+        onDailyRegenUpdate?.();
+      }
       
       if (response?.data?.mindmap) {
         setMindmapData(prev => ({
@@ -100,6 +117,18 @@ const LearningContent = ({
       }
     } catch (error) {
       console.error('Failed to regenerate mindmap:', error);
+      if (typeof error.response?.data?.dailyRemaining === "number") {
+        onDailyRegenUpdate?.(
+          error.response.data.dailyRemaining,
+          error.response.data.dailyResetAt
+        );
+      }
+      if (error.response?.status === 429) {
+        setLimitMessage(
+          error.response?.data?.message ||
+            "Daily regeneration limit reached (max 6 per day)"
+        );
+      }
       setMindmapData(prev => ({
         ...prev,
         hasError: true
@@ -111,6 +140,11 @@ const LearningContent = ({
 
   const handleComponentRegenerate = async (componentName) => {
     if (!selectedTopic || !selectedSubtopic?.name) {
+      return;
+    }
+
+    if (dailyLimitReached) {
+      setLimitMessage("Daily regeneration limit reached (max 6 per day)");
       return;
     }
 
@@ -131,6 +165,15 @@ const LearningContent = ({
         component: componentName,
       });
 
+      if (response?.data?.dailyRemaining !== undefined) {
+        onDailyRegenUpdate?.(
+          response.data.dailyRemaining,
+          response.data.dailyResetAt
+        );
+      } else {
+        onDailyRegenUpdate?.();
+      }
+
       const newValue = response?.data?.[componentName];
       if (newValue !== undefined) {
         setComponentOverrides((prev) => ({
@@ -145,6 +188,18 @@ const LearningContent = ({
 
     } catch (error) {
       console.error(`Failed to regenerate ${componentName}:`, error);
+      if (typeof error.response?.data?.dailyRemaining === "number") {
+        onDailyRegenUpdate?.(
+          error.response.data.dailyRemaining,
+          error.response.data.dailyResetAt
+        );
+      }
+      if (error.response?.status === 429) {
+        setLimitMessage(
+          error.response?.data?.message ||
+            "Daily regeneration limit reached (max 6 per day)"
+        );
+      }
     } finally {
       setRegeneratingComponents((prev) => ({
         ...prev,
@@ -388,7 +443,7 @@ const LearningContent = ({
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      background: 'white',
+      bgcolor: 'background.paper',
       '& ::-webkit-scrollbar': {
         width: '6px',
       },
@@ -425,9 +480,16 @@ const LearningContent = ({
         PaperProps={{
           sx: {
             borderRadius: 3,
-            background: `linear-gradient(135deg, ${colorPalette[50]} 0%, #ffffff 100%)`,
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.12)",
-            border: `1px solid ${colorPalette[200]}`,
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? `linear-gradient(135deg, ${colorPalette[900]} 0%, ${theme.palette.background.paper} 100%)`
+                : `linear-gradient(135deg, ${colorPalette[50]} 0%, #ffffff 100%)`,
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 20px 60px rgba(0, 0, 0, 0.5)"
+                : "0 20px 60px rgba(0, 0, 0, 0.12)",
+            border: "1px solid",
+            borderColor: "divider",
             overflow: "hidden",
           },
         }}
@@ -468,7 +530,10 @@ const LearningContent = ({
         <DialogContent
           dividers
           sx={{
-            background: colorPalette[50],
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? theme.palette.background.default
+                : colorPalette[50],
           }}
         >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -501,9 +566,13 @@ const LearningContent = ({
                   mt: 1,
                   p: 2,
                   borderRadius: 1,
-                  border: `1px dashed ${colorPalette[200]}`,
-                  color: colorPalette[600],
-                  background: colorPalette[50],
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  color: "text.secondary",
+                  background: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.paper
+                      : colorPalette[50],
                   fontSize: isMobile ? "0.75rem" : "0.85rem",
                 }}
               >
@@ -515,9 +584,13 @@ const LearningContent = ({
                   mt: 1,
                   p: 2,
                   borderRadius: 1,
-                  border: `1px dashed ${colorPalette[200]}`,
-                  color: colorPalette[600],
-                  background: colorPalette[50],
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  color: "text.secondary",
+                  background: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.paper
+                      : colorPalette[50],
                   fontSize: isMobile ? "0.75rem" : "0.85rem",
                 }}
               >
@@ -542,16 +615,18 @@ const LearningContent = ({
                   "& .MuiToggleButton-root": {
                     borderRadius: 2,
                     border: `1px solid ${colorPalette[300]}`,
-                    color: colorPalette[700],
+                    color: theme.palette.mode === "dark"
+                      ? theme.palette.text.primary
+                      : colorPalette[700],
                     fontWeight: 600,
                     textTransform: "none",
                     px: 1.5,
                     py: 0.6,
-                    background: "white",
+                    bgcolor: (theme) => theme.palette.background.paper,
                     transition: "all 0.2s ease",
                   },
                   "& .MuiToggleButton-root:hover": {
-                    background: colorPalette[100],
+                    background: (theme) => theme.palette.action.hover,
                     borderColor: colorPalette[500],
                   },
                   "& .MuiToggleButton-root.Mui-selected": {
@@ -620,7 +695,10 @@ const LearningContent = ({
               color: colorPalette[600],
               "&:hover": {
                 borderColor: colorPalette[500],
-                background: colorPalette[50],
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? theme.palette.action.hover
+                    : colorPalette[50],
               },
             }}
           >
@@ -649,7 +727,9 @@ const LearningContent = ({
             onToggle={() => toggleSection('concept')}
             onRegenerate={() => handleComponentRegenerate("concept")}
             isRegenerating={!!regeneratingComponents.concept}
-            isRegenerateDisabled={getComponentGenerationCount("concept") >= 3}
+            isRegenerateDisabled={
+              getComponentGenerationCount("concept") >= 3 || dailyLimitReached
+            }
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -664,7 +744,10 @@ const LearningContent = ({
             onToggle={() => toggleSection('explanation')}
             onRegenerate={() => handleComponentRegenerate("explanation")}
             isRegenerating={!!regeneratingComponents.explanation}
-            isRegenerateDisabled={getComponentGenerationCount("explanation") >= 3}
+            isRegenerateDisabled={
+              getComponentGenerationCount("explanation") >= 3 ||
+              dailyLimitReached
+            }
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -680,7 +763,10 @@ const LearningContent = ({
             onToggle={() => toggleSection('learningActions')}
             onRegenerate={() => handleComponentRegenerate("learningActions")}
             isRegenerating={!!regeneratingComponents.learningActions}
-            isRegenerateDisabled={getComponentGenerationCount("learningActions") >= 3}
+            isRegenerateDisabled={
+              getComponentGenerationCount("learningActions") >= 3 ||
+              dailyLimitReached
+            }
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -695,7 +781,9 @@ const LearningContent = ({
     onToggle={() => toggleSection('coreExample')}
     onRegenerate={() => handleComponentRegenerate("coreExample")}
     isRegenerating={!!regeneratingComponents.coreExample}
-    isRegenerateDisabled={getComponentGenerationCount("coreExample") >= 3}
+    isRegenerateDisabled={
+      getComponentGenerationCount("coreExample") >= 3 || dailyLimitReached
+    }
     isMobile={isMobile}
     colorPalette={colorPalette}
  
@@ -712,7 +800,9 @@ const LearningContent = ({
             onToggle={() => toggleSection('practice')}
             onRegenerate={() => handleComponentRegenerate("practice")}
             isRegenerating={!!regeneratingComponents.practice}
-            isRegenerateDisabled={getComponentGenerationCount("practice") >= 3}
+            isRegenerateDisabled={
+              getComponentGenerationCount("practice") >= 3 || dailyLimitReached
+            }
             isMobile={isMobile}
             colorPalette={colorPalette}
           />
@@ -729,7 +819,10 @@ const LearningContent = ({
             regeneratingMindmap={regeneratingMindmap}
             userRemainingGenerations={Math.max(
               0,
-              3 - getComponentGenerationCount("mindmap")
+              Math.min(
+                3 - getComponentGenerationCount("mindmap"),
+                dailyRemaining
+              )
             )}
             mindmapData={mindmapData}
           />
@@ -744,7 +837,9 @@ const LearningContent = ({
             colorPalette={colorPalette}
             onRegenerate={() => handleComponentRegenerate("quiz")}
             isRegenerating={!!regeneratingComponents.quiz}
-            isRegenerateDisabled={getComponentGenerationCount("quiz") >= 3}
+            isRegenerateDisabled={
+              getComponentGenerationCount("quiz") >= 3 || dailyLimitReached
+            }
             onQuizSubmitted={onQuizSubmitted}
           />
         )}

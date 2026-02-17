@@ -7,6 +7,7 @@ import {
   IconButton,
   Collapse,
   List,
+  useTheme,
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { alpha } from "@mui/material/styles";
@@ -26,6 +27,7 @@ const TopicItem = ({
   contentCache,
   colorPalette,
 }) => {
+  const theme = useTheme();
   const completedCount =
     topic.subTopics?.filter((s) => s.completed).length || 0;
   const totalCount = topic.subTopics?.length || 0;
@@ -42,15 +44,18 @@ const TopicItem = ({
           py: 1.5,
           px: 2,
           backgroundColor: isSelected
-            ? alpha(colorPalette[50], 0.8)
+            ? theme.palette.mode === "dark"
+              ? alpha(colorPalette[500], 0.15)
+              : alpha(colorPalette[50], 0.8)
             : "transparent",
-          border: `1px solid ${
-            isSelected ? colorPalette[300] : colorPalette[100]
-          }`,
+          border: "1px solid",
+          borderColor: isSelected ? colorPalette[300] : "divider",
           position: "relative",
           "&:hover": {
-            backgroundColor: alpha(colorPalette[50], 0.6),
-            borderColor: colorPalette[200],
+            backgroundColor: theme.palette.mode === "dark"
+              ? alpha(colorPalette[500], 0.08)
+              : alpha(colorPalette[50], 0.6),
+            borderColor: "divider",
           },
           cursor: "pointer",
           transition: "all 0.2s ease",
@@ -72,7 +77,7 @@ const TopicItem = ({
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  color: isSelected ? colorPalette[700] : "text.primary",
+                  color: "text.primary",
                   fontSize: "0.9rem",
                 }}
               >

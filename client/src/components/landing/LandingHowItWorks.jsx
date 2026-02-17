@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Grid } from "@mui/material";
+import { Box, Container, Typography, Grid, alpha, useTheme } from "@mui/material";
 
 const steps = [
   {
@@ -17,8 +17,11 @@ const steps = [
 ];
 
 const LandingHowItWorks = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   return (
-    <Box sx={{ py: { xs: 5, md: 7 }, background: "white" }}>
+    <Box sx={{ py: { xs: 5, md: 7 }, background: "background.paper" }}>
       <Container maxWidth="lg">
         <Typography
           variant="h4"
@@ -38,14 +41,20 @@ const LandingHowItWorks = () => {
                 sx={{
                   p: 2.5,
                   borderRadius: 2,
-                  border: "1px solid rgba(124,58,237,0.15)",
+                  border: `1px solid ${alpha(
+                    theme.palette.primary.main,
+                    isDark ? 0.3 : 0.15
+                  )}`,
                   height: "100%",
-                  background: "rgba(124,58,237,0.03)",
+                  background: alpha(
+                    theme.palette.primary.main,
+                    isDark ? 0.18 : 0.03
+                  ),
                 }}
               >
                 <Typography
                   variant="overline"
-                  sx={{ color: "#5E35B1", fontWeight: 600 }}
+                  sx={{ color: theme.palette.primary.main, fontWeight: 600 }}
                 >
                   Step {index + 1}
                 </Typography>
@@ -55,7 +64,9 @@ const LandingHowItWorks = () => {
                 >
                   {step.title}
                 </Typography>
-                <Typography sx={{ color: "#4B5563" }}>{step.detail}</Typography>
+                <Typography sx={{ color: "text.secondary" }}>
+                  {step.detail}
+                </Typography>
               </Box>
             </Grid>
           ))}

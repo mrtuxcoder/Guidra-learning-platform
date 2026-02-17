@@ -15,6 +15,7 @@ const ProfileHeader = ({ user, styleInfo }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const isDark = theme.palette.mode === "dark";
 
   return (
     <Paper
@@ -93,6 +94,7 @@ const ProfileHeader = ({ user, styleInfo }) => {
               border: `2px solid ${alpha("#fff", 0.3)}`,
               fontSize: isMobile ? "1.25rem" : "1.5rem",
               fontWeight: "bold",
+              color: "white",
               position: "relative",
               boxShadow: `0 4px 16px ${alpha(profileTheme.primaryDark, 0.3)}`,
             }}
@@ -170,7 +172,10 @@ const ProfileHeader = ({ user, styleInfo }) => {
                 sx={{
                   opacity: 0.85,
                   fontWeight: 500,
-                  background: alpha("#fff", 0.12),
+                  background: alpha(
+                    theme.palette.common.white,
+                    isDark ? 0.2 : 0.12
+                  ),
                   px: 1,
                   py: 0.25,
                   borderRadius: 1,

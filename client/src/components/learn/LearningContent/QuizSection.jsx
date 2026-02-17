@@ -8,6 +8,8 @@ import {
   Button,
   IconButton,
   Tooltip,
+  useTheme,
+  alpha,
 } from "@mui/material";
 import { Quiz, Refresh, Lock } from "@mui/icons-material";
 import QuizQuestion from "./QuizQuestion";
@@ -25,6 +27,7 @@ const QuizSection = ({
   isRegenerateDisabled = false,
   onQuizSubmitted,
 }) => {
+  const theme = useTheme();
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizResults, setQuizResults] = useState({ correct: 0, wrong: 0 });
@@ -109,8 +112,9 @@ const QuizSection = ({
     <Card
       sx={{
         mb: 3,
-        background: "white",
-        border: `2px solid ${colorPalette[200]}`,
+        bgcolor: "background.paper",
+        border: "2px solid",
+        borderColor: "divider",
         borderRadius: 2,
       }}
     >
@@ -135,7 +139,7 @@ const QuizSection = ({
             <Typography
               variant={isMobile ? "subtitle1" : "h6"}
               fontWeight="600"
-              sx={{ color: colorPalette[700] }}
+              sx={{ color: "text.primary" }}
             >
               Knowledge Check
             </Typography>

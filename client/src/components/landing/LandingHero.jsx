@@ -6,6 +6,8 @@ import {
   Typography,
   Stack,
   Chip,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import { profileTheme } from "../profile/constants";
 
@@ -17,13 +19,21 @@ const LandingHero = ({
   onNavRegister,
   isMobile,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   return (
     <Box
       sx={{
         pt: { xs: 3, md: 6 },
         pb: { xs: 5, md: 8 },
         background:
-          "linear-gradient(180deg, rgba(126,87,194,0.12) 0%, rgba(126,87,194,0) 60%)",
+          isDark
+            ? `linear-gradient(180deg, ${alpha(
+                theme.palette.primary.main,
+                0.2
+              )} 0%, ${alpha(theme.palette.background.default, 0)} 60%)`
+            : "linear-gradient(180deg, rgba(126,87,194,0.12) 0%, rgba(126,87,194,0) 60%)",
       }}
     >
       <Container maxWidth="lg">
@@ -69,7 +79,7 @@ const LandingHero = ({
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                color: "#475569",
+                color: "text.secondary",
               }}
             >
               Login
@@ -82,7 +92,9 @@ const LandingHero = ({
                 textTransform: "none",
                 fontWeight: 600,
                 borderColor: "rgba(126,87,194,0.4)",
-                color: profileTheme.primaryDark,
+                color: isDark
+                  ? profileTheme.primaryLight
+                  : profileTheme.primaryDark,
               }}
             >
               Register
@@ -104,8 +116,10 @@ const LandingHero = ({
               size="small"
               sx={{
                 mb: 2,
-                bgcolor: "rgba(126,87,194,0.12)",
-                color: profileTheme.primaryDark,
+                bgcolor: alpha(profileTheme.primary, isDark ? 0.24 : 0.12),
+                color: isDark
+                  ? profileTheme.primaryLight
+                  : profileTheme.primaryDark,
                 fontWeight: 600,
               }}
             />
@@ -123,7 +137,9 @@ const LandingHero = ({
               variant={isMobile ? "h5" : "h4"}
               sx={{
                 fontWeight: 700,
-                color: profileTheme.primaryDark,
+                color: isDark
+                  ? profileTheme.primaryLight
+                  : profileTheme.primaryDark,
                 mb: 2,
               }}
             >
@@ -132,7 +148,7 @@ const LandingHero = ({
             <Typography
               variant="body1"
               sx={{
-                color: "#475569",
+                color: "text.secondary",
                 maxWidth: 520,
                 mb: 3,
                 fontSize: { xs: "0.95rem", md: "1.05rem" },
@@ -164,7 +180,9 @@ const LandingHero = ({
                   borderRadius: 2,
                   fontWeight: 600,
                   borderColor: "rgba(126,87,194,0.4)",
-                  color: profileTheme.primaryDark,
+                  color: isDark
+                    ? profileTheme.primaryLight
+                    : profileTheme.primaryDark,
                 }}
               >
                 Login
@@ -212,8 +230,8 @@ const LandingHero = ({
                     border: "1px solid rgba(126,87,194,0.2)",
                     bgcolor:
                       index % 3 === 0
-                        ? "rgba(126,87,194,0.18)"
-                        : "rgba(255,255,255,0.6)",
+                        ? alpha(profileTheme.primary, isDark ? 0.28 : 0.18)
+                        : alpha(theme.palette.background.paper, isDark ? 0.35 : 0.6),
                   }}
                 />
               ))}

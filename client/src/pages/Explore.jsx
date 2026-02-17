@@ -84,7 +84,7 @@ export default function Explore() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        bgcolor: "background.default",
         pb: 8, // Space for bottom button
       }}
     >
@@ -129,7 +129,7 @@ export default function Explore() {
               <Typography
                 variant="h5"
                 fontWeight={700}
-                color="#7C3AED"
+                color="primary"
                 sx={{ fontSize: { xs: "1.25rem", md: "1.5rem" } }}
               >
                 {CATEGORIES.find((cat) => cat.id === selectedCategory)?.name}

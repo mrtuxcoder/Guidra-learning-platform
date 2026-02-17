@@ -11,7 +11,7 @@ const TopicSelector = ({ topics, selectedTopic, onTopicSelect }) => {
       <Typography
         variant={isMobile ? "subtitle1" : "h6"}
         fontWeight="700"
-        sx={{ mb: 2, color: "#1e293b" }}
+        sx={{ mb: 2, color: "text.primary" }}
       >
         Choose a Topic
       </Typography>
@@ -31,12 +31,14 @@ const TopicSelector = ({ topics, selectedTopic, onTopicSelect }) => {
                 mb: 1,
                 background: isSelected
                   ? `linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)`
-                  : "white",
-                color: isSelected ? "white" : "#475569",
-                borderColor: isSelected ? "#7c3aed" : "#e2e8f0",
+                  : "background.paper",
+                color: isSelected ? "white" : "text.primary",
+                borderColor: isSelected ? "#7c3aed" : "divider",
                 fontWeight: "600",
                 "&:hover": {
-                  background: isSelected ? "#7c3aed" : "#f8fafc",
+                  background: isSelected
+                    ? "#7c3aed"
+                    : (theme) => theme.palette.action.hover,
                 },
               }}
             />

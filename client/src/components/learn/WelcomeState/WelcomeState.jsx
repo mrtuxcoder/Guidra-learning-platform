@@ -8,6 +8,8 @@ import {
   Button,
   Stack,
   Chip,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import { AutoAwesome, SmartToy } from "@mui/icons-material";
 import Header from "./Header";
@@ -55,6 +57,8 @@ const WelcomeState = ({
     900: "#581c87",
   },
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [activeSuggestion, setActiveSuggestion] = useState("continue");
 
   // Memoized calculations
@@ -133,7 +137,12 @@ const WelcomeState = ({
         <Box
           sx={{
             minHeight: "100vh",
-            background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+            background: isDark
+              ? `linear-gradient(135deg, ${alpha(
+                  theme.palette.background.paper,
+                  0.85
+                )} 0%, ${theme.palette.background.default} 100%)`
+              : "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
             display: "flex",
             flexDirection: "column",
           }}
@@ -160,7 +169,12 @@ const WelcomeState = ({
       <Box
         sx={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+          background: isDark
+            ? `linear-gradient(135deg, ${alpha(
+                theme.palette.background.paper,
+                0.85
+              )} 0%, ${theme.palette.background.default} 100%)`
+            : "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
           display: "flex",
           flexDirection: "column",
         }}
@@ -224,8 +238,9 @@ const WelcomeState = ({
                     p: { xs: 2, md: 2.5 },
                     mb: 3,
                     borderRadius: 2,
-                    border: "1px solid #e2e8f0",
-                    background: "white",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
                   }}
                 >
                   <Stack
@@ -238,12 +253,12 @@ const WelcomeState = ({
                       <Typography variant="h6" fontWeight={700}>
                         Continue where you left off
                       </Typography>
-                      <Typography variant="body2" color="#64748b">
+                      <Typography variant="body2" color="text.secondary">
                         In progress: {inProgressTopicName || selectedTopic}
                       </Typography>
                       <Typography
                         variant="body2"
-                        color="#1e293b"
+                        color="text.primary"
                         sx={{ fontWeight: 600, mt: 0.5 }}
                       >
                         Next up: {mostRecentIncompleteSubtopic.name}

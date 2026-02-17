@@ -79,6 +79,13 @@ export const clearContentCache = async () => {
   return response;
 };
 
+export const getCachedSubtopics = async (topic) => {
+  const response = await API.get(
+    `/api/v1/content/cache/subtopics?topic=${encodeURIComponent(topic)}`
+  );
+  return response;
+};
+
 export const incrementGenerationCount = async (data) => {
   const response = await API.put(
     "/api/v1/progress/generation-count/increment",
