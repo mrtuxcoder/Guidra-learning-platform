@@ -44,18 +44,21 @@ export const desktopSidebarStyles = {
 };
 
 export const mobileHeaderStyles = {
-  header: {
-    background: `linear-gradient(135deg, #9333EA 0%, #581C87 100%)`,
+  header: (theme) => ({
+    background:
+      theme.palette.mode === "dark"
+        ? "linear-gradient(135deg, #1C1240 0%, #100A2A 100%)"
+        : "linear-gradient(135deg, #9333EA 0%, #581C87 100%)",
     pt: 6,
     pb: 8,
     px: 3,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    color: "white",
+    color: theme.palette.mode === "dark" ? "#E2E8F0" : "white",
     textAlign: "center",
     position: "relative",
     zIndex: 1,
-  },
+  }),
 };
 
 export const formStyles = {

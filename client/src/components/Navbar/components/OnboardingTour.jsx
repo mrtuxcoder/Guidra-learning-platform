@@ -32,7 +32,7 @@ const tourSteps = [
     description: "Discover new topics and expand your knowledge.",
   },
   {
-    label: "Custom Topics (BETA)",
+    label: "Custom Topics",
     description: "Create personalized learning paths on any topic you choose.",
   },
   {

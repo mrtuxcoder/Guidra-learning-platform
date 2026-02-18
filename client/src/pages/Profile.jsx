@@ -18,6 +18,7 @@ import QuickStatsCard from "../components/profile/QuickStatsCard";
 import LearningJourneyCard from "../components/profile/LearningJourneyCard";
 import QuickActions from "../components/profile/QuickActions";
 import CompletedTopicsCard from "../components/profile/CompletedTopicsCard";
+import CompletedSubtopicsInsights from "../components/profile/CompletedSubtopicsInsights";
 
 // Import logic
 import {
@@ -144,6 +145,11 @@ export default function Profile() {
             <LearningJourneyCard
               stats={stats}
               onLaunchLesson={() => navigate("/learn")}
+            />
+
+            <CompletedSubtopicsInsights
+              progress={user?.progress || []}
+              appTimeMs={user?.appTimeMs || 0}
             />
           </Box>
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Paper, Box, Typography, Fade } from "@mui/material";
-import { Warning } from "@mui/icons-material";
+import { Warning, TipsAndUpdates } from "@mui/icons-material";
+import { alpha, useTheme } from "@mui/material/styles";
 
 const guidelines = [
   {
@@ -24,31 +25,40 @@ const guidelines = [
 const Guidelines = ({ show }) => {
   if (!show) return null;
 
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   return (
     <Fade in={show}>
       <Paper
         elevation={0}
         sx={{
-          p: 3,
-          mt: 3,
-          borderRadius: "16px",
-          background: "rgba(124, 58, 237, 0.05)",
-          border: "1px solid rgba(124, 58, 237, 0.1)",
+          p: { xs: 2.5, sm: 3 },
+          mt: { xs: 0, md: 3 },
+          borderRadius: "20px",
+          background: isDark
+            ? "linear-gradient(135deg, rgba(30, 27, 56, 0.7) 0%, rgba(17, 15, 28, 0.8) 100%)"
+            : "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(255, 255, 255, 0.9) 100%)",
+          border: isDark
+            ? "1px solid rgba(148, 163, 184, 0.22)"
+            : "1px solid rgba(124, 58, 237, 0.12)",
         }}
       >
         <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
-            color: "#7C3AED",
+            color: isDark
+              ? theme.palette.primary.light
+              : theme.palette.primary.main,
             mb: 2,
             display: "flex",
             alignItems: "center",
             gap: 1,
           }}
         >
-          <Warning sx={{ fontSize: 20 }} />
-          Important Guidelines
+          <TipsAndUpdates sx={{ fontSize: 20 }} />
+          Helpful Guidelines
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -61,35 +71,55 @@ const Guidelines = ({ show }) => {
   );
 };
 
-const GuidelineItem = ({ index, guideline }) => (
-  <Box sx={{ display: "flex", gap: 2 }}>
+const GuidelineItem = ({ index, guideline }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
+  return (
     <Box
       sx={{
-        width: 24,
-        height: 24,
-        borderRadius: "50%",
-        background: "#7C3AED",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        mt: 0.5,
-        flexShrink: 0,
+        gap: 2,
+        p: 1.5,
+        borderRadius: "14px",
+        border: isDark
+          ? "1px solid rgba(148, 163, 184, 0.18)"
+          : "1px solid rgba(124, 58, 237, 0.12)",
+        background: isDark
+          ? "rgba(15, 15, 23, 0.7)"
+          : "rgba(255, 255, 255, 0.85)",
       }}
     >
-      <Typography variant="caption" sx={{ color: "white", fontWeight: 700 }}>
-        {index + 1}
-      </Typography>
-    </Box>
+      <Box
+        sx={{
+          width: 28,
+          height: 28,
+          borderRadius: "10px",
+          background: alpha(theme.palette.primary.main, isDark ? 0.3 : 0.12),
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          mt: 0.25,
+          flexShrink: 0,
+          color: theme.palette.primary.main,
+          fontWeight: 700,
+        }}
+      >
+        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+          {index + 1}
+        </Typography>
+      </Box>
 
-    <Box>
-      <Typography variant="body2" fontWeight={600}>
-        {guideline.title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {guideline.desc}
-      </Typography>
+      <Box>
+        <Typography variant="body2" fontWeight={700}>
+          {guideline.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {guideline.desc}
+        </Typography>
+      </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 export default Guidelines;

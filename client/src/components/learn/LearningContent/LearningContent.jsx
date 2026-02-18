@@ -24,6 +24,7 @@ import LoadingState from "../LoadingState";
 import Header from "./Header";
 import ContentSection from "./ContentSection";
 import QuizSection from "./QuizSection";
+import TeachingStyleSelector from "../TeachingStyleSelector";
 import {
   generateComponent,
   getComponentVersions,
@@ -66,6 +67,8 @@ const LearningContent = ({
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState("concept");
   const [limitMessage, setLimitMessage] = useState("");
+  const [teachingStyleSelectorOpen, setTeachingStyleSelectorOpen] = useState(false);
+  const [pendingComponentRegeneration, setPendingComponentRegeneration] = useState(null);
   const dailyLimitReached = dailyRemaining <= 0;
 
   // Register the open function with parent on mount
@@ -80,8 +83,8 @@ const LearningContent = ({
       (version) => version.source === "component"
     ).length;
 
-  // Handle mindmap regeneration
-  const handleManualMindmapRegenerate = async () => {
+  // Handle mindmap regeneration - open teaching style selector first
+  const handleManualMindmapRegenerate = () => {
     if (!selectedTopic || !selectedSubtopic?.name) {
       return;
     }
@@ -91,32 +94,60 @@ const LearningContent = ({
       return;
     }
 
+    setPendingComponentRegeneration("mindmap");
+    setTeachingStyleSelectorOpen(true);
+  };
+
+  // Execute component regeneration with selected teaching style
+  const executeComponentRegeneration = async (teachingStyle) => {
+    if (!pendingComponentRegeneration) return;
+
+    const componentName = pendingComponentRegeneration;
+    
     try {
-      setRegeneratingMindmap(true);
+      if (componentName === "mindmap") {
+        setRegeneratingMindmap(true);
+      } else {
+        setRegeneratingComponents((prev) => ({
+          ...prev,
+          [componentName]: true,
+        }));
+      }
+
       const response = await generateComponent({
         topic: selectedTopic,
         subtopic: selectedSubtopic.name,
-        component: "mindmap" 
+        component: componentName,
+        teachingStyle: teachingStyle,
       });
 
-      if (response?.data?.dailyRemaining !== undefined) {
-        onDailyRegenUpdate?.(
-          response.data.dailyRemaining,
-          response.data.dailyResetAt
-        );
+      if (componentName === "mindmap") {
+        // Handle mindmap response
+        if (response?.data?.dailyRemaining !== undefined) {
+          onDailyRegenUpdate?.(
+            response.data.dailyRemaining,
+            response.data.dailyResetAt
+          );
+        } else {
+          onDailyRegenUpdate?.();
+        }
+        
+        if (response?.data?.mindmap) {
+          setMindmapData(prev => ({
+            ...prev,
+            mindmap: response.data.mindmap,
+            hasError: false
+          }));
+        }
       } else {
-        onDailyRegenUpdate?.();
+        // Handle regular component response
+        await handleComponentRegenerationResponse(componentName, response);
       }
-      
-      if (response?.data?.mindmap) {
-        setMindmapData(prev => ({
-          ...prev,
-          mindmap: response.data.mindmap,
-          hasError: false
-        }));
-      }
+
+      // Close teaching style selector modal
+      setTeachingStyleSelectorOpen(false);
     } catch (error) {
-      console.error('Failed to regenerate mindmap:', error);
+      console.error(`Failed to regenerate ${componentName}:`, error);
       if (typeof error.response?.data?.dailyRemaining === "number") {
         onDailyRegenUpdate?.(
           error.response.data.dailyRemaining,
@@ -129,16 +160,23 @@ const LearningContent = ({
             "Daily regeneration limit reached (max 6 per day)"
         );
       }
-      setMindmapData(prev => ({
-        ...prev,
-        hasError: true
-      }));
+      if (componentName === "mindmap") {
+        setMindmapData(prev => ({
+          ...prev,
+          hasError: true
+        }));
+      }
+      // Close teaching style selector modal on error too
+      setTeachingStyleSelectorOpen(false);
     } finally {
-      setRegeneratingMindmap(false);
+      if (componentName === "mindmap") {
+        setRegeneratingMindmap(false);
+      }
+      setPendingComponentRegeneration(null);
     }
   };
 
-  const handleComponentRegenerate = async (componentName) => {
+  const handleComponentRegenerate = (componentName) => {
     if (!selectedTopic || !selectedSubtopic?.name) {
       return;
     }
@@ -153,17 +191,13 @@ const LearningContent = ({
       return;
     }
 
-    try {
-      setRegeneratingComponents((prev) => ({
-        ...prev,
-        [componentName]: true,
-      }));
+    setPendingComponentRegeneration(componentName);
+    setTeachingStyleSelectorOpen(true);
+  };
 
-      const response = await generateComponent({
-        topic: selectedTopic,
-        subtopic: selectedSubtopic.name,
-        component: componentName,
-      });
+  // Handle component regeneration response
+  const handleComponentRegenerationResponse = async (componentName, response) => {
+    try {
 
       if (response?.data?.dailyRemaining !== undefined) {
         onDailyRegenUpdate?.(
@@ -706,6 +740,18 @@ const LearningContent = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Teaching Style Selector Modal */}
+      <TeachingStyleSelector
+        open={teachingStyleSelectorOpen}
+        onClose={() => setTeachingStyleSelectorOpen(false)}
+        onSelect={executeComponentRegeneration}
+        isLoading={pendingComponentRegeneration && (
+          pendingComponentRegeneration === "mindmap" 
+            ? regeneratingMindmap 
+            : regeneratingComponents[pendingComponentRegeneration]
+        )}
+      />
 
       {/* Content */}
       <Box sx={{ 

@@ -25,12 +25,14 @@ import {
   incrementGenerationCount,
   getGenerationCounts,
   getCachedSubtopics,
+  recordTimeSpent,
 } from "../api/learning";
 import LearningSidebar from "../components/learn/LearningSidebar/index";
 import LearningHeader from "../components/learn/LearningHeader/index";
 import LearningContent from "../components/learn/LearningContent/index";
 import WelcomeState from "../components/learn/WelcomeState/index";
 import LoadingState from "../components/learn/LoadingState/index";
+import TeachingStyleSelector from "../components/learn/TeachingStyleSelector";
 import { useDailyRegen } from "../contexts/DailyRegenContext";
 
 // Consistent color palette
@@ -63,6 +65,9 @@ export default function Learning() {
   const [generationCounts, setGenerationCounts] = useState({});
   const [contentCache, setContentCache] = useState({});
   const [cachedSubtopics, setCachedSubtopics] = useState([]);
+  const subtopicStartRef = useRef(null);
+  const activeTopicRef = useRef(null);
+  const activeSubtopicRef = useRef(null);
   
   // Use daily regen context
   const { dailyRegenRemaining, dailyRegenResetAt, updateDailyRegen } = useDailyRegen();
@@ -71,6 +76,8 @@ export default function Learning() {
   const [showError, setShowError] = useState(false);
   const [quizPromptOpen, setQuizPromptOpen] = useState(false);
   const [quizPromptMessage, setQuizPromptMessage] = useState("");
+  const [teachingStyleSelectorOpen, setTeachingStyleSelectorOpen] = useState(false);
+  const [selectedTeachingStyle, setSelectedTeachingStyle] = useState("default");
   
   // Ref to store the version dialog opener from LearningContent
   const versionDialogOpenerRef = useRef(null);
@@ -79,6 +86,27 @@ export default function Learning() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const MAX_GENERATIONS = 3;
+
+  const flushSubtopicTime = useCallback(async () => {
+    const startTime = subtopicStartRef.current;
+    const activeTopic = activeTopicRef.current;
+    const activeSubtopic = activeSubtopicRef.current;
+
+    if (!startTime || !activeTopic || !activeSubtopic) return;
+
+    const durationMs = Date.now() - startTime;
+    if (durationMs < 1000) return;
+
+    try {
+      await recordTimeSpent({
+        durationMs,
+        topic: activeTopic,
+        subtopicName: activeSubtopic,
+      });
+    } catch (error) {
+      console.error("Failed to record subtopic time:", error);
+    }
+  }, [recordTimeSpent]);
 
   // Register the version dialog opener from LearningContent
   const handleRegisterVersionDialogOpener = useCallback((openerFn) => {
@@ -467,17 +495,28 @@ export default function Learning() {
       return;
     }
 
+    // Open teaching style selector
+    setTeachingStyleSelectorOpen(true);
+  }, [selectedSubtopic, selectedTopic, canGenerate, dailyRegenRemaining]);
+
+  const handleTeachingStyleSelect = useCallback(async (teachingStyle) => {
+    if (!selectedSubtopic || !selectedTopic) return;
+
+    const subtopicName = selectedSubtopic.name;
+
     try {
       setContentLoading(true);
       setContentError("");
       const { data } = await regenerateContent({
         topic: selectedTopic,
         subtopic: subtopicName,
+        teachingStyle: teachingStyle,
       });
 
       await handleIncrementGenerationCount(subtopicName, selectedTopic);
 
       setContent(data.data);
+      setSelectedTeachingStyle(teachingStyle);
       setContentInfo({
         cached: false,
         version: data.version || 1,
@@ -516,13 +555,7 @@ export default function Learning() {
     } finally {
       setContentLoading(false);
     }
-  }, [
-    selectedTopic,
-    selectedSubtopic,
-    canGenerate,
-    handleIncrementGenerationCount,
-    dailyRegenRemaining,
-  ]);
+  }, [selectedTopic, selectedSubtopic, canGenerate, handleIncrementGenerationCount, updateDailyRegen]);
 
   const handleDailyRegenUpdate = useCallback((nextRemaining, nextResetAt) => {
     updateDailyRegen(nextRemaining, nextResetAt);
@@ -720,6 +753,40 @@ export default function Learning() {
       setShowError(false);
     }
   }, [selectedSubtopic]);
+
+  useEffect(() => {
+    const currentTopic = selectedTopic;
+    const currentSubtopic = selectedSubtopic?.name;
+
+    if (!currentTopic || !currentSubtopic) {
+      if (activeTopicRef.current && activeSubtopicRef.current) {
+        flushSubtopicTime();
+        activeTopicRef.current = null;
+        activeSubtopicRef.current = null;
+        subtopicStartRef.current = null;
+      }
+      return;
+    }
+
+    if (
+      activeTopicRef.current &&
+      activeSubtopicRef.current &&
+      (activeTopicRef.current !== currentTopic ||
+        activeSubtopicRef.current !== currentSubtopic)
+    ) {
+      flushSubtopicTime();
+    }
+
+    activeTopicRef.current = currentTopic;
+    activeSubtopicRef.current = currentSubtopic;
+    subtopicStartRef.current = Date.now();
+  }, [selectedTopic, selectedSubtopic, flushSubtopicTime]);
+
+  useEffect(() => {
+    return () => {
+      flushSubtopicTime();
+    };
+  }, [flushSubtopicTime]);
 
   const currentError = contentError || error;
   const handleNavigateSubtopic = useCallback(
@@ -923,6 +990,14 @@ export default function Learning() {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Teaching Style Selector */}
+        <TeachingStyleSelector
+          open={teachingStyleSelectorOpen}
+          onClose={() => setTeachingStyleSelectorOpen(false)}
+          onSelect={handleTeachingStyleSelect}
+          isLoading={contentLoading}
+        />
 
         {/* Content Area - NO PADDING */}
         <Box

@@ -5,7 +5,7 @@ import { mobileHeaderStyles } from "./styles";
 
 const AuthHeader = ({ title, subtitle }) => {
   return (
-    <Box sx={mobileHeaderStyles.header}>
+    <Box sx={(theme) => mobileHeaderStyles.header(theme)}>
       <Box
         sx={{
           display: "flex",

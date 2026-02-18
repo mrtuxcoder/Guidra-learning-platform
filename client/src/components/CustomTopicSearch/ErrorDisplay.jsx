@@ -1,8 +1,12 @@
 import React from "react";
 import { Alert, Typography, Box } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 
 const ErrorDisplay = ({ error }) => {
   if (!error) return null;
+
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
 
   const getRetrySuggestion = () => {
     if (!error) return null;
@@ -16,15 +20,25 @@ const ErrorDisplay = ({ error }) => {
 
   return (
     <Box>
-      <Alert severity="error" sx={{ borderRadius: "12px", mb: 1 }}>
+      <Alert
+        severity="error"
+        sx={{
+          borderRadius: "14px",
+          mb: 1.5,
+          border: `1px solid ${alpha(theme.palette.error.main, 0.4)}`,
+          background: isDark
+            ? alpha(theme.palette.error.main, 0.12)
+            : alpha(theme.palette.error.main, 0.08),
+        }}
+      >
         {error}
       </Alert>
 
       <Typography
         variant="body2"
         sx={{
-          textAlign: "center",
-          color: "#7C3AED",
+          textAlign: "left",
+          color: theme.palette.primary.main,
           fontStyle: "italic",
           fontWeight: 500,
         }}

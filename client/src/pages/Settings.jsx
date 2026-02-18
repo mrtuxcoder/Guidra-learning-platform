@@ -55,6 +55,10 @@ const Settings = () => {
     tonePreference: "neutral",
   });
 
+  const [showTimerInNavbar, setShowTimerInNavbar] = useState(
+    localStorage.getItem("showTimerInNavbar") === "true"
+  );
+
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -134,6 +138,15 @@ const Settings = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleTimerNavbarToggle = () => {
+    const newValue = !showTimerInNavbar;
+    setShowTimerInNavbar(newValue);
+    localStorage.setItem("showTimerInNavbar", newValue ? "true" : "false");
+    
+    // Dispatch custom event for same-window updates
+    window.dispatchEvent(new Event("timerNavbarToggle"));
   };
 
   const handlePasswordChange = (event) => {
@@ -342,6 +355,37 @@ const Settings = () => {
                   <Switch
                     checked={mode === "dark"}
                     onChange={toggleTheme}
+                    color="primary"
+                  />
+                }
+                label=""
+                sx={{ m: 0 }}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                py: 1,
+                borderTop: "1px solid",
+                borderColor: "divider",
+                pt: 2,
+              }}
+            >
+              <Box>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  Timer in Navbar
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Show live countdown in the navigation bar
+                </Typography>
+              </Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showTimerInNavbar}
+                    onChange={handleTimerNavbarToggle}
                     color="primary"
                   />
                 }

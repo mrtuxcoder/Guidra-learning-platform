@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Box, IconButton, Tooltip, Typography, Chip } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   Menu,
   Lock,
@@ -32,54 +33,46 @@ const MobileHeader = ({
   onOpenVersions,
   colorPalette,
 }) => {
-  const [isMinimal, setIsMinimal] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const scrollTimeoutRef = useRef(null);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const idleTimeoutRef = useRef(null);
   const headerRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Make minimal on scroll down
-      if (currentScrollY > lastScrollY + 50) {
-        setIsMinimal(true);
-      } else if (currentScrollY < lastScrollY - 30) {
-        setIsMinimal(false);
+    const resetIdleTimer = () => {
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
       }
-      
-      setLastScrollY(currentScrollY);
-      
-      // Auto-show (restore opacity) after 3 seconds of scroll stop
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsMinimal(false);
-      }, 3000);
+
+      idleTimeoutRef.current = setTimeout(() => {
+        setIsCollapsed(true);
+      }, 10000);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    
+    const handleActivity = () => {
+      if (isCollapsed) {
+        return;
+      }
+      resetIdleTimer();
+    };
+
+    resetIdleTimer();
+    window.addEventListener("scroll", handleActivity, { passive: true });
+    window.addEventListener("mousemove", handleActivity, { passive: true });
+    window.addEventListener("touchstart", handleActivity, { passive: true });
+    window.addEventListener("keydown", handleActivity);
+
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      window.removeEventListener("scroll", handleActivity);
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
       }
     };
-  }, [lastScrollY]);
-
-  const handleHeaderMouseEnter = () => {
-    setIsMinimal(false);
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-  };
-
-  const handleHeaderMouseLeave = () => {
-    // Optional: uncomment to fade again after mouse leaves
-    // setIsMinimal(true);
-  };
+  }, [isCollapsed]);
 
   const progress = ((currentIndex + 1) / totalSubtopics) * 100;
 
@@ -87,33 +80,77 @@ const MobileHeader = ({
     <Box
       ref={headerRef}
       component="footer"
-      onMouseEnter={handleHeaderMouseEnter}
-      onMouseLeave={handleHeaderMouseLeave}
       sx={{
         position: "fixed",
         bottom: 8,
         left: "50%",
         transform: "translateX(-50%)",
-        background: "rgba(255, 255, 255, 0.98)",
-        backdropFilter: "blur(40px)",
-        border: "1px solid rgba(126, 87, 194, 0.15)",
-        borderRadius: "16px",
         zIndex: 1000,
-        height: "48px",
         display: "flex",
         alignItems: "center",
-        boxShadow: `
-          0 12px 32px rgba(126, 87, 194, 0.18),
-          0 4px 16px rgba(0, 0, 0, 0.08),
-          0 2px 8px rgba(0, 0, 0, 0.04)
-        `,
-        minWidth: "280px",
-        maxWidth: "calc(100vw - 16px)",
-        overflow: "hidden",
-        opacity: isMinimal ? 0.3 : 1,
-        transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        justifyContent: "center",
       }}
     >
+      {isCollapsed ? (
+        <IconButton
+          onClick={() => setIsCollapsed(false)}
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            background: isDark
+              ? "rgba(15, 15, 23, 0.96)"
+              : "rgba(255, 255, 255, 0.98)",
+            backdropFilter: "blur(40px)",
+            border: isDark
+              ? "1px solid rgba(148, 163, 184, 0.18)"
+              : "1px solid rgba(126, 87, 194, 0.15)",
+            boxShadow: isDark
+              ? `
+              0 12px 32px rgba(0, 0, 0, 0.45),
+              0 4px 16px rgba(0, 0, 0, 0.32),
+              0 2px 8px rgba(0, 0, 0, 0.2)
+            `
+              : `
+              0 12px 32px rgba(126, 87, 194, 0.18),
+              0 4px 16px rgba(0, 0, 0, 0.08),
+              0 2px 8px rgba(0, 0, 0, 0.04)
+            `,
+            color: colorPalette?.[600] || "#6d48b5",
+          }}
+        >
+          <Menu sx={{ fontSize: 20 }} />
+        </IconButton>
+      ) : (
+        <Box
+          sx={{
+            background: isDark
+              ? "rgba(15, 15, 23, 0.96)"
+              : "rgba(255, 255, 255, 0.98)",
+            backdropFilter: "blur(40px)",
+            border: isDark
+              ? "1px solid rgba(148, 163, 184, 0.18)"
+              : "1px solid rgba(126, 87, 194, 0.15)",
+            borderRadius: "16px",
+            height: "48px",
+            display: "flex",
+            alignItems: "center",
+            boxShadow: isDark
+              ? `
+              0 12px 32px rgba(0, 0, 0, 0.45),
+              0 4px 16px rgba(0, 0, 0, 0.32),
+              0 2px 8px rgba(0, 0, 0, 0.2)
+            `
+              : `
+              0 12px 32px rgba(126, 87, 194, 0.18),
+              0 4px 16px rgba(0, 0, 0, 0.08),
+              0 2px 8px rgba(0, 0, 0, 0.04)
+            `,
+            minWidth: "280px",
+            maxWidth: "calc(100vw - 16px)",
+            overflow: "hidden",
+          }}
+        >
       {/* Floating Progress Indicator */}
       <Box
         component="span"
@@ -163,12 +200,18 @@ const MobileHeader = ({
                 width: 32,
                 height: 32,
                 borderRadius: "8px",
-                background: "rgba(126, 87, 194, 0.08)",
+                background: isDark
+                  ? "rgba(148, 163, 184, 0.15)"
+                  : "rgba(126, 87, 194, 0.08)",
                 color: colorPalette?.[600] || "#6d48b5",
-                border: "1px solid rgba(126, 87, 194, 0.12)",
+                border: isDark
+                  ? "1px solid rgba(148, 163, 184, 0.22)"
+                  : "1px solid rgba(126, 87, 194, 0.12)",
                 padding: "6px",
                 "&:hover": {
-                  background: "rgba(126, 87, 194, 0.15)",
+                  background: isDark
+                    ? "rgba(148, 163, 184, 0.25)"
+                    : "rgba(126, 87, 194, 0.15)",
                   transform: "translateY(-1px)",
                 },
                 transition: "all 0.2s ease",
@@ -228,6 +271,8 @@ const MobileHeader = ({
           />
         </Box>
       </Box>
+        </Box>
+      )}
     </Box>
   );
 };

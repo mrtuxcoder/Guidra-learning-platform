@@ -12,6 +12,7 @@ import {
   School,
   Explore,
   Search,
+  AccessTime,
   Person,
 } from "@mui/icons-material";
 
@@ -41,7 +42,11 @@ export const navItems = [
     path: "/custom-topic",
     label: "Custom Topic",
     icon: <Search sx={{ fontSize: 20 }} />,
-    beta: true,
+  },
+  {
+    path: "/study-timer",
+    label: "Timer",
+    icon: <AccessTime sx={{ fontSize: 20 }} />,
   },
   {
     path: "/profile",

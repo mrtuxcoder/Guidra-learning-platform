@@ -121,6 +121,7 @@ const TopicItem = ({
               </Typography>
             </Box>
           }
+          secondaryTypographyProps={{ component: "div" }}
           sx={{ my: 0, width: "100%" }}
         />
       </ListItem>

@@ -3,12 +3,12 @@ import {
   Paper,
   Box,
   Typography,
-  Chip,
   Button,
   Alert,
   CircularProgress,
 } from "@mui/material";
 import { CheckCircle, Psychology } from "@mui/icons-material";
+import { alpha, useTheme } from "@mui/material/styles";
 
 const ValidatedTopic = ({
   searchQuery,
@@ -17,36 +17,65 @@ const ValidatedTopic = ({
   onResetSearch,
   onGenerateSubtopics,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   return (
     <Paper
       elevation={0}
       sx={{
-        p: 3,
-        borderRadius: "16px",
-        background: "rgba(124, 58, 237, 0.05)",
-        border: "1px solid rgba(124, 58, 237, 0.1)",
-        textAlign: "center",
+        p: { xs: 2.5, sm: 3 },
+        borderRadius: "20px",
+        background: isDark
+          ? "linear-gradient(135deg, rgba(22, 16, 38, 0.92) 0%, rgba(12, 10, 20, 0.96) 100%)"
+          : "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, #ffffff 100%)",
+        border: isDark
+          ? "1px solid rgba(148, 163, 184, 0.2)"
+          : "1px solid rgba(124, 58, 237, 0.12)",
+        textAlign: "left",
       }}
     >
-      <CheckCircle sx={{ fontSize: 40, color: "#10b981", mb: 2 }} />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: "14px",
+            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+          }}
+        >
+          <CheckCircle />
+        </Box>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.25 }}>
+            Topic validated
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Great choice. Ready to build your learning path.
+          </Typography>
+        </Box>
+      </Box>
 
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-        Topic Validated!
-      </Typography>
-
-      <Chip
-        label={searchQuery}
+      <Box
         sx={{
-          background: "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
-          color: "white",
-          fontWeight: 600,
-          py: 1.5,
-          mb: 2,
+          p: 2,
+          borderRadius: "16px",
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          background: alpha(theme.palette.primary.main, isDark ? 0.15 : 0.08),
+          fontWeight: 700,
+          color: "text.primary",
+          mb: 2.5,
         }}
-      />
+      >
+        {searchQuery}
+      </Box>
 
       <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-        This topic is suitable for structured learning with 10-15 subtopics.
+        This topic fits a structured sequence of 10-15 lessons.
       </Typography>
 
       {error && (
@@ -60,6 +89,8 @@ const ValidatedTopic = ({
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
           gap: 2,
+          justifyContent: { xs: "stretch", md: "center" },
+          alignItems: { xs: "stretch", md: "center" },
         }}
       >
         <Button
@@ -67,8 +98,8 @@ const ValidatedTopic = ({
           onClick={onResetSearch}
           sx={{
             borderRadius: "12px",
-            borderColor: "#7C3AED",
-            color: "#7C3AED",
+            borderColor: alpha(theme.palette.primary.main, 0.5),
+            color: theme.palette.primary.main,
             fontWeight: 600,
           }}
         >
@@ -90,6 +121,7 @@ const ValidatedTopic = ({
             borderRadius: "12px",
             background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
             fontWeight: 600,
+            boxShadow: "0 12px 26px rgba(16, 185, 129, 0.3)",
           }}
         >
           {generating ? "Generating..." : "Generate Learning Path"}

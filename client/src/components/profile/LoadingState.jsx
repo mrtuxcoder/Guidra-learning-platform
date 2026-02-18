@@ -1,8 +1,15 @@
 import React from "react";
 import { Container, Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { RocketLaunch } from "@mui/icons-material";
 
 const LoadingState = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const accentGradient = isDark
+    ? "linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)"
+    : "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)";
+
   return (
     <Container
       maxWidth="xl"
@@ -11,7 +18,9 @@ const LoadingState = () => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+        background: isDark
+          ? "linear-gradient(135deg, #120B1D 0%, #0B0B12 100%)"
+          : "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
       }}
     >
       <Box sx={{ textAlign: "center", px: 2 }}>
@@ -20,7 +29,7 @@ const LoadingState = () => {
             width: 80,
             height: 80,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+            background: accentGradient,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -41,7 +50,7 @@ const LoadingState = () => {
           sx={{
             fontWeight: 700,
             fontSize: { xs: "1.25rem", sm: "1.5rem" },
-            background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+            background: accentGradient,
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -52,7 +61,7 @@ const LoadingState = () => {
         </Typography>
         <Typography
           variant="body1"
-          color="text.secondary"
+          color={isDark ? "rgba(226, 232, 240, 0.7)" : "text.secondary"}
           sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
         >
           Preparing your learning dashboard

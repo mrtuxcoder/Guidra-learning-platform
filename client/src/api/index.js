@@ -56,6 +56,7 @@ export const {
   updateUnderstandingLevel,
   markSubtopicComplete,
   markTopicComplete,
+  recordTimeSpent,
 } = learningService;
 
 export const { getPasswordStatus, createPassword, updatePassword } =

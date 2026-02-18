@@ -1,18 +1,20 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box, CircularProgress, Typography, alpha, useTheme } from "@mui/material";
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
 import Learn from "./pages/Learn";
 import Explore from "./pages/Explore";
 import CustomTopicSearch from "./pages/CustomTopicSearch";
+import StudyTimer from "./pages/StudyTimer";
 import Settings from "./pages/Settings";
 import Layout from "./components/Layout";
 import PasswordSetupModal from "./components/PasswordSetupModal";
-import { hasAuthCookie, isAuthenticated } from "./api";
+import { hasAuthCookie, isAuthenticated, recordTimeSpent } from "./api";
 import { usePasswordCheck } from "./hooks/usePasswordCheck";
 import { DailyRegenProvider } from "./contexts/DailyRegenContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { TimerProvider } from "./contexts/TimerContext";
 
 // Loading component
 const LoadingSpinner = () => {
@@ -53,6 +55,8 @@ export default function App() {
   const [isAuth, setIsAuth] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
+  const appSessionStartRef = useRef(Date.now());
+  const appTimerRef = useRef(null);
 
   // Use the password check hook
   const {
@@ -73,6 +77,7 @@ export default function App() {
       "/explore",
       "/learn",
       "/custom-topic",
+      "/study-timer",
     ].includes(location.pathname);
     const isNonAuthRoute = ["/", "/login", "/register"].includes(
       location.pathname
@@ -90,6 +95,43 @@ export default function App() {
     }
   }, [isAuth, needsPasswordSetup, passwordLoading]);
 
+  useEffect(() => {
+    const clearTimer = () => {
+      if (appTimerRef.current) {
+        clearInterval(appTimerRef.current);
+        appTimerRef.current = null;
+      }
+    };
+
+    if (!isAuth) {
+      clearTimer();
+      return;
+    }
+
+    appSessionStartRef.current = Date.now();
+
+    const trackAppTime = async () => {
+      const now = Date.now();
+      const durationMs = now - appSessionStartRef.current;
+      appSessionStartRef.current = now;
+
+      if (durationMs < 1000) return;
+
+      try {
+        await recordTimeSpent({ durationMs });
+      } catch (error) {
+        console.error("Failed to record app time:", error);
+      }
+    };
+
+    appTimerRef.current = setInterval(trackAppTime, 60000);
+
+    return () => {
+      clearTimer();
+      trackAppTime();
+    };
+  }, [isAuth]);
+
   const checkAuth = async () => {
     try {
       // Use quick check for initial load, full check for auth routes
@@ -98,6 +140,7 @@ export default function App() {
         "/explore",
         "/learn",
         "/custom-topic",
+        "/study-timer",
       ].includes(location.pathname);
       const authenticated = shouldFullCheck
         ? await isAuthenticated() // Makes API call to verify token
@@ -125,15 +168,16 @@ export default function App() {
       {!authChecked ? (
         <LoadingSpinner />
       ) : (
-        <DailyRegenProvider>
-          {/* Password Setup Modal */}
-          <PasswordSetupModal
-            open={showPasswordModal}
-            onClose={() => setShowPasswordModal(false)}
-            onSuccess={handlePasswordSetupSuccess}
-          />
+        <TimerProvider>
+          <DailyRegenProvider>
+            {/* Password Setup Modal */}
+            <PasswordSetupModal
+              open={showPasswordModal}
+              onClose={() => setShowPasswordModal(false)}
+              onSuccess={handlePasswordSetupSuccess}
+            />
 
-          <Routes>
+            <Routes>
         {/* Public routes - only accessible when not logged in */}
         <Route
           path="/"
@@ -198,6 +242,18 @@ export default function App() {
           }
         />
         <Route
+          path="/study-timer"
+          element={
+            isAuth ? (
+              <Layout>
+                <StudyTimer />
+              </Layout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
           path="/settings"
           element={
             isAuth ? (
@@ -216,7 +272,8 @@ export default function App() {
           element={<Navigate to={isAuth ? "/profile" : "/login"} replace />}
         />
           </Routes>
-        </DailyRegenProvider>
+          </DailyRegenProvider>
+        </TimerProvider>
       )}
     </ThemeProvider>
   );

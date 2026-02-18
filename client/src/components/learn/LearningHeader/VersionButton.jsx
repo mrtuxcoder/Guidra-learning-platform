@@ -1,5 +1,6 @@
 import React from "react";
 import { IconButton, Button, Tooltip } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 import { Layers } from "@mui/icons-material";
 
 const VersionButton = ({
@@ -8,6 +9,8 @@ const VersionButton = ({
   colorPalette,
   variant = "desktop",
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const handleClick = () => {
     if (typeof onOpenVersions === "function") {
       onOpenVersions(true);
@@ -25,18 +28,30 @@ const VersionButton = ({
         variant="outlined"
         startIcon={<Layers sx={{ fontSize: 18 }} />}
         sx={{
-          borderColor: colorPalette?.[300] || "rgba(126, 87, 194, 0.2)",
-          color: colorPalette?.[600] || "#6d48b5",
-          background: colorPalette?.[50] || "rgba(126, 87, 194, 0.05)",
+          borderColor: isDark
+            ? alpha(theme.palette.primary.main, 0.5)
+            : colorPalette?.[300] || "rgba(126, 87, 194, 0.2)",
+          color: isDark
+            ? theme.palette.primary.light
+            : colorPalette?.[600] || "#6d48b5",
+          background: isDark
+            ? alpha(theme.palette.primary.main, 0.12)
+            : colorPalette?.[50] || "rgba(126, 87, 194, 0.05)",
           fontWeight: 600,
           borderRadius: 2,
           px: 2,
           textTransform: "none",
           "&:hover": {
-            borderColor: colorPalette?.[500] || "#7e57c2",
-            background: colorPalette?.[100] || "rgba(126, 87, 194, 0.1)",
+            borderColor: isDark
+              ? theme.palette.primary.main
+              : colorPalette?.[500] || "#7e57c2",
+            background: isDark
+              ? alpha(theme.palette.primary.main, 0.22)
+              : colorPalette?.[100] || "rgba(126, 87, 194, 0.1)",
             transform: "translateY(-1px)",
-            boxShadow: "0 4px 12px rgba(126, 87, 194, 0.12)",
+            boxShadow: isDark
+              ? "0 6px 16px rgba(0, 0, 0, 0.35)"
+              : "0 4px 12px rgba(126, 87, 194, 0.12)",
           },
           transition: "all 0.2s ease",
         }}
@@ -55,12 +70,20 @@ const VersionButton = ({
           width: 32,
           height: 32,
           borderRadius: "8px",
-          background: "rgba(126, 87, 194, 0.08)",
-          color: colorPalette?.[600] || "#6d48b5",
-          border: "1px solid rgba(126, 87, 194, 0.12)",
+          background: isDark
+            ? alpha(theme.palette.primary.main, 0.16)
+            : "rgba(126, 87, 194, 0.08)",
+          color: isDark
+            ? theme.palette.primary.light
+            : colorPalette?.[600] || "#6d48b5",
+          border: isDark
+            ? `1px solid ${alpha(theme.palette.primary.main, 0.4)}`
+            : "1px solid rgba(126, 87, 194, 0.12)",
           padding: "6px",
           "&:hover": {
-            background: "rgba(126, 87, 194, 0.15)",
+            background: isDark
+              ? alpha(theme.palette.primary.main, 0.26)
+              : "rgba(126, 87, 194, 0.15)",
             transform: "translateY(-1px)",
           },
           transition: "all 0.2s ease",

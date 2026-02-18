@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Container, Box, Fade, Typography, Button } from "@mui/material";
+import { Container, Box } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import { ArrowForward } from "@mui/icons-material";
 
 // Import components from the components folder
 import Header from "../components/CustomTopicSearch/Header";
@@ -14,14 +14,20 @@ import { validateTopic, personalizeAndGenerate } from "../api";
 
 export default function CustomTopicSearch() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
   const [isValidTopic, setIsValidTopic] = useState(false);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+  const handleSearch = async (overrideQuery) => {
+    const rawQuery =
+      typeof overrideQuery === "string" ? overrideQuery : searchQuery;
+    const query = rawQuery.trim();
+
+    if (!query) {
       setError("Please enter a topic to search");
       return;
     }
@@ -31,7 +37,11 @@ export default function CustomTopicSearch() {
       setError("");
       setIsValidTopic(false);
 
-      const response = await validateTopic(searchQuery);
+      if (query !== searchQuery) {
+        setSearchQuery(query);
+      }
+
+      const response = await validateTopic(query);
 
       if (response.data.valid) {
         setIsValidTopic(true);
@@ -53,14 +63,15 @@ export default function CustomTopicSearch() {
   };
 
   const handleGenerateSubtopics = async () => {
-    if (!searchQuery.trim()) return;
+    const query = searchQuery.trim();
+    if (!query) return;
 
     try {
       setGenerating(true);
       setError("");
 
       const personalizationData = {
-        topic: searchQuery,
+        topic: query,
         learningStyle: "comprehensive",
         depth: "intermediate",
       };
@@ -69,7 +80,7 @@ export default function CustomTopicSearch() {
 
       navigate("/learn", {
         state: {
-          customTopic: searchQuery,
+          customTopic: query,
           validated: true,
           subtopics: response.data.data.subTopics,
           generatedContent: response.data,
@@ -86,10 +97,11 @@ export default function CustomTopicSearch() {
   };
 
   const handleStartLearning = () => {
-    if (isValidTopic && searchQuery) {
+    const query = searchQuery.trim();
+    if (isValidTopic && query) {
       navigate("/learn", {
         state: {
-          customTopic: searchQuery,
+          customTopic: query,
           validated: true,
         },
       });
@@ -115,10 +127,41 @@ export default function CustomTopicSearch() {
         bgcolor: "background.default",
         display: "flex",
         alignItems: "center",
-        py: 4,
+        py: { xs: 4, md: 7 },
+        position: "relative",
+        overflow: "hidden",
+        "&:before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          background: isDark
+            ? `radial-gradient(circle at 15% 20%, ${alpha(
+                theme.palette.primary.main,
+                0.18
+              )} 0%, transparent 45%),
+               radial-gradient(circle at 85% 10%, ${alpha(
+                 theme.palette.primary.main,
+                 0.12
+               )} 0%, transparent 40%)`
+            : "radial-gradient(circle at 15% 20%, rgba(124, 58, 237, 0.18) 0%, transparent 45%), radial-gradient(circle at 85% 10%, rgba(94, 53, 177, 0.12) 0%, transparent 40%)",
+          pointerEvents: "none",
+        },
+        "&:after": {
+          content: '""',
+          position: "absolute",
+          width: 420,
+          height: 420,
+          right: { xs: -280, md: -180 },
+          bottom: { xs: -300, md: -220 },
+          borderRadius: "50%",
+          background: isDark
+            ? "radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, transparent 70%)"
+            : "radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, transparent 70%)",
+          pointerEvents: "none",
+        },
       }}
     >
-      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 }, zIndex: 1 }}>
         <Header />
 
         {!isValidTopic ? (
@@ -133,8 +176,6 @@ export default function CustomTopicSearch() {
             />
 
             <ErrorDisplay error={error} />
-
-            <Guidelines show={!isValidTopic} />
           </Box>
         ) : (
           <Box sx={{ mb: 3 }}>
@@ -148,6 +189,7 @@ export default function CustomTopicSearch() {
           </Box>
         )}
 
+        <Guidelines show={!isValidTopic} />
         <BasicLearningOption
           isValidTopic={isValidTopic}
           generating={generating}
