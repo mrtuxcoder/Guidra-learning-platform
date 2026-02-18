@@ -1,4 +1,4 @@
-const setTokenCookie = require("./set-token-cookie");
+const { setTokenCookie, getTokenCookieOptions } = require("./set-token-cookie");
 const User = require("../../models/User");
 const { signJwt } = require("../../configs/jwt");
 
@@ -166,12 +166,7 @@ exports.logoutController = async (req, res) => {
     console.log("🚀 [BACKEND] Fast logout initiated");
 
     // Clear backend cookie immediately
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-    });
+    res.clearCookie("token", getTokenCookieOptions());
 
     // Send immediate response - don't wait for anything
     return res.status(200).json({

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { checkPasswordStatus } from "../api/password";
-import { getStoredToken } from "../api/utils/cookies";
+import { useUser } from "../contexts/UserContext";
 
 export const usePasswordCheck = () => {
   const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
@@ -8,33 +7,19 @@ export const usePasswordCheck = () => {
   const [authProvider, setAuthProvider] = useState(null);
   const [hasPassword, setHasPassword] = useState(false);
 
+  // Get password info from shared UserContext instead of separate API call
+  const { authInfo, isLoading } = useUser();
+
   useEffect(() => {
-    const checkPassword = async () => {
-      const token = getStoredToken();
-
-      if (!token) {
-        setLoading(false);
-        return;
+    if (!isLoading) {
+      if (authInfo) {
+        setNeedsPasswordSetup(authInfo.needsPasswordSetup || false);
+        setAuthProvider(authInfo.authProvider || null);
+        setHasPassword(authInfo.hasPassword || false);
       }
-
-      try {
-        const response = await checkPasswordStatus();
-        const { needsPasswordSetup, authProvider, hasPassword } = response.data;
-
-        setNeedsPasswordSetup(needsPasswordSetup);
-        setAuthProvider(authProvider);
-        setHasPassword(hasPassword);
-      } catch (error) {
-        console.error("Error checking password status:", error);
-        // Don't show modal on error
-        setNeedsPasswordSetup(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkPassword();
-  }, []);
+      setLoading(false);
+    }
+  }, [authInfo, isLoading]);
 
   return {
     needsPasswordSetup,
@@ -44,3 +29,5 @@ export const usePasswordCheck = () => {
     setNeedsPasswordSetup, // Allow manual override
   };
 };
+
+

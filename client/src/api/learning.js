@@ -150,3 +150,29 @@ export const markTopicComplete = async (topic) => {
   );
   return response;
 };
+
+// Content version management
+export const getAvailableVersions = async (data) => {
+  const response = await API.post("/api/v1/content/version/available", data);
+  return response;
+};
+
+export const getFullContentByVersion = async (data) => {
+  const response = await API.post("/api/v1/content/version/full", data);
+  return response;
+};
+
+export const getLatestFullContent = async (data) => {
+  const response = await API.post("/api/v1/content/version/latest", data);
+  return response;
+};
+
+export const compareContentVersions = async (data) => {
+  const response = await API.post("/api/v1/content/version/compare", data);
+  return response;
+};
+
+export const getContentVersionHistory = async (data) => {
+  const response = await API.post("/api/v1/content/version/history", data);
+  return response;
+};

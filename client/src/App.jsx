@@ -9,9 +9,11 @@ import CustomTopicSearch from "./pages/CustomTopicSearch";
 import StudyTimer from "./pages/StudyTimer";
 import Settings from "./pages/Settings";
 import Layout from "./components/Layout";
+import OfflineIndicator from "./components/OfflineIndicator";
 import PasswordSetupModal from "./components/PasswordSetupModal";
-import { hasAuthCookie, isAuthenticated, recordTimeSpent } from "./api";
+import { recordTimeSpent } from "./api";
 import { usePasswordCheck } from "./hooks/usePasswordCheck";
+import { useUser } from "./contexts/UserContext";
 import { DailyRegenProvider } from "./contexts/DailyRegenContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
@@ -51,42 +53,23 @@ const LoadingSpinner = () => {
 };
 
 export default function App() {
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isAuth, setIsAuth] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
   const appSessionStartRef = useRef(Date.now());
   const appTimerRef = useRef(null);
 
-  // Use the password check hook
+  // Get user from shared context - already fetching on mount
+  const { user, isLoading: userLoading } = useUser();
+  
+  // Use the password check hook - now uses shared context
   const {
     needsPasswordSetup,
     loading: passwordLoading,
     setNeedsPasswordSetup,
   } = usePasswordCheck();
 
-  // Check auth on initial load
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  // Re-check auth only when moving between auth/non-auth routes
-  useEffect(() => {
-    const isAuthRoute = [
-      "/profile",
-      "/explore",
-      "/learn",
-      "/custom-topic",
-      "/study-timer",
-    ].includes(location.pathname);
-    const isNonAuthRoute = ["/", "/login", "/register"].includes(
-      location.pathname
-    );
-
-    if ((isAuth && isNonAuthRoute) || (!isAuth && isAuthRoute)) {
-      checkAuth();
-    }
-  }, [location.pathname]);
+  // Determine if authenticated based on user context
+  const isAuth = !!user;
 
   // Show password modal when needed
   useEffect(() => {
@@ -132,54 +115,34 @@ export default function App() {
     };
   }, [isAuth]);
 
-  const checkAuth = async () => {
-    try {
-      // Use quick check for initial load, full check for auth routes
-      const shouldFullCheck = [
-        "/profile",
-        "/explore",
-        "/learn",
-        "/custom-topic",
-        "/study-timer",
-      ].includes(location.pathname);
-      const authenticated = shouldFullCheck
-        ? await isAuthenticated() // Makes API call to verify token
-        : hasAuthCookie(); // Just checks cookie presence (no API call)
-
-      setIsAuth(authenticated);
-    } catch (error) {
-      console.error("🔐 [APP] Auth check error:", error);
-      setIsAuth(false);
-    } finally {
-      setAuthChecked(true);
-    }
-  };
-
   const handlePasswordSetupSuccess = () => {
     setShowPasswordModal(false);
     setNeedsPasswordSetup(false);
-    // Optionally refresh user data
-    checkAuth();
   };
 
-  // Show loading while checking auth
+  // Show loading while user data is being fetched
+  if (userLoading) {
+    return <LoadingSpinner />;
+  }
+
+  // Show loading spinner for theme which might not be ready
   return (
     <ThemeProvider>
-      {!authChecked ? (
-        <LoadingSpinner />
-      ) : (
-        <TimerProvider>
-          <DailyRegenProvider>
-            {/* Password Setup Modal */}
-            <PasswordSetupModal
-              open={showPasswordModal}
-              onClose={() => setShowPasswordModal(false)}
-              onSuccess={handlePasswordSetupSuccess}
-            />
+      <TimerProvider>
+        <DailyRegenProvider>
+          {/* Offline Indicator */}
+          <OfflineIndicator />
 
-            <Routes>
-        {/* Public routes - only accessible when not logged in */}
-        <Route
+          {/* Password Setup Modal */}
+          <PasswordSetupModal
+            open={showPasswordModal}
+            onClose={() => setShowPasswordModal(false)}
+            onSuccess={handlePasswordSetupSuccess}
+          />
+
+          <Routes>
+            {/* Public routes - only accessible when not logged in */}
+            <Route
           path="/"
           element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
         />
@@ -272,9 +235,8 @@ export default function App() {
           element={<Navigate to={isAuth ? "/profile" : "/login"} replace />}
         />
           </Routes>
-          </DailyRegenProvider>
-        </TimerProvider>
-      )}
+        </DailyRegenProvider>
+      </TimerProvider>
     </ThemeProvider>
   );
 }

@@ -6,7 +6,8 @@ const {
 // ===== PROFILE & UTILITY CONTROLLERS =====
 
 /**
- * Get user profile
+ * Get user profile with auth info (unified endpoint)
+ * Returns both user data and password/auth status to avoid multiple API calls
  */
 exports.profileController = async (req, res) => {
   try {
@@ -31,7 +32,17 @@ exports.profileController = async (req, res) => {
       await userData.save({ validateBeforeSave: false });
     }
 
-    return res.status(200).json({ user: userData });
+    // Include password/auth status info to avoid separate API calls
+    const authInfo = {
+      hasPassword: userData.hasPassword?.() || false,
+      authProvider: userData.authProvider,
+      needsPasswordSetup: userData.needsPasswordSetup?.() || false,
+    };
+
+    return res.status(200).json({ 
+      user: userData,
+      authInfo: authInfo
+    });
   } catch (err) {
     console.error("error in profileController:", err);
     return res.status(500).json({ error: "Internal Server Error" });

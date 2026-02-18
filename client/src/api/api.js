@@ -5,6 +5,7 @@ import {
   setFrontendCookie,
   removeFrontendCookie,
 } from "./utils/cookies.js";
+import { offlineCacheService } from "../services/offlineCacheService.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -45,6 +46,15 @@ API.interceptors.response.use(
       removeFrontendCookie();
     }
 
+    // Cache successful GET responses for offline access
+    if (response.config.method === "get" && response.status === 200) {
+      const cacheUrl = response.config.url;
+      offlineCacheService.setCache(cacheUrl, {
+        data: response.data,
+        timestamp: Date.now(),
+      });
+    }
+
     return response;
   },
   (error) => {
@@ -52,6 +62,22 @@ API.interceptors.response.use(
       removeFrontendCookie();
       if (!window.location.pathname.includes("/login")) {
         window.location.href = "/login";
+      }
+    }
+
+    // If offline and request failed, try to return cached data
+    if (!navigator.onLine && error.response?.status !== 401) {
+      const cachedData = offlineCacheService.getCache(error.config.url);
+      if (cachedData) {
+        console.warn(
+          "Offline: Returning cached data for",
+          error.config.url
+        );
+        return Promise.resolve({
+          ...error.response,
+          data: cachedData.data,
+          isOfflineCache: true,
+        });
       }
     }
 

@@ -13,15 +13,27 @@ import { profileTheme } from "../profile/constants";
 const progressItems = [
   {
     title: "Topic completion",
-    detail: "Automatically calculated from subtopics.",
+    detail: "Automatically calculated from subtopics and learning sessions.",
   },
   {
     title: "Understanding level",
-    detail: "Track your level on a 1–5 scale.",
+    detail: "Track your mastery on a 1–5 scale and see progress over time.",
   },
   {
-    title: "Quiz performance",
-    detail: "Scores are saved for later review.",
+    title: "Quiz analytics",
+    detail: "Detailed quiz scores, mistakes, and performance trends saved for review.",
+  },
+  {
+    title: "Session tracking",
+    detail: "Monitor time spent per topic and subtopic to optimize learning.",
+  },
+  {
+    title: "Content versions",
+    detail: "Keep track of all content regenerations and access previous versions.",
+  },
+  {
+    title: "Daily stats",
+    detail: "Daily regeneration limit tracking and learning streak analytics.",
   },
 ];
 

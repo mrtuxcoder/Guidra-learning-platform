@@ -18,12 +18,11 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import {
-  getProfile,
   updateUserPreferences,
-  getPasswordStatus,
   createPassword,
   updatePassword,
 } from "../api";
+import { useUser } from "../contexts/UserContext";
 import { profileTheme, cardSx } from "../components/profile/constants";
 import { useThemeMode } from "../contexts/ThemeContext";
 
@@ -36,7 +35,8 @@ const toneOptions = [
 
 const Settings = () => {
   const { mode, toggleTheme } = useThemeMode();
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, authInfo, fetchUserProfile } = useUser(); // Get user and refresh function from shared context
+  const [isLoading, setIsLoading] = useState(!user); // Loading when no user yet
   const [profileError, setProfileError] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
@@ -65,36 +65,23 @@ const Settings = () => {
     confirmPassword: "",
   });
 
+  // Use shared user context instead of fetching independently
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const [profileResponse, passwordResponse] = await Promise.all([
-          getProfile(),
-          getPasswordStatus(),
-        ]);
+    if (user) {
+      setPreferences({
+        reasonForLearning: user?.reasonForLearning || "",
+        tonePreference: user?.tonePreference || "neutral",
+      });
 
-        const userData = profileResponse.data?.user || profileResponse.data;
-        setPreferences({
-          reasonForLearning: userData?.reasonForLearning || "",
-          tonePreference: userData?.tonePreference || "neutral",
-        });
+      setPasswordStatus({
+        hasPassword: authInfo?.hasPassword || false,
+        authProvider: authInfo?.authProvider || null,
+        needsPasswordSetup: authInfo?.needsPasswordSetup || false,
+      });
 
-        setPasswordStatus({
-          hasPassword: passwordResponse.data?.hasPassword || false,
-          authProvider: passwordResponse.data?.authProvider || null,
-          needsPasswordSetup: passwordResponse.data?.needsPasswordSetup || false,
-        });
-      } catch (error) {
-        setProfileError(
-          error.response?.data?.error || "Failed to load settings"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadSettings();
-  }, []);
+      setIsLoading(false);
+    }
+  }, [user, authInfo]);
 
   const handlePreferenceChange = (event) => {
     const { name, value } = event.target || {};
@@ -184,7 +171,6 @@ const Settings = () => {
           setIsUpdatingPassword(false);
           return;
         }
-
         await updatePassword({
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
@@ -194,12 +180,9 @@ const Settings = () => {
 
       setPasswordMessage("Password updated successfully.");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      const statusResponse = await getPasswordStatus();
-      setPasswordStatus({
-        hasPassword: statusResponse.data?.hasPassword || false,
-        authProvider: statusResponse.data?.authProvider || null,
-        needsPasswordSetup: statusResponse.data?.needsPasswordSetup || false,
-      });
+      
+      // Refresh user data from the unified /me endpoint
+      await fetchUserProfile(true);
     } catch (error) {
       setPasswordError(
         error.response?.data?.error || "Failed to update password"

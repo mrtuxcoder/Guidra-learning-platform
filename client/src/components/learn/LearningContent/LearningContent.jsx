@@ -29,6 +29,8 @@ import {
   generateComponent,
   getComponentVersions,
   getComponentVersion,
+  getAvailableVersions,
+  getFullContentByVersion,
 } from '../../../api/learning';
 
 const LearningContent = ({ 
@@ -38,6 +40,7 @@ const LearningContent = ({
   selectedSubtopic, 
   contentLoading, 
   onGenerateContent,
+  onSelectFullVersion,
   colorPalette,
   userRemainingGenerations = 5,
   dailyRemaining = 6,
@@ -69,6 +72,10 @@ const LearningContent = ({
   const [limitMessage, setLimitMessage] = useState("");
   const [teachingStyleSelectorOpen, setTeachingStyleSelectorOpen] = useState(false);
   const [pendingComponentRegeneration, setPendingComponentRegeneration] = useState(null);
+  const [versionMode, setVersionMode] = useState("full"); // "full" or "component"
+  const [fullVersions, setFullVersions] = useState([]);
+  const [loadingFullVersions, setLoadingFullVersions] = useState(false);
+  const [selectedFullVersion, setSelectedFullVersion] = useState(null);
   const dailyLimitReached = dailyRemaining <= 0;
 
   // Register the open function with parent on mount
@@ -285,6 +292,30 @@ const LearningContent = ({
     }
   };
 
+  const loadFullVersions = async () => {
+    if (!selectedTopic || !selectedSubtopic?.name) {
+      return;
+    }
+
+    try {
+      setLoadingFullVersions(true);
+      const response = await getAvailableVersions({
+        topic: selectedTopic,
+        subtopic: selectedSubtopic.name,
+      });
+
+      const versions = response?.data?.versions || [];
+      setFullVersions(versions);
+      setSelectedFullVersion(versions.length > 0 ? versions[0].version : null);
+    } catch (error) {
+      console.error("Error loading full versions:", error);
+      setFullVersions([]);
+      setSelectedFullVersion(null);
+    } finally {
+      setLoadingFullVersions(false);
+    }
+  };
+
   const handleComponentVersionSelect = async (componentName, versionNumber) => {
     if (!selectedTopic || !selectedSubtopic?.name) {
       return;
@@ -442,8 +473,12 @@ const LearningContent = ({
       return;
     }
 
-    loadComponentVersions(selectedComponent);
-  }, [versionDialogOpen, selectedComponent]);
+    if (versionMode === "full") {
+      loadFullVersions();
+    } else {
+      loadComponentVersions(selectedComponent);
+    }
+  }, [versionDialogOpen, selectedComponent, versionMode]);
 
   if (contentLoading) {
     return <LoadingState isContentLoading={true} source={contentInfo?.source} colorPalette={colorPalette} />;
@@ -574,148 +609,298 @@ const LearningContent = ({
               Pick a cached version to preview. Regeneration stays on the
               section buttons.
             </Typography>
-          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <InputLabel id="component-select-label">Component</InputLabel>
-            <Select
-              labelId="component-select-label"
-              value={selectedComponent}
-              label="Component"
-              onChange={(e) => handleDialogComponentChange(e.target.value)}
-            >
-              {componentOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              Versions
-            </Typography>
-            {loadingVersions[selectedComponent] ? (
-              <Box
-                sx={{
-                  mt: 1,
-                  p: 2,
-                  borderRadius: 1,
-                  border: "1px dashed",
-                  borderColor: "divider",
-                  color: "text.secondary",
-                  background: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : colorPalette[50],
-                  fontSize: isMobile ? "0.75rem" : "0.85rem",
-                }}
-              >
-                Checking versions...
-              </Box>
-            ) : dialogVersions.length === 0 ? (
-              <Box
-                sx={{
-                  mt: 1,
-                  p: 2,
-                  borderRadius: 1,
-                  border: "1px dashed",
-                  borderColor: "divider",
-                  color: "text.secondary",
-                  background: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : colorPalette[50],
-                  fontSize: isMobile ? "0.75rem" : "0.85rem",
-                }}
-              >
-                No available versions yet. Generate or regenerate this
-                component first.
-              </Box>
-            ) : (
+            {/* Mode Toggle */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                Version Type
+              </Typography>
               <ToggleButtonGroup
                 size="small"
                 exclusive
-                value={dialogSelectedVersion}
-                onChange={(e, nextValue) => {
-                  if (nextValue !== null) {
-                    handleComponentVersionSelect(selectedComponent, nextValue);
+                value={versionMode}
+                onChange={(e, newMode) => {
+                  if (newMode !== null) {
+                    setVersionMode(newMode);
                   }
                 }}
-                sx={{
-                  mt: 1,
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 1,
-                  "& .MuiToggleButton-root": {
-                    borderRadius: 2,
-                    border: `1px solid ${colorPalette[300]}`,
-                    color: theme.palette.mode === "dark"
-                      ? theme.palette.text.primary
-                      : colorPalette[700],
-                    fontWeight: 600,
-                    textTransform: "none",
-                    px: 1.5,
-                    py: 0.6,
-                    bgcolor: (theme) => theme.palette.background.paper,
-                    transition: "all 0.2s ease",
-                  },
-                  "& .MuiToggleButton-root:hover": {
-                    background: (theme) => theme.palette.action.hover,
-                    borderColor: colorPalette[500],
-                  },
-                  "& .MuiToggleButton-root.Mui-selected": {
-                    background: colorPalette[600],
-                    color: "white",
-                    borderColor: colorPalette[600],
-                    boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
-                  },
-                  "& .MuiToggleButton-root.Mui-selected:hover": {
-                    background: colorPalette[700],
-                  },
-                }}
+                fullWidth
               >
-                {dialogVersions.map((option) => {
-                  const isSelected =
-                    dialogSelectedVersion === option.version;
+                <ToggleButton value="full" sx={{ flex: 1 }}>
+                  Full Content
+                </ToggleButton>
+                <ToggleButton value="component" sx={{ flex: 1 }}>
+                  Components
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
 
-                  return (
-                    <ToggleButton key={option.version} value={option.version}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.75,
-                        }}
-                      >
-                        <Box component="span">
-                          V{option.displayVersion ?? option.version}
-                        </Box>
-                        {isSelected && (
+            {/* Component Selection - Only show in component mode */}
+            {versionMode === "component" && (
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel id="component-select-label">Component</InputLabel>
+                <Select
+                  labelId="component-select-label"
+                  value={selectedComponent}
+                  label="Component"
+                  onChange={(e) => handleDialogComponentChange(e.target.value)}
+                >
+                  {componentOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {/* Versions Display */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" color="text.secondary">
+                {versionMode === "full" ? "Full Content Versions" : "Component Versions"}
+              </Typography>
+              
+              {/* FULL CONTENT VERSIONS MODE */}
+              {versionMode === "full" && (
+                <>
+                  {loadingFullVersions ? (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        p: 2,
+                        borderRadius: 1,
+                        border: "1px dashed",
+                        borderColor: "divider",
+                        color: "text.secondary",
+                        background: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.background.paper
+                            : colorPalette[50],
+                        fontSize: isMobile ? "0.75rem" : "0.85rem",
+                      }}
+                    >
+                      Checking versions...
+                    </Box>
+                  ) : fullVersions.length === 0 ? (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        p: 2,
+                        borderRadius: 1,
+                        border: "1px dashed",
+                        borderColor: "divider",
+                        color: "text.secondary",
+                        background: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.background.paper
+                            : colorPalette[50],
+                        fontSize: isMobile ? "0.75rem" : "0.85rem",
+                      }}
+                    >
+                      No full content versions available. Generate content first.
+                    </Box>
+                  ) : (
+                    <ToggleButtonGroup
+                      size="small"
+                      exclusive
+                      value={selectedFullVersion}
+                      onChange={(e, nextValue) => {
+                        if (nextValue !== null) {
+                          setSelectedFullVersion(nextValue);
+                          if (typeof onSelectFullVersion === "function") {
+                            onSelectFullVersion(nextValue);
+                          }
+                        }
+                      }}
+                      sx={{
+                        mt: 1,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        "& .MuiToggleButton-root": {
+                          borderRadius: 2,
+                          border: `1px solid ${colorPalette[300]}`,
+                          color: theme.palette.mode === "dark"
+                            ? theme.palette.text.primary
+                            : colorPalette[700],
+                          fontWeight: 600,
+                          textTransform: "none",
+                          px: 1.5,
+                          py: 0.6,
+                          bgcolor: (theme) => theme.palette.background.paper,
+                          transition: "all 0.2s ease",
+                        },
+                        "& .MuiToggleButton-root:hover": {
+                          background: (theme) => theme.palette.action.hover,
+                          borderColor: colorPalette[500],
+                        },
+                        "& .MuiToggleButton-root.Mui-selected": {
+                          background: colorPalette[600],
+                          color: "white",
+                          borderColor: colorPalette[600],
+                          boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
+                        },
+                        "& .MuiToggleButton-root.Mui-selected:hover": {
+                          background: colorPalette[700],
+                        },
+                      }}
+                    >
+                      {fullVersions.map((version) => (
+                        <ToggleButton key={version.version} value={version.version}>
                           <Box
-                            component="span"
                             sx={{
-                              fontSize: "0.65rem",
-                              fontWeight: 700,
-                              px: 0.75,
-                              py: 0.2,
-                              borderRadius: 999,
-                              background: "rgba(255, 255, 255, 0.2)",
-                              border: "1px solid rgba(255, 255, 255, 0.35)",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.75,
+                              flexDirection: "column",
+                              fontSize: "0.75rem",
                             }}
                           >
-                            Current
+                            <Box component="span" sx={{ fontWeight: 700 }}>
+                              V{version.version}
+                            </Box>
+                            <Box component="span" sx={{ fontSize: "0.65rem", opacity: 0.7 }}>
+                              {new Date(version.createdAt).toLocaleDateString()}
+                            </Box>
                           </Box>
-                        )}
-                      </Box>
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-            )}
+                        </ToggleButton>
+                      ))}
+                    </ToggleButtonGroup>
+                  )}
+                </>
+              )}
+
+              {/* COMPONENT VERSIONS MODE */}
+              {versionMode === "component" && (
+                <>
+                  {loadingVersions[selectedComponent] ? (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        p: 2,
+                        borderRadius: 1,
+                        border: "1px dashed",
+                        borderColor: "divider",
+                        color: "text.secondary",
+                        background: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.background.paper
+                            : colorPalette[50],
+                        fontSize: isMobile ? "0.75rem" : "0.85rem",
+                      }}
+                    >
+                      Checking versions...
+                    </Box>
+                  ) : dialogVersions.length === 0 ? (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        p: 2,
+                        borderRadius: 1,
+                        border: "1px dashed",
+                        borderColor: "divider",
+                        color: "text.secondary",
+                        background: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.background.paper
+                            : colorPalette[50],
+                        fontSize: isMobile ? "0.75rem" : "0.85rem",
+                      }}
+                    >
+                      No available versions yet. Generate or regenerate this
+                      component first.
+                    </Box>
+                  ) : (
+                    <ToggleButtonGroup
+                      size="small"
+                      exclusive
+                      value={dialogSelectedVersion}
+                      onChange={(e, nextValue) => {
+                        if (nextValue !== null) {
+                          handleComponentVersionSelect(selectedComponent, nextValue);
+                        }
+                      }}
+                      sx={{
+                        mt: 1,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        "& .MuiToggleButton-root": {
+                          borderRadius: 2,
+                          border: `1px solid ${colorPalette[300]}`,
+                          color: theme.palette.mode === "dark"
+                            ? theme.palette.text.primary
+                            : colorPalette[700],
+                          fontWeight: 600,
+                          textTransform: "none",
+                          px: 1.5,
+                          py: 0.6,
+                          bgcolor: (theme) => theme.palette.background.paper,
+                          transition: "all 0.2s ease",
+                        },
+                        "& .MuiToggleButton-root:hover": {
+                          background: (theme) => theme.palette.action.hover,
+                          borderColor: colorPalette[500],
+                        },
+                        "& .MuiToggleButton-root.Mui-selected": {
+                          background: colorPalette[600],
+                          color: "white",
+                          borderColor: colorPalette[600],
+                          boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
+                        },
+                        "& .MuiToggleButton-root.Mui-selected:hover": {
+                          background: colorPalette[700],
+                        },
+                      }}
+                    >
+                      {dialogVersions.map((option) => {
+                        const isSelected =
+                          dialogSelectedVersion === option.version;
+
+                        return (
+                          <ToggleButton key={option.version} value={option.version}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.75,
+                              }}
+                            >
+                              <Box component="span">
+                                V{option.displayVersion ?? option.version}
+                              </Box>
+                              {isSelected && (
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    fontSize: "0.65rem",
+                                    fontWeight: 700,
+                                    px: 0.75,
+                                    py: 0.2,
+                                    borderRadius: 999,
+                                    background: "rgba(255, 255, 255, 0.2)",
+                                    border: "1px solid rgba(255, 255, 255, 0.35)",
+                                  }}
+                                >
+                                  Current
+                                </Box>
+                              )}
+                            </Box>
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+                </>
+              )}
           </Box>
           <Box sx={{ mt: 2 }}>
             <Typography variant="caption" color="text.secondary">
-              Component generations: {dialogVersionCount}/3 · Cached versions: {dialogCachedCount}
+              {versionMode === "full" ? (
+                <>Full content versions: {fullVersions.length}</>
+              ) : (
+                <>Component generations: {dialogVersionCount}/3 · Component versions: {dialogCachedCount}</>
+              )}
             </Typography>
           </Box>
 

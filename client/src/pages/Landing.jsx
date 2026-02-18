@@ -11,11 +11,14 @@ import {
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loginUser, registerUser, startGoogleOAuth } from "../api";
+import { useUser } from "../contexts/UserContext";
 import LandingHero from "../components/landing/LandingHero";
 import LandingProblem from "../components/landing/LandingProblem";
 import LandingSolution from "../components/landing/LandingSolution";
 import LandingRegeneration from "../components/landing/LandingRegeneration";
+import LandingFeatures from "../components/landing/LandingFeatures";
 import LandingProgress from "../components/landing/LandingProgress";
+import LandingMobileApp from "../components/landing/LandingMobileApp";
 import LandingNavPreview from "../components/landing/LandingNavPreview";
 import LandingCTA from "../components/landing/LandingCTA";
 import LandingFooter from "../components/landing/LandingFooter";
@@ -28,6 +31,7 @@ const Landing = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const authRef = useRef(null);
+  const { fetchUserProfile } = useUser();
 
   const initialTab = useMemo(() => {
     if (location.pathname === "/register") return "register";
@@ -126,6 +130,7 @@ const Landing = () => {
         email: formData.email,
         password: formData.password,
       });
+      await fetchUserProfile(true);
       navigate("/profile", { replace: true });
     } catch (err) {
       setError(
@@ -186,7 +191,9 @@ const Landing = () => {
           <LandingProblem />
           <LandingSolution />
           <LandingRegeneration />
+          <LandingFeatures />
           <LandingProgress />
+          <LandingMobileApp />
           <LandingNavPreview />
 
           <Box
@@ -212,16 +219,15 @@ const Landing = () => {
                         fontFamily: '"Space Grotesk", sans-serif',
                       }}
                     >
-                      Start with a structured account
+                      Start your learning journey
                     </Typography>
                     <Typography sx={{ color: "text.secondary", mb: 2 }}>
-                      Your dashboard keeps lessons, versions, and revision paths
-                      in one place. Switch between login and register any time.
+                      Your dashboard organizes lessons, content versions, quiz scores, and learning analytics in one place. Customize your experience with teaching styles, custom topics, and study timers.
                     </Typography>
                     <Typography
                       sx={{ color: "text.secondary", fontSize: "0.95rem" }}
                     >
-                      Built for focused study sessions and exam preparation.
+                      Track progress, manage time, and ace exams with AI-powered personalized learning.
                     </Typography>
                   </Box>
                   <LandingAuthPanel

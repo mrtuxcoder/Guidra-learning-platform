@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getProfile } from '../../../api';
 import { completeLogout } from '../../../api';
 import { iconSet } from '../constants.jsx';
 import { useDailyRegen } from '../../../contexts/DailyRegenContext';
+import { useUser } from '../../../contexts/UserContext';
 
 export const useNavbar = (navigate, location, isMobile) => {
-  const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [randomIcon, setRandomIcon] = useState(null);
   const [tourOpen, setTourOpen] = useState(false);
   const [activeTourStep, setActiveTourStep] = useState(0);
+  
+  // Use shared user context - no need to fetch independently
+  const { user, isLoading } = useUser();
   
   // Use daily regen context
   const { dailyRegenRemaining } = useDailyRegen();
@@ -40,28 +41,6 @@ export const useNavbar = (navigate, location, isMobile) => {
       return () => clearTimeout(timer);
     }
   }, [user, isLoading, hasSeenTour]);
-
-  // Optimized auth check
-  const checkAuth = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await getProfile();
-      const userData = response.data?.user || response.data || response;
-      
-      if (userData) {
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
 
   const getUserInitial = () => {
     if (!user) return 'U';

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getProfile } from "../../api";
 import { hasAuthCookie } from "../../api";
 import { authHelpers } from "../../api";
@@ -12,6 +12,7 @@ export const useProfileLogic = (navigate) => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
+  const hasMountedRef = useRef(false);
 
   const fetchProfile = useCallback(
     async (forceRefresh = false) => {
@@ -34,6 +35,7 @@ export const useProfileLogic = (navigate) => {
 
         const response = await getProfile();
         const userData = response.data?.user || response.data || response;
+        const authInfo = response.data?.authInfo;
 
         const enhancedUserData = {
           ...userData,
@@ -48,8 +50,8 @@ export const useProfileLogic = (navigate) => {
         sessionStorage.setItem("userProfile", JSON.stringify(enhancedUserData));
         sessionStorage.setItem("userProfileTimestamp", Date.now().toString());
 
-        // Check password status after fetching user
-        checkPasswordStatus(enhancedUserData);
+        // Check password status from the unified response (no separate API call needed)
+        checkPasswordStatus(enhancedUserData, authInfo);
       } catch (err) {
         console.error("Profile fetch error:", err);
 
@@ -66,13 +68,20 @@ export const useProfileLogic = (navigate) => {
     [navigate]
   );
 
-  const checkPasswordStatus = async (userData) => {
+  const checkPasswordStatus = async (userData, authInfo = null) => {
     try {
-      if (
+      // Use authInfo from the unified /me response if available
+      if (authInfo && authInfo.needsPasswordSetup) {
+        setNeedsPasswordSetup(true);
+        setTimeout(() => {
+          setShowPasswordModal(true);
+        }, 2000);
+      } else if (
         userData &&
         userData.authProvider === "google" &&
         !userData.password
       ) {
+        // Fallback for cases where authInfo is not provided (legacy)
         const { checkNeedsPasswordSetup } = await import("../../api");
         const passwordInfo = await checkNeedsPasswordSetup();
 
@@ -96,15 +105,9 @@ export const useProfileLogic = (navigate) => {
     if (tokenFromUrl && source === "google") {
       setFrontendCookie(tokenFromUrl);
       window.history.replaceState({}, "", "/profile");
-      setTimeout(() => fetchProfile(true), 1000);
+      // Force refresh after OAuth redirect
     }
-  }, [fetchProfile]);
-
-  const handleVisibilityChange = useCallback(() => {
-    if (document.visibilityState === "visible") {
-      fetchProfile(true);
-    }
-  }, [fetchProfile]);
+  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("userProfile");
@@ -127,29 +130,37 @@ export const useProfileLogic = (navigate) => {
     fetchProfile(true);
   };
 
-  // Effects
+  // Main effect - only runs once on mount
   useEffect(() => {
+    if (hasMountedRef.current) return;
+    hasMountedRef.current = true;
+
     fetchProfile();
+  }, []); // Empty dependency array - runs ONCE on mount only
 
-    const interval = setInterval(() => {
-      if (!loading) {
-        fetchProfile(true);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [fetchProfile, loading]);
-
+  // Handle OAuth redirect
   useEffect(() => {
     handleOAuthToken();
-  }, [handleOAuthToken]);
+  }, []); // Run once on mount
 
+  // Visibility change listener - check if data is stale when tab becomes active
   useEffect(() => {
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    const visibilityHandler = () => {
+      if (document.visibilityState === "visible") {
+        const cacheTimestamp = sessionStorage.getItem("userProfileTimestamp");
+        const isStale =
+          !cacheTimestamp || Date.now() - parseInt(cacheTimestamp) > 60000;
+        if (isStale) {
+          fetchProfile(true);
+        }
+      }
     };
-  }, [handleVisibilityChange]);
+
+    document.addEventListener("visibilitychange", visibilityHandler);
+    return () => {
+      document.removeEventListener("visibilitychange", visibilityHandler);
+    };
+  }, [fetchProfile]);
 
   return {
     user,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, MenuItem, Box, Typography, Chip } from "@mui/material";
+import { Menu, MenuItem, Box, Typography, Chip, useTheme } from "@mui/material";
 import { Logout } from "@mui/icons-material";
 import { navItems, purpleTheme } from "../constants.jsx";
 import { useTimer } from "../../../contexts/TimerContext";
@@ -18,6 +18,8 @@ const UserMenu = ({
   navigate,
   handleLogout,
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const { isActive: timerActive, remainingSeconds } = useTimer();
   const [showTimer, setShowTimer] = useState(false);
 
@@ -82,11 +84,11 @@ const UserMenu = ({
               sx={{
                 py: 1.25,
                 "&:hover": {
-                  bgcolor: purpleTheme.lightBg,
+                  bgcolor: isDark ? "rgba(149, 117, 205, 0.1)" : purpleTheme.lightBg,
                 },
               }}
             >
-              <Box sx={{ mr: 1.5, color: purpleTheme.primary }}>{item.icon}</Box>
+              <Box sx={{ mr: 1.5, color: isDark ? theme.palette.primary.light : purpleTheme.primary }}>{item.icon}</Box>
               <Typography variant="body2" sx={{ fontWeight: "500" }}>
                 {shouldShowTimerCountdown ? formatTime(remainingSeconds) : item.label}
               </Typography>

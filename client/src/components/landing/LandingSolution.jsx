@@ -12,24 +12,28 @@ import { profileTheme } from "../profile/constants";
 
 const solutionSteps = [
   {
-    title: "Choose a topic",
-    detail: "Pick a subject you want to learn clearly.",
+    title: "Choose or customize a topic",
+    detail: "Pick from recommended subjects or add your own custom learning topic.",
   },
   {
-    title: "Get structured subtopics",
-    detail: "Guidra builds a predictable learning flow.",
+    title: "Select your teaching style",
+    detail: "Choose how you want content generated—detailed, concise, visual, or academic.",
   },
   {
-    title: "Study explanation and mindmap",
-    detail: "Focused content for understanding and recall.",
+    title: "Get structured content",
+    detail: "Guidra builds a complete learning path with explanation, mindmap, and examples.",
   },
   {
-    title: "Take the quiz",
-    detail: "Quick checks to reinforce concepts.",
+    title: "Practice with interactive quizzes",
+    detail: "Test your understanding with AI-generated quizzes and track your performance.",
   },
   {
-    title: "Track progress",
-    detail: "See completion and understanding levels.",
+    title: "Study with focus timer",
+    detail: "Use the built-in study timer to maintain focused sessions and track time spent.",
+  },
+  {
+    title: "Review and regenerate",
+    detail: "Access all content versions, regenerate components, and compare different approaches.",
   },
 ];
 

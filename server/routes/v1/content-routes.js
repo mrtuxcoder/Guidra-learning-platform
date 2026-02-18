@@ -16,6 +16,13 @@ const {regenerateContentController} = require('../../controllers/content-control
 const {
   getCachedSubtopicsController,
 } = require("../../controllers/content-controllers/content-cache-controller");
+const {
+  getAvailableVersionsController,
+  getFullContentByVersionController,
+  compareVersionsController,
+  getLatestFullContentController,
+  getVersionHistoryController,
+} = require("../../controllers/content-controllers/unified-content/content-version-management");
 
 
 // Content teaching
@@ -42,5 +49,11 @@ router.post(
 // Cache metadata
 router.get("/cache/subtopics", authMiddleware, getCachedSubtopicsController);
 
+// Version management - retrieve full content from different versions
+router.post("/version/available", authMiddleware, getAvailableVersionsController);
+router.post("/version/full", authMiddleware, getFullContentByVersionController);
+router.post("/version/latest", authMiddleware, getLatestFullContentController);
+router.post("/version/compare", authMiddleware, compareVersionsController);
+router.post("/version/history", authMiddleware, getVersionHistoryController);
 
 module.exports = router;

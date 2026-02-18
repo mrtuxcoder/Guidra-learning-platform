@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getProfile } from '../api';
+import { useUser } from './UserContext';
 
 const DailyRegenContext = createContext();
 
@@ -14,28 +14,18 @@ export const useDailyRegen = () => {
 export const DailyRegenProvider = ({ children }) => {
   const [dailyRegenRemaining, setDailyRegenRemaining] = useState(6);
   const [dailyRegenResetAt, setDailyRegenResetAt] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Fetch initial daily regen count from user profile
+  // Get user data from the shared UserContext instead of fetching independently
+  const { user } = useUser();
+
+  // Update daily regen count when user data is available
   useEffect(() => {
-    const fetchDailyRegenCount = async () => {
-      try {
-        const response = await getProfile();
-        const userData = response.data?.user || response.data || response;
-        if (userData) {
-          const dailyUsed = Number(userData.regenDailyCount || 0);
-          setDailyRegenRemaining(Math.max(0, 6 - dailyUsed));
-          setDailyRegenResetAt(userData.regenDailyResetAt || null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch daily regen count:', error);
-      } finally {
-        setIsInitialized(true);
-      }
-    };
-
-    fetchDailyRegenCount();
-  }, []);
+    if (user) {
+      const dailyUsed = Number(user.regenDailyCount || 0);
+      setDailyRegenRemaining(Math.max(0, 6 - dailyUsed));
+      setDailyRegenResetAt(user.regenDailyResetAt || null);
+    }
+  }, [user]);
 
   const updateDailyRegen = useCallback((nextRemaining, nextResetAt) => {
     if (typeof nextRemaining === 'number') {
@@ -56,7 +46,6 @@ export const DailyRegenProvider = ({ children }) => {
   const value = {
     dailyRegenRemaining,
     dailyRegenResetAt,
-    isInitialized,
     updateDailyRegen,
     decrementDailyRegen,
   };

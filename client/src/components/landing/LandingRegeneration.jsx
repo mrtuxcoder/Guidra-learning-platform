@@ -11,9 +11,12 @@ import {
 import { profileTheme } from "../profile/constants";
 
 const regenerationPoints = [
-  "Regenerate only the explanation, quiz, mindmap, or examples.",
-  "AI usage is controlled and component-based.",
-  "Versioned caching keeps previous outputs available.",
+  "Regenerate specific components (explanation, quiz, mindmap, examples) with different styles.",
+  "AI usage is controlled and tracked daily to manage costs and quality.",
+  "Full content versioning—access all generated versions and compare them side-by-side.",
+  "Retrieve complete generated content from multiple versions in one place.",
+  "Component-level regeneration with teaching style customization.",
+  "Smart caching system keeps your learning efficient and fast.",
 ];
 
 const LandingRegeneration = () => {

@@ -2,12 +2,18 @@ import React from "react";
 import { Box, Container, Typography, Grid, alpha, useTheme } from "@mui/material";
 
 const features = [
-  "Structured Content Generation",
-  "Academic Mode (Exam-ready answers)",
-  "Versioned Caching System",
-  "Minimal and Focused Interface",
-  "Smart Regeneration",
-  "Exam Practice Mode",
+  "AI-Powered Content Generation",
+  "Teaching Style Customization",
+  "Full Content Versioning & Caching",
+  "Focus Study Timer",
+  "Interactive Quiz Analysis",
+  "Custom Topic Support",
+  "Session Time Tracking",
+  "Component-Level Regeneration",
+  "Exam Practice Ready",
+  "Progress Analytics",
+  "Content Version Comparison",
+  "Daily Regeneration Control",
 ];
 
 const LandingFeatures = () => {

@@ -79,19 +79,12 @@ export const isAuthenticatedWithInfo = async () => {
     const isAuth = response.status === 200;
 
     if (isAuth && response.data?.user) {
-      let authInfo = null;
-      try {
-        const passwordResponse = await API.get(
-          "/api/v1/users/me/password/status"
-        );
-        authInfo = passwordResponse.data;
-      } catch (passwordError) {
-        authInfo = {
-          authProvider: "unknown",
-          hasPassword: false,
-          needsPasswordSetup: false,
-        };
-      }
+      // authInfo is now included in the /me response
+      const authInfo = response.data?.authInfo || {
+        authProvider: "unknown",
+        hasPassword: false,
+        needsPasswordSetup: false,
+      };
 
       const token = getStoredToken();
       if (!token && response.data.token) {

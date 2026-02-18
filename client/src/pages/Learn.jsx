@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { Menu, Refresh } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
-import { getProfile } from "../api";
+import { useUser } from "../contexts/UserContext";
 import {
   getSubtopics,
   teachSubtopic,
@@ -26,6 +26,7 @@ import {
   getGenerationCounts,
   getCachedSubtopics,
   recordTimeSpent,
+  getFullContentByVersion,
 } from "../api/learning";
 import LearningSidebar from "../components/learn/LearningSidebar/index";
 import LearningHeader from "../components/learn/LearningHeader/index";
@@ -68,6 +69,9 @@ export default function Learning() {
   const subtopicStartRef = useRef(null);
   const activeTopicRef = useRef(null);
   const activeSubtopicRef = useRef(null);
+  
+  // Use shared user context
+  const { user } = useUser();
   
   // Use daily regen context
   const { dailyRegenRemaining, dailyRegenResetAt, updateDailyRegen } = useDailyRegen();
@@ -188,10 +192,15 @@ export default function Learning() {
     try {
       setLoading(true);
       setError("");
-      const { data } = await getProfile();
-      const progressTopics = data.user.progress || [];
-      const dailyUsed = Number(data.user.regenDailyCount || 0);
-      updateDailyRegen(Math.max(0, 6 - dailyUsed), data.user.regenDailyResetAt || null);
+      
+      // Use user data from shared context instead of fetching
+      if (!user) {
+        throw new Error("User data not available");
+      }
+      
+      const progressTopics = user.progress || [];
+      const dailyUsed = Number(user.regenDailyCount || 0);
+      updateDailyRegen(Math.max(0, 6 - dailyUsed), user.regenDailyResetAt || null);
       const orderedTopics = getOrderedTopics(progressTopics);
 
       if (preferredTopicName) {
@@ -242,7 +251,7 @@ export default function Learning() {
     } finally {
       setLoading(false);
     }
-  }, [getOrderedTopics, fetchSubtopics]);
+  }, [user, getOrderedTopics, fetchSubtopics, updateDailyRegen]);
 
   // Function to reorder subtopics - incomplete first
   const getOrderedSubtopics = useCallback((subtopicsArray) => {
@@ -477,6 +486,38 @@ export default function Learning() {
       isActive = false;
     };
   }, [selectedTopic, dailyRegenRemaining]);
+
+  const handleSelectFullVersion = useCallback(
+    async (versionNumber) => {
+      if (!selectedSubtopic || !selectedTopic) return;
+
+      try {
+        setContentLoading(true);
+        setContentError("");
+        const { data } = await getFullContentByVersion({
+          topic: selectedTopic,
+          subtopic: selectedSubtopic.name,
+          versionNumber: versionNumber,
+        });
+
+        setContent(data.data);
+        setContentInfo({
+          cached: true,
+          version: data.version,
+          source: "cache",
+          isFullVersion: true,
+        });
+      } catch (err) {
+        const errorMessage =
+          err.response?.data?.message || "Failed to load content version";
+        setContentError(errorMessage);
+        setShowError(true);
+      } finally {
+        setContentLoading(false);
+      }
+    },
+    [selectedTopic, selectedSubtopic]
+  );
 
   const handleRegenerateContent = useCallback(async () => {
     if (!selectedSubtopic || !selectedTopic) return;
@@ -744,8 +785,10 @@ export default function Learning() {
 
   // Effects
   useEffect(() => {
-    fetchUserTopics(preferredTopic);
-  }, [fetchUserTopics, preferredTopic]);
+    if (user) {
+      fetchUserTopics(preferredTopic);
+    }
+  }, [fetchUserTopics, preferredTopic, user]);
 
   useEffect(() => {
     if (selectedSubtopic) {
@@ -1025,6 +1068,7 @@ export default function Learning() {
               colorPalette={purplePalette}
               onQuizSubmitted={handleQuizSubmitted}
               onVersionDialogOpen={handleRegisterVersionDialogOpener}
+              onSelectFullVersion={handleSelectFullVersion}
               dailyRemaining={dailyRegenRemaining}
               onDailyRegenUpdate={handleDailyRegenUpdate}
             />
