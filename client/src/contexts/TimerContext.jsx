@@ -32,6 +32,24 @@ export const TimerProvider = ({ children }) => {
     }
   };
 
+  const notifyTimerComplete = () => {
+    try {
+      const notificationsEnabled =
+        localStorage.getItem("timerNotificationsEnabled") === "true";
+      if (!notificationsEnabled) return;
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+
+      new Notification("Guidra Timer Complete", {
+        body: "Your study session is complete.",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+      });
+    } catch (error) {
+      console.error("Failed to show timer notification:", error);
+    }
+  };
+
   // Main timer loop
   useEffect(() => {
     if (!isActive) {
@@ -53,6 +71,7 @@ export const TimerProvider = ({ children }) => {
             completionNotifiedRef.current = true;
             setHasCompleted(true);
             playCompletionSound();
+            notifyTimerComplete();
             
             // Reset notification flag after 5 seconds
             setTimeout(() => {

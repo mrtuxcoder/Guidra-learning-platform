@@ -30,9 +30,24 @@ const mobileFeatures = [
     detail: "Access all cached lessons, quizzes, and progress even without internet connection.",
   },
   {
+    icon: <Download sx={{ fontSize: 32 }} />,
+    title: "Installable",
+    detail: "Add to your home screen directly from the browser without the Play Store.",
+  },
+  {
     icon: <Lock sx={{ fontSize: 32 }} />,
     title: "Secure & Private",
     detail: "Your data stays on your device with encrypted storage and secure authentication.",
+  },
+  {
+    icon: <Speed sx={{ fontSize: 32 }} />,
+    title: "Low Data Mode",
+    detail: "Smart caching reduces data usage while keeping lessons ready to open.",
+  },
+  {
+    icon: <Wifi sx={{ fontSize: 32 }} />,
+    title: "Auto Sync",
+    detail: "Progress syncs back to your account when you reconnect.",
   },
 ];
 
@@ -92,7 +107,7 @@ const LandingMobileApp = () => {
                 lineHeight: 1.6,
               }}
             >
-              Get the best learning experience on the go with our PWA app. Install it on your phone for faster access, offline support, and a native app feel.
+              Get the best learning experience on the go with our PWA app. Install it on your phone for faster access, offline support, and a native app feel. The mobile app is in beta and not available on the Play Store yet.
             </Typography>
 
             <Box sx={{ mb: 3 }}>
@@ -179,7 +194,7 @@ const LandingMobileApp = () => {
                 mt: 2,
               }}
             >
-              Available for Android. PWA wrapper for optimal mobile experience.
+              Available for Android. PWA wrapper for optimal mobile experience. Beta release, not on the Play Store yet.
             </Typography>
           </Box>
 
@@ -246,7 +261,7 @@ const LandingMobileApp = () => {
                   lineHeight: 1.6,
                 }}
               >
-                Install on your home screen and use Guidra like a native app. Fast, reliable, and always available.
+                Install on your home screen and use Guidra like a native app. Fast, reliable, and always available. Beta release, not on the Play Store yet.
               </Typography>
             </Card>
           </Box>

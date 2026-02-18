@@ -14,6 +14,7 @@ const API = axios.create({
   withCredentials: true,
 });
 
+
 export const authHelpers = {
   setFrontendCookie,
   removeFrontendCookie,

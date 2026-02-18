@@ -9,6 +9,9 @@ import {
   TextField,
   Stack,
   LinearProgress,
+  Alert,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { AccessTime, PlayArrow, Pause, RestartAlt } from "@mui/icons-material";
 import { alpha, useTheme } from "@mui/material/styles";
@@ -44,6 +47,10 @@ export default function StudyTimer() {
 
   const [mode, setMode] = useState("25");
   const [customMinutes, setCustomMinutes] = useState(30);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    localStorage.getItem("timerNotificationsEnabled") === "true"
+  );
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   const computedMinutes = useMemo(() => {
     if (mode === "custom") {
@@ -90,6 +97,30 @@ export default function StudyTimer() {
       const minutes = Number(newMode) || computedMinutes;
       resetTimer(minutes);
     }
+  };
+
+  const handleNotificationsToggle = async () => {
+    setNotificationMessage("");
+    const nextValue = !notificationsEnabled;
+
+    if (nextValue) {
+      if (!("Notification" in window)) {
+        setNotificationMessage("Notifications are not supported in this browser.");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setNotificationMessage("Allow notifications to enable timer alerts.");
+        return;
+      }
+    }
+
+    setNotificationsEnabled(nextValue);
+    localStorage.setItem(
+      "timerNotificationsEnabled",
+      nextValue ? "true" : "false"
+    );
   };
 
   return (
@@ -260,6 +291,23 @@ export default function StudyTimer() {
                   Reset
                 </Button>
               </Stack>
+
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={notificationsEnabled}
+                      onChange={handleNotificationsToggle}
+                    />
+                  }
+                  label="Timer notifications"
+                />
+                {notificationMessage && (
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    {notificationMessage}
+                  </Alert>
+                )}
+              </Box>
             </Stack>
           </CardContent>
         </Card>

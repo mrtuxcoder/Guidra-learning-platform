@@ -250,6 +250,7 @@ const QuizSection = ({
             </Typography>
           </Alert>
         )}
+
       </CardContent>
     </Card>
   );
