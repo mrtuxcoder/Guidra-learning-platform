@@ -4,6 +4,7 @@ const generateSubtopicPrompt = require("../../prompts/subtopic-generator");
 const {
   isNonsense,
   normalizeInput,
+  getTopicValidationErrors,
 } = require("../../utils/curriculum/simple-topic-validator");
 const callAI = require("../../utils/call-AI");
 
@@ -40,19 +41,20 @@ exports.subtopicGenerateController = async (req, res) => {
     const userId = req.user._id;
     const { topic } = req.body;
 
-    // Basic validation - topic is required
-    if (!topic) {
-      return res.status(400).json({ message: "Topic is required." });
-    }
-
     // Validate topic input quality
-    const normalizedTopic = normalizeInput(topic);
+    const validationErrors = getTopicValidationErrors(topic, {
+      maxLength: 60,
+      maxWords: 8,
+    });
 
-    if (isNonsense(normalizedTopic)) {
+    if (validationErrors.length > 0) {
       return res.status(400).json({
-        message: "Please enter a valid topic to learn.",
+        message: validationErrors[0],
+        errors: validationErrors,
       });
     }
+
+    const cleanTopic = normalizeInput(topic);
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -62,14 +64,17 @@ exports.subtopicGenerateController = async (req, res) => {
       p.subTopics?.some((s) => !s.completed)
     );
 
-    if (incompleteTopic && incompleteTopic.topic !== topic) {
+    if (
+      incompleteTopic &&
+      incompleteTopic.topic.toLowerCase() !== cleanTopic.toLowerCase()
+    ) {
       return res.status(400).json({
         message: `Please complete all subtopics in "${incompleteTopic.topic}" before starting a new one.`,
       });
     }
 
     // Generate subtopics using the unified buildPrompt function
-    const aiPrompt = generateSubtopicPrompt(topic);
+    const aiPrompt = generateSubtopicPrompt(cleanTopic);
     const aiResponse = await callAI(aiPrompt);
 
     // Use the cleanSubtopicOutput function from the unified buildPrompt
@@ -92,14 +97,16 @@ exports.subtopicGenerateController = async (req, res) => {
     }));
 
     // Update or create topic progress
-    const existingTopic = user.progress.find((p) => p.topic === topic);
+    const existingTopic = user.progress.find(
+      (p) => p.topic.toLowerCase() === cleanTopic.toLowerCase()
+    );
     if (existingTopic) {
       existingTopic.subTopics = formattedSubtopics;
       existingTopic.lastAccessed = new Date();
       existingTopic.overallUnderstanding = 1; // Minimum allowed value
     } else {
       user.progress.push({
-        topic,
+        topic: cleanTopic,
         subTopics: formattedSubtopics,
         overallUnderstanding: 1, // Minimum allowed value
         lastAccessed: new Date(),
@@ -111,7 +118,7 @@ exports.subtopicGenerateController = async (req, res) => {
     res.status(200).json({
       message: "Learning path generated successfully!",
       data: {
-        topic,
+        topic: cleanTopic,
         subTopics: formattedSubtopics,
       },
     });

@@ -2,6 +2,7 @@ const profanity = require('leo-profanity');
 
 const MIN_LENGTH = 3;
 const MAX_LENGTH = 80;
+const MAX_WORDS = 8;
 
 // Normalize text (trim + lowercase + collapse spaces)
 function normalizeInput(str = "") {
@@ -41,6 +42,57 @@ function isNonsense(str) {
   return false;
 }
 
+function getTopicValidationErrors(topic, options = {}) {
+  const errors = [];
+  const minLength = options.minLength || MIN_LENGTH;
+  const maxLength = options.maxLength || MAX_LENGTH;
+  const maxWords = options.maxWords || MAX_WORDS;
+
+  if (!topic || typeof topic !== "string") {
+    return ["Topic is required."];
+  }
+
+  const clean = topic.trim().replace(/\s+/g, " ");
+  if (!clean) {
+    return ["Topic is required."];
+  }
+
+  if (clean.length < minLength) {
+    errors.push(`Topic must be at least ${minLength} characters long.`);
+  }
+
+  if (clean.length > maxLength) {
+    errors.push(`Topic must be ${maxLength} characters or fewer.`);
+  }
+
+  const wordCount = clean.split(" ").filter(Boolean).length;
+  if (wordCount > maxWords) {
+    errors.push(`Topic must be ${maxWords} words or fewer.`);
+  }
+
+  if (/[\r\n]/.test(topic)) {
+    errors.push("Topic must be a single line.");
+  }
+
+  if (/(https?:\/\/|www\.)/i.test(clean)) {
+    errors.push("Topic must not include links.");
+  }
+
+  if (
+    /(ignore|disregard|system|assistant|developer|prompt|instruction|jailbreak|bypass|override)/i.test(
+      clean
+    )
+  ) {
+    errors.push("Topic must be a plain subject without instructions.");
+  }
+
+  if (isNonsense(clean)) {
+    errors.push("Topic is not a valid learning subject.");
+  }
+
+  return errors;
+}
+
 /**
  * Quick client-side validation for obvious cases
  */
@@ -68,5 +120,6 @@ function isObviouslyInvalid(topic) {
 module.exports = {
   normalizeInput,
   isNonsense,
-  isObviouslyInvalid
+  isObviouslyInvalid,
+  getTopicValidationErrors
 };

@@ -28,11 +28,12 @@ const {
 exports.regenerateComponentController = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { topic, subtopic, component } = req.body;
+    const { topic, subtopic, component, teachingStyle } = req.body;
     
     if (!topic || !subtopic || !component) {
       return res.status(400).json({
         message: "Topic, subtopic, and component are required.",
+        teachingStyles: ["default", "like5", "popular", "storytelling", "technical"],
         componentOptions: [
           "title",
           "concept",
@@ -46,6 +47,10 @@ exports.regenerateComponentController = async (req, res) => {
         ],
       });
     }
+
+    // Validate teaching style
+    const validTeachingStyles = ["default", "like5", "popular", "storytelling", "technical"];
+    const selectedTeachingStyle = validTeachingStyles.includes(teachingStyle) ? teachingStyle : "default";
 
     // Validate component
     const validComponents = [
@@ -127,7 +132,8 @@ exports.regenerateComponentController = async (req, res) => {
       user,
       topic,
       subtopic,
-      component
+      component,
+      selectedTeachingStyle
     );
 
     if (!promptResult.success) {

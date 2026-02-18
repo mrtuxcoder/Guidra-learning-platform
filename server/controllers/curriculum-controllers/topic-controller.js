@@ -1,7 +1,10 @@
 const User = require("../../models/User");
 const callAI = require("../../utils/call-AI");
 const { buildTopicValidatorPrompt } = require("../../prompts/topic-validator");
-const { isObviouslyInvalid } = require("../../utils/curriculum/simple-topic-validator");
+const {
+  isObviouslyInvalid,
+  getTopicValidationErrors,
+} = require("../../utils/curriculum/simple-topic-validator");
 
 // new feature
 /**
@@ -12,14 +15,22 @@ exports.validateTopicController = async (req, res) => {
   try {
     const { topic } = req.body;
 
-    if (!topic || topic.trim().length < 2) {
-      return res.status(400).json({
+    const validationErrors = getTopicValidationErrors(topic, {
+      maxLength: 60,
+      maxWords: 8,
+    });
+
+    if (validationErrors.length > 0) {
+      const isMissing = !topic || !String(topic).trim();
+      return res.status(isMissing ? 400 : 200).json({
         valid: false,
-        message: "Topic is required and should be at least 2 characters long.",
+        message: validationErrors[0],
+        errors: validationErrors,
+        topic: (topic || "").trim(),
       });
     }
 
-    const cleanTopic = topic.trim();
+    const cleanTopic = topic.trim().replace(/\s+/g, " ");
 
     // Quick client-side validation for obvious cases
     if (isObviouslyInvalid(cleanTopic)) {

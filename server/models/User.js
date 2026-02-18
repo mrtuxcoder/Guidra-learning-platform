@@ -70,6 +70,7 @@ const userSchema = new mongoose.Schema(
     progress: [
       {
         topic: { type: String },
+        timeSpentMs: { type: Number, min: 0, default: 0 },
         subTopics: [
           {
             name: { type: String },
@@ -77,6 +78,7 @@ const userSchema = new mongoose.Schema(
             understandingLevel: { type: Number, min: 1, max: 5, default: 0 },
             lastReviewed: { type: Date, default: Date.now },
             generationCount: { type: Number, min: 0, max: 3, default: 0 },
+            timeSpentMs: { type: Number, min: 0, default: 0 },
             quizMark: {
               correct: { type: Number, default: 0 },
               wrong: { type: Number, default: 0 },
@@ -91,6 +93,8 @@ const userSchema = new mongoose.Schema(
         completed: { type: Boolean, default: false },
       },
     ],
+
+    appTimeMs: { type: Number, min: 0, default: 0 },
 
     // 🪞 AI reflection memory
     aiSummary: {
