@@ -24,6 +24,11 @@ const {
 const {
   recordTimeSpent,
 } = require("../../controllers/progress-controllers/time-controller");
+const {
+  analyzeQuizAnswers,
+  getTopicAnalysis,
+  getAllAnalysis,
+} = require("../../controllers/progress-controllers/quiz-analysis-controller");
 
 // Overall progress
 router.get("/", authMiddleware, getUserProgress);
@@ -54,5 +59,10 @@ router.put(
 router.get("/quizzes", authMiddleware, getQuizMarks);
 router.put("/quizzes", authMiddleware, updateQuizMarks);
 router.delete("/quizzes", authMiddleware, clearQuizMarks);
+
+// Quiz analysis - AI-powered strengths & weaknesses tracking
+router.post("/quizzes/analyze", authMiddleware, analyzeQuizAnswers);
+router.get("/analysis/topic", authMiddleware, getTopicAnalysis);
+router.get("/analysis/all", authMiddleware, getAllAnalysis);
 
 module.exports = router;

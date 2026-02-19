@@ -88,6 +88,15 @@ const userSchema = new mongoose.Schema(
             },
           },
         ],
+        // 📊 AI-analyzed strengths and weaknesses for this specific topic
+        strengths: {
+          type: [String],
+          default: [],
+        },
+        weaknesses: {
+          type: [String],
+          default: [],
+        },
         overallUnderstanding: { type: Number, min: 1, max: 5, default: 3 },
         lastAccessed: { type: Date, default: Date.now },
         completed: { type: Boolean, default: false },
