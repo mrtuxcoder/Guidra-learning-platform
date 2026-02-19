@@ -14,7 +14,7 @@ import {
 import { Quiz, Refresh, Lock } from "@mui/icons-material";
 import QuizQuestion from "./QuizQuestion";
 import QuizProgress from "./QuizProgress";
-import { updateQuizMarks } from "../../../api";
+import { updateQuizMarks, analyzeQuizAnswers } from "../../../api";
 
 const QuizSection = ({
   quizItems,
@@ -50,6 +50,7 @@ const QuizSection = ({
 
     let correct = 0;
     let wrong = 0;
+    const analysisData = [];
 
     quizItems.forEach((question, index) => {
       if (quizAnswers[index] !== undefined) {
@@ -59,11 +60,22 @@ const QuizSection = ({
           currentQuestion.choices?.[currentQuestion.correctIndex] ||
           currentQuestion.answer;
 
-        if (quizAnswers[index] === correctAnswer) {
+        const isCorrect = quizAnswers[index] === correctAnswer;
+        
+        if (isCorrect) {
           correct++;
         } else {
           wrong++;
         }
+
+        // Prepare data for AI analysis
+        analysisData.push({
+          question: currentQuestion.question || question,
+          userAnswer: quizAnswers[index],
+          correctAnswer: correctAnswer,
+          isCorrect: isCorrect,
+          explanation: currentQuestion.explanation || "",
+        });
       }
     });
 
@@ -73,12 +85,22 @@ const QuizSection = ({
     setSavingQuiz(true);
 
     try {
+      // Update quiz marks
       await updateQuizMarks({
         topic: selectedTopic,
         subtopic: selectedSubtopic.name,
         correct,
         wrong,
         total,
+      });
+
+      // Analyze quiz answers with AI (don't wait for it to complete)
+      analyzeQuizAnswers({
+        topic: selectedTopic,
+        subtopic: selectedSubtopic.name,
+        quizAnswers: analysisData,
+      }).catch((error) => {
+        console.error("Quiz analysis failed (non-critical):", error);
       });
 
       // Notify parent component that quiz was submitted successfully

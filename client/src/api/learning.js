@@ -176,3 +176,21 @@ export const getContentVersionHistory = async (data) => {
   const response = await API.post("/api/v1/content/version/history", data);
   return response;
 };
+
+// Quiz Analysis - AI-powered strengths & weaknesses
+export const analyzeQuizAnswers = async (data) => {
+  const response = await API.post("/api/v1/progress/quizzes/analyze", data);
+  return response;
+};
+
+export const getTopicAnalysis = async (topic) => {
+  const response = await API.get(
+    `/api/v1/progress/analysis/topic?topic=${encodeURIComponent(topic)}`
+  );
+  return response;
+};
+
+export const getAllAnalysis = async () => {
+  const response = await API.get("/api/v1/progress/analysis/all");
+  return response;
+};
