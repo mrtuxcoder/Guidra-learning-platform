@@ -13,7 +13,7 @@ const LandingFooter = () => {
           justifyContent="space-between"
         >
           <Typography sx={{ fontWeight: 700 }}>Guidra</Typography>
-          <Stack direction="row" spacing={2} flexWrap="wrap">
+          {/* <Stack direction="row" spacing={2} flexWrap="wrap">
             <Link href="#" underline="hover" color="text.secondary">
               About
             </Link>
@@ -32,9 +32,9 @@ const LandingFooter = () => {
             >
               GitHub
             </Link>
-          </Stack>
+          </Stack> */}
           <Typography sx={{ color: "#64748b", fontSize: "0.85rem" }}>
-            v1.x
+            v1.5
           </Typography>
         </Stack>
       </Container>
