@@ -137,8 +137,16 @@ function parseSingleComponent(aiResponse, componentType) {
       return cleanText;
     
     // Mermaid mindmap
-    case 'mindmap':
-      return validateAndFixMermaidSyntax(cleanText);
+    case 'mindmap': {
+      const mermaidStartPattern = /(?:^|\n)\s*(graph\s+(?:TD|LR|RL|BT)|flowchart\s+\w+|mindmap)\b/i;
+      const startMatch = cleanText.match(mermaidStartPattern);
+
+      const mermaidOnly = startMatch
+        ? cleanText.slice(startMatch.index).trim()
+        : cleanText;
+
+      return validateAndFixMermaidSyntax(mermaidOnly);
+    }
     
     // Learning actions - array of strings
     case 'learningActions':
@@ -155,19 +163,6 @@ function parseSingleComponent(aiResponse, componentType) {
     default:
       console.warn(`Unknown component type: ${componentType}`);
       return cleanText;
-  }
-}
-
-/**
- * Extract clean component from AI response with fallback
- */
-function extractComponentFromAIResponse(aiResponse, component) {
-  try {
-    const parsed = parseSingleComponent(aiResponse, component);
-    return parsed;
-  } catch (error) {
-    console.error(`Error parsing ${component}:`, error);
-    return getDefaultForComponent(component);
   }
 }
 
@@ -225,17 +220,16 @@ function extractComponentFromAIResponse(aiResponse, component) {
     return parseSingleComponent(aiResponse, component);
   } catch (error) {
     console.error(`Error parsing ${component}:`, error);
-    
+
     // Fallback for different component types
     if (['title', 'concept', 'explanation', 'coreExample', 'practice'].includes(component)) {
       return aiResponse.trim().replace(/```[\w]*\n?/g, '').trim();
     } else if (['learningActions', 'examples', 'quiz'].includes(component)) {
       return [];
     } else if (component === 'mindmap') {
-      const generateFallbackMindmap = require("../../../utils/content/fallback/mindmap-fallback");
-      return generateFallbackMindmap(component);
+      return validateAndFixMermaidSyntax(String(aiResponse || ''));
     }
-    
+
     return aiResponse.trim();
   }
 }
@@ -249,5 +243,4 @@ module.exports = {
   extractComponentFromAIResponse,
   parseStructuredResponse,
   getDefaultForComponent,
-  extractComponentFromAIResponse
 };
