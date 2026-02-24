@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,46 +11,41 @@ import {
   Typography,
   CircularProgress,
   IconButton,
-  alpha,
   useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import LockResetIcon from "@mui/icons-material/LockReset";
 import { setPassword } from "../api/password";
 import { setFrontendCookie } from "../api/utils/cookies";
 
-// Purple color palette
-const purplePalette = {
-  50: "#f3e5f5",
-  100: "#e1bee7",
-  200: "#ce93d8",
-  300: "#ba68c8",
-  400: "#ab47bc",
-  500: "#9c27b0",
-  600: "#8e24aa",
-  700: "#7b1fa2",
-  800: "#6a1b9a",
-  900: "#4a148c",
-  A100: "#ea80fc",
-  A200: "#e040fb",
-  A400: "#d500f9",
-  A700: "#aa00ff",
+const initialFormData = {
+  newPassword: "",
+  confirmPassword: "",
 };
 
-const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
+const PasswordSetupModal = ({ open, onClose, onSuccess, required = false }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-  const [formData, setFormData] = useState({
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [serverError, setServerError] = useState("");
+
+  const resetState = () => {
+    setFormData(initialFormData);
+    setErrors({});
+    setServerError("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  useEffect(() => {
+    if (!open) {
+      resetState();
+    }
+  }, [open]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -73,6 +68,11 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) {
+      return;
+    }
+
     setServerError("");
 
     if (!validateForm()) return;
@@ -86,18 +86,13 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
       });
 
       if (response.data && response.data.message) {
-        // Success!
         if (response.data.token) {
           setFrontendCookie(response.data.token);
         }
 
-        if (onSuccess) onSuccess();
-        onClose();
-
-        // Show success message
-        alert(
-          "🎉 Password set successfully! You can now login with email and password."
-        );
+        if (onSuccess) {
+          onSuccess();
+        }
       }
     } catch (error) {
       console.error("Password setup error:", error);
@@ -113,6 +108,7 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setServerError("");
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -126,10 +122,10 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    setFormData({ newPassword: "", confirmPassword: "" });
-    setErrors({});
-    setServerError("");
-    onClose();
+    if (loading || required) {
+      return;
+    }
+    onClose?.();
   };
 
   return (
@@ -138,16 +134,13 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
+      disableEscapeKeyDown={required || loading}
       PaperProps={{
         sx: {
-          borderRadius: 3,
+          borderRadius: 2,
           bgcolor: "background.paper",
-          boxShadow: (theme) =>
-            theme.palette.mode === "dark"
-              ? `0 20px 60px rgba(0, 0, 0, 0.4)`
-              : `0 20px 60px ${alpha(purplePalette[600], 0.15)}`,
-          border: (theme) =>
-            `1px solid ${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : alpha(purplePalette[300], 0.2)}`,
+          boxShadow: theme.shadows[8],
+          border: `1px solid ${theme.palette.divider}`,
           overflow: "hidden",
         },
       }}
@@ -155,110 +148,43 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
       <DialogTitle
         sx={{
           m: 0,
-          p: 3,
+          p: 2,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "linear-gradient(90deg, #7E57C2 0%, #5E35B1 100%)",
-          color: "white",
-          position: "relative",
-          overflow: "hidden",
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              background: "rgba(255, 255, 255, 0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(10px)",
-            }}
+        <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+          Set Password
+        </Typography>
+        {!required && (
+          <IconButton
+            onClick={handleClose}
+            size="small"
+            disabled={loading}
+            aria-label="Close password setup"
           >
-            <LockResetIcon sx={{ fontSize: 20, color: "white" }} />
-          </Box>
-          <Typography
-            variant="h5"
-            component="div"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: "1.25rem", sm: "1.5rem" },
-              letterSpacing: "-0.5px",
-            }}
-          >
-            Set Your Password
-          </Typography>
-        </Box>
-        <IconButton
-          onClick={handleClose}
-          size="small"
-          sx={{
-            color: "white",
-            background: "rgba(255, 255, 255, 0.15)",
-            "&:hover": {
-              background: "rgba(255, 255, 255, 0.25)",
-            },
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-
-        {/* Decorative elements */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: -20,
-            right: -20,
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
-          }}
-        />
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        )}
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-        <Box component="form" onSubmit={handleSubmit} noValidate>
+      <Box component="form" onSubmit={handleSubmit} noValidate>
+        <DialogContent dividers sx={{ p: 2 }}>
           {serverError && (
-            <Alert
-              severity="error"
-              sx={{
-                mb: 3,
-                borderRadius: 2,
-                border: `1px solid ${alpha(theme.palette.error.main, 0.25)}`,
-                background: alpha(theme.palette.error.main, 0.12),
-                "& .MuiAlert-icon": {
-                  color: theme.palette.error.main,
-                },
-              }}
-            >
+            <Alert severity="error" sx={{ mb: 2 }}>
               {serverError}
             </Alert>
           )}
 
-          <Alert
-            severity="info"
-            sx={{
-              mb: 4,
-              borderRadius: 2,
-              border: `1px solid ${alpha(purplePalette[500], 0.2)}`,
-              background: alpha(purplePalette[500], isDark ? 0.22 : 0.08),
-              "& .MuiAlert-icon": {
-                color: purplePalette[600],
-              },
-            }}
-          >
-            <Typography variant="body2" fontWeight={500}>
-              You signed up with Google. Set a password to also login with email
-              and password.
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              Add a password to sign in with email and password.
             </Typography>
           </Alert>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField
               required
               fullWidth
@@ -274,35 +200,13 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
               InputProps={{
                 endAdornment: (
                   <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowPassword((prev) => !prev)}
                     edge="end"
                     size="small"
-                    sx={{
-                      color: purplePalette[600],
-                      "&:hover": {
-                        background: alpha(purplePalette[600], 0.1),
-                      },
-                    }}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 ),
-                sx: {
-                  borderRadius: 2,
-                  background: isDark
-                    ? alpha(theme.palette.common.white, 0.06)
-                    : "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: alpha(purplePalette[300], 0.5),
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: purplePalette[400],
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: purplePalette[600],
-                    borderWidth: 2,
-                  },
-                },
               }}
               disabled={loading}
             />
@@ -322,169 +226,48 @@ const PasswordSetupModal = ({ open, onClose, onSuccess }) => {
               InputProps={{
                 endAdornment: (
                   <IconButton
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
                     edge="end"
                     size="small"
-                    sx={{
-                      color: purplePalette[600],
-                      "&:hover": {
-                        background: alpha(purplePalette[600], 0.1),
-                      },
-                    }}
                   >
                     {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 ),
-                sx: {
-                  borderRadius: 2,
-                  background: isDark
-                    ? alpha(theme.palette.common.white, 0.06)
-                    : "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: alpha(purplePalette[300], 0.5),
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: purplePalette[400],
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: purplePalette[600],
-                    borderWidth: 2,
-                  },
-                },
               }}
               disabled={loading}
             />
           </Box>
 
-          <Box
-            sx={{
-              mt: 3,
-              p: 2,
-              borderRadius: 2,
-              background: alpha(purplePalette[500], isDark ? 0.12 : 0.08),
-              border: `1px solid ${alpha(purplePalette[200], isDark ? 0.4 : 0.3)}`,
-            }}
-          >
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                fontWeight: 500,
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: purplePalette[500],
-                }}
-              />
-              Password must be at least 6 characters long
-            </Typography>
-          </Box>
-        </Box>
-      </DialogContent>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: "block" }}>
+            Password must be at least 6 characters.
+          </Typography>
+        </DialogContent>
 
-      <DialogActions
-        sx={{
-          px: { xs: 2.5, sm: 3.5 },
-          py: 3,
-          gap: 2,
-          background: alpha(purplePalette[500], isDark ? 0.12 : 0.06),
-          borderTop: `1px solid ${alpha(purplePalette[200], isDark ? 0.4 : 0.2)}`,
-        }}
-      >
-        <Button
-          onClick={handleClose}
-          disabled={loading}
+        <DialogActions
           sx={{
-            borderRadius: 2,
-            px: 3,
-            py: 1,
-            fontSize: "0.95rem",
-            fontWeight: 600,
-            color: isDark ? "text.primary" : purplePalette[700],
-            border: `1px solid ${alpha(purplePalette[400], isDark ? 0.5 : 0.3)}`,
-            background: isDark
-              ? alpha(theme.palette.common.white, 0.06)
-              : "white",
-            textTransform: "none",
-            "&:hover": {
-              background: isDark
-                ? alpha(theme.palette.common.white, 0.12)
-                : alpha(purplePalette[50], 0.8),
-              borderColor: purplePalette[500],
-              transform: "translateY(-1px)",
-              boxShadow: `0 4px 12px ${alpha(purplePalette[400], 0.15)}`,
-            },
-            "&:disabled": {
-              color: alpha(theme.palette.text.primary, 0.5),
-              borderColor: alpha(purplePalette[400], 0.2),
-            },
+            px: 2,
+            py: 1.5,
+            gap: 1,
+            borderTop: `1px solid ${theme.palette.divider}`,
           }}
         >
-          Maybe Later
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={loading}
-          startIcon={
-            loading ? (
-              <CircularProgress size={20} color="inherit" />
+          {!required && (
+            <Button onClick={handleClose} disabled={loading} variant="text">
+              Later
+            </Button>
+          )}
+          <Button type="submit" variant="contained" disabled={loading}>
+            {loading ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress size={16} color="inherit" />
+                <span>Saving...</span>
+              </Box>
             ) : (
-              <LockResetIcon />
-            )
-          }
-          sx={{
-            borderRadius: 2,
-            px: 4,
-            py: 1,
-            fontSize: "1rem",
-            fontWeight: 700,
-            background: `linear-gradient(90deg, ${purplePalette[600]} 0%, ${purplePalette[800]} 100%)`,
-            boxShadow: `0 8px 20px ${alpha(purplePalette[600], 0.3)}`,
-            textTransform: "none",
-            letterSpacing: "0.5px",
-            "&:hover": {
-              background: `linear-gradient(90deg, ${purplePalette[700]} 0%, ${purplePalette[900]} 100%)`,
-              boxShadow: `0 10px 25px ${alpha(purplePalette[600], 0.4)}`,
-              transform: "translateY(-2px)",
-            },
-            "&:active": {
-              transform: "translateY(0)",
-              boxShadow: `0 4px 12px ${alpha(purplePalette[600], 0.3)}`,
-            },
-            "&:disabled": {
-              background: `linear-gradient(90deg, ${alpha(
-                purplePalette[600],
-                0.5
-              )} 0%, ${alpha(purplePalette[800], 0.5)} 100%)`,
-              boxShadow: "none",
-            },
-          }}
-        >
-          {loading ? "Setting Password..." : "Set Password"}
-        </Button>
-      </DialogActions>
-
-      {/* Decorative bottom wave */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          background: `linear-gradient(90deg, ${purplePalette[600]} 0%, ${purplePalette[800]} 100%)`,
-          opacity: 0.8,
-        }}
-      />
+              "Save Password"
+            )}
+          </Button>
+        </DialogActions>
+      </Box>
     </Dialog>
   );
 };

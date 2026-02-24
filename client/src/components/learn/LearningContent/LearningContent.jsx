@@ -546,15 +546,9 @@ const LearningContent = ({
         maxWidth="xs"
         PaperProps={{
           sx: {
-            borderRadius: 3,
-            background: (theme) =>
-              theme.palette.mode === "dark"
-                ? `linear-gradient(135deg, ${colorPalette[900]} 0%, ${theme.palette.background.paper} 100%)`
-                : `linear-gradient(135deg, ${colorPalette[50]} 0%, #ffffff 100%)`,
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 20px 60px rgba(0, 0, 0, 0.5)"
-                : "0 20px 60px rgba(0, 0, 0, 0.12)",
+            borderRadius: 2,
+            background: "background.paper",
+            boxShadow: (theme) => theme.shadows[8],
             border: "1px solid",
             borderColor: "divider",
             overflow: "hidden",
@@ -564,10 +558,8 @@ const LearningContent = ({
         <DialogTitle
           sx={{
             p: 2,
-            background: `linear-gradient(135deg, ${
-              colorPalette[600]
-            } 0%, ${colorPalette[700]} 100%)`,
-            color: "white",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Box
@@ -578,17 +570,12 @@ const LearningContent = ({
               gap: 1,
             }}
           >
-            <Typography variant="subtitle1" fontWeight={700}>
+            <Typography variant="subtitle1" fontWeight={600}>
               Content Versions
             </Typography>
             <IconButton
               onClick={() => setVersionDialogOpen(false)}
               size="small"
-              sx={{
-                color: "white",
-                background: "rgba(255, 255, 255, 0.15)",
-                "&:hover": { background: "rgba(255, 255, 255, 0.25)" },
-              }}
             >
               <Close sx={{ fontSize: 16 }} />
             </IconButton>
@@ -596,12 +583,7 @@ const LearningContent = ({
         </DialogTitle>
         <DialogContent
           dividers
-          sx={{
-            background: (theme) =>
-              theme.palette.mode === "dark"
-                ? theme.palette.background.default
-                : colorPalette[50],
-          }}
+          sx={{ p: 2 }}
         >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Pick a cached version to preview. Regeneration stays on the
@@ -716,12 +698,11 @@ const LearningContent = ({
                         flexWrap: "wrap",
                         gap: 1,
                         "& .MuiToggleButton-root": {
-                          borderRadius: 2,
-                          border: `1px solid ${colorPalette[300]}`,
-                          color: theme.palette.mode === "dark"
-                            ? theme.palette.text.primary
-                            : colorPalette[700],
-                          fontWeight: 600,
+                          borderRadius: 1.5,
+                          border: "1px solid",
+                          borderColor: "divider",
+                          color: "text.primary",
+                          fontWeight: 500,
                           textTransform: "none",
                           px: 1.5,
                           py: 0.6,
@@ -730,16 +711,14 @@ const LearningContent = ({
                         },
                         "& .MuiToggleButton-root:hover": {
                           background: (theme) => theme.palette.action.hover,
-                          borderColor: colorPalette[500],
                         },
                         "& .MuiToggleButton-root.Mui-selected": {
-                          background: colorPalette[600],
-                          color: "white",
-                          borderColor: colorPalette[600],
-                          boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
+                          background: (theme) => theme.palette.action.selected,
+                          color: "text.primary",
+                          borderColor: "divider",
                         },
                         "& .MuiToggleButton-root.Mui-selected:hover": {
-                          background: colorPalette[700],
+                          background: (theme) => theme.palette.action.selected,
                         },
                       }}
                     >
@@ -824,12 +803,11 @@ const LearningContent = ({
                         flexWrap: "wrap",
                         gap: 1,
                         "& .MuiToggleButton-root": {
-                          borderRadius: 2,
-                          border: `1px solid ${colorPalette[300]}`,
-                          color: theme.palette.mode === "dark"
-                            ? theme.palette.text.primary
-                            : colorPalette[700],
-                          fontWeight: 600,
+                          borderRadius: 1.5,
+                          border: "1px solid",
+                          borderColor: "divider",
+                          color: "text.primary",
+                          fontWeight: 500,
                           textTransform: "none",
                           px: 1.5,
                           py: 0.6,
@@ -838,16 +816,14 @@ const LearningContent = ({
                         },
                         "& .MuiToggleButton-root:hover": {
                           background: (theme) => theme.palette.action.hover,
-                          borderColor: colorPalette[500],
                         },
                         "& .MuiToggleButton-root.Mui-selected": {
-                          background: colorPalette[600],
-                          color: "white",
-                          borderColor: colorPalette[600],
-                          boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
+                          background: (theme) => theme.palette.action.selected,
+                          color: "text.primary",
+                          borderColor: "divider",
                         },
                         "& .MuiToggleButton-root.Mui-selected:hover": {
-                          background: colorPalette[700],
+                          background: (theme) => theme.palette.action.selected,
                         },
                       }}
                     >
@@ -907,17 +883,6 @@ const LearningContent = ({
           <Button
             onClick={() => setVersionDialogOpen(false)}
             variant="outlined"
-            sx={{
-              borderColor: colorPalette[400],
-              color: colorPalette[600],
-              "&:hover": {
-                borderColor: colorPalette[500],
-                background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.action.hover
-                    : colorPalette[50],
-              },
-            }}
           >
             Close
           </Button>
@@ -1056,6 +1021,18 @@ const LearningContent = ({
             mindmapData={mindmapData}
           />
         )}
+
+        <Box
+          sx={{
+            mt: 2,
+            pb: 1,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            Made with love
+          </Typography>
+        </Box>
 
       </Box>
     </Box>

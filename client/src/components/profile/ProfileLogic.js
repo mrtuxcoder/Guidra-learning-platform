@@ -73,9 +73,6 @@ export const useProfileLogic = (navigate) => {
       // Use authInfo from the unified /me response if available
       if (authInfo && authInfo.needsPasswordSetup) {
         setNeedsPasswordSetup(true);
-        setTimeout(() => {
-          setShowPasswordModal(true);
-        }, 2000);
       } else if (
         userData &&
         userData.authProvider === "google" &&
@@ -87,10 +84,11 @@ export const useProfileLogic = (navigate) => {
 
         if (passwordInfo.needsPasswordSetup) {
           setNeedsPasswordSetup(true);
-          setTimeout(() => {
-            setShowPasswordModal(true);
-          }, 2000);
+        } else {
+          setNeedsPasswordSetup(false);
         }
+      } else {
+        setNeedsPasswordSetup(false);
       }
     } catch (error) {
       console.error("Error checking password status:", error);

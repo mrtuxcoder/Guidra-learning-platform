@@ -9,6 +9,21 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
   const accentSoft = colorPalette?.[300] || "#b39ddb";
   const titleGradient = `linear-gradient(135deg, ${accentMain} 0%, ${accentSoft} 100%)`;
 
+  const displayTitle = React.useMemo(() => {
+    if (!isMobile || !title || !topic) {
+      return title;
+    }
+
+    const escapedTopic = topic.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const leadingTopicPattern = new RegExp(
+      `^\\s*${escapedTopic}\\s*[:\\-–—|]+\\s*`,
+      "i"
+    );
+
+    const cleanedTitle = title.replace(leadingTopicPattern, "").trim();
+    return cleanedTitle || title;
+  }, [isMobile, title, topic]);
+
   return (
     <Box
       sx={{
@@ -30,7 +45,7 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, textAlign: isMobile ? "center" : "left" }}>
           <Typography
             variant={isMobile ? "subtitle1" : "h5"}
             fontWeight={700}
@@ -49,22 +64,24 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
               overflow: "hidden",
             }}
           >
-            {title}
+            {displayTitle}
           </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: isDark
-                ? alpha(theme.palette.common.white, 0.7)
-                : alpha(theme.palette.text.primary, 0.65),
-              fontSize: isMobile ? "0.72rem" : "0.9rem",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-            }}
-          >
-            {topic}
-          </Typography>
+          {!isMobile && (
+            <Typography
+              variant="caption"
+              sx={{
+                color: isDark
+                  ? alpha(theme.palette.common.white, 0.7)
+                  : alpha(theme.palette.text.primary, 0.65),
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {topic}
+            </Typography>
+          )}
         </Box>
       </Box>
     </Box>

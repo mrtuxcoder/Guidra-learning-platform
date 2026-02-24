@@ -56,12 +56,21 @@ const ContentSection = ({
             <Typography
               variant={isMobile ? "subtitle1" : "h6"}
               fontWeight="700"
-              sx={{ color: "text.primary", textAlign: "left" }}
+              sx={{
+                color: "text.primary",
+                textAlign: "left",
+              }}
             >
               {title}
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              alignItems: "center",
+            }}
+          >
             {onRegenerate && (
               <Tooltip
                 title={
@@ -220,7 +229,10 @@ ContentSection.MindmapSection = ({
         <Typography
           variant={isMobile ? "subtitle1" : "h6"}
           fontWeight="600"
-          sx={{ color: "text.primary" }}
+          sx={{
+            color: "text.primary",
+            textAlign: "left",
+          }}
         >
           Mind Map
         </Typography>

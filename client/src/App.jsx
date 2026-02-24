@@ -138,6 +138,7 @@ export default function App() {
             open={showPasswordModal}
             onClose={() => setShowPasswordModal(false)}
             onSuccess={handlePasswordSetupSuccess}
+            required={needsPasswordSetup}
           />
 
           <Routes>
