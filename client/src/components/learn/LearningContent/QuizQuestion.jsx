@@ -6,6 +6,8 @@ import {
   Typography,
   RadioGroup,
   Box,
+  useTheme,
+  alpha,
 } from "@mui/material";
 import { ExpandMore, CheckCircle, Cancel } from "@mui/icons-material";
 import AnswerOption from "./AnswerOption";
@@ -19,6 +21,7 @@ const QuizQuestion = ({
   isMobile,
   colorPalette,
 }) => {
+  const theme = useTheme();
   const question =
     typeof quizItem === "string" ? { question: quizItem } : quizItem;
 
@@ -36,17 +39,18 @@ const QuizQuestion = ({
     <Accordion
       key={index}
       sx={{
-        mb: 1,
-        borderRadius: 1,
-        border: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
+        mb: 1.25,
+        borderRadius: 0,
+        border: "none",
+        background: "transparent",
         "&:before": { display: "none" },
+        boxShadow: "none",
+        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.45)}`,
       }}
     >
       <AccordionSummary
         expandIcon={<ExpandMore sx={{ color: colorPalette[500] }} />}
-        sx={{ borderRadius: 1 }}
+        sx={{ borderRadius: 0 }}
       >
         <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
           <Typography

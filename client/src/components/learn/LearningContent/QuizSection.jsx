@@ -134,25 +134,26 @@ const QuizSection = ({
     <Card
       sx={{
         mb: 3,
-        bgcolor: "background.paper",
-        border: "2px solid",
-        borderColor: "divider",
-        borderRadius: 2,
+        bgcolor: "transparent",
+        border: "none",
+        borderRadius: 0,
+        boxShadow: "none",
       }}
     >
-      <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
+      <CardContent sx={{ p: 0 }}>
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Box
             sx={{
               width: isMobile ? 32 : 40,
               height: isMobile ? 32 : 40,
-              borderRadius: "10px",
-              background: colorPalette[500],
+              borderRadius: "12px",
+              background: `linear-gradient(135deg, ${colorPalette[400]} 0%, ${colorPalette[600]} 100%)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               mr: 2,
+              boxShadow: `0 6px 16px ${alpha(colorPalette[500], 0.28)}`,
             }}
           >
             <Quiz sx={{ fontSize: isMobile ? 18 : 20, color: "white" }} />
@@ -205,6 +206,7 @@ const QuizSection = ({
             </Tooltip>
           )}
         </Box>
+        <Box sx={{ height: 1, bgcolor: alpha(theme.palette.divider, 0.5), mb: 2 }} />
 
         {/* Progress */}
         <QuizProgress

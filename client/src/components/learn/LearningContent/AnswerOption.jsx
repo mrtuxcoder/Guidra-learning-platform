@@ -45,25 +45,11 @@ const AnswerOption = ({
       }
       sx={{
         mb: 1,
-        p: isMobile ? 0.75 : 1,
-        borderRadius: 1,
-        border: "1px solid",
-        borderColor:
-          answerStatus === "correct"
-            ? "#10b981"
-            : answerStatus === "wrong"
-            ? "#ef4444"
-            : "divider",
-        background:
-          answerStatus === "correct"
-            ? theme.palette.mode === "dark"
-              ? alpha("#10b981", 0.15)
-              : "#f0fdf4"
-            : answerStatus === "wrong"
-            ? theme.palette.mode === "dark"
-              ? alpha("#ef4444", 0.15)
-              : "#fef2f2"
-            : "transparent",
+        p: isMobile ? 0.85 : 1.05,
+        borderRadius: 0,
+        border: "none",
+        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.35)}`,
+        background: "transparent",
       }}
       onClick={onSelect}
     />

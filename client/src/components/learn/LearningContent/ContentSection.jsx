@@ -16,7 +16,6 @@ import MermaidDiagram from "../MermardDiagram/index";
 const ContentSection = ({
   title,
   content,
-  emoji = "💡",
   isList = false,
   isExpanded = true,
   onToggle,
@@ -35,15 +34,15 @@ const ContentSection = ({
     <Card
       sx={{
         mb: 3,
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 2,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+        bgcolor: "transparent",
+        border: "none",
+        borderRadius: 0,
+        boxShadow: "none",
         overflow: "visible",
+        position: "relative",
       }}
     >
-      <CardContent sx={{ p: 2 }}>
+      <CardContent sx={{ p: 0 }}>
         <Box
           sx={{
             display: "flex",
@@ -53,28 +52,11 @@ const ContentSection = ({
           }}
           onClick={onToggle}
         >
-          <Box
-            sx={{
-              width: isMobile ? 32 : 40,
-              height: isMobile ? 32 : 40,
-              borderRadius: "10px",
-              background: `linear-gradient(135deg, ${colorPalette[400]} 0%, ${colorPalette[600]} 100%)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mr: 2,
-              flexShrink: 0,
-            }}
-          >
-            <Typography sx={{ fontSize: isMobile ? "1rem" : "1.2rem" }}>
-              {emoji}
-            </Typography>
-          </Box>
           <Box sx={{ flex: 1 }}>
             <Typography
               variant={isMobile ? "subtitle1" : "h6"}
-              fontWeight="600"
-              sx={{ color: "text.primary" }}
+              fontWeight="700"
+              sx={{ color: "text.primary", textAlign: "left" }}
             >
               {title}
             </Typography>
@@ -139,6 +121,14 @@ const ContentSection = ({
           </Box>
         </Box>
 
+        <Box
+          sx={{
+            height: 1,
+            bgcolor: alpha(theme.palette.divider, 0.5),
+            mb: isExpanded ? 2 : 0,
+          }}
+        />
+
         {isExpanded && (
           <Fade in={isExpanded} timeout={300}>
             <Box>
@@ -148,48 +138,23 @@ const ContentSection = ({
                     <Box
                       key={index}
                       sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
+                        display: "block",
                         mb: 2,
-                        p: isMobile ? 1.5 : 2,
-                        borderRadius: 1,
-                        bgcolor:
-                          index % 2 === 0 ? (theme.palette.mode === "dark" ? alpha(theme.palette.primary.main, 0.05) : colorPalette[50]) : "transparent",
-                        border: "1px solid",
-                        borderColor: "divider",
+                        p: isMobile ? 1.25 : 1.5,
+                        borderRadius: 0,
+                        background: "transparent",
+                        border: "none",
+                        borderBottom:
+                          index < content.length - 1
+                            ? `1px solid ${alpha(theme.palette.divider, 0.45)}`
+                            : "none",
                       }}
                     >
-                      <Box
-                        sx={{
-                          width: isMobile ? 20 : 24,
-                          height: isMobile ? 20 : 24,
-                          borderRadius: "6px",
-                          background: colorPalette[500],
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          mr: 2,
-                          flexShrink: 0,
-                          mt: 0.25,
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "white",
-                            fontWeight: "700",
-                            fontSize: isMobile ? "0.6rem" : "0.75rem",
-                          }}
-                        >
-                          {index + 1}
-                        </Typography>
-                      </Box>
                       <Typography
                         variant="body1"
                         sx={{
                           lineHeight: 1.6,
                           color: "text.primary",
-                          flex: 1,
                           fontSize: isMobile ? "0.9rem" : "1rem",
                         }}
                       >
@@ -201,11 +166,10 @@ const ContentSection = ({
               ) : (
                 <Box
                   sx={{
-                    p: isMobile ? 1.5 : 2,
-                    borderRadius: 1,
-                    bgcolor: theme.palette.mode === "dark" ? alpha(theme.palette.primary.main, 0.05) : colorPalette[50],
-                    border: "1px solid",
-                    borderColor: "divider",
+                    p: isMobile ? 1.25 : 1.5,
+                    borderRadius: 0,
+                    background: "transparent",
+                    border: "none",
                   }}
                 >
                   <Typography
@@ -242,8 +206,16 @@ ContentSection.MindmapSection = ({
   userRemainingGenerations,
   mindmapData,
 }) => (
-  <Card sx={{ mb: 3, borderRadius: 2 }}>
-    <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
+  <Card
+    sx={{
+      mb: 3,
+      borderRadius: 0,
+      background: "transparent",
+      border: "none",
+      boxShadow: "none",
+    }}
+  >
+    <CardContent sx={{ p: 0 }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Typography
           variant={isMobile ? "subtitle1" : "h6"}
@@ -253,6 +225,7 @@ ContentSection.MindmapSection = ({
           Mind Map
         </Typography>
       </Box>
+      <Box sx={{ height: 1, bgcolor: (theme) => alpha(theme.palette.divider, 0.5), mb: 2 }} />
       <MermaidDiagram
         chart={safeContent.mindmap}
         topic={selectedTopic}

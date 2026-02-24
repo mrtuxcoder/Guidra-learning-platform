@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
 } from "@mui/material";
 import { Menu, Refresh } from "@mui/icons-material";
@@ -31,6 +30,7 @@ import {
 import LearningSidebar from "../components/learn/LearningSidebar/index";
 import LearningHeader from "../components/learn/LearningHeader/index";
 import LearningContent from "../components/learn/LearningContent/index";
+import QuizSection from "../components/learn/LearningContent/QuizSection";
 import WelcomeState from "../components/learn/WelcomeState/index";
 import LoadingState from "../components/learn/LoadingState/index";
 import TeachingStyleSelector from "../components/learn/TeachingStyleSelector";
@@ -78,8 +78,8 @@ export default function Learning() {
   
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showError, setShowError] = useState(false);
-  const [quizPromptOpen, setQuizPromptOpen] = useState(false);
-  const [quizPromptMessage, setQuizPromptMessage] = useState("");
+  const [quizModalOpen, setQuizModalOpen] = useState(false);
+  const [pendingCompleteSubtopic, setPendingCompleteSubtopic] = useState(null);
   const [teachingStyleSelectorOpen, setTeachingStyleSelectorOpen] = useState(false);
   const [selectedTeachingStyle, setSelectedTeachingStyle] = useState("default");
   
@@ -670,6 +670,52 @@ export default function Learning() {
     [selectedTopic, selectedSubtopic]
   );
 
+  const performCompleteSubtopic = useCallback(
+    async (subtopic) => {
+      try {
+        setUpdatingSubtopic(subtopic.name);
+        setError("");
+
+        await updateSubtopicProgress({
+          topic: selectedTopic,
+          subtopicName: subtopic.name,
+          completed: true,
+          understandingLevel: subtopic.understandingLevel,
+        });
+
+        const updatedSubtopic = { ...subtopic, completed: true };
+
+        setOriginalSubtopics((prev) =>
+          prev.map((sub) =>
+            sub.name === subtopic.name ? updatedSubtopic : sub
+          )
+        );
+
+        setSubtopics((prev) => {
+          const updatedArray = prev.map((sub) =>
+            sub.name === subtopic.name ? updatedSubtopic : sub
+          );
+          return getOrderedSubtopics(updatedArray);
+        });
+
+        if (selectedSubtopic?.name === subtopic.name) {
+          setSelectedSubtopic(updatedSubtopic);
+        }
+
+        return true;
+      } catch (err) {
+        const errorMessage =
+          err.response?.data?.message || "Failed to complete subtopic";
+        setError(errorMessage);
+        setShowError(true);
+        return false;
+      } finally {
+        setUpdatingSubtopic(null);
+      }
+    },
+    [selectedTopic, selectedSubtopic, getOrderedSubtopics]
+  );
+
   const handleCompleteSubtopic = useCallback(
     async (subtopic) => {
       if (!subtopic.understandingLevel || subtopic.understandingLevel < 1) {
@@ -683,61 +729,20 @@ export default function Learning() {
       const hasQuizAttempt = (quizMark.total || 0) > 0 && answeredCount > 0;
 
       if (!hasQuizAttempt) {
-        setQuizPromptMessage(
-          "Please complete the quiz before marking this subtopic as complete."
-        );
-        setQuizPromptOpen(true);
+        if (!Array.isArray(content?.quiz) || content.quiz.length === 0) {
+          setContentError("Quiz is not available for this subtopic yet");
+          setShowError(true);
+          return;
+        }
+
+        setPendingCompleteSubtopic(subtopic);
+        setQuizModalOpen(true);
         return;
       }
 
-      try {
-        setUpdatingSubtopic(subtopic.name);
-        setError("");
-
-        await updateSubtopicProgress({
-          topic: selectedTopic,
-          subtopicName: subtopic.name,
-          completed: true,
-          understandingLevel: subtopic.understandingLevel,
-        });
-
-        // Create the updated subtopic object
-        const updatedSubtopic = { ...subtopic, completed: true };
-
-        // Update ORIGINAL subtopics array
-        setOriginalSubtopics((prev) =>
-          prev.map((sub) =>
-            sub.name === subtopic.name ? updatedSubtopic : sub
-          )
-        );
-
-        // Update SORTED subtopics array and re-sort it
-        setSubtopics((prev) => {
-          const updatedArray = prev.map((sub) =>
-            sub.name === subtopic.name ? updatedSubtopic : sub
-          );
-          return getOrderedSubtopics(updatedArray);
-        });
-
-        // Update selected subtopic if it's the current one
-        if (selectedSubtopic?.name === subtopic.name) {
-          setSelectedSubtopic(updatedSubtopic);
-        }
-      } catch (err) {
-        const errorMessage =
-          err.response?.data?.message || "Failed to complete subtopic";
-        if (errorMessage.toLowerCase().includes("complete the quiz")) {
-          setQuizPromptMessage(errorMessage);
-          setQuizPromptOpen(true);
-        } else {
-          setError(errorMessage);
-          setShowError(true);
-        }
-      } finally {
-        setUpdatingSubtopic(null);
-      }
+      await performCompleteSubtopic(subtopic);
     },
-    [selectedTopic, selectedSubtopic, getOrderedSubtopics]
+    [content, performCompleteSubtopic]
   );
 
   const handleQuizSubmitted = useCallback(async () => {
@@ -758,12 +763,29 @@ export default function Learning() {
           // Update the subtopics list with the refreshed data
           setOriginalSubtopics(updatedSubtopics);
           setSubtopics(getOrderedSubtopics(updatedSubtopics));
+
+          if (
+            pendingCompleteSubtopic &&
+            pendingCompleteSubtopic.name === updatedSubtopic.name
+          ) {
+            const completed = await performCompleteSubtopic(updatedSubtopic);
+            if (completed) {
+              setQuizModalOpen(false);
+              setPendingCompleteSubtopic(null);
+            }
+          }
         }
       } catch (error) {
         console.error("Failed to refresh subtopic data after quiz submission:", error);
       }
     }
-  }, [selectedSubtopic, selectedTopic, getOrderedSubtopics]);
+  }, [
+    selectedSubtopic,
+    selectedTopic,
+    getOrderedSubtopics,
+    pendingCompleteSubtopic,
+    performCompleteSubtopic,
+  ]);
 
   const calculateProgress = useCallback(() => {
     if (!originalSubtopics.length) return 0;
@@ -994,9 +1016,12 @@ export default function Learning() {
         )}
 
         <Dialog
-          open={quizPromptOpen}
-          onClose={() => setQuizPromptOpen(false)}
-          aria-labelledby="quiz-required-title"
+          open={quizModalOpen}
+          onClose={() => {
+            setQuizModalOpen(false);
+            setPendingCompleteSubtopic(null);
+          }}
+          aria-labelledby="quiz-complete-title"
           maxWidth="xs"
           fullWidth
           PaperProps={{
@@ -1013,23 +1038,36 @@ export default function Learning() {
           }}
         >
           <DialogTitle
-            id="quiz-required-title"
+            id="quiz-complete-title"
             sx={{ fontWeight: 700, color: "text.primary" }}
           >
-            Quiz Required
+            Complete Subtopic Quiz
           </DialogTitle>
-          <DialogContent>
-            <DialogContentText sx={{ color: "text.secondary" }}>
-              {quizPromptMessage ||
-                "Please complete the quiz before marking this subtopic as complete."}
-            </DialogContentText>
+          <DialogContent sx={{ px: 2, pb: 1 }}>
+            {Array.isArray(content?.quiz) && content.quiz.length > 0 ? (
+              <QuizSection
+                quizItems={content.quiz}
+                selectedTopic={selectedTopic}
+                selectedSubtopic={pendingCompleteSubtopic || selectedSubtopic}
+                isMobile={isMobile}
+                colorPalette={purplePalette}
+                onQuizSubmitted={handleQuizSubmitted}
+              />
+            ) : (
+              <Typography color="text.secondary" variant="body2">
+                No quiz available for this subtopic.
+              </Typography>
+            )}
           </DialogContent>
           <DialogActions>
             <Button
-              onClick={() => setQuizPromptOpen(false)}
+              onClick={() => {
+                setQuizModalOpen(false);
+                setPendingCompleteSubtopic(null);
+              }}
               sx={{ textTransform: "none", fontWeight: 600, color: "text.primary" }}
             >
-              OK
+              Close
             </Button>
           </DialogActions>
         </Dialog>
@@ -1066,7 +1104,6 @@ export default function Learning() {
               contentError={contentError}
               onRetry={handleRetryContent}
               colorPalette={purplePalette}
-              onQuizSubmitted={handleQuizSubmitted}
               onVersionDialogOpen={handleRegisterVersionDialogOpener}
               onSelectFullVersion={handleSelectFullVersion}
               dailyRemaining={dailyRegenRemaining}

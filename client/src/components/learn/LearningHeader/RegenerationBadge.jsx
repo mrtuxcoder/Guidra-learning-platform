@@ -4,7 +4,7 @@ import {
   IconButton,
   Button,
   Tooltip,
-  Typography,
+  Badge,
   CircularProgress,
 } from "@mui/material";
 import { Lock, Refresh } from "@mui/icons-material";
@@ -28,102 +28,61 @@ const RegenerationBadge = ({
         }
         placement="top"
       >
-        <Box
-          component="span"
+        <Badge
+          badgeContent={remainingGenerations}
+          max={99}
+          color={remainingGenerations === 0 ? "error" : "primary"}
+          overlap="circular"
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.6,
-            background:
-              remainingGenerations === 0
-                ? "rgba(239, 68, 68, 0.08)"
-                : "rgba(126, 87, 194, 0.08)",
-            borderRadius: "10px",
-            px: 1.2,
-            py: 0.4,
-            border:
-              remainingGenerations === 0
-                ? "1px solid rgba(239, 68, 68, 0.15)"
-                : "1px solid rgba(126, 87, 194, 0.15)",
+            "& .MuiBadge-badge": {
+              minWidth: 16,
+              height: 16,
+              fontSize: "0.62rem",
+              fontWeight: 800,
+              lineHeight: 1,
+              border: "1px solid rgba(255,255,255,0.35)",
+            },
           }}
         >
-          <Box component="span" sx={{ textAlign: "center" }}>
-            <Typography
-              variant="caption"
-              sx={{
-                color:
-                  remainingGenerations === 0
-                    ? "#ef4444"
-                    : colorPalette?.[600] || "#6d48b5",
-                fontSize: "0.6rem",
-                fontWeight: 800,
-                lineHeight: 1,
-                display: "block",
-              }}
-            >
-              {remainingGenerations}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color:
-                  remainingGenerations === 0
-                    ? "#ef4444"
-                    : colorPalette?.[500] || "#7e57c2",
-                fontSize: "0.45rem",
-                fontWeight: 700,
-                lineHeight: 1,
-                display: "block",
-              }}
-            >
-              REGEN
-            </Typography>
-          </Box>
-
-          <Tooltip
-            title={
-              remainingGenerations === 0
-                ? "No regenerations left"
-                : "Regenerate content"
-            }
-            placement="top"
+          <IconButton
+            onClick={onRegenerateContent}
+            disabled={contentLoading || remainingGenerations === 0}
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "10px",
+              color:
+                remainingGenerations === 0
+                  ? "#ef4444"
+                  : colorPalette?.[600] || "#6d48b5",
+              background:
+                remainingGenerations === 0
+                  ? "rgba(239, 68, 68, 0.1)"
+                  : "rgba(126, 87, 194, 0.1)",
+              border:
+                remainingGenerations === 0
+                  ? "1px solid rgba(239, 68, 68, 0.22)"
+                  : "1px solid rgba(126, 87, 194, 0.15)",
+              "&:hover":
+                !contentLoading && remainingGenerations > 0
+                  ? {
+                      background: "rgba(126, 87, 194, 0.18)",
+                      transform: "translateY(-1px)",
+                    }
+                  : {},
+              transition: "all 0.2s ease",
+            }}
           >
-            <IconButton
-              onClick={onRegenerateContent}
-              disabled={contentLoading || remainingGenerations === 0}
-              size="small"
-              sx={{
-                width: 26,
-                height: 26,
-                borderRadius: "7px",
-                color:
-                  remainingGenerations === 0
-                    ? "#ef4444"
-                    : colorPalette?.[600] || "#6d48b5",
-                background:
-                  remainingGenerations === 0
-                    ? "rgba(239, 68, 68, 0.1)"
-                    : "rgba(126, 87, 194, 0.1)",
-                "&:hover":
-                  !contentLoading && remainingGenerations > 0
-                    ? {
-                        background: "rgba(126, 87, 194, 0.18)",
-                        transform: "scale(1.1)",
-                      }
-                    : {},
-                transition: "all 0.2s ease",
-              }}
-            >
-              {contentLoading ? (
-                <CircularProgress size={10} />
-              ) : remainingGenerations === 0 ? (
-                <Lock sx={{ fontSize: 12 }} />
-              ) : (
-                <Refresh sx={{ fontSize: 12 }} />
-              )}
-            </IconButton>
-          </Tooltip>
-        </Box>
+            {contentLoading ? (
+              <CircularProgress size={13} />
+            ) : remainingGenerations === 0 ? (
+              <Lock sx={{ fontSize: 16 }} />
+            ) : (
+              <Refresh sx={{ fontSize: 16 }} />
+            )}
+          </IconButton>
+        </Badge>
       </Tooltip>
     );
   }

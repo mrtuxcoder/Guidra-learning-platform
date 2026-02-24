@@ -23,7 +23,6 @@ import WelcomeState from "../WelcomeState/index";
 import LoadingState from "../LoadingState";
 import Header from "./Header";
 import ContentSection from "./ContentSection";
-import QuizSection from "./QuizSection";
 import TeachingStyleSelector from "../TeachingStyleSelector";
 import {
   generateComponent,
@@ -45,7 +44,6 @@ const LearningContent = ({
   userRemainingGenerations = 5,
   dailyRemaining = 6,
   onDailyRegenUpdate,
-  onQuizSubmitted,
   onVersionDialogOpen,
 }) => {
   const theme = useTheme();
@@ -1059,21 +1057,6 @@ const LearningContent = ({
           />
         )}
 
-        {safeContent.quiz.length > 0 && (
-          <QuizSection 
-            quizItems={safeContent.quiz}
-            selectedTopic={selectedTopic}
-            selectedSubtopic={selectedSubtopic}
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-            onRegenerate={() => handleComponentRegenerate("quiz")}
-            isRegenerating={!!regeneratingComponents.quiz}
-            isRegenerateDisabled={
-              getComponentGenerationCount("quiz") >= 3 || dailyLimitReached
-            }
-            onQuizSubmitted={onQuizSubmitted}
-          />
-        )}
       </Box>
     </Box>
   );

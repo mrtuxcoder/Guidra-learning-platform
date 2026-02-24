@@ -67,9 +67,9 @@ const VersionButton = ({
       <IconButton
         onClick={handleClick}
         sx={{
-          width: 32,
-          height: 32,
-          borderRadius: "8px",
+          width: 36,
+          height: 36,
+          borderRadius: "10px",
           background: isDark
             ? alpha(theme.palette.primary.main, 0.16)
             : "rgba(126, 87, 194, 0.08)",
@@ -79,7 +79,7 @@ const VersionButton = ({
           border: isDark
             ? `1px solid ${alpha(theme.palette.primary.main, 0.4)}`
             : "1px solid rgba(126, 87, 194, 0.12)",
-          padding: "6px",
+          padding: "7px",
           "&:hover": {
             background: isDark
               ? alpha(theme.palette.primary.main, 0.26)
@@ -89,7 +89,7 @@ const VersionButton = ({
           transition: "all 0.2s ease",
         }}
       >
-        <Layers sx={{ fontSize: 15 }} />
+        <Layers sx={{ fontSize: 16 }} />
       </IconButton>
     </Tooltip>
   );
