@@ -35,6 +35,7 @@ export const profileTheme = {
   primary: "#7E57C2",
   primaryLight: "#B39DDB",
   primaryDark: "#5E35B1",
+  accent: "#7E57C2",
   gradient: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
   lightBg: "#F3E5F5",
   subtleBg: "#FAF7FE",
@@ -46,7 +47,21 @@ export const cardSx = {
   borderRadius: 3,
   border: `1px solid ${profileTheme.border}`,
   bgcolor: "background.paper",
-  boxShadow: profileTheme.softShadow,
+  boxShadow: "none",
+};
+
+export const smallCardSx = {
+  p: { xs: 1.5, sm: 2 },
+  borderRadius: 2,
+  border: `1px solid ${profileTheme.border}`,
+  bgcolor: "background.default",
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-start",
+  gap: 0.75,
 };
 
 export const understandingLevels = {

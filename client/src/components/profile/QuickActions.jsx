@@ -5,10 +5,14 @@ import {
   Box,
   Typography,
   Button,
-  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import { School, Explore, Logout } from "@mui/icons-material";
-import { profileTheme, cardSx } from "./constants";
+import { cardSx } from "./constants";
 
 const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
   const actions = [
@@ -43,10 +47,6 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
               fontWeight: 700,
               mb: 2,
               fontSize: { xs: "1rem", sm: "1.125rem" },
-              background: profileTheme.gradient,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
             }}
           >
             Quick Actions
@@ -63,18 +63,19 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
                   borderRadius: 2,
                   ...(action.variant === "contained"
                     ? {
-                        background: profileTheme.gradient,
+                        bgcolor: "primary.main",
                         fontWeight: 600,
+                        "&:hover": { bgcolor: "primary.dark" },
                       }
                     : {
                         borderColor:
                           action.color === "error"
                             ? "rgba(211, 47, 47, 0.3)"
-                            : "rgba(126, 87, 194, 0.3)",
+                            : "primary.light",
                         color:
                           action.color === "error"
-                            ? "#d32f2f"
-                            : profileTheme.primary,
+                            ? "error.main"
+                            : "primary.main",
                         fontWeight: 600,
                       }),
                   py: 1.4,
@@ -99,82 +100,72 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
             fontWeight: 700,
             mb: 2.5,
             fontSize: "1.125rem",
-            background: profileTheme.gradient,
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
           }}
         >
           Quick Navigation
         </Typography>
-        <Grid container spacing={2} sx={{ width: "100%" }}>
-          {actions.map((action, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <Box
-                sx={{
-                  borderRadius: 2,
-                  border: `1px solid ${profileTheme.border}`,
-                  background: "rgba(126, 87, 194, 0.04)",
-                  p: 2,
-                  height: "100%",
-                  width: "100%",
-                  maxWidth: "100%",
-                  boxSizing: "border-box",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: 1.5,
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 2,
-                    background: action.variant === "contained"
-                      ? profileTheme.gradient
-                      : "rgba(126, 87, 194, 0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: action.variant === "contained" ? "white" : profileTheme.primary,
-                  }}
-                >
-                  {action.icon}
-                </Box>
-                <Typography sx={{ fontWeight: 700, color: "text.primary" }}>
-                  {action.label}
-                </Typography>
-                <Button
-                  variant={action.variant === "contained" ? "contained" : "outlined"}
-                  onClick={action.action}
-                  fullWidth
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    ...(action.variant === "contained"
-                      ? {
-                          background: profileTheme.gradient,
-                        }
-                      : {
-                          borderColor:
-                            action.color === "error"
-                              ? "rgba(211, 47, 47, 0.3)"
-                              : "rgba(126, 87, 194, 0.3)",
-                          color:
-                            action.color === "error"
-                              ? "#d32f2f"
-                              : profileTheme.primary,
-                        }),
-                  }}
-                >
-                  {action.label}
-                </Button>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+        <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, px: 1.5 }}>
+          <List disablePadding>
+            {actions.map((action, index) => (
+              <React.Fragment key={action.label}>
+                <ListItem disableGutters sx={{ py: 1.2, gap: 1.25 }}>
+                  <ListItemIcon sx={{ minWidth: 38 }}>
+                    <Box
+                      sx={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 1.5,
+                        backgroundColor:
+                          action.variant === "contained"
+                            ? "primary.main"
+                            : "action.hover",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color:
+                          action.variant === "contained" ? "white" : "primary.main",
+                      }}
+                    >
+                      {action.icon}
+                    </Box>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={action.label}
+                    primaryTypographyProps={{ fontWeight: 600 }}
+                  />
+                  <Button
+                    variant={action.variant === "contained" ? "contained" : "outlined"}
+                    onClick={action.action}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 600,
+                      minWidth: 100,
+                      ...(action.variant === "contained"
+                        ? {
+                            bgcolor: "primary.main",
+                            "&:hover": { bgcolor: "primary.dark" },
+                          }
+                        : {
+                            borderColor:
+                              action.color === "error"
+                                ? "rgba(211, 47, 47, 0.3)"
+                                : "primary.light",
+                            color:
+                              action.color === "error"
+                                ? "error.main"
+                                : "primary.main",
+                          }),
+                    }}
+                  >
+                    Open
+                  </Button>
+                </ListItem>
+                {index < actions.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </Box>
       </CardContent>
     </Card>
   );

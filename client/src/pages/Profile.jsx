@@ -1,5 +1,29 @@
 import React from "react";
-import { Container, Box, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Container,
+  Box,
+  useTheme,
+  useMediaQuery,
+  Paper,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  IconButton,
+  Stack,
+  Button,
+} from "@mui/material";
+import {
+  AccountCircle,
+  QueryStats,
+  Insights,
+  CheckCircleOutline,
+  Bolt,
+  ArrowBack,
+  ChevronRight,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 // Import existing components
@@ -34,19 +58,26 @@ export default function Profile() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = React.useState("profile");
+  const [mobileDetailSection, setMobileDetailSection] = React.useState(null);
 
   const {
     user,
     loading,
     error,
     showPasswordModal,
-    needsPasswordSetup,
     setShowPasswordModal,
     handleLogout,
     handlePasswordSuccess,
     handlePasswordSetupClick,
     handleRefresh,
   } = useProfileLogic(navigate);
+
+  React.useEffect(() => {
+    if (!isMobile) {
+      setMobileDetailSection(null);
+    }
+  }, [isMobile]);
 
   // Loading State
   if (loading) {
@@ -66,6 +97,88 @@ export default function Profile() {
 
   const stats = getProgressStats(user);
 
+  const sections = [
+    {
+      id: "profile",
+      label: "Profile",
+      subtitle: "Personal info and account security",
+      icon: <AccountCircle fontSize="small" />,
+      content: (
+        <Stack spacing={2.5}>
+          <PersonalInfo user={user} />
+          <AuthenticationCard
+            user={user}
+            onPasswordSetup={handlePasswordSetupClick}
+          />
+        </Stack>
+      ),
+    },
+    {
+      id: "progress",
+      label: "Progress",
+      subtitle: "Learning stats and momentum",
+      icon: <QueryStats fontSize="small" />,
+      content: (
+        <Stack spacing={2.5}>
+          <ProgressStats stats={stats} />
+          <QuickStatsCard stats={stats} />
+          <LearningJourneyCard
+            stats={stats}
+            onLaunchLesson={() => navigate("/learn")}
+          />
+        </Stack>
+      ),
+    },
+    {
+      id: "insights",
+      label: "Insights",
+      subtitle: "Analysis and subtopic understanding",
+      icon: <Insights fontSize="small" />,
+      content: (
+        <Stack spacing={2.5}>
+          <AnalysisCard />
+          <CompletedSubtopicsInsights
+            progress={user?.progress || []}
+            appTimeMs={user?.appTimeMs || 0}
+          />
+        </Stack>
+      ),
+    },
+    {
+      id: "topics",
+      label: "Completed topics",
+      subtitle: "Review finished topics quickly",
+      icon: <CheckCircleOutline fontSize="small" />,
+      content: (
+        <CompletedTopicsCard
+          progress={user?.progress || []}
+          onRecall={(topicName) =>
+            navigate(`/learn?topic=${encodeURIComponent(topicName)}`)
+          }
+        />
+      ),
+    },
+    {
+      id: "actions",
+      label: "Quick actions",
+      subtitle: "Navigate and sign out",
+      icon: <Bolt fontSize="small" />,
+      content: (
+        <QuickActions
+          isMobile={isMobile}
+          onNavigate={navigate}
+          onLogout={handleLogout}
+        />
+      ),
+    },
+  ];
+
+  const currentSectionId = isMobile
+    ? mobileDetailSection || activeSection
+    : activeSection;
+  const currentSection =
+    sections.find((section) => section.id === currentSectionId) || sections[0];
+
   return (
     <Box
       sx={{
@@ -76,7 +189,7 @@ export default function Profile() {
       {/* Enhanced Header */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)",
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: "white",
           position: "relative",
           overflow: "hidden",
@@ -106,73 +219,144 @@ export default function Profile() {
         maxWidth="xl"
         sx={{
           px: { xs: 2, sm: 3 },
-          py: 4,
+          py: { xs: 2.5, md: 4 },
           mt: -1,
         }}
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              md: "minmax(280px, 1fr) minmax(360px, 1.3fr) minmax(260px, 0.9fr)",
-            },
-            gap: 3,
-            alignItems: "stretch",
-          }}
-        >
-          <Box
+        {isMobile ? (
+          <Paper
+            elevation={0}
             sx={{
-              display: "grid",
-              gridTemplateRows: { xs: "auto", md: "minmax(0, 1fr) auto" },
-              gap: 3,
-              height: "100%",
-              alignItems: "stretch",
+              borderRadius: 3,
+              bgcolor: "background.paper",
+              border: `1px solid ${theme.palette.divider}`,
+              overflow: "hidden",
             }}
           >
-            <Box sx={{ height: "100%", minHeight: 0 }}>
-              <PersonalInfo user={user} />
+            {mobileDetailSection ? (
+              <Box sx={{ p: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <IconButton
+                    size="small"
+                    onClick={() => setMobileDetailSection(null)}
+                    aria-label="Back to profile sections"
+                  >
+                    <ArrowBack fontSize="small" />
+                  </IconButton>
+                  <Typography variant="h6" fontWeight={700}>
+                    {currentSection.label}
+                  </Typography>
+                </Box>
+                {currentSection.content}
+              </Box>
+            ) : (
+              <>
+                <Box sx={{ px: 2, py: 1.75 }}>
+                  <Typography variant="h6" fontWeight={700}>
+                    Profile sections
+                  </Typography>
+                </Box>
+                <Divider />
+                <List disablePadding>
+                  {sections.map((section) => (
+                    <React.Fragment key={section.id}>
+                      <ListItemButton
+                        onClick={() => {
+                          setActiveSection(section.id);
+                          setMobileDetailSection(section.id);
+                        }}
+                        sx={{ py: 1.5, px: 2 }}
+                      >
+                        <ListItemIcon
+                          sx={{ minWidth: 36, color: "text.secondary" }}
+                        >
+                          {section.icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={section.label}
+                          secondary={section.subtitle}
+                          primaryTypographyProps={{ fontWeight: 600 }}
+                          secondaryTypographyProps={{
+                            variant: "body2",
+                            color: "text.secondary",
+                          }}
+                        />
+                        <ChevronRight
+                          sx={{ color: "text.disabled", fontSize: 18 }}
+                        />
+                      </ListItemButton>
+                      <Divider component="li" />
+                    </React.Fragment>
+                  ))}
+                </List>
+              </>
+            )}
+          </Paper>
+        ) : (
+          <Box>
+            <Box
+              sx={{
+                position: "sticky",
+                top: 80,
+                zIndex: 2,
+                mb: 3,
+                overflowX: "auto",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  minWidth: "max-content",
+                  px: 0.5,
+                  justifyContent: "center",
+                }}
+              >
+                {sections.map((section) => (
+                  <Button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    startIcon={section.icon}
+                    variant="text"
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: activeSection === section.id ? 700 : 600,
+                      px: 2,
+                      py: 1,
+                      whiteSpace: "nowrap",
+                      color: activeSection === section.id ? "primary.main" : "text.primary",
+                      backgroundColor: "transparent",
+                      borderBottom: activeSection === section.id ? "2px solid" : "2px solid transparent",
+                      borderRadius: 0,
+                      "&:hover": {
+                        bgcolor: "transparent",
+                        color: "primary.main",
+                      },
+                    }}
+                  >
+                    {section.label}
+                  </Button>
+                ))}
+              </Stack>
             </Box>
 
-            <AuthenticationCard
-              user={user}
-              onPasswordSetup={handlePasswordSetupClick}
-            />
+            <Box sx={{ maxWidth: 1240, mx: "auto" }}>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+                {currentSection.label}
+              </Typography>
+              {currentSection.content}
+            </Box>
           </Box>
-
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <ProgressStats stats={stats} />
-
-            <LearningJourneyCard
-              stats={stats}
-              onLaunchLesson={() => navigate("/learn")}
-            />
-
-            <AnalysisCard />
-
-            <CompletedSubtopicsInsights
-              progress={user?.progress || []}
-              appTimeMs={user?.appTimeMs || 0}
-            />
-          </Box>
-
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <QuickStatsCard stats={stats} />
-
-            <CompletedTopicsCard
-              progress={user?.progress || []}
-              onRecall={(topicName) =>
-                navigate(`/learn?topic=${encodeURIComponent(topicName)}`)
-              }
-            />
-
-            <QuickActions
-              isMobile={isMobile}
-              onNavigate={navigate}
-              onLogout={handleLogout}
-            />
-          </Box>
-        </Box>
+        )}
       </Container>
 
       {/* Password Setup Modal */}

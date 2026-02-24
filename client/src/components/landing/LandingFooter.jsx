@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Stack, Link } from "@mui/material";
+import { Box, Container, Typography, Stack } from "@mui/material";
 import { profileTheme } from "../profile/constants";
 
 const LandingFooter = () => {
@@ -7,9 +7,9 @@ const LandingFooter = () => {
     <Box sx={{ py: 4, borderTop: `1px solid ${profileTheme.border}` }}>
       <Container maxWidth="lg">
         <Stack
-          direction={{ xs: "column", sm: "row" }}
+          direction="row"
           spacing={2}
-          alignItems={{ xs: "flex-start", sm: "center" }}
+          alignItems="center"
           justifyContent="space-between"
         >
           <Typography sx={{ fontWeight: 700 }}>Guidra</Typography>

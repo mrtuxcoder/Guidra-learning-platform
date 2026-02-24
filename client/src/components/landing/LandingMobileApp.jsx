@@ -4,9 +4,7 @@ import {
   Container,
   Typography,
   Button,
-  Grid,
   useTheme,
-  useMediaQuery,
   alpha,
   Card,
 } from "@mui/material";
@@ -53,7 +51,6 @@ const mobileFeatures = [
 
 const LandingMobileApp = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isDark = theme.palette.mode === "dark";
 
   const downloadAPK = () => {
@@ -78,13 +75,12 @@ const LandingMobileApp = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Grid
-          container
-          spacing={{ xs: 3, md: 5 }}
-          alignItems="center"
+        <Box
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: { xs: 3, md: 5 },
+            alignItems: "center",
           }}
         >
           {/* Left Side - Features */}
@@ -209,7 +205,7 @@ const LandingMobileApp = () => {
             <Card
               sx={{
                 width: "100%",
-                maxWidth: "300px",
+                maxWidth: { xs: 360, md: 320 },
                 background: isDark
                   ? `linear-gradient(135deg, ${alpha(
                       theme.palette.primary.main,
@@ -265,7 +261,7 @@ const LandingMobileApp = () => {
               </Typography>
             </Card>
           </Box>
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

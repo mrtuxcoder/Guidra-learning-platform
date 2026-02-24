@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Grid, alpha, useTheme } from "@mui/material";
+import { Box, Container, Typography, alpha, useTheme } from "@mui/material";
 
 const features = [
   "AI-Powered Content Generation",
@@ -43,28 +43,37 @@ const LandingFeatures = () => {
         >
           Features
         </Typography>
-        <Grid container spacing={2.5}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+              md: "repeat(3, minmax(0, 1fr))",
+            },
+            gap: 2.5,
+          }}
+        >
           {features.map((feature) => (
-            <Grid item xs={12} sm={6} md={4} key={feature}>
-              <Box
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  background: "background.paper",
-                  border: `1px solid ${alpha(
-                    theme.palette.primary.main,
-                    theme.palette.mode === "dark" ? 0.3 : 0.15
-                  )}`,
-                  height: "100%",
-                }}
-              >
-                <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
-                  {feature}
-                </Typography>
-              </Box>
-            </Grid>
+            <Box
+              key={feature}
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                background: "background.paper",
+                border: `1px solid ${alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.3 : 0.15
+                )}`,
+                height: "100%",
+              }}
+            >
+              <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
+                {feature}
+              </Typography>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

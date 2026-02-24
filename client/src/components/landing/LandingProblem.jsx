@@ -3,9 +3,7 @@ import {
   Box,
   Container,
   Typography,
-  Grid,
   useTheme,
-  useMediaQuery,
   alpha,
 } from "@mui/material";
 import { profileTheme } from "../profile/constants";
@@ -19,7 +17,6 @@ const problemPoints = [
 
 const LandingProblem = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box sx={{ py: { xs: 5, md: 7 }, background: "background.paper" }}>
@@ -33,38 +30,34 @@ const LandingProblem = () => {
         >
           The Problem
         </Typography>
-        <Grid container spacing={2.5}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+            },
+            gap: 2.5,
+          }}
+        >
           {problemPoints.map((point) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
+            <Box
               key={point}
-              sx={isMobile ? { width: "100%" } : undefined}
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                border: `1px solid ${profileTheme.border}`,
+                background: alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.18 : 0.05
+                ),
+                height: "100%",
+              }}
             >
-              <Box
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  border: `1px solid ${profileTheme.border}`,
-                  background: alpha(
-                    theme.palette.primary.main,
-                    theme.palette.mode === "dark" ? 0.18 : 0.05
-                  ),
-                  ...(isMobile && {
-                    width: "100%",
-                    maxWidth: "100%",
-                    boxSizing: "border-box",
-                  }),
-                }}
-              >
-                <Typography sx={{ color: "text.secondary" }}>
-                  {point}
-                </Typography>
-              </Box>
-            </Grid>
+              <Typography sx={{ color: "text.secondary" }}>{point}</Typography>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

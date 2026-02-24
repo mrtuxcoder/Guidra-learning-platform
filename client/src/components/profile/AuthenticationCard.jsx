@@ -7,7 +7,7 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-import { profileTheme, cardSx } from "./constants";
+import { cardSx } from "./constants";
 
 const AuthenticationCard = ({ user, onPasswordSetup }) => {
   if (user?.authProvider !== "google" || user?.password) {
@@ -18,8 +18,7 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
     <Card
       sx={{
         ...cardSx,
-        background:
-          "linear-gradient(135deg, rgba(126, 87, 194, 0.06) 0%, rgba(94, 53, 177, 0.06) 100%)",
+        bgcolor: "background.paper",
       }}
     >
       <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
@@ -35,7 +34,7 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
                 width: 40,
                 height: 40,
                 borderRadius: 2,
-                background: profileTheme.gradient,
+                bgcolor: "primary.main",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -54,10 +53,6 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
                 sx={{
                   fontWeight: 700,
                   fontSize: { xs: "0.95rem", sm: "1.05rem" },
-                  background: profileTheme.gradient,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
                 }}
               >
                 Authentication Status
@@ -78,14 +73,13 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
             onClick={onPasswordSetup}
             sx={{
               borderRadius: 2,
-              background: profileTheme.gradient,
+              bgcolor: "primary.main",
               fontWeight: 600,
               px: 2.5,
               py: 1,
               fontSize: "0.85rem",
               "&:hover": {
-                transform: "translateY(-1px)",
-                boxShadow: "0 8px 20px rgba(126, 87, 194, 0.3)",
+                bgcolor: "primary.dark",
               },
             }}
           >

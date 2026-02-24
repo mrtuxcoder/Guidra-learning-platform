@@ -3,9 +3,7 @@ import {
   Box,
   Container,
   Typography,
-  Grid,
   useTheme,
-  useMediaQuery,
   alpha,
 } from "@mui/material";
 import { profileTheme } from "../profile/constants";
@@ -39,7 +37,6 @@ const progressItems = [
 
 const LandingProgress = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -64,39 +61,33 @@ const LandingProgress = () => {
         >
           Progress Tracking
         </Typography>
-        <Grid container spacing={2.5} alignItems="stretch">
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+              md: "repeat(3, minmax(0, 1fr))",
+            },
+            gap: 2.5,
+          }}
+        >
           {progressItems.map((item) => (
-            <Grid
-              item
-              xs={12}
-              md={4}
+            <Box
               key={item.title}
-              sx={isMobile ? { width: "100%" } : undefined}
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                border: `1px solid ${profileTheme.border}`,
+                background: "background.paper",
+                height: "100%",
+              }}
             >
-              <Box
-                sx={{
-                  p: 2.5,
-                  borderRadius: 2,
-                  border: `1px solid ${profileTheme.border}`,
-                  background: "background.paper",
-                  height: "100%",
-                  ...(isMobile && {
-                    width: "100%",
-                    maxWidth: "100%",
-                    boxSizing: "border-box",
-                  }),
-                }}
-              >
-                <Typography sx={{ fontWeight: 600, mb: 1 }}>
-                  {item.title}
-                </Typography>
-                <Typography sx={{ color: "text.secondary" }}>
-                  {item.detail}
-                </Typography>
-              </Box>
-            </Grid>
+              <Typography sx={{ fontWeight: 600, mb: 1 }}>{item.title}</Typography>
+              <Typography sx={{ color: "text.secondary" }}>{item.detail}</Typography>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Container>
     </Box>
   );

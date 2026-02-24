@@ -26,7 +26,7 @@ import {
   ErrorOutline,
   Refresh,
 } from "@mui/icons-material";
-import { profileTheme, cardSx } from "./constants";
+import { profileTheme, cardSx, smallCardSx } from "./constants";
 import { getAllAnalysis } from "../../api";
 
 const AnalysisCard = () => {
@@ -99,16 +99,24 @@ const AnalysisCard = () => {
       <Card sx={cardSx}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-            <Psychology sx={{ color: profileTheme.accent, fontSize: 28 }} />
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 2,
+                bgcolor: "primary.main",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Psychology sx={{ color: "white", fontSize: 20 }} />
+            </Box>
             <Typography
               variant="h6"
               sx={{
                 fontWeight: 700,
                 fontSize: { xs: "1rem", sm: "1.125rem" },
-                background: profileTheme.gradient,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
               }}
             >
               Learning Analysis
@@ -127,16 +135,25 @@ const AnalysisCard = () => {
       <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Psychology sx={{ color: profileTheme.accent, fontSize: 28 }} />
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 2,
+              bgcolor: "primary.main",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Psychology sx={{ color: "white", fontSize: 20 }} />
+          </Box>
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
               fontSize: { xs: "1rem", sm: "1.125rem" },
-              background: profileTheme.gradient,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
               flex: 1,
             }}
           >
@@ -147,7 +164,7 @@ const AnalysisCard = () => {
               size="small"
               onClick={fetchAnalysis}
               disabled={loading}
-              sx={{ color: profileTheme.accent }}
+              sx={{ color: "primary.main" }}
             >
               <Refresh
                 sx={{
@@ -167,15 +184,14 @@ const AnalysisCard = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
             gap: 2,
             mb: 3,
           }}
         >
           <Box
             sx={{
-              p: 2,
-              borderRadius: 2,
+              ...smallCardSx,
               background: alpha(theme.palette.success.main, 0.08),
               border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
             }}
@@ -196,8 +212,7 @@ const AnalysisCard = () => {
 
           <Box
             sx={{
-              p: 2,
-              borderRadius: 2,
+              ...smallCardSx,
               background: alpha(theme.palette.warning.main, 0.08),
               border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
             }}
@@ -219,7 +234,7 @@ const AnalysisCard = () => {
 
         {/* Topic-by-Topic Analysis */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          {analysisData.map((topicData, index) => (
+          {analysisData.map((topicData) => (
             <Accordion
               key={topicData.topic}
               expanded={expanded === topicData.topic}
@@ -228,6 +243,7 @@ const AnalysisCard = () => {
                 boxShadow: "none",
                 "&:before": { display: "none" },
                 border: `1px solid ${profileTheme.border}`,
+                bgcolor: "background.default",
                 borderRadius: "12px !important",
                 overflow: "hidden",
                 "&.Mui-expanded": {

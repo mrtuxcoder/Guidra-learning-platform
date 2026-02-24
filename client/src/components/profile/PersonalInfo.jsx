@@ -5,7 +5,11 @@ import {
   Typography,
   Box,
   Chip,
-  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
   useTheme,
   alpha,
   useMediaQuery,
@@ -18,67 +22,29 @@ const PersonalInfo = ({ user }) => {
   const isDark = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const InfoItem = ({ icon, label, value }) => (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1.5,
-        p: 2,
-        borderRadius: 2,
-        border: `1px solid ${profileTheme.border}`,
-        background: "rgba(126, 87, 194, 0.04)",
-        height: "100%",
-        width: "100%",
-        maxWidth: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <Box
-        sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 2,
-          background: profileTheme.gradient,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        {React.cloneElement(icon, {
-          sx: { fontSize: 18, color: "white" },
-        })}
-      </Box>
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: 0.6,
-            fontSize: "0.65rem",
-            display: "block",
-            mb: 0.5,
-          }}
-        >
-          {label}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.primary",
-            fontWeight: 600,
-            wordBreak: "break-word",
-          }}
-        >
-          {value || "Not specified"}
-        </Typography>
-      </Box>
-    </Box>
-  );
+  const infoItems = [
+    {
+      icon: <Email />,
+      label: "Email Address",
+      value: user?.email,
+    },
+    {
+      icon: <CalendarToday />,
+      label: "Member Since",
+      value: user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : null,
+    },
+    {
+      icon: <Lightbulb />,
+      label: "Learning Goal",
+      value: user?.reasonForLearning || user?.learningMotivation,
+    },
+  ];
 
   return (
     <Card
@@ -116,7 +82,7 @@ const PersonalInfo = ({ user }) => {
                 width: 32,
                 height: 32,
                 borderRadius: 2,
-                background: profileTheme.gradient,
+                bgcolor: "primary.main",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -130,10 +96,6 @@ const PersonalInfo = ({ user }) => {
                 sx={{
                   fontWeight: 700,
                   fontSize: isMobile ? "1.05rem" : "1.2rem",
-                  background: profileTheme.gradient,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
                 }}
               >
                 Personal Info
@@ -149,43 +111,39 @@ const PersonalInfo = ({ user }) => {
           </Box>
         </Box>
 
-        {/* Info Items - Responsive Grid */}
-        <Grid
-          container
-          spacing={2}
-          alignItems="flex-start"
-          sx={{ width: "100%" }}
-        >
-          <Grid item xs={12} sm={6}>
-            <InfoItem
-              icon={<Email />}
-              label="Email Address"
-              value={user?.email}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <InfoItem
-              icon={<CalendarToday />}
-              label="Member Since"
-              value={
-                user?.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : null
-              }
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <InfoItem
-              icon={<Lightbulb />}
-              label="Learning Goal"
-              value={user?.reasonForLearning || user?.learningMotivation}
-            />
-          </Grid>
-        </Grid>
+        <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, px: 1.5 }}>
+          <List disablePadding>
+            {infoItems.map((item, index) => (
+              <React.Fragment key={item.label}>
+                <ListItem disableGutters sx={{ py: 1.2 }}>
+                  <ListItemIcon sx={{ minWidth: 38 }}>
+                    <Box
+                      sx={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 1.5,
+                        bgcolor: "primary.main",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                      }}
+                    >
+                      {React.cloneElement(item.icon, { sx: { fontSize: 16 } })}
+                    </Box>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    secondary={item.value || "Not specified"}
+                    primaryTypographyProps={{ variant: "caption", color: "text.secondary" }}
+                    secondaryTypographyProps={{ variant: "body2", fontWeight: 600 }}
+                  />
+                </ListItem>
+                {index < infoItems.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </Box>
 
         {/* Learning Style Chip if available */}
         {user?.learningStyle && (

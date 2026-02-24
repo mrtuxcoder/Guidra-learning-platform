@@ -9,12 +9,10 @@ import {
   alpha,
 } from "@mui/material";
 import { Email, RocketLaunch } from "@mui/icons-material";
-import { profileTheme } from "./constants";
 
 const ProfileHeader = ({ user, styleInfo }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const isDark = theme.palette.mode === "dark";
 
   return (
@@ -28,34 +26,8 @@ const ProfileHeader = ({ user, styleInfo }) => {
         position: "relative",
         overflow: "hidden",
         border: `1px solid ${alpha("#fff", 0.2)}`,
-        boxShadow: `0 12px 32px ${alpha(profileTheme.primaryDark, 0.2)}`,
+        boxShadow: "none",
         backdropFilter: "blur(10px)",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: -20,
-          right: -20,
-          width: isMobile ? 80 : 120,
-          height: isMobile ? 80 : 120,
-          background: `radial-gradient(circle, ${alpha(
-            "#fff",
-            0.1
-          )} 0%, transparent 70%)`,
-          borderRadius: "50%",
-        },
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          bottom: -15,
-          left: -15,
-          width: isMobile ? 60 : 80,
-          height: isMobile ? 60 : 80,
-          background: `radial-gradient(circle, ${alpha(
-            "#fff",
-            0.08
-          )} 0%, transparent 70%)`,
-          borderRadius: "50%",
-        },
       }}
     >
       <Box
@@ -70,21 +42,6 @@ const ProfileHeader = ({ user, styleInfo }) => {
       >
         {/* Compact Avatar */}
         <Box sx={{ position: "relative", flexShrink: 0 }}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: -2,
-              left: -2,
-              right: -2,
-              bottom: -2,
-              background: `linear-gradient(45deg, ${alpha(
-                "#fff",
-                0.3
-              )}, ${alpha("#fff", 0.1)})`,
-              borderRadius: "50%",
-              animation: "pulse 2s ease-in-out infinite alternate",
-            }}
-          />
           <Avatar
             sx={{
               width: isMobile ? 56 : 72,
@@ -96,7 +53,6 @@ const ProfileHeader = ({ user, styleInfo }) => {
               fontWeight: "bold",
               color: "white",
               position: "relative",
-              boxShadow: `0 4px 16px ${alpha(profileTheme.primaryDark, 0.3)}`,
             }}
           >
             {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -219,19 +175,6 @@ const ProfileHeader = ({ user, styleInfo }) => {
           </Box>
         )}
       </Box>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-            opacity: 0.4;
-          }
-          100% {
-            transform: scale(1.05);
-            opacity: 0.6;
-          }
-        }
-      `}</style>
     </Paper>
   );
 };

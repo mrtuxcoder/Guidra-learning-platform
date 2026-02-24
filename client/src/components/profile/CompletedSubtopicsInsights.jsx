@@ -7,9 +7,12 @@ import {
   Chip,
   Stack,
   Divider,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import { AccessTime, Checklist, Quiz } from "@mui/icons-material";
-import { profileTheme, cardSx } from "./constants";
+import { cardSx } from "./constants";
 
 const formatDuration = (ms) => {
   if (!ms || ms <= 0) return "0m";
@@ -119,7 +122,7 @@ const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
               width: 40,
               height: 40,
               borderRadius: 2,
-              background: profileTheme.gradient,
+              bgcolor: "primary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -132,10 +135,6 @@ const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
               variant="h6"
               sx={{
                 fontWeight: 700,
-                background: profileTheme.gradient,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
               }}
             >
               Completed Subtopics
@@ -152,8 +151,8 @@ const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
             label={`Total ${formatDuration(totalTimeMs)}`}
             size="small"
             sx={{
-              background: "rgba(126, 87, 194, 0.08)",
-              color: profileTheme.primary,
+              background: "rgba(126, 87, 194, 0.1)",
+              color: "primary.main",
               fontWeight: 600,
             }}
           />
@@ -167,7 +166,7 @@ const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
             size="small"
             sx={{
               background: "rgba(16, 185, 129, 0.12)",
-              color: "#059669",
+              color: "success.main",
               fontWeight: 600,
             }}
           />
@@ -180,57 +179,46 @@ const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
             No completed subtopics yet. Finish a lesson to see stats here.
           </Typography>
         ) : (
-          <Stack spacing={1.5} sx={{ mb: 2 }}>
-            {topSubtopics.map((subtopic) => {
-              const accuracy = getAccuracy(subtopic.quizMark);
-              return (
-                <Box
-                  key={`${subtopic.topic}-${subtopic.name}`}
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 2,
-                    border: `1px solid ${profileTheme.border}`,
-                    background: "rgba(126, 87, 194, 0.04)",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight={700}
-                    sx={{ mb: 0.25 }}
-                  >
-                    {subtopic.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {subtopic.topic}
-                  </Typography>
-                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                    <Chip
-                      size="small"
-                      label={formatDuration(subtopic.timeSpentMs)}
-                      sx={{
-                        background: "rgba(126, 87, 194, 0.1)",
-                        color: profileTheme.primary,
-                        fontWeight: 600,
-                      }}
-                    />
-                    <Chip
-                      size="small"
-                      label={
-                        accuracy === null
-                          ? "No quiz"
-                          : `${accuracy}% quiz`
-                      }
-                      sx={{
-                        background: "rgba(59, 130, 246, 0.12)",
-                        color: "#2563eb",
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Stack>
-                </Box>
-              );
-            })}
-          </Stack>
+          <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, px: 1.5, mb: 2 }}>
+            <List disablePadding>
+              {topSubtopics.map((subtopic, index) => {
+                const accuracy = getAccuracy(subtopic.quizMark);
+                return (
+                  <React.Fragment key={`${subtopic.topic}-${subtopic.name}`}>
+                    <ListItem disableGutters sx={{ py: 1.2, gap: 1 }}>
+                      <ListItemText
+                        primary={subtopic.name}
+                        secondary={subtopic.topic}
+                        primaryTypographyProps={{ fontWeight: 700, noWrap: true }}
+                        secondaryTypographyProps={{ variant: "caption", noWrap: true }}
+                      />
+                      <Stack direction="row" spacing={1}>
+                        <Chip
+                          size="small"
+                          label={formatDuration(subtopic.timeSpentMs)}
+                          sx={{
+                            background: "rgba(126, 87, 194, 0.1)",
+                            color: "primary.main",
+                            fontWeight: 600,
+                          }}
+                        />
+                        <Chip
+                          size="small"
+                          label={accuracy === null ? "No quiz" : `${accuracy}%`}
+                          sx={{
+                            background: "rgba(59, 130, 246, 0.12)",
+                            color: "info.main",
+                            fontWeight: 600,
+                          }}
+                        />
+                      </Stack>
+                    </ListItem>
+                    {index < topSubtopics.length - 1 && <Divider />}
+                  </React.Fragment>
+                );
+              })}
+            </List>
+          </Box>
         )}
 
         <Divider sx={{ mb: 2 }} />

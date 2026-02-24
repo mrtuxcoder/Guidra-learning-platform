@@ -4,7 +4,11 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
   CircularProgress,
   useTheme,
   useMediaQuery,
@@ -27,7 +31,7 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
         size={size}
         thickness={thickness}
         sx={{
-          color: "rgba(126, 87, 194, 0.1)",
+          color: "action.hover",
           position: "absolute",
         }}
       />
@@ -37,7 +41,7 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
         size={size}
         thickness={thickness}
         sx={{
-          color: value === 100 ? "#10b981" : profileTheme.primary,
+          color: value === 100 ? "success.main" : "primary.main",
         }}
       />
       <Box
@@ -56,12 +60,7 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
           variant={size > 80 ? "h5" : "h6"}
           component="div"
           fontWeight="700"
-          sx={{
-            background: `linear-gradient(135deg, ${profileTheme.primary} 0%, ${profileTheme.primaryDark} 100%)`,
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
+          color="text.primary"
         >
           {value}%
         </Typography>
@@ -70,62 +69,36 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
   );
 };
 
-const StatBox = ({ icon: Icon, value, label, color, isMobile }) => (
-  <Box
-    sx={{
-      textAlign: "left",
-      p: isMobile ? 1.25 : 1.5,
-      height: "100%",
-      width: "100%",
-      maxWidth: "100%",
-      boxSizing: "border-box",
-      display: "flex",
-      alignItems: "center",
-      gap: 1.25,
-      borderRadius: 2,
-      border: `1px solid ${profileTheme.border}`,
-      background: "rgba(126, 87, 194, 0.04)",
-    }}
-  >
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: isMobile ? 30 : 36,
-        height: isMobile ? 30 : 36,
-        borderRadius: "50%",
-        bgcolor: alpha(color, 0.1),
-        color: color,
-        flexShrink: 0,
-      }}
-    >
-      <Icon sx={{ fontSize: isMobile ? 14 : 18 }} />
-    </Box>
-    <Box>
-      <Typography
-        variant={isMobile ? "body2" : "h6"}
-        fontWeight="700"
+const StatRow = ({ icon, value, label, color, isMobile }) => (
+  <ListItem disableGutters sx={{ py: isMobile ? 1 : 1.25 }}>
+    <ListItemIcon sx={{ minWidth: 36 }}>
+      <Box
         sx={{
-          mb: 0.25,
-          lineHeight: 1.2,
-          background: `linear-gradient(135deg, ${color} 0%, ${color}99 100%)`,
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: isMobile ? 28 : 32,
+          height: isMobile ? 28 : 32,
+          borderRadius: "50%",
+          bgcolor: alpha(color, 0.1),
+          color,
         }}
       >
-        {value}
-      </Typography>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ lineHeight: 1.2, fontSize: isMobile ? "0.7rem" : "0.75rem" }}
-      >
-        {label}
-      </Typography>
-    </Box>
-  </Box>
+        {React.createElement(icon, { sx: { fontSize: isMobile ? 14 : 17 } })}
+      </Box>
+    </ListItemIcon>
+    <ListItemText
+      primary={label}
+      primaryTypographyProps={{
+        variant: "body2",
+        color: "text.secondary",
+        fontWeight: 500,
+      }}
+    />
+    <Typography variant={isMobile ? "body1" : "h6"} fontWeight={700} sx={{ color }}>
+      {value}
+    </Typography>
+  </ListItem>
 );
 
 const ProgressStats = ({ stats }) => {
@@ -195,7 +168,7 @@ const ProgressStats = ({ stats }) => {
                 width: isMobile ? 32 : 40,
                 height: isMobile ? 32 : 40,
                 borderRadius: 2,
-                background: profileTheme.gradient,
+                  bgcolor: "primary.main",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -208,13 +181,7 @@ const ProgressStats = ({ stats }) => {
               <Typography
                 variant={isMobile ? "subtitle1" : "h6"}
                 fontWeight="700"
-                sx={{
-                  background: profileTheme.gradient,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  lineHeight: 1.2,
-                }}
+                sx={{ lineHeight: 1.2 }}
               >
                 Progress Overview
               </Typography>
@@ -254,24 +221,29 @@ const ProgressStats = ({ stats }) => {
             />
           </Box>
 
-          <Grid
-            container
-            spacing={1.5}
-            alignItems="stretch"
-            sx={{ width: "100%" }}
+          <Box
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 2,
+              px: { xs: 1.25, sm: 1.5 },
+            }}
           >
-            {statItems.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <StatBox
-                  icon={item.icon}
-                  value={item.value}
-                  label={item.label}
-                  color={item.color}
-                  isMobile={isMobile}
-                />
-              </Grid>
-            ))}
-          </Grid>
+            <List disablePadding>
+              {statItems.map((item, index) => (
+                <React.Fragment key={item.label}>
+                  <StatRow
+                    icon={item.icon}
+                    value={item.value}
+                    label={item.label}
+                    color={item.color}
+                    isMobile={isMobile}
+                  />
+                  {index < statItems.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          </Box>
         </Box>
 
         {/* Progress Bar - Compact */}
@@ -295,13 +267,8 @@ const ProgressStats = ({ stats }) => {
             <Typography
               variant="caption"
               fontWeight="700"
-              sx={{
-                background: profileTheme.gradient,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                fontSize: isMobile ? "0.7rem" : "0.75rem",
-              }}
+              color="primary.main"
+              sx={{ fontSize: isMobile ? "0.7rem" : "0.75rem" }}
             >
               {safeStats.progressPercentage || 0}%
             </Typography>
@@ -311,7 +278,7 @@ const ProgressStats = ({ stats }) => {
               width: "100%",
               height: isMobile ? 6 : 8,
               borderRadius: 4,
-              backgroundColor: alpha(profileTheme.primary, 0.12),
+              backgroundColor: "action.hover",
               overflow: "hidden",
             }}
           >
@@ -319,10 +286,9 @@ const ProgressStats = ({ stats }) => {
               sx={{
                 height: "100%",
                 borderRadius: 4,
-                background: profileTheme.gradient,
+                bgcolor: "primary.main",
                 width: `${safeStats.progressPercentage || 0}%`,
                 transition: "width 0.5s ease-in-out",
-                boxShadow: "0 2px 8px rgba(126, 87, 194, 0.25)",
               }}
             />
           </Box>
