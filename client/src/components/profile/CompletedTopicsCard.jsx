@@ -59,7 +59,7 @@ const CompletedTopicsCard = ({ progress = [], onRecall }) => {
             const topicName = getTopicName(topic);
 
             return (
-              <Grid item xs={12} sm={6} key={topicName} sx={{ width: "100%" }}>
+              <Grid item xs={12} sm={6} key={topicName}>
                 <Box
                   sx={{
                     display: "flex",

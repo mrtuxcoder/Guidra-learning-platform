@@ -102,7 +102,7 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
           alignItems="stretch"
           sx={{ mb: { xs: 2, sm: 3 }, width: "100%" }}
         >
-          <Grid item xs={12} sm={6} sx={{ width: "100%" }}>
+          <Grid item xs={12} sm={6}>
             <Box
               sx={{
                 textAlign: "center",
@@ -148,7 +148,7 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={6} sx={{ width: "100%" }}>
+          <Grid item xs={12} sm={6}>
             <Box
               sx={{
                 textAlign: "center",

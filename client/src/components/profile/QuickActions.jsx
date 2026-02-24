@@ -109,7 +109,7 @@ const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
         </Typography>
         <Grid container spacing={2} sx={{ width: "100%" }}>
           {actions.map((action, index) => (
-            <Grid item xs={12} md={4} key={index} sx={{ width: "100%" }}>
+            <Grid item xs={12} md={4} key={index}>
               <Box
                 sx={{
                   borderRadius: 2,

@@ -156,14 +156,14 @@ const PersonalInfo = ({ user }) => {
           alignItems="flex-start"
           sx={{ width: "100%" }}
         >
-          <Grid item xs={12} sm={6} sx={{ width: "100%" }}>
+          <Grid item xs={12} sm={6}>
             <InfoItem
               icon={<Email />}
               label="Email Address"
               value={user?.email}
             />
           </Grid>
-          <Grid item xs={12} sm={6} sx={{ width: "100%" }}>
+          <Grid item xs={12} sm={6}>
             <InfoItem
               icon={<CalendarToday />}
               label="Member Since"
@@ -178,7 +178,7 @@ const PersonalInfo = ({ user }) => {
               }
             />
           </Grid>
-          <Grid item xs={12} sx={{ width: "100%" }}>
+          <Grid item xs={12}>
             <InfoItem
               icon={<Lightbulb />}
               label="Learning Goal"
