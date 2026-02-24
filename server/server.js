@@ -73,6 +73,11 @@ app.use("/api/v1/learning", learningRoutes);
 app.use("/api/v1/progress", progressRoutes);
 app.use("/api/v1/content", contentRoutes);
 
+app.get("/", (req, res) => {
+  res.json({ status: "OK", message: "Guidra API is running!" });
+});
+
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });
