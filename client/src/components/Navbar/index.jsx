@@ -19,6 +19,7 @@ import AuthButtons from "./components/AuthButtons";
 import UserMenu from "./components/UserMenu";
 import OnboardingTour from "./components/OnboardingTour";
 import DailyRegenBadge from "./components/DailyRegenBadge";
+import MobileFooterNav from "./components/MobileFooterNav";
 
 // Import hooks and constants
 import { useNavbar } from "./hooks/useNavbar";
@@ -159,6 +160,8 @@ const Navbar = () => {
           </Toolbar>
         </AppBar>
       </HideOnScroll>
+
+      <MobileFooterNav isActive={isActive} navigate={navigate} user={user} />
 
       {/* User Menu */}
       <UserMenu

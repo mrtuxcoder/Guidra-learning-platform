@@ -6,7 +6,6 @@ const CompleteButton = ({
   selectedSubtopic,
   updatingSubtopic,
   onCompleteSubtopic,
-  colorPalette,
   variant = "desktop",
 }) => {
   const isMobile = variant === "mobile";
@@ -58,8 +57,8 @@ const CompleteButton = ({
           onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
           disabled={isDisabled}
           sx={{
-            width: 36,
-            height: 36,
+            width: 44,
+            height: 44,
             borderRadius: "10px",
             background: `linear-gradient(135deg, #10b981 0%, #059669 100%)`,
             color: "white",
@@ -76,9 +75,9 @@ const CompleteButton = ({
           }}
         >
           {isUpdating ? (
-            <CircularProgress size={13} sx={{ color: "white" }} />
+            <CircularProgress size={18} sx={{ color: "white" }} />
           ) : (
-            <CheckCircle sx={{ fontSize: 15 }} />
+            <CheckCircle sx={{ fontSize: 22 }} />
           )}
         </IconButton>
       </Tooltip>

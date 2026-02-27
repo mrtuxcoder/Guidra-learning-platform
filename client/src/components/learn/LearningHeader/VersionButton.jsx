@@ -4,7 +4,6 @@ import { alpha, useTheme } from "@mui/material/styles";
 import { Layers } from "@mui/icons-material";
 
 const VersionButton = ({
-  contentInfo,
   onOpenVersions,
   colorPalette,
   variant = "desktop",
@@ -67,8 +66,8 @@ const VersionButton = ({
       <IconButton
         onClick={handleClick}
         sx={{
-          width: 36,
-          height: 36,
+          width: 44,
+          height: 44,
           borderRadius: "10px",
           background: isDark
             ? alpha(theme.palette.primary.main, 0.16)
@@ -79,7 +78,7 @@ const VersionButton = ({
           border: isDark
             ? `1px solid ${alpha(theme.palette.primary.main, 0.4)}`
             : "1px solid rgba(126, 87, 194, 0.12)",
-          padding: "7px",
+          padding: "8px",
           "&:hover": {
             background: isDark
               ? alpha(theme.palette.primary.main, 0.26)
@@ -89,7 +88,7 @@ const VersionButton = ({
           transition: "all 0.2s ease",
         }}
       >
-        <Layers sx={{ fontSize: 16 }} />
+        <Layers sx={{ fontSize: 22 }} />
       </IconButton>
     </Tooltip>
   );
