@@ -1,8 +1,11 @@
 import React from "react";
 import { Box, Typography, Button, Avatar, Stack } from "@mui/material";
 import { Explore, School, AutoAwesome } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const EmptyState = ({ colorPalette }) => {
+  const navigate = useNavigate();
+
   return (
     <Box
       sx={{
@@ -108,7 +111,7 @@ const EmptyState = ({ colorPalette }) => {
             <Button
               variant="contained"
               size="large"
-              onClick={() => (window.location.href = "/explore")}
+              onClick={() => navigate("/explore")}
               startIcon={<Explore />}
               sx={{
                 py: 1.6,

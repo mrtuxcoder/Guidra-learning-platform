@@ -1,12 +1,67 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 
 const TimerContext = createContext(null);
+const TIMER_STORAGE_KEY = "guidra_timer_state";
+
+const loadTimerState = () => {
+  try {
+    const raw = localStorage.getItem(TIMER_STORAGE_KEY);
+    if (!raw) {
+      return {
+        isActive: false,
+        remainingSeconds: 25 * 60,
+        selectedMinutes: 25,
+        endTimestamp: null,
+        hasCompleted: false,
+      };
+    }
+
+    const parsed = JSON.parse(raw);
+    const selectedMinutes = Math.max(1, Number(parsed.selectedMinutes) || 25);
+    const maxSeconds = selectedMinutes * 60;
+    const remainingSeconds = Math.max(
+      0,
+      Math.min(maxSeconds, Number(parsed.remainingSeconds) || maxSeconds)
+    );
+
+    return {
+      isActive: Boolean(parsed.isActive),
+      remainingSeconds,
+      selectedMinutes,
+      endTimestamp:
+        typeof parsed.endTimestamp === "number" ? parsed.endTimestamp : null,
+      hasCompleted: Boolean(parsed.hasCompleted),
+    };
+  } catch {
+    return {
+      isActive: false,
+      remainingSeconds: 25 * 60,
+      selectedMinutes: 25,
+      endTimestamp: null,
+      hasCompleted: false,
+    };
+  }
+};
 
 export const TimerProvider = ({ children }) => {
-  const [isActive, setIsActive] = useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState(25 * 60);
-  const [selectedMinutes, setSelectedMinutes] = useState(25);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const initialState = loadTimerState();
+
+  const [isActive, setIsActive] = useState(initialState.isActive);
+  const [remainingSeconds, setRemainingSeconds] = useState(
+    initialState.remainingSeconds
+  );
+  const [selectedMinutes, setSelectedMinutes] = useState(
+    initialState.selectedMinutes
+  );
+  const [endTimestamp, setEndTimestamp] = useState(initialState.endTimestamp);
+  const [hasCompleted, setHasCompleted] = useState(initialState.hasCompleted);
   const intervalRef = useRef(null);
   const completionNotifiedRef = useRef(false);
 
@@ -50,9 +105,65 @@ export const TimerProvider = ({ children }) => {
     }
   };
 
+  const completeTimer = useCallback(() => {
+    setIsActive(false);
+    setEndTimestamp(null);
+    setRemainingSeconds(0);
+
+    if (!completionNotifiedRef.current) {
+      completionNotifiedRef.current = true;
+      setHasCompleted(true);
+      playCompletionSound();
+      notifyTimerComplete();
+
+      setTimeout(() => {
+        completionNotifiedRef.current = false;
+      }, 5000);
+    }
+  }, []);
+
+  const syncFromTimestamp = useCallback(() => {
+    if (!endTimestamp) return;
+
+    const nextSeconds = Math.max(
+      0,
+      Math.ceil((endTimestamp - Date.now()) / 1000)
+    );
+
+    if (nextSeconds <= 0) {
+      completeTimer();
+      return;
+    }
+
+    setRemainingSeconds(nextSeconds);
+  }, [endTimestamp, completeTimer]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        TIMER_STORAGE_KEY,
+        JSON.stringify({
+          isActive,
+          remainingSeconds,
+          selectedMinutes,
+          endTimestamp,
+          hasCompleted,
+        })
+      );
+    } catch {
+      // noop
+    }
+  }, [isActive, remainingSeconds, selectedMinutes, endTimestamp, hasCompleted]);
+
+  useEffect(() => {
+    if (isActive && endTimestamp) {
+      syncFromTimestamp();
+    }
+  }, [isActive, endTimestamp, syncFromTimestamp]);
+
   // Main timer loop
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || !endTimestamp) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -61,28 +172,7 @@ export const TimerProvider = ({ children }) => {
     }
 
     intervalRef.current = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-          setIsActive(false);
-          
-          if (!completionNotifiedRef.current) {
-            completionNotifiedRef.current = true;
-            setHasCompleted(true);
-            playCompletionSound();
-            notifyTimerComplete();
-            
-            // Reset notification flag after 5 seconds
-            setTimeout(() => {
-              completionNotifiedRef.current = false;
-            }, 5000);
-          }
-          
-          return 0;
-        }
-        return prev - 1;
-      });
+      syncFromTimestamp();
     }, 1000);
 
     return () => {
@@ -91,38 +181,71 @@ export const TimerProvider = ({ children }) => {
         intervalRef.current = null;
       }
     };
-  }, [isActive]);
+  }, [isActive, endTimestamp, syncFromTimestamp]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && isActive && endTimestamp) {
+        syncFromTimestamp();
+      }
+    };
+
+    window.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isActive, endTimestamp, syncFromTimestamp]);
 
   const startTimer = (minutes) => {
-    setSelectedMinutes(minutes);
-    setRemainingSeconds(minutes * 60);
+    const normalizedMinutes = Math.max(1, Number(minutes) || 1);
+    const totalSeconds = normalizedMinutes * 60;
+
+    setSelectedMinutes(normalizedMinutes);
+    setRemainingSeconds(totalSeconds);
+    setEndTimestamp(Date.now() + totalSeconds * 1000);
     setIsActive(true);
     setHasCompleted(false);
     completionNotifiedRef.current = false;
   };
 
   const pauseTimer = () => {
+    if (isActive && endTimestamp) {
+      const nextSeconds = Math.max(
+        0,
+        Math.ceil((endTimestamp - Date.now()) / 1000)
+      );
+      setRemainingSeconds(nextSeconds);
+    }
     setIsActive(false);
+    setEndTimestamp(null);
   };
 
   const resumeTimer = () => {
     if (remainingSeconds > 0) {
+      setEndTimestamp(Date.now() + remainingSeconds * 1000);
       setIsActive(true);
+      setHasCompleted(false);
+      completionNotifiedRef.current = false;
     }
   };
 
   const resetTimer = (minutes) => {
+    const normalizedMinutes = Math.max(1, Number(minutes) || 1);
     setIsActive(false);
-    setSelectedMinutes(minutes);
-    setRemainingSeconds(minutes * 60);
+    setEndTimestamp(null);
+    setSelectedMinutes(normalizedMinutes);
+    setRemainingSeconds(normalizedMinutes * 60);
     setHasCompleted(false);
     completionNotifiedRef.current = false;
   };
 
   const setCustomMinutes = (minutes) => {
     if (!isActive) {
-      setSelectedMinutes(minutes);
-      setRemainingSeconds(minutes * 60);
+      const normalizedMinutes = Math.max(1, Number(minutes) || 1);
+      setSelectedMinutes(normalizedMinutes);
+      setRemainingSeconds(normalizedMinutes * 60);
+      setEndTimestamp(null);
+      setHasCompleted(false);
     }
   };
 

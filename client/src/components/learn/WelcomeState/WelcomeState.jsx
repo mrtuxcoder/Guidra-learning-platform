@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
   Box,
-  Avatar,
   Card,
   CardActionArea,
   Chip,
@@ -16,9 +15,8 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
-import { ArrowForward, MenuBook, School, LocalFireDepartment } from "@mui/icons-material";
+import { ArrowForward, MenuBook, School } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../../../contexts/UserContext";
 import Header from "./Header";
 import TopicSelector from "./TopicSelector";
 import ProgressCard from "./ProgressCard";
@@ -65,7 +63,6 @@ const WelcomeState = ({
 }) => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user } = useUser();
   const isDark = theme.palette.mode === "dark";
   const [activeSuggestion, setActiveSuggestion] = useState("continue");
 
@@ -126,7 +123,6 @@ const WelcomeState = ({
   const progressPercent = Math.round(learningInsights.progressPercentage || 0);
   const completedCount = learningInsights.completedSubtopics || 0;
   const totalCount = learningInsights.totalSubtopics || 0;
-  const streakCount = Number(user?.learningStreak || user?.streak || 0);
 
   const handleContinueLearning = () => {
     if (primarySubtopic && onSubtopicSelect) {
@@ -198,7 +194,7 @@ const WelcomeState = ({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                  justifyContent: "flex-start",
                   mb: 1.5,
                 }}
               >
@@ -207,23 +203,6 @@ const WelcomeState = ({
                   <Typography sx={{ fontSize: "1rem", fontWeight: 700 }}>
                     Learn
                   </Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Chip
-                    size="small"
-                    icon={<LocalFireDepartment sx={{ color: "#fff !important" }} />}
-                    label={streakCount}
-                    sx={{
-                      height: 26,
-                      bgcolor: "rgba(255,255,255,0.24)",
-                      color: "white",
-                      fontWeight: 700,
-                      borderRadius: "999px",
-                    }}
-                  />
-                  <Avatar sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,0.25)" }}>
-                    {(user?.name?.[0] || "U").toUpperCase()}
-                  </Avatar>
                 </Stack>
               </Box>
               <Typography sx={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2 }}>
@@ -329,7 +308,7 @@ const WelcomeState = ({
               sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-start",
                 mb: 1.5,
               }}
             >
@@ -338,23 +317,6 @@ const WelcomeState = ({
                 <Typography sx={{ fontSize: "1rem", fontWeight: 700 }}>
                   Learn
                 </Typography>
-              </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Chip
-                  size="small"
-                  icon={<LocalFireDepartment sx={{ color: "#fff !important" }} />}
-                  label={streakCount}
-                  sx={{
-                    height: 26,
-                    bgcolor: "rgba(255,255,255,0.24)",
-                    color: "white",
-                    fontWeight: 700,
-                    borderRadius: "999px",
-                  }}
-                />
-                <Avatar sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,0.25)" }}>
-                  {(user?.name?.[0] || "U").toUpperCase()}
-                </Avatar>
               </Stack>
             </Box>
             <Typography sx={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2 }}>

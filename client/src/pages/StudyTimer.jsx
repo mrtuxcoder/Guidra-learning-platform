@@ -14,7 +14,6 @@ import {
   Switch,
   useMediaQuery,
   Chip,
-  Avatar,
   Divider,
 } from "@mui/material";
 import {
@@ -26,7 +25,6 @@ import {
 } from "@mui/icons-material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { useTimer } from "../contexts/TimerContext";
-import { useUser } from "../contexts/UserContext";
 
 const PRESET_MINUTES = [25, 40, 60];
 const DAILY_SESSION_GOAL = 6;
@@ -46,7 +44,6 @@ const clampMinutes = (value) => {
 export default function StudyTimer() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { user } = useUser();
   const {
     isActive,
     remainingSeconds,
@@ -440,7 +437,7 @@ export default function StudyTimer() {
               py: 0.5,
               display: "flex",
               alignItems: "flex-start",
-              justifyContent: "space-between",
+              justifyContent: "flex-start",
             }}
           >
             <Box>
@@ -451,23 +448,6 @@ export default function StudyTimer() {
                 Stay focused. One session at a time.
               </Typography>
             </Box>
-            <Stack spacing={0.8} alignItems="flex-end">
-              <Chip
-                size="small"
-                label={`${dailySessions} today`}
-                sx={{
-                  height: 24,
-                  borderRadius: "999px",
-                  bgcolor: "#EEF2FF",
-                  color: "#4F46E5",
-                  fontWeight: 700,
-                  fontSize: "0.68rem",
-                }}
-              />
-              <Avatar sx={{ width: 34, height: 34, bgcolor: "#E5E7FF", color: "#4F46E5" }}>
-                {(user?.name?.[0] || "U").toUpperCase()}
-              </Avatar>
-            </Stack>
           </Box>
 
           <Card
@@ -523,7 +503,7 @@ export default function StudyTimer() {
                   />
                   <Typography
                     sx={{
-                      fontSize: "3.2rem",
+                      fontSize: "2.4rem",
                       fontWeight: 800,
                       lineHeight: 1,
                       letterSpacing: "0.02em",

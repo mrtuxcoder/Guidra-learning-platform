@@ -9,16 +9,14 @@ import {
   Card,
   CardContent,
   Stack,
-  Avatar,
   Chip,
   Button,
   Paper,
   Divider,
 } from "@mui/material";
-import { AutoAwesome, LocalFireDepartment } from "@mui/icons-material";
+import { AutoAwesome } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { personalizeAndGenerate, validateTopic } from "../api";
-import { useUser } from "../contexts/UserContext";
 
 // Import components
 import Header from "../components/Explore/Header";
@@ -40,7 +38,6 @@ import {
 export default function Explore() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { user } = useUser();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const suggestedTopics = [
@@ -60,14 +57,6 @@ export default function Explore() {
   const [customError, setCustomError] = useState("");
   const [isCustomTopicValid, setIsCustomTopicValid] = useState(false);
   const [lastValidatedQuery, setLastValidatedQuery] = useState("");
-  const [recentSearches, setRecentSearches] = useState(() => {
-    try {
-      const stored = localStorage.getItem("guidra-explore-recent-searches");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
 
   // Memoized filtered topics
   const filteredTopics = useMemo(() => {
@@ -88,20 +77,6 @@ export default function Explore() {
     setError("");
   };
 
-  const storeRecentSearch = (query) => {
-    const normalized = query.trim();
-    if (!normalized) return;
-
-    setRecentSearches((prev) => {
-      const next = [normalized, ...prev.filter((item) => item !== normalized)].slice(
-        0,
-        6
-      );
-      localStorage.setItem("guidra-explore-recent-searches", JSON.stringify(next));
-      return next;
-    });
-  };
-
   const handleCustomSearch = async (overrideQuery) => {
     const query =
       typeof overrideQuery === "string" ? overrideQuery.trim() : searchQuery.trim();
@@ -116,7 +91,6 @@ export default function Explore() {
       setCustomError("");
       setIsCustomTopicValid(false);
       setLastValidatedQuery(query);
-      storeRecentSearch(query);
 
       const response = await validateTopic(query);
 
@@ -249,7 +223,6 @@ export default function Explore() {
 
   if (isMobile) {
     const topicLabel = searchQuery.trim();
-    const streakCount = Number(user?.learningStreak || user?.streak || 0);
     const discoverTopics = filteredTopics;
 
     return (
@@ -264,23 +237,6 @@ export default function Explore() {
             <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "#111827" }}>
               Explore
             </Typography>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Chip
-                size="small"
-                icon={<LocalFireDepartment sx={{ color: "#4F46E5 !important" }} />}
-                label={streakCount}
-                sx={{
-                  height: 28,
-                  borderRadius: "999px",
-                  bgcolor: "#EEF0FF",
-                  color: "#4F46E5",
-                  fontWeight: 700,
-                }}
-              />
-              <Avatar sx={{ width: 32, height: 32, bgcolor: "#DCDFFE", color: "#4F46E5" }}>
-                {(user?.name?.[0] || "U").toUpperCase()}
-              </Avatar>
-            </Stack>
           </Stack>
 
           <SearchBar
@@ -290,8 +246,18 @@ export default function Explore() {
             helperText="Search existing courses or create a custom AI path"
           />
 
-          <Stack direction="row" spacing={1} sx={{ mb: 2.3, overflowX: "auto", pb: 0.2 }}>
-            {(hasSearchQuery ? recentSearches : suggestedTopics).map((item) => (
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              mb: 2.3,
+              overflowX: "auto",
+              pb: 0.2,
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            {suggestedTopics.map((item) => (
               <Chip
                 key={item}
                 label={item}
@@ -362,7 +328,7 @@ export default function Explore() {
                     background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
                   }}
                 >
-                  Create Custom Path
+                  Custom Path
                 </Button>
               </Stack>
             </Paper>
@@ -615,6 +581,7 @@ export default function Explore() {
           sx={{
             display: "flex",
             flexDirection: { xs: "column", lg: "row" },
+            alignItems: { xs: "stretch", lg: "flex-start" },
             gap: { xs: 1.5, md: 2.5 },
           }}
         >

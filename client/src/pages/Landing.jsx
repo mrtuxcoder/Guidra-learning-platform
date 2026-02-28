@@ -122,7 +122,8 @@ const Landing = () => {
           password: formData.password,
           confirmPassword: formData.confirmPassword,
         });
-        window.location.href = "/explore";
+        await fetchUserProfile(true);
+        navigate("/explore", { replace: true });
         return;
       }
 

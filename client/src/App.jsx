@@ -18,6 +18,37 @@ import { DailyRegenProvider } from "./contexts/DailyRegenContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
 
+const LAST_PROTECTED_ROUTE_KEY = "guidra:last-protected-route";
+const PROTECTED_ROUTE_PATHS = [
+  "/profile",
+  "/explore",
+  "/learn",
+  "/custom-topic",
+  "/study-timer",
+  "/settings",
+];
+
+const isProtectedRoutePath = (pathname) => {
+  if (!pathname) return false;
+  return PROTECTED_ROUTE_PATHS.some(
+    (routePath) => pathname === routePath || pathname.startsWith(`${routePath}/`)
+  );
+};
+
+const getLastProtectedRoute = () => {
+  try {
+    const storedRoute = sessionStorage.getItem(LAST_PROTECTED_ROUTE_KEY);
+    if (!storedRoute) return null;
+
+    const parsedUrl = new URL(storedRoute, window.location.origin);
+    if (!isProtectedRoutePath(parsedUrl.pathname)) return null;
+
+    return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+  } catch {
+    return null;
+  }
+};
+
 // Loading component
 const LoadingSpinner = () => {
   const theme = useTheme();
@@ -70,6 +101,22 @@ export default function App() {
 
   // Determine if authenticated based on user context
   const isAuth = !!user;
+  const authedHomeRoute = getLastProtectedRoute() || "/profile";
+
+  useEffect(() => {
+    if (!isAuth) {
+      sessionStorage.removeItem(LAST_PROTECTED_ROUTE_KEY);
+      return;
+    }
+
+    const { pathname, search, hash } = location;
+    if (!isProtectedRoutePath(pathname)) return;
+
+    sessionStorage.setItem(
+      LAST_PROTECTED_ROUTE_KEY,
+      `${pathname}${search}${hash}`
+    );
+  }, [isAuth, location.pathname, location.search, location.hash]);
 
   // Show password modal when needed
   useEffect(() => {
@@ -145,15 +192,15 @@ export default function App() {
             {/* Public routes - only accessible when not logged in */}
             <Route
           path="/"
-          element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
+              element={!isAuth ? <Landing /> : <Navigate to={authedHomeRoute} replace />}
         />
         <Route
           path="/login"
-          element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
+              element={!isAuth ? <Landing /> : <Navigate to={authedHomeRoute} replace />}
         />
         <Route
           path="/register"
-          element={!isAuth ? <Landing /> : <Navigate to="/profile" replace />}
+              element={!isAuth ? <Landing /> : <Navigate to={authedHomeRoute} replace />}
         />
 
         {/* Protected routes - only accessible when logged in */}
@@ -233,7 +280,7 @@ export default function App() {
         {/* Catch all route */}
         <Route
           path="*"
-          element={<Navigate to={isAuth ? "/profile" : "/login"} replace />}
+          element={<Navigate to={isAuth ? authedHomeRoute : "/login"} replace />}
         />
           </Routes>
         </DailyRegenProvider>

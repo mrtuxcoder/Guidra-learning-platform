@@ -12,17 +12,21 @@ const CategorySidebar = ({
   return (
     <Box
       sx={{
-        width: "100%",
+        width: isMobile ? "100%" : { lg: 260 },
         display: "flex",
-        flexDirection: "row",
+        flexDirection: isMobile ? "row" : "column",
         gap: 0.8,
-        justifyContent: { xs: "flex-start", lg: "center" },
-        alignItems: "center",
+        justifyContent: "flex-start",
+        alignItems: isMobile ? "center" : "stretch",
         flexShrink: 0,
-        overflowX: "auto",
+        overflowX: isMobile ? "auto" : "visible",
+        overflowY: isMobile ? "visible" : "auto",
+        maxHeight: isMobile ? "none" : "calc(100vh - 180px)",
+        position: isMobile ? "static" : "sticky",
+        top: isMobile ? "auto" : 92,
         pb: 0.4,
         pt: 0.25,
-        px: { xs: 0.1, lg: 0 },
+        px: { xs: 0.1, lg: 0.25 },
         "&::-webkit-scrollbar": { display: "none" },
         scrollbarWidth: "none",
       }}
@@ -39,9 +43,11 @@ const CategorySidebar = ({
             clickable
             size="medium"
             sx={{
-              height: 36,
+              height: isMobile ? 36 : 40,
               borderRadius: "999px",
-              px: 0.3,
+              px: isMobile ? 0.3 : 1,
+              width: isMobile ? "auto" : "100%",
+              justifyContent: isMobile ? "center" : "flex-start",
               border: "1px solid",
               borderColor: isSelected
                 ? theme.palette.primary.main
