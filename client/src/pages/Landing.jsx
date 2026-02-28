@@ -126,12 +126,16 @@ const Landing = () => {
         return;
       }
 
-      await loginUser({
+      const loginResponse = await loginUser({
         email: formData.email,
         password: formData.password,
       });
+      const loggedInUser = loginResponse?.data?.user;
+      const isExistingUser =
+        Array.isArray(loggedInUser?.progress) && loggedInUser.progress.length > 0;
+
       await fetchUserProfile(true);
-      navigate("/profile", { replace: true });
+      navigate(isExistingUser ? "/learn" : "/explore", { replace: true });
     } catch (err) {
       setError(
         err.response?.data?.error ||
@@ -198,7 +202,7 @@ const Landing = () => {
 
           <Box
             ref={authRef}
-            sx={{ py: { xs: 5, md: 7 }, background: "background.paper" }}
+            sx={{ py: { xs: 4, md: 7 }, background: "background.paper" }}
           >
             <Container maxWidth="lg">
               <Slide in={mounted} direction="up" timeout={700}>
@@ -206,26 +210,41 @@ const Landing = () => {
                   sx={{
                     display: "grid",
                     gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                    gap: { xs: 3, md: 4 },
+                    gap: { xs: 2.5, md: 4 },
                     alignItems: "center",
                   }}
                 >
-                  <Box>
+                  <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
                     <Typography
                       variant="h4"
                       sx={{
                         fontWeight: 700,
-                        mb: 2,
+                        mb: { xs: 1.25, md: 2 },
+                        fontSize: { xs: "1.5rem", sm: "1.85rem", md: "2.125rem" },
                         fontFamily: '"Space Grotesk", sans-serif',
                       }}
                     >
                       Start your learning journey
                     </Typography>
-                    <Typography sx={{ color: "text.secondary", mb: 2 }}>
+                    <Typography
+                      sx={{
+                        color: "text.secondary",
+                        mb: { xs: 1.25, md: 2 },
+                        maxWidth: { xs: 640, md: 540 },
+                        mx: { xs: "auto", md: 0 },
+                        fontSize: { xs: "0.95rem", md: "1rem" },
+                      }}
+                    >
                       Your dashboard organizes lessons, content versions, quiz scores, and learning analytics in one place. Customize your experience with teaching styles, custom topics, and study timers.
                     </Typography>
                     <Typography
-                      sx={{ color: "text.secondary", fontSize: "0.95rem" }}
+                      sx={{
+                        color: "text.secondary",
+                        fontSize: "0.95rem",
+                        maxWidth: { xs: 640, md: 540 },
+                        mx: { xs: "auto", md: 0 },
+                        mb: { xs: 0.5, md: 0 },
+                      }}
                     >
                       Track progress, manage time, and ace exams with AI-powered personalized learning.
                     </Typography>

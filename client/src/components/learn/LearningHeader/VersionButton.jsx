@@ -66,8 +66,8 @@ const VersionButton = ({
       <IconButton
         onClick={handleClick}
         sx={{
-          width: 44,
-          height: 44,
+          width: 40,
+          height: 40,
           borderRadius: "10px",
           background: isDark
             ? alpha(theme.palette.primary.main, 0.16)
@@ -88,7 +88,7 @@ const VersionButton = ({
           transition: "all 0.2s ease",
         }}
       >
-        <Layers sx={{ fontSize: 22 }} />
+        <Layers sx={{ fontSize: 20 }} />
       </IconButton>
     </Tooltip>
   );

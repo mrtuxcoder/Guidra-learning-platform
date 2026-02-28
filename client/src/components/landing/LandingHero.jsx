@@ -25,8 +25,8 @@ const LandingHero = ({
   return (
     <Box
       sx={{
-        pt: { xs: 3, md: 6 },
-        pb: { xs: 5, md: 8 },
+        pt: { xs: 2, md: 6 },
+        pb: { xs: 4, md: 8 },
         background:
           isDark
             ? `linear-gradient(180deg, ${alpha(
@@ -42,7 +42,8 @@ const LandingHero = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            mb: { xs: 4, md: 6 },
+            mb: { xs: 2.5, md: 6 },
+            gap: { xs: 1, md: 0 },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -71,7 +72,7 @@ const LandingHero = ({
               Guidra
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
             <Button
               onClick={onNavLogin}
               size="small"
@@ -80,6 +81,7 @@ const LandingHero = ({
                 textTransform: "none",
                 fontWeight: 600,
                 color: "text.secondary",
+                minWidth: { xs: 72, md: "auto" },
               }}
             >
               Login
@@ -92,6 +94,7 @@ const LandingHero = ({
                 textTransform: "none",
                 fontWeight: 600,
                 borderColor: "rgba(126,87,194,0.4)",
+                minWidth: { xs: 84, md: "auto" },
                 color: isDark
                   ? profileTheme.primaryLight
                   : profileTheme.primaryDark,
@@ -106,11 +109,11 @@ const LandingHero = ({
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "1.1fr 0.9fr" },
-            gap: { xs: 4, md: 6 },
+            gap: { xs: 2.5, md: 6 },
             alignItems: "center",
           }}
         >
-          <Box>
+          <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
             <Chip
               label="Structured AI learning"
               size="small"
@@ -128,7 +131,8 @@ const LandingHero = ({
               sx={{
                 fontWeight: 800,
                 lineHeight: 1.1,
-                mb: 2,
+                mb: { xs: 1.25, md: 2 },
+                fontSize: { xs: "1.95rem", sm: "2.2rem", md: "inherit" },
               }}
             >
               Guidra is structured learning, not chat.
@@ -140,7 +144,8 @@ const LandingHero = ({
                 color: isDark
                   ? profileTheme.primaryLight
                   : profileTheme.primaryDark,
-                mb: 2,
+                mb: { xs: 1.25, md: 2 },
+                fontSize: { xs: "1.2rem", sm: "1.4rem", md: "inherit" },
               }}
             >
               A calm, predictable study flow built for real understanding.
@@ -150,7 +155,8 @@ const LandingHero = ({
               sx={{
                 color: "text.secondary",
                 maxWidth: 520,
-                mb: 3,
+                mb: { xs: 2, md: 3 },
+                mx: { xs: "auto", md: 0 },
                 fontSize: { xs: "0.95rem", md: "1.05rem" },
               }}
             >
@@ -158,7 +164,13 @@ const LandingHero = ({
               platform that organizes topics into subtopics, explanations,
               mindmaps, quizzes, and practice so you can study without noise.
             </Typography>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.25}
+              justifyContent={{ xs: "center", md: "flex-start" }}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
+            >
               <Button
                 variant="contained"
                 onClick={onStartLearning}
@@ -167,6 +179,8 @@ const LandingHero = ({
                   borderRadius: 2,
                   fontWeight: 700,
                   px: 3,
+                  py: { xs: 1.15, md: 0.95 },
+                  width: { xs: "100%", sm: "auto" },
                   background: profileTheme.gradient,
                 }}
               >
@@ -179,6 +193,8 @@ const LandingHero = ({
                   textTransform: "none",
                   borderRadius: 2,
                   fontWeight: 600,
+                  py: { xs: 1.15, md: 0.95 },
+                  width: { xs: "100%", sm: "auto" },
                   borderColor: "rgba(126,87,194,0.4)",
                   color: isDark
                     ? profileTheme.primaryLight
@@ -193,12 +209,14 @@ const LandingHero = ({
           <Box
             sx={{
               position: "relative",
-              height: { xs: 220, md: 320 },
+              height: { xs: 180, sm: 220, md: 320 },
               borderRadius: 3,
               border: "1px solid rgba(126,87,194,0.2)",
               background:
                 "linear-gradient(135deg, rgba(126,87,194,0.12) 0%, rgba(94,53,177,0.04) 100%)",
               overflow: "hidden",
+              maxWidth: { xs: "460px", md: "none" },
+              mx: { xs: "auto", md: 0 },
             }}
           >
             <Box
@@ -218,8 +236,8 @@ const LandingHero = ({
                 inset: 0,
                 display: "grid",
                 gridTemplateColumns: "repeat(4, 1fr)",
-                gap: 1.5,
-                p: 3,
+                gap: { xs: 1, md: 1.5 },
+                p: { xs: 2, md: 3 },
               }}
             >
               {Array.from({ length: 12 }).map((_, index) => (

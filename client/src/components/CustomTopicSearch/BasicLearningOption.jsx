@@ -15,12 +15,13 @@ const BasicLearningOption = ({ isValidTopic, generating, onClick }) => {
         sx={{
           mt: { xs: 2, md: 3 },
           p: 2.5,
-          borderRadius: "18px",
+          borderRadius: "14px",
           border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-          background: isDark
-            ? "rgba(15, 15, 23, 0.8)"
-            : "rgba(255, 255, 255, 0.9)",
-          textAlign: "left",
+          background: "background.paper",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
@@ -37,7 +38,7 @@ const BasicLearningOption = ({ isValidTopic, generating, onClick }) => {
             fontWeight: 600,
             borderColor: alpha(theme.palette.primary.main, 0.5),
             color: theme.palette.primary.main,
-            borderRadius: "14px",
+            borderRadius: "10px",
             textTransform: "none",
           }}
           endIcon={<ArrowForward />}

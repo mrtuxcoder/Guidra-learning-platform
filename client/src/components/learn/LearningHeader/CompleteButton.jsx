@@ -20,8 +20,8 @@ const CompleteButton = ({
       <Tooltip title="Lesson completed" placement="top">
         <IconButton
           sx={{
-            width: isMobile ? 36 : 36,
-            height: isMobile ? 36 : 36,
+            width: isMobile ? 34 : 36,
+            height: isMobile ? 34 : 36,
             borderRadius: isMobile ? "10px" : "12px",
             background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
             color: "white",
@@ -35,7 +35,7 @@ const CompleteButton = ({
           }}
           disabled
         >
-          <CheckCircle sx={{ fontSize: isMobile ? 17 : 20 }} />
+          <CheckCircle sx={{ fontSize: isMobile ? 16 : 20 }} />
         </IconButton>
       </Tooltip>
     );
@@ -57,8 +57,8 @@ const CompleteButton = ({
           onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
           disabled={isDisabled}
           sx={{
-            width: 44,
-            height: 44,
+            width: 40,
+            height: 40,
             borderRadius: "10px",
             background: `linear-gradient(135deg, #10b981 0%, #059669 100%)`,
             color: "white",
@@ -75,9 +75,9 @@ const CompleteButton = ({
           }}
         >
           {isUpdating ? (
-            <CircularProgress size={18} sx={{ color: "white" }} />
+            <CircularProgress size={16} sx={{ color: "white" }} />
           ) : (
-            <CheckCircle sx={{ fontSize: 22 }} />
+            <CheckCircle sx={{ fontSize: 20 }} />
           )}
         </IconButton>
       </Tooltip>

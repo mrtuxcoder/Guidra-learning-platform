@@ -50,6 +50,14 @@ const Navbar = () => {
     handleTourSkip,
   } = useNavbar(navigate, location, isMobile);
 
+  const handleAvatarClick = () => {
+    if (isMobile) {
+      navigate("/profile");
+      return;
+    }
+    handleUserMenu();
+  };
+
   return (
     <>
       <HideOnScroll>
@@ -114,32 +122,34 @@ const Navbar = () => {
                     remaining={dailyRegenRemaining}
                     isLoading={isLoading}
                   />
-                  <IconButton
-                    size="small"
-                    aria-label="settings"
-                    onClick={() => navigate("/settings")}
-                    sx={{
-                      border: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "2px solid rgba(149, 117, 205, 0.3)"
-                          : `2px solid ${purpleTheme.primaryLight}30`,
-                      bgcolor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(149, 117, 205, 0.1)"
-                          : "white",
-                      width: { xs: 36, sm: 40 },
-                      height: { xs: 36, sm: 40 },
-                      color: "primary.main",
-                      "&:hover": {
+                  {!isMobile && (
+                    <IconButton
+                      size="small"
+                      aria-label="settings"
+                      onClick={() => navigate("/settings")}
+                      sx={{
+                        border: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "2px solid rgba(149, 117, 205, 0.3)"
+                            : `2px solid ${purpleTheme.primaryLight}30`,
                         bgcolor: (theme) =>
                           theme.palette.mode === "dark"
-                            ? "rgba(149, 117, 205, 0.2)"
-                            : purpleTheme.lightBg,
-                      },
-                    }}
-                  >
-                    <Settings sx={{ fontSize: 20 }} />
-                  </IconButton>
+                            ? "rgba(149, 117, 205, 0.1)"
+                            : "white",
+                        width: { xs: 36, sm: 40 },
+                        height: { xs: 36, sm: 40 },
+                        color: "primary.main",
+                        "&:hover": {
+                          bgcolor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(149, 117, 205, 0.2)"
+                              : purpleTheme.lightBg,
+                        },
+                      }}
+                    >
+                      <Settings sx={{ fontSize: 20 }} />
+                    </IconButton>
+                  )}
                 </>
               )}
               <UserAvatar
@@ -148,6 +158,8 @@ const Navbar = () => {
                 randomIcon={randomIcon}
                 getUserInitial={getUserInitial}
                 handleUserMenu={handleUserMenu}
+                onAvatarClick={handleAvatarClick}
+                ariaLabel={isMobile ? "go to profile" : "user menu"}
               />
 
               <AuthButtons

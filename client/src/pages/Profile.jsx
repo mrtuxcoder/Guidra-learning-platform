@@ -14,6 +14,8 @@ import {
   IconButton,
   Stack,
   Button,
+  Chip,
+  Avatar,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -23,6 +25,8 @@ import {
   Bolt,
   ArrowBack,
   ChevronRight,
+  LocalFireDepartment,
+  Settings,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -176,6 +180,7 @@ export default function Profile() {
   const currentSectionId = isMobile
     ? mobileDetailSection || activeSection
     : activeSection;
+  const mobileSections = sections.filter((section) => section.id !== "actions");
   const currentSection =
     sections.find((section) => section.id === currentSectionId) || sections[0];
 
@@ -183,20 +188,50 @@ export default function Profile() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "background.default",
+        bgcolor: isMobile ? "#F7F8FC" : "background.default",
       }}
     >
       {/* Enhanced Header */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          background: isMobile
+            ? "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)"
+            : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: "white",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: 3 }}>
-          <ProfileHeader user={user} />
+        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: isMobile ? 3 : 3 }}>
+          {isMobile ? (
+            <Stack spacing={1.3}>
+              <Stack direction="row" alignItems="center" spacing={1.2}>
+                <Avatar sx={{ width: 56, height: 56, bgcolor: "rgba(255,255,255,0.25)" }}>
+                  {(user?.name?.[0] || "U").toUpperCase()}
+                </Avatar>
+                <Box
+                  sx={{
+                    minWidth: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "1.2rem", fontWeight: 700, lineHeight: 1.2 }} noWrap>
+                    {user?.name || "User"}
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: "0.92rem", opacity: 0.9, mt: 0.2 }}
+                    noWrap
+                  >
+                    {user?.email || "No email"}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Stack>
+          ) : (
+            <ProfileHeader user={user} />
+          )}
         </Container>
 
         {/* Wave decoration */}
@@ -219,86 +254,126 @@ export default function Profile() {
         maxWidth="xl"
         sx={{
           px: { xs: 2, sm: 3 },
-          py: { xs: 2.5, md: 4 },
+          py: { xs: 2, md: 4 },
           mt: -1,
         }}
       >
         {isMobile ? (
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              bgcolor: "background.paper",
-              border: `1px solid ${theme.palette.divider}`,
-              overflow: "hidden",
-            }}
-          >
-            {mobileDetailSection ? (
-              <Box sx={{ p: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mb: 2,
-                  }}
-                >
-                  <IconButton
-                    size="small"
-                    onClick={() => setMobileDetailSection(null)}
-                    aria-label="Back to profile sections"
-                  >
-                    <ArrowBack fontSize="small" />
-                  </IconButton>
-                  <Typography variant="h6" fontWeight={700}>
-                    {currentSection.label}
-                  </Typography>
+          <Stack spacing={2}>
+            <Paper
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                bgcolor: "#FFFFFF",
+                border: "1px solid #E7EAF3",
+                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
+                overflow: "hidden",
+              }}
+            >
+              {mobileDetailSection ? (
+                <Box sx={{ p: 2 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.8 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setMobileDetailSection(null)}
+                      aria-label="Back to profile sections"
+                    >
+                      <ArrowBack fontSize="small" />
+                    </IconButton>
+                    <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#0F172A" }}>
+                      {currentSection.label}
+                    </Typography>
+                  </Stack>
+                  {currentSection.content}
                 </Box>
-                {currentSection.content}
-              </Box>
-            ) : (
-              <>
-                <Box sx={{ px: 2, py: 1.75 }}>
-                  <Typography variant="h6" fontWeight={700}>
-                    Profile sections
-                  </Typography>
-                </Box>
-                <Divider />
-                <List disablePadding>
-                  {sections.map((section) => (
-                    <React.Fragment key={section.id}>
-                      <ListItemButton
-                        onClick={() => {
-                          setActiveSection(section.id);
-                          setMobileDetailSection(section.id);
-                        }}
-                        sx={{ py: 1.5, px: 2 }}
-                      >
-                        <ListItemIcon
-                          sx={{ minWidth: 36, color: "text.secondary" }}
-                        >
-                          {section.icon}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={section.label}
-                          secondary={section.subtitle}
-                          primaryTypographyProps={{ fontWeight: 600 }}
-                          secondaryTypographyProps={{
-                            variant: "body2",
-                            color: "text.secondary",
+              ) : (
+                <>
+                  <Box sx={{ px: 2, py: 1.6 }}>
+                    <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#0F172A" }}>
+                      Profile sections
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.76rem", color: "#64748B", mt: 0.25 }}>
+                      Manage account, progress, and insights.
+                    </Typography>
+                  </Box>
+                  <Divider />
+                  <List disablePadding>
+                    {mobileSections.map((section) => (
+                      <React.Fragment key={section.id}>
+                        <ListItemButton
+                          onClick={() => {
+                            setActiveSection(section.id);
+                            setMobileDetailSection(section.id);
                           }}
-                        />
-                        <ChevronRight
-                          sx={{ color: "text.disabled", fontSize: 18 }}
-                        />
-                      </ListItemButton>
-                      <Divider component="li" />
-                    </React.Fragment>
-                  ))}
-                </List>
-              </>
-            )}
-          </Paper>
+                          sx={{ py: 1.5, px: 2 }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36, color: "#4F46E5" }}>
+                            {section.icon}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={section.label}
+                            secondary={section.subtitle}
+                            primaryTypographyProps={{
+                              fontWeight: 700,
+                              fontSize: "0.92rem",
+                              color: "#0F172A",
+                            }}
+                            secondaryTypographyProps={{
+                              variant: "body2",
+                              color: "#64748B",
+                              fontSize: "0.75rem",
+                            }}
+                          />
+                          <ChevronRight sx={{ color: "#94A3B8", fontSize: 18 }} />
+                        </ListItemButton>
+                        <Divider component="li" />
+                      </React.Fragment>
+                    ))}
+
+                    <ListItemButton
+                      onClick={() => navigate("/settings")}
+                      sx={{ py: 1.5, px: 2 }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36, color: "#4F46E5" }}>
+                        <Settings fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Settings"
+                        secondary="App preferences and options"
+                        primaryTypographyProps={{
+                          fontWeight: 700,
+                          fontSize: "0.92rem",
+                          color: "#0F172A",
+                        }}
+                        secondaryTypographyProps={{
+                          variant: "body2",
+                          color: "#64748B",
+                          fontSize: "0.75rem",
+                        }}
+                      />
+                      <ChevronRight sx={{ color: "#94A3B8", fontSize: 18 }} />
+                    </ListItemButton>
+                    <Divider component="li" />
+                  </List>
+                </>
+              )}
+            </Paper>
+
+            <Button
+              onClick={handleLogout}
+              variant="contained"
+              color="error"
+              fullWidth
+              sx={{
+                py: 1.15,
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 700,
+              }}
+            >
+              Logout
+            </Button>
+          </Stack>
         ) : (
           <Box>
             <Box

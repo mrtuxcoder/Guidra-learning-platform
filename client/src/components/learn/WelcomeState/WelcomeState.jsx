@@ -1,24 +1,30 @@
 import React, { useState, useMemo } from "react";
 import {
   Box,
-  Container,
-  Fade,
-  Typography,
-  Paper,
-  Button,
-  Stack,
+  Avatar,
+  Card,
+  CardActionArea,
   Chip,
+  Fade,
+  LinearProgress,
+  Button,
+  Container,
+  Paper,
+  Stack,
+  Typography,
   alpha,
+  IconButton,
   useTheme,
 } from "@mui/material";
-import { AutoAwesome, SmartToy } from "@mui/icons-material";
+import { ArrowForward, MenuBook, School, LocalFireDepartment } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../../../contexts/UserContext";
 import Header from "./Header";
 import TopicSelector from "./TopicSelector";
 import ProgressCard from "./ProgressCard";
 import QuickActions from "./QuickActions";
 import EmptyState from "./EmptyState";
 import LoadingState from "./LoadingState";
-import MobileMenuButton from "./MobileMenuButton";
 import {
   getRecentlyAccessedSubtopics,
   getHighPrioritySubtopics,
@@ -58,6 +64,8 @@ const WelcomeState = ({
   },
 }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { user } = useUser();
   const isDark = theme.palette.mode === "dark";
   const [activeSuggestion, setActiveSuggestion] = useState("continue");
 
@@ -104,7 +112,41 @@ const WelcomeState = ({
 
   // Check if we have any topics at all
   const hasTopics = Array.isArray(topics) && topics.length > 0;
-  const hasSelectedTopic = !!selectedTopic;
+
+  const normalizedSelectedTopic = useMemo(() => {
+    if (selectedTopic) return selectedTopic;
+    const firstTopic = topics?.[0];
+    return firstTopic?.topic || firstTopic?.name || "Python Programming";
+  }, [selectedTopic, topics]);
+
+  const primarySubtopic = useMemo(() => {
+    return mostRecentIncompleteSubtopic || learningInsights.firstIncompleteSubtopic;
+  }, [mostRecentIncompleteSubtopic, learningInsights.firstIncompleteSubtopic]);
+
+  const progressPercent = Math.round(learningInsights.progressPercentage || 0);
+  const completedCount = learningInsights.completedSubtopics || 0;
+  const totalCount = learningInsights.totalSubtopics || 0;
+  const streakCount = Number(user?.learningStreak || user?.streak || 0);
+
+  const handleContinueLearning = () => {
+    if (primarySubtopic && onSubtopicSelect) {
+      onSubtopicSelect(primarySubtopic);
+    }
+  };
+
+  const handleOpenCourses = () => {
+    if (onOpenSidebar) {
+      onOpenSidebar();
+      return;
+    }
+    if (typeof onNavigateToFirstIncomplete === "function") {
+      onNavigateToFirstIncomplete();
+    }
+  };
+
+  const handleExploreTopics = () => {
+    navigate("/explore");
+  };
 
   const handleQuickAction = (actionType) => {
     let targetSubtopic = null;
@@ -132,6 +174,105 @@ const WelcomeState = ({
   }
 
   if (!hasTopics) {
+    if (isMobile) {
+      return (
+        <Fade in={true} timeout={400}>
+          <Box
+            sx={{
+              minHeight: "100vh",
+              bgcolor: "#F7F7FA",
+              pb: "80px",
+            }}
+          >
+            <Box
+              sx={{
+                minHeight: "128px",
+                px: 2,
+                pt: 2.5,
+                pb: 2,
+                background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+                color: "white",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 1.5,
+                }}
+              >
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <School sx={{ fontSize: 20 }} />
+                  <Typography sx={{ fontSize: "1rem", fontWeight: 700 }}>
+                    Learn
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Chip
+                    size="small"
+                    icon={<LocalFireDepartment sx={{ color: "#fff !important" }} />}
+                    label={streakCount}
+                    sx={{
+                      height: 26,
+                      bgcolor: "rgba(255,255,255,0.24)",
+                      color: "white",
+                      fontWeight: 700,
+                      borderRadius: "999px",
+                    }}
+                  />
+                  <Avatar sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,0.25)" }}>
+                    {(user?.name?.[0] || "U").toUpperCase()}
+                  </Avatar>
+                </Stack>
+              </Box>
+              <Typography sx={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2 }}>
+                Continue Learning
+              </Typography>
+              <Typography sx={{ fontSize: "14px", opacity: 0.86, mt: 0.4 }}>
+                Pick up where you left off
+              </Typography>
+            </Box>
+
+            <Box sx={{ px: 2, pt: 2 }}>
+              <Box
+                sx={{
+                  minHeight: "calc(100vh - 240px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
+                <School sx={{ fontSize: 54, color: "#7B61FF", mb: 1.2 }} />
+                <Typography sx={{ fontSize: "22px", fontWeight: 700, color: "#222", mb: 0.8 }}>
+                  Start Learning
+                </Typography>
+                <Typography sx={{ fontSize: "14px", color: "#666", mb: 2.4, maxWidth: 280 }}>
+                  Choose a course to begin your journey
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={handleExploreTopics}
+                  sx={{
+                    width: "70%",
+                    height: 48,
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+                  }}
+                >
+                  Browse Courses
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Fade>
+      );
+    }
+
     return (
       <Fade in={true} timeout={400}>
         <Box
@@ -159,6 +300,222 @@ const WelcomeState = ({
             isRecalledTopic={isRecalledTopic}
           />
           <EmptyState colorPalette={colorPalette} />
+        </Box>
+      </Fade>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <Fade in={true} timeout={400}>
+        <Box
+          sx={{
+            minHeight: "100vh",
+            bgcolor: "#F7F7FA",
+            pb: "80px",
+          }}
+        >
+          <Box
+            sx={{
+              minHeight: "128px",
+              px: 2,
+              pt: 2.5,
+              pb: 2,
+              background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+              color: "white",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 1.5,
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
+                <School sx={{ fontSize: 20 }} />
+                <Typography sx={{ fontSize: "1rem", fontWeight: 700 }}>
+                  Learn
+                </Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Chip
+                  size="small"
+                  icon={<LocalFireDepartment sx={{ color: "#fff !important" }} />}
+                  label={streakCount}
+                  sx={{
+                    height: 26,
+                    bgcolor: "rgba(255,255,255,0.24)",
+                    color: "white",
+                    fontWeight: 700,
+                    borderRadius: "999px",
+                  }}
+                />
+                <Avatar sx={{ width: 30, height: 30, bgcolor: "rgba(255,255,255,0.25)" }}>
+                  {(user?.name?.[0] || "U").toUpperCase()}
+                </Avatar>
+              </Stack>
+            </Box>
+            <Typography sx={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2 }}>
+              Continue Learning
+            </Typography>
+            <Typography sx={{ fontSize: "14px", opacity: 0.86, mt: 0.4 }}>
+              Pick up where you left off
+            </Typography>
+          </Box>
+
+          <Box sx={{ px: 2, pt: 2 }}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                p: 2,
+                bgcolor: "#fff",
+                border: "1px solid",
+                borderColor: "divider",
+                mb: 2,
+              }}
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.4 }}>
+                <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#222" }}>
+                  {normalizedSelectedTopic}
+                </Typography>
+                <Chip
+                  label={`${completedCount} / ${totalCount}`}
+                  size="small"
+                  sx={{
+                    bgcolor: "rgba(123,97,255,0.12)",
+                    color: "#7B61FF",
+                    fontWeight: 700,
+                    borderRadius: "999px",
+                  }}
+                />
+              </Stack>
+
+              <LinearProgress
+                variant="determinate"
+                value={progressPercent}
+                sx={{
+                  height: 8,
+                  borderRadius: 999,
+                  bgcolor: "rgba(123,97,255,0.12)",
+                  mb: 1,
+                  "& .MuiLinearProgress-bar": {
+                    borderRadius: 999,
+                    background: "linear-gradient(90deg, #7B61FF 0%, #9C6BFF 100%)",
+                  },
+                }}
+              />
+
+              <Typography sx={{ color: "#666", fontSize: "0.88rem", mb: 1.6, fontWeight: 500 }}>
+                {progressPercent}% completed
+              </Typography>
+
+              <Button
+                fullWidth
+                onClick={handleContinueLearning}
+                disabled={!primarySubtopic}
+                sx={{
+                  height: 48,
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  color: "white",
+                  background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+                  boxShadow: "0 6px 18px rgba(123,97,255,0.24)",
+                }}
+              >
+                Continue
+              </Button>
+            </Card>
+
+            <Stack direction="row" spacing={1.2} sx={{ mb: 1.5 }}>
+              <Button
+                variant="outlined"
+                onClick={handleOpenCourses}
+                sx={{
+                  flex: 1,
+                  height: 40,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  color: "#666",
+                  borderColor: "rgba(123,97,255,0.25)",
+                }}
+              >
+                View Courses
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={handleExploreTopics}
+                sx={{
+                  flex: 1,
+                  height: 40,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  color: "#666",
+                  borderColor: "rgba(123,97,255,0.25)",
+                }}
+              >
+                Explore Topics
+              </Button>
+            </Stack>
+
+            <Typography sx={{ mt: 3, mb: 1, fontSize: "0.95rem", fontWeight: 700, color: "#222" }}>
+              Your Courses
+            </Typography>
+
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                bgcolor: "#fff",
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <CardActionArea onClick={handleContinueLearning} sx={{ borderRadius: 3 }}>
+                <Box sx={{ p: 2 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.1 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <MenuBook sx={{ fontSize: 18, color: "#7B61FF" }} />
+                      <Typography sx={{ fontSize: "0.98rem", fontWeight: 700, color: "#222" }}>
+                        {normalizedSelectedTopic}
+                      </Typography>
+                    </Stack>
+                    <IconButton size="small" sx={{ color: "#7B61FF" }}>
+                      <ArrowForward fontSize="small" />
+                    </IconButton>
+                  </Stack>
+
+                  <LinearProgress
+                    variant="determinate"
+                    value={progressPercent}
+                    sx={{
+                      height: 6,
+                      borderRadius: 999,
+                      bgcolor: "rgba(123,97,255,0.12)",
+                      mb: 0.9,
+                      "& .MuiLinearProgress-bar": {
+                        borderRadius: 999,
+                        background: "linear-gradient(90deg, #7B61FF 0%, #9C6BFF 100%)",
+                      },
+                    }}
+                  />
+
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography sx={{ fontSize: "0.82rem", color: "#666" }}>
+                      {completedCount} / {totalCount} Lessons
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.82rem", color: "#666", fontWeight: 600 }}>
+                      {progressPercent}% Complete
+                    </Typography>
+                  </Stack>
+                </Box>
+              </CardActionArea>
+            </Card>
+          </Box>
         </Box>
       </Fade>
     );

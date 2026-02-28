@@ -49,8 +49,8 @@ const RegenerationBadge = ({
             onClick={onRegenerateContent}
             disabled={contentLoading || remainingGenerations === 0}
             sx={{
-              width: 44,
-              height: 44,
+              width: 40,
+              height: 40,
               borderRadius: "10px",
               color:
                 remainingGenerations === 0
@@ -75,11 +75,11 @@ const RegenerationBadge = ({
             }}
           >
             {contentLoading ? (
-              <CircularProgress size={18} />
+              <CircularProgress size={16} />
             ) : remainingGenerations === 0 ? (
-              <Lock sx={{ fontSize: 22 }} />
+              <Lock sx={{ fontSize: 20 }} />
             ) : (
-              <Refresh sx={{ fontSize: 22 }} />
+              <Refresh sx={{ fontSize: 20 }} />
             )}
           </IconButton>
         </Badge>

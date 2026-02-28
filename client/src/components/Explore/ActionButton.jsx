@@ -32,8 +32,8 @@ const ActionButton = ({
               0.92
             )} 60%)`
           : "linear-gradient(transparent, #FAF7FE 60%)",
-        py: 2,
-        px: { xs: 2, sm: 3 },
+        py: { xs: 1.25, sm: 1.6 },
+        px: { xs: 1.5, sm: 3 },
         zIndex: 1000,
         borderTop: `1px solid ${alpha(
           theme.palette.primary.main,
@@ -43,7 +43,7 @@ const ActionButton = ({
       }}
     >
       <Fade in timeout={1200}>
-        <Box sx={{ textAlign: "center" }}>
+        <Box sx={{ textAlign: "center", maxWidth: 540, mx: "auto" }}>
           <Button
             variant="contained"
             size="large"
@@ -64,11 +64,11 @@ const ActionButton = ({
                   }}
                 />
                 <Typography sx={{ fontSize: { xs: "0.8rem", md: "0.9rem" } }}>
-                  Starting...
+                  Preparing...
                 </Typography>
               </Box>
             ) : (
-              "Start Learning"
+              "Learn Now"
             )}
           </Button>
 
@@ -76,12 +76,12 @@ const ActionButton = ({
             <Typography
               variant="body2"
               sx={{
-                mt: 1,
+                mt: 0.8,
                 fontWeight: 600,
                 color: isDark
                   ? theme.palette.primary.light
                   : "#7C3AED",
-                fontSize: { xs: "0.75rem", md: "0.8rem" },
+                fontSize: { xs: "0.72rem", md: "0.8rem" },
               }}
             >
               Selected: {getSelectedTopicName()}

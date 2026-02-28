@@ -140,7 +140,7 @@ exports.googleCallbackController = (req, res, next) => {
           !user.progress ||
           user.progress.length === 0;
 
-        const redirectPath = needsPersonalization ? "/explore" : "/profile";
+        const redirectPath = needsPersonalization ? "/explore" : "/learn";
 
         // Send HTML that communicates token to frontend via postMessage
         res.send(`

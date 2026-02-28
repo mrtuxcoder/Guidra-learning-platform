@@ -25,13 +25,9 @@ const ValidatedTopic = ({
       elevation={0}
       sx={{
         p: { xs: 2.5, sm: 3 },
-        borderRadius: "20px",
-        background: isDark
-          ? "linear-gradient(135deg, rgba(22, 16, 38, 0.92) 0%, rgba(12, 10, 20, 0.96) 100%)"
-          : "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, #ffffff 100%)",
-        border: isDark
-          ? "1px solid rgba(148, 163, 184, 0.2)"
-          : "1px solid rgba(124, 58, 237, 0.12)",
+        borderRadius: "16px",
+        background: "background.paper",
+        border: `1px solid ${theme.palette.divider}`,
         textAlign: "left",
       }}
     >
@@ -41,7 +37,7 @@ const ValidatedTopic = ({
             width: 44,
             height: 44,
             borderRadius: "14px",
-            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            background: theme.palette.success.main,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -63,7 +59,7 @@ const ValidatedTopic = ({
       <Box
         sx={{
           p: 2,
-          borderRadius: "16px",
+          borderRadius: "12px",
           border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
           background: alpha(theme.palette.primary.main, isDark ? 0.15 : 0.08),
           fontWeight: 700,
@@ -119,9 +115,12 @@ const ValidatedTopic = ({
           }
           sx={{
             borderRadius: "12px",
-            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
             fontWeight: 600,
-            boxShadow: "0 12px 26px rgba(16, 185, 129, 0.3)",
+            boxShadow: "none",
+            bgcolor: "success.main",
+            "&:hover": {
+              bgcolor: "success.dark",
+            },
           }}
         >
           {generating ? "Generating..." : "Generate Learning Path"}

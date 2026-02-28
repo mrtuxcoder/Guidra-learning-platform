@@ -4,9 +4,7 @@ export const cardStyles = {
   card: (isSelected, categoryColor, theme) => ({
     cursor: "pointer",
     transition: "all 0.2s ease",
-    border: isSelected
-      ? `2px solid ${categoryColor}`
-      : "1px solid",
+    border: isSelected ? `1.5px solid ${categoryColor}` : "1px solid",
     borderColor: isSelected ? categoryColor : theme?.palette?.divider || "rgba(126, 87, 194, 0.1)",
     bgcolor: isSelected
       ? `linear-gradient(135deg, ${alpha(categoryColor, 0.08)} 0%, ${alpha(
@@ -14,33 +12,33 @@ export const cardStyles = {
           0.02
         )} 100%)`
       : "background.paper",
-    transform: isSelected ? "translateY(-2px)" : "none",
+    transform: "none",
     boxShadow: isSelected
       ? theme?.palette?.mode === "dark"
-        ? "0 8px 25px rgba(0, 0, 0, 0.4)"
-        : "0 8px 25px rgba(126, 87, 194, 0.15)"
+        ? "0 4px 14px rgba(0, 0, 0, 0.26)"
+        : "0 4px 14px rgba(15, 23, 42, 0.08)"
       : theme?.palette?.mode === "dark"
-      ? "0 2px 8px rgba(0, 0, 0, 0.2)"
-      : "0 2px 8px rgba(126, 87, 194, 0.06)",
+      ? "0 2px 8px rgba(0, 0, 0, 0.18)"
+      : "0 2px 8px rgba(15, 23, 42, 0.05)",
     borderRadius: 3,
     height: "100%",
-    minHeight: { xs: "140px", sm: "160px" },
+    minHeight: { xs: "132px", sm: "150px" },
     display: "flex",
     flexDirection: "column",
     "&:hover": {
-      transform: "translateY(-2px)",
+      transform: "none",
       boxShadow: theme?.palette?.mode === "dark"
-        ? "0 8px 20px rgba(0, 0, 0, 0.3)"
-        : "0 8px 20px rgba(126, 87, 194, 0.1)",
+        ? "0 6px 16px rgba(0, 0, 0, 0.25)"
+        : "0 6px 16px rgba(15, 23, 42, 0.08)",
     },
   }),
   cardContent: {
-    p: { xs: 1.5, sm: 2 },
+    p: { xs: 1.3, sm: 1.7 },
     position: "relative",
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    "&:last-child": { pb: { xs: 1.5, sm: 2 } },
+    "&:last-child": { pb: { xs: 1.3, sm: 1.7 } },
   },
 };
 
@@ -82,17 +80,17 @@ export const countBadgeStyles = {
 
 export const actionButtonStyles = {
   button: {
-    px: { xs: 4, md: 6 },
-    py: { xs: 1.25, md: 1.5 },
-    fontSize: { xs: "0.9rem", md: "1rem" },
+    px: { xs: 3.5, md: 5.5 },
+    py: { xs: 1.1, md: 1.35 },
+    fontSize: { xs: "0.86rem", md: "0.96rem" },
     fontWeight: 700,
     background: "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
-    borderRadius: 3,
-    minWidth: { xs: "160px", md: "180px" },
-    boxShadow: "0 8px 25px rgba(126, 87, 194, 0.3)",
+    borderRadius: 2,
+    minWidth: { xs: "152px", md: "176px" },
+    boxShadow: "0 6px 18px rgba(126, 87, 194, 0.25)",
     "&:hover": {
-      transform: "translateY(-1px)",
-      boxShadow: "0 12px 35px rgba(126, 87, 194, 0.4)",
+      transform: "none",
+      boxShadow: "0 8px 24px rgba(126, 87, 194, 0.3)",
     },
     "&:disabled": {
       background: "grey.300",

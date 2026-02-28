@@ -1,6 +1,6 @@
 import React from "react";
 import { Paper, Box, Typography, Fade } from "@mui/material";
-import { Warning, TipsAndUpdates } from "@mui/icons-material";
+import { TipsAndUpdates } from "@mui/icons-material";
 import { alpha, useTheme } from "@mui/material/styles";
 
 const guidelines = [
@@ -35,22 +35,16 @@ const Guidelines = ({ show }) => {
         sx={{
           p: { xs: 2.5, sm: 3 },
           mt: { xs: 0, md: 3 },
-          borderRadius: "20px",
-          background: isDark
-            ? "linear-gradient(135deg, rgba(30, 27, 56, 0.7) 0%, rgba(17, 15, 28, 0.8) 100%)"
-            : "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(255, 255, 255, 0.9) 100%)",
-          border: isDark
-            ? "1px solid rgba(148, 163, 184, 0.22)"
-            : "1px solid rgba(124, 58, 237, 0.12)",
+          borderRadius: "16px",
+          background: "background.paper",
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
         <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
-            color: isDark
-              ? theme.palette.primary.light
-              : theme.palette.primary.main,
+            color: "text.primary",
             mb: 2,
             display: "flex",
             alignItems: "center",
@@ -80,14 +74,10 @@ const GuidelineItem = ({ index, guideline }) => {
       sx={{
         display: "flex",
         gap: 2,
-        p: 1.5,
-        borderRadius: "14px",
-        border: isDark
-          ? "1px solid rgba(148, 163, 184, 0.18)"
-          : "1px solid rgba(124, 58, 237, 0.12)",
-        background: isDark
-          ? "rgba(15, 15, 23, 0.7)"
-          : "rgba(255, 255, 255, 0.85)",
+        p: 1.4,
+        borderRadius: "12px",
+        border: `1px solid ${theme.palette.divider}`,
+        background: "background.paper",
       }}
     >
       <Box

@@ -153,6 +153,25 @@ export default function Learning() {
     return params.get("topic");
   }, [location.search]);
 
+  const generatedTopicState = useMemo(() => {
+    if (!location?.state) return null;
+
+    const topicFromState =
+      location.state.customTopic || location.state.topic || preferredTopic;
+    const subtopicsFromState = Array.isArray(location.state.subtopics)
+      ? location.state.subtopics
+      : [];
+
+    if (!topicFromState || subtopicsFromState.length === 0) {
+      return null;
+    }
+
+    return {
+      topic: topicFromState,
+      subtopics: subtopicsFromState,
+    };
+  }, [location.state, preferredTopic]);
+
   const fetchSubtopics = useCallback(
     async (topic) => {
       try {
@@ -811,6 +830,49 @@ export default function Learning() {
       fetchUserTopics(preferredTopic);
     }
   }, [fetchUserTopics, preferredTopic, user]);
+
+  useEffect(() => {
+    if (!generatedTopicState) return;
+
+    const normalizedSubtopics = generatedTopicState.subtopics.map((subtopic) => ({
+      ...subtopic,
+      completed: !!subtopic.completed,
+      understandingLevel: subtopic.understandingLevel || 1,
+    }));
+
+    setSelectedTopic(generatedTopicState.topic);
+    setOriginalSubtopics(normalizedSubtopics);
+    setSubtopics(getOrderedSubtopics(normalizedSubtopics));
+    fetchGenerationCounts(normalizedSubtopics, generatedTopicState.topic);
+
+    setTopics((prev) => {
+      const exists = prev.some(
+        (topic) => (topic?.topic || topic?.name) === generatedTopicState.topic
+      );
+
+      if (exists) {
+        return prev.map((topic) =>
+          (topic?.topic || topic?.name) === generatedTopicState.topic
+            ? {
+                ...topic,
+                topic: generatedTopicState.topic,
+                subTopics: normalizedSubtopics,
+              }
+            : topic
+        );
+      }
+
+      return [
+        {
+          topic: generatedTopicState.topic,
+          subTopics: normalizedSubtopics,
+          overallUnderstanding: 1,
+          lastAccessed: new Date(),
+        },
+        ...prev,
+      ];
+    });
+  }, [generatedTopicState, getOrderedSubtopics, fetchGenerationCounts]);
 
   useEffect(() => {
     if (selectedSubtopic) {

@@ -17,6 +17,8 @@ const formatTime = (totalSeconds) => {
   return `${minutes}:${paddedSeconds}`;
 };
 
+const LEARN_FOOTER_HEIGHT = 66;
+
 const MobileFooterNav = ({ isActive, navigate, user }) => {
   const theme = useTheme();
   const location = useLocation();
@@ -75,14 +77,10 @@ const MobileFooterNav = ({ isActive, navigate, user }) => {
   if (!user) return null;
   if (location.pathname === "/learn" && hideOnLearnOverlay) return null;
 
-  const isLearnCompactNav = location.pathname === "/learn";
-
   const orderedPaths = [
     "/study-timer",
-    "/custom-topic",
     "/learn",
     "/explore",
-    "/profile",
   ];
   const orderedNavItems = orderedPaths
     .map((path) => navItems.find((item) => item.path === path))
@@ -108,7 +106,7 @@ const MobileFooterNav = ({ isActive, navigate, user }) => {
       }}
     >
       <BottomNavigation
-        showLabels={false}
+        showLabels
         value={activePath}
         onChange={(_, newValue) => {
           if (newValue) {
@@ -117,33 +115,33 @@ const MobileFooterNav = ({ isActive, navigate, user }) => {
         }}
         sx={{
           bgcolor: "transparent",
-          height: isLearnCompactNav ? 58 : 66,
+          height: LEARN_FOOTER_HEIGHT,
           "& .MuiBottomNavigationAction-root": {
             minWidth: 0,
             maxWidth: "none",
             flex: 1,
             color: "text.secondary",
-            px: isLearnCompactNav ? 0 : 0.25,
-            py: isLearnCompactNav ? 0.25 : 0.5,
+            px: 0.25,
+            py: 0.5,
             borderRadius: 2,
-            mx: isLearnCompactNav ? 0.15 : 0.35,
-            opacity: isLearnCompactNav ? 0.85 : 1,
+            mx: 0.35,
             "& .MuiSvgIcon-root": {
-              fontSize: isLearnCompactNav ? "1.45rem" : "1.8rem",
+              fontSize: "1.45rem",
               transition: "transform 0.2s ease, color 0.2s ease",
             },
             "&.Mui-selected": {
               color: isDark
                 ? theme.palette.primary.light
                 : theme.palette.primary.main,
-              opacity: isLearnCompactNav ? 0.95 : 1,
               "& .MuiSvgIcon-root": {
-                fontSize: isLearnCompactNav ? "1.6rem" : "2rem",
+                fontSize: "1.65rem",
               },
             },
           },
           "& .MuiBottomNavigationAction-label, & .MuiBottomNavigationAction-label.Mui-selected": {
-            fontSize: "0.62rem",
+            fontSize: "0.55rem",
+            lineHeight: 1.1,
+            marginTop: "2px",
           },
         }}
       >
@@ -164,7 +162,7 @@ const MobileFooterNav = ({ isActive, navigate, user }) => {
                   <span>{item.icon}</span>
                 </Tooltip>
               }
-              label=" "
+              label={item.label}
               data-tour={item.path.replace("/", "")}
             />
           );

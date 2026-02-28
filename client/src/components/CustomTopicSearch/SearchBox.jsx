@@ -20,10 +20,10 @@ const SearchBox = ({
   };
 
   const borderGradient = error
-    ? "linear-gradient(135deg, #ef4444 0%, #f97316 100%)"
+    ? `1px solid ${theme.palette.error.main}`
     : isValidTopic
-    ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-    : "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)";
+    ? `1px solid ${theme.palette.success.main}`
+    : `1px solid ${alpha(theme.palette.primary.main, 0.3)}`;
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -38,12 +38,9 @@ const SearchBox = ({
         <Box
           sx={{
             flex: 1,
-            p: "2px",
-            borderRadius: "18px",
-            background: borderGradient,
-            boxShadow: isDark
-              ? "0 12px 30px rgba(0, 0, 0, 0.35)"
-              : "0 12px 30px rgba(94, 53, 177, 0.12)",
+            borderRadius: "14px",
+            border: borderGradient,
+            bgcolor: "background.paper",
           }}
         >
           <InputBase
@@ -53,14 +50,9 @@ const SearchBox = ({
             onKeyDown={handleKeyDown}
             sx={{
               width: "100%",
-              p: 2,
-              borderRadius: "16px",
-              bgcolor: "background.paper",
-              fontSize: "1rem",
-              border: `1px solid ${alpha(
-                theme.palette.primary.main,
-                isDark ? 0.2 : 0.08
-              )}`,
+              p: 1.6,
+              borderRadius: "14px",
+              fontSize: "0.95rem",
             }}
           />
         </Box>
@@ -71,13 +63,9 @@ const SearchBox = ({
           disabled={loading || !searchQuery.trim()}
           sx={{
             minWidth: { xs: "100%", sm: "120px" },
-            borderRadius: "16px",
-            background: "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+            borderRadius: "12px",
             fontWeight: 600,
-            boxShadow: "0 10px 24px rgba(124, 58, 237, 0.25)",
-            "&:hover": {
-              background: "linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%)",
-            },
+            boxShadow: "none",
           }}
         >
           {loading ? (

@@ -1,7 +1,17 @@
 import React, { useState } from "react";
-import { Container, Box } from "@mui/material";
+import {
+  Container,
+  Box,
+  useMediaQuery,
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+  Chip,
+} from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import { AutoAwesome } from "@mui/icons-material";
+import { useNavigate, Navigate } from "react-router-dom";
 
 // Import components from the components folder
 import Header from "../components/CustomTopicSearch/Header";
@@ -15,6 +25,7 @@ import { validateTopic, personalizeAndGenerate } from "../api";
 export default function CustomTopicSearch() {
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isDark = theme.palette.mode === "dark";
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -120,81 +131,98 @@ export default function CustomTopicSearch() {
     setIsValidTopic(false);
   };
 
+  if (isMobile) {
+    return <Navigate to="/explore" replace />;
+  }
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
         display: "flex",
-        alignItems: "center",
-        py: { xs: 4, md: 7 },
-        position: "relative",
-        overflow: "hidden",
-        "&:before": {
-          content: '""',
-          position: "absolute",
-          inset: 0,
-          background: isDark
-            ? `radial-gradient(circle at 15% 20%, ${alpha(
-                theme.palette.primary.main,
-                0.18
-              )} 0%, transparent 45%),
-               radial-gradient(circle at 85% 10%, ${alpha(
-                 theme.palette.primary.main,
-                 0.12
-               )} 0%, transparent 40%)`
-            : "radial-gradient(circle at 15% 20%, rgba(124, 58, 237, 0.18) 0%, transparent 45%), radial-gradient(circle at 85% 10%, rgba(94, 53, 177, 0.12) 0%, transparent 40%)",
-          pointerEvents: "none",
-        },
-        "&:after": {
-          content: '""',
-          position: "absolute",
-          width: 420,
-          height: 420,
-          right: { xs: -280, md: -180 },
-          bottom: { xs: -300, md: -220 },
-          borderRadius: "50%",
-          background: isDark
-            ? "radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, transparent 70%)"
-            : "radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, transparent 70%)",
-          pointerEvents: "none",
-        },
+        alignItems: { xs: "flex-start", md: "center" },
+        py: { xs: 1.5, md: 5 },
       }}
     >
-      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 }, zIndex: 1 }}>
-        <Header />
+      <Container maxWidth="sm" sx={{ px: { xs: 1.5, sm: 2.5 } }}>
+        <Stack spacing={1.5}>
+          {!isMobile && <Header />}
 
-        {!isValidTopic ? (
-          <Box sx={{ mb: 3 }}>
-            <SearchBox
-              searchQuery={searchQuery}
-              onQueryChange={handleQueryChange}
-              onSearch={handleSearch}
-              loading={loading}
-              error={error}
-              isValidTopic={isValidTopic}
-            />
+          {isMobile && (
+            <Card
+              sx={{
+                borderRadius: 3,
+                border: `1px solid ${theme.palette.divider}`,
+                boxShadow: "none",
+              }}
+            >
+              <CardContent sx={{ p: 2 }}>
+                <Stack spacing={1}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <AutoAwesome sx={{ color: "primary.main", fontSize: 20 }} />
+                    <Typography variant="subtitle1" fontWeight={700}>
+                      Build your custom learning path
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ color: "text.secondary", fontSize: "0.88rem" }}>
+                    Enter any topic, validate it, then generate a structured path in one tap.
+                  </Typography>
+                  <Box>
+                    <Chip
+                      label="10–15 structured lessons"
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
 
-            <ErrorDisplay error={error} />
-          </Box>
-        ) : (
-          <Box sx={{ mb: 3 }}>
-            <ValidatedTopic
-              searchQuery={searchQuery}
-              error={error}
-              generating={generating}
-              onResetSearch={resetSearch}
-              onGenerateSubtopics={handleGenerateSubtopics}
-            />
-          </Box>
-        )}
+          <Card
+            sx={{
+              borderRadius: 3,
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: "none",
+              overflow: "hidden",
+            }}
+          >
+            <CardContent sx={{ p: { xs: 1.8, sm: 2.4 } }}>
+              {!isValidTopic ? (
+                <Box>
+                  <SearchBox
+                    searchQuery={searchQuery}
+                    onQueryChange={handleQueryChange}
+                    onSearch={handleSearch}
+                    loading={loading}
+                    error={error}
+                    isValidTopic={isValidTopic}
+                  />
+                  <ErrorDisplay error={error} />
+                </Box>
+              ) : (
+                <ValidatedTopic
+                  searchQuery={searchQuery}
+                  error={error}
+                  generating={generating}
+                  onResetSearch={resetSearch}
+                  onGenerateSubtopics={handleGenerateSubtopics}
+                />
+              )}
+            </CardContent>
+          </Card>
 
-        <Guidelines show={!isValidTopic} />
-        <BasicLearningOption
-          isValidTopic={isValidTopic}
-          generating={generating}
-          onClick={handleStartLearning}
-        />
+          <Guidelines show={!isValidTopic} />
+
+          <BasicLearningOption
+            isValidTopic={isValidTopic}
+            generating={generating}
+            onClick={handleStartLearning}
+          />
+        </Stack>
       </Container>
     </Box>
   );

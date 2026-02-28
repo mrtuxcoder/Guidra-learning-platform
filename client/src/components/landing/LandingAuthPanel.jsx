@@ -35,17 +35,32 @@ const LandingAuthPanel = ({
         borderRadius: 3,
         border: `1px solid ${profileTheme.border}`,
         background: "background.paper",
-        p: { xs: 2.5, md: 3 },
+        p: { xs: 2, sm: 2.5, md: 3 },
+        maxWidth: { xs: "100%", sm: 560 },
+        mx: "auto",
       }}
     >
       <Typography
         variant="h6"
         sx={{
           fontWeight: 700,
-          mb: 2,
+          mb: 1.5,
+          textAlign: { xs: "center", md: "left" },
         }}
       >
         {isRegister ? "Create your account" : "Sign in to Guidra"}
+      </Typography>
+
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+          textAlign: { xs: "center", md: "left" },
+          display: { xs: "block", md: "none" },
+        }}
+      >
+        Continue where you left off and keep your progress synced.
       </Typography>
 
       <ToggleButtonGroup
@@ -56,10 +71,11 @@ const LandingAuthPanel = ({
         }}
         fullWidth
         sx={{
-          mb: 2,
+          mb: 1.75,
           "& .MuiToggleButton-root": {
             textTransform: "none",
             fontWeight: 600,
+            py: { xs: 1, md: 0.85 },
             borderColor: profileTheme.border,
             color: "text.secondary",
             "&.Mui-selected": {
@@ -75,7 +91,11 @@ const LandingAuthPanel = ({
         <ToggleButton value="register">Register</ToggleButton>
       </ToggleButtonGroup>
 
-      <Box component="form" onSubmit={onSubmit} sx={{ display: "grid", gap: 2 }}>
+      <Box
+        component="form"
+        onSubmit={onSubmit}
+        sx={{ display: "grid", gap: { xs: 1.5, md: 2 } }}
+      >
         {isRegister && (
           <TextField
             label="Full name"
@@ -84,6 +104,7 @@ const LandingAuthPanel = ({
             onChange={onChange}
             fullWidth
             required
+            size="small"
           />
         )}
         <TextField
@@ -94,6 +115,7 @@ const LandingAuthPanel = ({
           onChange={onChange}
           fullWidth
           required
+          size="small"
         />
         <TextField
           label="Password"
@@ -103,6 +125,7 @@ const LandingAuthPanel = ({
           onChange={onChange}
           fullWidth
           required
+          size="small"
         />
         {isRegister && (
           <TextField
@@ -113,6 +136,7 @@ const LandingAuthPanel = ({
             onChange={onChange}
             fullWidth
             required
+            size="small"
           />
         )}
 
@@ -138,6 +162,7 @@ const LandingAuthPanel = ({
             textTransform: "none",
             borderRadius: 2,
             fontWeight: 700,
+            py: { xs: 1.15, md: 1 },
             background: profileTheme.gradient,
           }}
         >
@@ -160,6 +185,7 @@ const LandingAuthPanel = ({
           textTransform: "none",
           borderRadius: 2,
           fontWeight: 600,
+          py: { xs: 1.15, md: 1 },
           borderColor: "rgba(126,87,194,0.4)",
           color: isDark ? profileTheme.primaryLight : profileTheme.primaryDark,
         }}

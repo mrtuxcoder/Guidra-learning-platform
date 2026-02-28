@@ -284,7 +284,7 @@ export const startGoogleOAuth = () => {
 
         const finalPath = needsPersonalization
           ? "/explore"
-          : redirectPath || "/profile";
+          : redirectPath || "/learn";
         window.location.href = finalPath;
       } catch (err) {
         window.location.href = "/login?error=oauth_processing_failed";

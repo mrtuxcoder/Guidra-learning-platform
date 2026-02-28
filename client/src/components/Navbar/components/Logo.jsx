@@ -1,9 +1,54 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
-import { RocketLaunch } from "@mui/icons-material";
+import {
+  RocketLaunch,
+  Explore,
+  Search,
+  AccessTime,
+  Person,
+  Settings,
+  School,
+} from "@mui/icons-material";
+import { useMediaQuery, useTheme } from "@mui/material";
 import { getThemeGradient } from "../constants.jsx";
 
 const Logo = ({ randomIcon, user, navigate }) => {
+  const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const pageMeta = {
+    "/learn": {
+      label: "Learn",
+      icon: <School sx={{ fontSize: { xs: 16, sm: 20 } }} />,
+    },
+    "/explore": {
+      label: "Explore",
+      icon: <Explore sx={{ fontSize: { xs: 16, sm: 20 } }} />,
+    },
+    "/custom-topic": {
+      label: "Custom Topic",
+      icon: <Search sx={{ fontSize: { xs: 16, sm: 20 } }} />,
+    },
+    "/study-timer": {
+      label: "Study Timer",
+      icon: <AccessTime sx={{ fontSize: { xs: 16, sm: 20 } }} />,
+    },
+    "/profile": {
+      label: "Profile",
+      icon: <Person sx={{ fontSize: { xs: 16, sm: 20 } }} />,
+    },
+    "/settings": {
+      label: "Settings",
+      icon: <Settings sx={{ fontSize: { xs: 16, sm: 20 } }} />,
+    },
+  };
+
+  const activeMeta = pageMeta[location.pathname];
+  const mobileLabel = user && isMobile && activeMeta ? activeMeta.label : "Guidra";
+  const mobileIcon = user && isMobile && activeMeta ? activeMeta.icon : null;
+
   return (
     <Box
       sx={{
@@ -30,9 +75,10 @@ const Logo = ({ randomIcon, user, navigate }) => {
           flexShrink: 0,
         }}
       >
-        {randomIcon?.icon || (
-          <RocketLaunch sx={{ fontSize: { xs: 16, sm: 20 } }} />
-        )}
+        {mobileIcon ||
+          randomIcon?.icon || (
+            <RocketLaunch sx={{ fontSize: { xs: 16, sm: 20 } }} />
+          )}
       </Box>
 
       <Typography
@@ -43,11 +89,13 @@ const Logo = ({ randomIcon, user, navigate }) => {
           backgroundClip: "text",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
-          fontSize: { xs: "1.1rem", sm: "1.25rem" },
+          fontSize: { xs: "1rem", sm: "1.25rem" },
           whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
-        Guidra
+        {mobileLabel}
       </Typography>
     </Box>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
   MenuBook,
@@ -196,19 +196,19 @@ const MobileHeader = ({
           gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
           alignItems: "center",
           px: 0.75,
-          py: 0.7,
+          py: 0.55,
           height: "100%",
           gap: 0.5,
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           <Tooltip title="Previous lesson" placement="top">
             <IconButton
               onClick={onPrevious}
               disabled={!hasPrevious}
               sx={{
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 borderRadius: "10px",
                 color: hasPrevious
                   ? colorPalette?.[600] || "#6d48b5"
@@ -226,18 +226,21 @@ const MobileHeader = ({
                 transition: "all 0.2s ease",
               }}
             >
-              <NavigateBefore sx={{ fontSize: 22 }} />
+              <NavigateBefore sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Prev
+          </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           <Tooltip title="Course menu" placement="top">
             <IconButton
               onClick={onOpenSidebar}
               sx={{
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 borderRadius: "10px",
                 background: isDark
                   ? "rgba(148, 163, 184, 0.15)"
@@ -255,12 +258,15 @@ const MobileHeader = ({
                 transition: "all 0.2s ease",
               }}
             >
-              <MenuBook sx={{ fontSize: 22 }} />
+              <MenuBook sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Menu
+          </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           {onOpenVersions ? (
             <VersionButton
               contentInfo={contentInfo}
@@ -269,11 +275,14 @@ const MobileHeader = ({
               variant="mobile"
             />
           ) : (
-            <Box sx={{ width: 44, height: 44 }} />
+            <Box sx={{ width: 40, height: 40 }} />
           )}
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Versions
+          </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           <CompleteButton
             selectedSubtopic={selectedSubtopic}
             updatingSubtopic={updatingSubtopic}
@@ -281,9 +290,12 @@ const MobileHeader = ({
             colorPalette={colorPalette}
             variant="mobile"
           />
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Complete
+          </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           <RegenerationBadge
             remainingGenerations={remainingGenerations}
             contentLoading={contentLoading}
@@ -291,15 +303,18 @@ const MobileHeader = ({
             colorPalette={colorPalette}
             variant="mobile"
           />
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Regen
+          </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           <Tooltip title="Hide controls" placement="top">
             <IconButton
               onClick={() => setIsCollapsed(true)}
               sx={{
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 borderRadius: "10px",
                 color: colorPalette?.[600] || "#6d48b5",
                 background: isDark
@@ -317,19 +332,22 @@ const MobileHeader = ({
                 transition: "all 0.2s ease",
               }}
             >
-              <VisibilityOff sx={{ fontSize: 20 }} />
+              <VisibilityOff sx={{ fontSize: 18 }} />
             </IconButton>
           </Tooltip>
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Hide
+          </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3 }}>
           <Tooltip title="Next lesson" placement="top">
             <IconButton
               onClick={onNext}
               disabled={!hasNext}
               sx={{
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 borderRadius: "10px",
                 color: hasNext
                   ? colorPalette?.[600] || "#6d48b5"
@@ -345,9 +363,12 @@ const MobileHeader = ({
                 transition: "all 0.2s ease",
               }}
             >
-              <NavigateNext sx={{ fontSize: 22 }} />
+              <NavigateNext sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
+          <Typography sx={{ fontSize: "0.52rem", lineHeight: 1, color: "text.secondary" }}>
+            Next
+          </Typography>
         </Box>
       </Box>
         </Box>

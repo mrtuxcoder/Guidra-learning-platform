@@ -15,6 +15,8 @@ const UserAvatar = ({
   randomIcon,
   getUserInitial,
   handleUserMenu,
+  onAvatarClick,
+  ariaLabel = "user menu",
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -51,8 +53,8 @@ const UserAvatar = ({
     return (
       <IconButton
         size="small"
-        aria-label="user menu"
-        onClick={handleUserMenu}
+        aria-label={ariaLabel}
+        onClick={onAvatarClick || handleUserMenu}
         data-tour="user-menu"
         sx={{
           border: `2px solid ${
