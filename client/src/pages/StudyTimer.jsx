@@ -28,6 +28,30 @@ import { useTimer } from "../contexts/TimerContext";
 
 const PRESET_MINUTES = [25, 40, 60];
 const DAILY_SESSION_GOAL = 6;
+const DAILY_SESSIONS_STORAGE_KEY = "timerDailySessions";
+
+const getTodayKey = () => new Date().toISOString().slice(0, 10);
+
+const readDailySessions = (key) => {
+  try {
+    const raw = localStorage.getItem(DAILY_SESSIONS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return Number(parsed[key] || 0);
+  } catch {
+    return 0;
+  }
+};
+
+const writeDailySessions = (key, value) => {
+  try {
+    const raw = localStorage.getItem(DAILY_SESSIONS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    parsed[key] = value;
+    localStorage.setItem(DAILY_SESSIONS_STORAGE_KEY, JSON.stringify(parsed));
+  } catch {
+    // noop
+  }
+};
 
 const formatTime = (totalSeconds) => {
   const minutes = Math.floor(totalSeconds / 60);
@@ -43,6 +67,7 @@ const clampMinutes = (value) => {
 
 export default function StudyTimer() {
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const {
     isActive,
@@ -65,19 +90,11 @@ export default function StudyTimer() {
   const [notificationMessage, setNotificationMessage] = useState("");
   const completionLoggedRef = useRef(false);
 
-  const todayKey = useMemo(() => {
-    return new Date().toISOString().slice(0, 10);
-  }, []);
+  const [todayKey, setTodayKey] = useState(getTodayKey);
 
-  const [dailySessions, setDailySessions] = useState(() => {
-    try {
-      const raw = localStorage.getItem("timerDailySessions");
-      const parsed = raw ? JSON.parse(raw) : {};
-      return Number(parsed[todayKey] || 0);
-    } catch {
-      return 0;
-    }
-  });
+  const [dailySessions, setDailySessions] = useState(() =>
+    readDailySessions(getTodayKey())
+  );
 
   const computedMinutes = useMemo(() => {
     if (mode === "custom") {
@@ -111,14 +128,7 @@ export default function StudyTimer() {
     if (hasCompleted && !completionLoggedRef.current) {
       setDailySessions((prev) => {
         const next = prev + 1;
-        try {
-          const raw = localStorage.getItem("timerDailySessions");
-          const parsed = raw ? JSON.parse(raw) : {};
-          parsed[todayKey] = next;
-          localStorage.setItem("timerDailySessions", JSON.stringify(parsed));
-        } catch {
-          // noop
-        }
+        writeDailySessions(todayKey, next);
         return next;
       });
       completionLoggedRef.current = true;
@@ -128,6 +138,37 @@ export default function StudyTimer() {
       completionLoggedRef.current = false;
     }
   }, [hasCompleted, todayKey]);
+
+  useEffect(() => {
+    const syncDayAndSessions = () => {
+      const nextTodayKey = getTodayKey();
+
+      if (nextTodayKey !== todayKey) {
+        setTodayKey(nextTodayKey);
+        setDailySessions(readDailySessions(nextTodayKey));
+        completionLoggedRef.current = false;
+        return;
+      }
+
+      setDailySessions(readDailySessions(nextTodayKey));
+    };
+
+    syncDayAndSessions();
+    const intervalId = setInterval(syncDayAndSessions, 60 * 1000);
+
+    const handleStorage = (event) => {
+      if (event.key === DAILY_SESSIONS_STORAGE_KEY) {
+        syncDayAndSessions();
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [todayKey]);
 
   const handleStartPause = () => {
     if (isActive) {
@@ -274,8 +315,7 @@ export default function StudyTimer() {
                         backgroundColor: alpha(theme.palette.primary.main, 0.12),
                         "& .MuiLinearProgress-bar": {
                           borderRadius: 10,
-                          background:
-                            "linear-gradient(135deg, #7C3AED 0%, #5E35B1 100%)",
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                         },
                       }}
                     />
@@ -424,7 +464,7 @@ export default function StudyTimer() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "#F7F8FC",
+        bgcolor: "background.default",
         pt: 1.5,
         pb: 10,
       }}
@@ -441,10 +481,10 @@ export default function StudyTimer() {
             }}
           >
             <Box>
-              <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "#141826" }}>
+              <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "text.primary" }}>
                 Focus Timer
               </Typography>
-              <Typography sx={{ mt: 0.35, fontSize: "0.84rem", color: "#667085" }}>
+              <Typography sx={{ mt: 0.35, fontSize: "0.84rem", color: "text.secondary" }}>
                 Stay focused. One session at a time.
               </Typography>
             </Box>
@@ -455,8 +495,8 @@ export default function StudyTimer() {
             sx={{
               borderRadius: 3,
               p: 2,
-              border: "1px solid #E8EBF4",
-              boxShadow: "0 10px 30px rgba(16, 24, 40, 0.06)",
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: "none",
             }}
           >
             <Stack alignItems="center" spacing={1.5}>
@@ -466,11 +506,11 @@ export default function StudyTimer() {
                   height: 250,
                   borderRadius: "50%",
                   p: "12px",
-                  background: `conic-gradient(#5B6CFF ${ringProgress}%, ${alpha(
+                  background: `conic-gradient(${theme.palette.primary.main} ${ringProgress}%, ${alpha(
                     theme.palette.primary.main,
                     0.14
                   )} ${ringProgress}% 100%)`,
-                  boxShadow: "inset 0 0 0 1px rgba(79,70,229,0.08)",
+                  boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -481,8 +521,10 @@ export default function StudyTimer() {
                     width: "100%",
                     height: "100%",
                     borderRadius: "50%",
-                    bgcolor: "#FFFFFF",
-                    boxShadow: "0 12px 24px rgba(79,70,229,0.10)",
+                    bgcolor: "background.paper",
+                    boxShadow: isDark
+                      ? `0 10px 24px ${alpha(theme.palette.common.black, 0.36)}`
+                      : `0 12px 24px ${alpha(theme.palette.primary.main, 0.12)}`,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
@@ -496,8 +538,8 @@ export default function StudyTimer() {
                     size="small"
                     sx={{
                       mb: 1,
-                      bgcolor: "#F2F4FF",
-                      color: "#4F46E5",
+                      bgcolor: alpha(theme.palette.primary.main, 0.12),
+                      color: "primary.main",
                       fontWeight: 600,
                     }}
                   />
@@ -507,13 +549,13 @@ export default function StudyTimer() {
                       fontWeight: 800,
                       lineHeight: 1,
                       letterSpacing: "0.02em",
-                      color: "#13172A",
+                      color: "text.primary",
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
                     {formatTime(remainingSeconds)}
                   </Typography>
-                  <Typography sx={{ mt: 0.7, color: "#667085", fontSize: "0.8rem" }}>
+                  <Typography sx={{ mt: 0.7, color: "text.secondary", fontSize: "0.8rem" }}>
                     {computedMinutes} min session
                   </Typography>
                 </Box>
@@ -530,8 +572,8 @@ export default function StudyTimer() {
                     textTransform: "none",
                     fontWeight: 700,
                     fontSize: "0.98rem",
-                    background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-                    boxShadow: "0 12px 24px rgba(79, 70, 229, 0.24)",
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                    boxShadow: "none",
                   }}
                 >
                   {primaryActionLabel}
@@ -545,8 +587,8 @@ export default function StudyTimer() {
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 600,
-                    color: "#667085",
-                    bgcolor: "rgba(15,23,42,0.03)",
+                    color: "text.secondary",
+                    bgcolor: "action.hover",
                   }}
                 >
                   Reset
@@ -559,13 +601,13 @@ export default function StudyTimer() {
             elevation={0}
             sx={{
               borderRadius: 3,
-              border: "1px solid #E8EBF4",
-              boxShadow: "0 8px 22px rgba(16, 24, 40, 0.05)",
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: "none",
             }}
           >
             <CardContent sx={{ p: 2 }}>
               <Stack spacing={1.5}>
-                <Typography sx={{ fontSize: "0.97rem", fontWeight: 700, color: "#141826" }}>
+                <Typography sx={{ fontSize: "0.97rem", fontWeight: 700, color: "text.primary" }}>
                   Session Settings
                 </Typography>
 
@@ -582,10 +624,14 @@ export default function StudyTimer() {
                         sx={{
                           height: 34,
                           borderRadius: "999px",
-                          bgcolor: active ? "#EEF2FF" : "#F8FAFC",
-                          color: active ? "#4F46E5" : "#667085",
+                          bgcolor: active
+                            ? alpha(theme.palette.primary.main, 0.12)
+                            : "action.hover",
+                          color: active ? "primary.main" : "text.secondary",
                           border: "1px solid",
-                          borderColor: active ? "#5B6CFF" : "#E5E7EB",
+                          borderColor: active
+                            ? alpha(theme.palette.primary.main, 0.45)
+                            : theme.palette.divider,
                           fontWeight: active ? 700 : 600,
                         }}
                       />
@@ -604,7 +650,7 @@ export default function StudyTimer() {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2,
-                      bgcolor: "#FCFDFF",
+                      bgcolor: "background.paper",
                     },
                   }}
                 />
@@ -620,7 +666,7 @@ export default function StudyTimer() {
                       />
                     }
                     label={
-                      <Typography sx={{ fontSize: "0.9rem", color: "#334155" }}>
+                      <Typography sx={{ fontSize: "0.9rem", color: "text.secondary" }}>
                         End session notification
                       </Typography>
                     }
@@ -641,17 +687,17 @@ export default function StudyTimer() {
             elevation={0}
             sx={{
               borderRadius: 3,
-              border: "1px solid #E8EBF4",
-              boxShadow: "0 8px 22px rgba(16, 24, 40, 0.05)",
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: "none",
             }}
           >
             <CardContent sx={{ p: 2 }}>
               <Stack spacing={1.1}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography sx={{ fontSize: "0.94rem", fontWeight: 700, color: "#141826" }}>
+                  <Typography sx={{ fontSize: "0.94rem", fontWeight: 700, color: "text.primary" }}>
                     Today&apos;s Focus
                   </Typography>
-                  <Typography sx={{ fontSize: "0.82rem", color: "#667085", fontWeight: 600 }}>
+                  <Typography sx={{ fontSize: "0.82rem", color: "text.secondary", fontWeight: 600 }}>
                     {dailySessions} / {DAILY_SESSION_GOAL} sessions completed
                   </Typography>
                 </Box>
@@ -661,10 +707,10 @@ export default function StudyTimer() {
                   sx={{
                     height: 8,
                     borderRadius: 999,
-                    bgcolor: "#EEF1F7",
+                    bgcolor: alpha(theme.palette.primary.main, 0.12),
                     "& .MuiLinearProgress-bar": {
                       borderRadius: 999,
-                      background: "linear-gradient(90deg, #5B6CFF 0%, #7C3AED 100%)",
+                      background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                     },
                   }}
                 />

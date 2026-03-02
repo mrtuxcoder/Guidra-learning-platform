@@ -234,8 +234,11 @@ export const initializeAuth = async () => {
 };
 
 export const startGoogleOAuth = () => {
+  const resolvedApiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || window.location.origin;
+
   const popup = window.open(
-    `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/google`,
+    `${resolvedApiBaseUrl}/api/v1/auth/google`,
     "oauth_popup",
     "width=600,height=700,scrollbars=no,resizable=no"
   );

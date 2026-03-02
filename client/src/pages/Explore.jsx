@@ -226,7 +226,7 @@ export default function Explore() {
     const discoverTopics = filteredTopics;
 
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "#F8F9FC", pb: "88px" }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: "88px" }}>
         <Container maxWidth="sm" sx={{ px: 2, pt: 1.6 }}>
           <Stack
             direction="row"
@@ -234,7 +234,7 @@ export default function Explore() {
             justifyContent="space-between"
             sx={{ mb: 1.8 }}
           >
-            <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "#111827" }}>
+            <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "text.primary" }}>
               Explore
             </Typography>
           </Stack>
@@ -265,16 +265,17 @@ export default function Explore() {
                 size="small"
                 sx={{
                   borderRadius: "999px",
-                  bgcolor: "#FFFFFF",
-                  border: "1px solid #E5E7EB",
-                  color: "#6B7280",
+                  bgcolor: "background.paper",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  color: "text.secondary",
                   fontWeight: 500,
                 }}
               />
             ))}
           </Stack>
 
-          <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "#111827", mb: 1 }}>
+          <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "text.primary", mb: 1 }}>
             Categories
           </Typography>
           <CategorySidebar
@@ -290,14 +291,15 @@ export default function Explore() {
                 mt: 2.3,
                 p: 2,
                 borderRadius: 2.5,
-                border: "1px solid #E5E7EB",
-                bgcolor: "#FFFFFF",
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
               }}
             >
-              <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, color: "#111827", mb: 0.6 }}>
+              <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, color: "text.primary", mb: 0.6 }}>
                 Start learning something new
               </Typography>
-              <Typography sx={{ fontSize: "0.85rem", color: "#6B7280", mb: 1.6 }}>
+              <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", mb: 1.6 }}>
                 Discover curated courses or build a custom AI learning path.
               </Typography>
               <Stack direction="row" spacing={1.2}>
@@ -310,8 +312,8 @@ export default function Explore() {
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 600,
-                    borderColor: "#D6DAE6",
-                    color: "#4B5563",
+                    borderColor: "divider",
+                    color: "text.secondary",
                   }}
                 >
                   Browse Courses
@@ -325,7 +327,7 @@ export default function Explore() {
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 700,
-                    background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                   }}
                 >
                   Custom Path
@@ -335,7 +337,7 @@ export default function Explore() {
           )}
 
           <Box sx={{ mt: 3 }}>
-            <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "#111827", mb: 1 }}>
+            <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "text.primary", mb: 1 }}>
               Courses
             </Typography>
             <Stack spacing={1.5}>
@@ -349,7 +351,7 @@ export default function Explore() {
                 />
               ))}
               {discoverTopics.length === 0 && (
-                <Typography sx={{ py: 1, fontSize: "0.86rem", color: "#6B7280" }}>
+                <Typography sx={{ py: 1, fontSize: "0.86rem", color: "text.secondary" }}>
                   No matching courses found for “{searchQuery.trim()}”.
                 </Typography>
               )}
@@ -359,7 +361,7 @@ export default function Explore() {
           {hasSearchQuery && (
             <Box sx={{ mt: 3 }}>
               <Divider sx={{ mb: 2 }}>
-                <Typography sx={{ fontSize: "0.74rem", color: "#6B7280" }}>
+                <Typography sx={{ fontSize: "0.74rem", color: "text.secondary" }}>
                   CREATE LEARNING PATH
                 </Typography>
               </Divider>
@@ -367,15 +369,16 @@ export default function Explore() {
               <Card
                 sx={{
                   borderRadius: 2.5,
-                  border: "1px solid #E5E7EB",
-                  boxShadow: "0 4px 14px rgba(15, 23, 42, 0.05)",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  boxShadow: "none",
                 }}
               >
                 <CardContent sx={{ p: 2 }}>
-                  <Typography sx={{ fontSize: "0.94rem", color: "#111827", fontWeight: 600, mb: 0.5 }}>
+                  <Typography sx={{ fontSize: "0.94rem", color: "text.primary", fontWeight: 600, mb: 0.5 }}>
                     Create learning path for:
                   </Typography>
-                  <Typography sx={{ fontSize: "1rem", color: "#4F46E5", fontWeight: 700, mb: 1.4 }}>
+                  <Typography sx={{ fontSize: "1rem", color: "primary.main", fontWeight: 700, mb: 1.4 }}>
                     {topicLabel}
                   </Typography>
 
@@ -391,8 +394,8 @@ export default function Explore() {
                         textTransform: "none",
                         fontWeight: 700,
                         mb: 1.2,
-                        borderColor: "rgba(79, 70, 229, 0.35)",
-                        color: "#4F46E5",
+                        borderColor: "primary.main",
+                        color: "primary.main",
                       }}
                     >
                       {customLoading ? "Validating..." : "Validate Topic"}
@@ -405,12 +408,13 @@ export default function Explore() {
                         sx={{
                           p: 1.2,
                           borderRadius: 1.6,
-                          bgcolor: "rgba(22, 163, 74, 0.09)",
-                          border: "1px solid rgba(22, 163, 74, 0.25)",
+                          bgcolor: "success.light",
+                          border: "1px solid",
+                          borderColor: "success.main",
                           mb: customError ? 0.9 : 1.4,
                         }}
                       >
-                        <Typography sx={{ fontSize: "0.82rem", color: "#166534", fontWeight: 600 }}>
+                        <Typography sx={{ fontSize: "0.82rem", color: "success.dark", fontWeight: 600 }}>
                           Ready to build your learning path
                         </Typography>
                       </Box>
@@ -431,7 +435,7 @@ export default function Explore() {
                       borderRadius: 2,
                       textTransform: "none",
                       fontWeight: 700,
-                      background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                     }}
                   >
                     {customGenerating ? "Generating..." : "Generate Path"}
@@ -450,7 +454,7 @@ export default function Explore() {
                 bottom: 64,
                 px: 2,
                 py: 1.2,
-                background: "linear-gradient(transparent, rgba(248,249,252,0.96) 40%)",
+                background: `linear-gradient(transparent, ${theme.palette.background.default} 40%)`,
                 zIndex: 1200,
               }}
             >
@@ -459,11 +463,12 @@ export default function Explore() {
                 sx={{
                   p: 1,
                   borderRadius: 2,
-                  border: "1px solid #E5E7EB",
-                  boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  boxShadow: "none",
                 }}
               >
-                <Typography sx={{ fontSize: "0.78rem", color: "#6B7280", mb: 0.7, px: 0.4 }}>
+                <Typography sx={{ fontSize: "0.78rem", color: "text.secondary", mb: 0.7, px: 0.4 }}>
                   Selected course: {getSelectedTopicName()}
                 </Typography>
                 <Button
@@ -476,7 +481,7 @@ export default function Explore() {
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 700,
-                    background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                   }}
                 >
                   {loading ? "Generating..." : "Generate Subtopics & Learn Now"}
@@ -630,7 +635,8 @@ export default function Explore() {
                 sx={{
                   mb: 2,
                   borderRadius: 2,
-                  border: "1px solid rgba(211, 47, 47, 0.2)",
+                  border: "1px solid",
+                  borderColor: "error.main",
                   mx: { xs: 0.5, sm: 0 },
                 }}
               >

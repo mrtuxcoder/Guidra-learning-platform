@@ -10,6 +10,7 @@ import {
   Divider,
   alpha,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { profileTheme } from "../profile/constants";
 
@@ -27,6 +28,7 @@ const LandingAuthPanel = ({
   const isRegister = activeTab === "register";
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <Paper
@@ -35,8 +37,9 @@ const LandingAuthPanel = ({
         borderRadius: 3,
         border: `1px solid ${profileTheme.border}`,
         background: "background.paper",
-        p: { xs: 2, sm: 2.5, md: 3 },
-        maxWidth: { xs: "100%", sm: 560 },
+        p: { xs: 2, sm: 2.5, md: 3.5, lg: 4 },
+        maxWidth: { xs: "100%", sm: 560, md: 640 },
+        width: { xs: "100%", md: "100%" },
         mx: "auto",
       }}
     >
@@ -45,6 +48,7 @@ const LandingAuthPanel = ({
         sx={{
           fontWeight: 700,
           mb: 1.5,
+          fontSize: { xs: "1.25rem", md: "1.45rem" },
           textAlign: { xs: "center", md: "left" },
         }}
       >
@@ -94,7 +98,7 @@ const LandingAuthPanel = ({
       <Box
         component="form"
         onSubmit={onSubmit}
-        sx={{ display: "grid", gap: { xs: 1.5, md: 2 } }}
+        sx={{ display: "grid", gap: { xs: 1.5, md: 2.2 } }}
       >
         {isRegister && (
           <TextField
@@ -104,7 +108,7 @@ const LandingAuthPanel = ({
             onChange={onChange}
             fullWidth
             required
-            size="small"
+            size={isDesktop ? "medium" : "small"}
           />
         )}
         <TextField
@@ -115,7 +119,7 @@ const LandingAuthPanel = ({
           onChange={onChange}
           fullWidth
           required
-          size="small"
+          size={isDesktop ? "medium" : "small"}
         />
         <TextField
           label="Password"
@@ -125,7 +129,7 @@ const LandingAuthPanel = ({
           onChange={onChange}
           fullWidth
           required
-          size="small"
+          size={isDesktop ? "medium" : "small"}
         />
         {isRegister && (
           <TextField
@@ -136,7 +140,7 @@ const LandingAuthPanel = ({
             onChange={onChange}
             fullWidth
             required
-            size="small"
+            size={isDesktop ? "medium" : "small"}
           />
         )}
 
@@ -162,7 +166,8 @@ const LandingAuthPanel = ({
             textTransform: "none",
             borderRadius: 2,
             fontWeight: 700,
-            py: { xs: 1.15, md: 1 },
+            py: { xs: 1.15, md: 1.35 },
+            fontSize: { xs: "0.95rem", md: "1rem" },
             background: profileTheme.gradient,
           }}
         >
@@ -185,7 +190,8 @@ const LandingAuthPanel = ({
           textTransform: "none",
           borderRadius: 2,
           fontWeight: 600,
-          py: { xs: 1.15, md: 1 },
+          py: { xs: 1.15, md: 1.25 },
+          fontSize: { xs: "0.92rem", md: "0.98rem" },
           borderColor: "rgba(126,87,194,0.4)",
           color: isDark ? profileTheme.primaryLight : profileTheme.primaryDark,
         }}

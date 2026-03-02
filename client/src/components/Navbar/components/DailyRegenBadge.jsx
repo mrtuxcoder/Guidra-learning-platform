@@ -1,12 +1,11 @@
 import React from "react";
-import { Box, Tooltip, useMediaQuery, useTheme, Avatar } from "@mui/material";
+import { Box, Tooltip, Avatar } from "@mui/material";
 import { AutoAwesome } from "@mui/icons-material";
 import { purpleTheme } from "../constants";
 
-const DailyRegenBadge = ({ remaining, isLoading }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const DAILY_REGEN_LIMIT = 6;
 
+const DailyRegenBadge = ({ remaining, isLoading }) => {
   if (isLoading) return null;
 
   const isLow = remaining <= 2;
@@ -17,7 +16,7 @@ const DailyRegenBadge = ({ remaining, isLoading }) => {
       title={
         isOut
           ? "Daily regeneration limit reached. Resets at midnight."
-          : `${remaining} regenerations remaining today`
+          : `${remaining}/${DAILY_REGEN_LIMIT} regenerations remaining today`
       }
       arrow
       placement="bottom"
@@ -63,7 +62,7 @@ const DailyRegenBadge = ({ remaining, isLoading }) => {
             },
           }}
         >
-          {remaining}
+          {`${remaining}/${DAILY_REGEN_LIMIT}`}
         </Avatar>
         <AutoAwesome
           sx={{

@@ -16,6 +16,7 @@ import {
   CircularProgress,
   Switch,
   FormControlLabel,
+  useTheme,
 } from "@mui/material";
 import {
   updateUserPreferences,
@@ -34,6 +35,7 @@ const toneOptions = [
 ];
 
 const Settings = () => {
+  const theme = useTheme();
   const { mode, toggleTheme } = useThemeMode();
   const { user, authInfo, fetchUserProfile } = useUser(); // Get user and refresh function from shared context
   const [isLoading, setIsLoading] = useState(!user); // Loading when no user yet
@@ -212,16 +214,16 @@ const Settings = () => {
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
-        py: { xs: 3, md: 5 },
+        py: { xs: 2, md: 5 },
       }}
     >
-      <Container maxWidth="md">
-        <Box sx={{ mb: 3 }}>
+      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ mb: { xs: 2, md: 3 } }}>
           <Typography
             variant="h4"
             sx={{
               fontWeight: 800,
-              fontSize: { xs: "1.6rem", sm: "2rem" },
+              fontSize: { xs: "1.3rem", sm: "1.8rem" },
               background: profileTheme.gradient,
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
@@ -233,7 +235,7 @@ const Settings = () => {
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mt: 0.5 }}
+            sx={{ mt: 0.35, fontSize: { xs: "0.82rem", sm: "0.875rem" } }}
           >
             Manage your learning preferences and account security.
           </Typography>
@@ -249,11 +251,11 @@ const Settings = () => {
           elevation={0}
           sx={{
             ...cardSx,
-            p: { xs: 2.5, md: 3 },
-            mb: 3,
+            p: { xs: 2, md: 3 },
+            mb: { xs: 2, md: 3 },
           }}
         >
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: { xs: "1rem", sm: "1.12rem" } }}>
           Learning Preferences
         </Typography>
         <Stack spacing={2}>
@@ -309,11 +311,11 @@ const Settings = () => {
           elevation={0}
           sx={{
             ...cardSx,
-            p: { xs: 2.5, md: 3 },
-            mb: 3,
+            p: { xs: 2, md: 3 },
+            mb: { xs: 2, md: 3 },
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: { xs: "1rem", sm: "1.12rem" } }}>
             Appearance
           </Typography>
           <Stack spacing={2}>
@@ -326,10 +328,10 @@ const Settings = () => {
               }}
             >
               <Box>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: "0.92rem", sm: "1rem" } }}>
                   Dark Mode
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   Switch between light and dark theme
                 </Typography>
               </Box>
@@ -357,10 +359,10 @@ const Settings = () => {
               }}
             >
               <Box>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: "0.92rem", sm: "1rem" } }}>
                   Timer in Navbar
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   Show live countdown in the navigation bar
                 </Typography>
               </Box>
@@ -383,13 +385,13 @@ const Settings = () => {
           elevation={0}
           sx={{
             ...cardSx,
-            p: { xs: 2.5, md: 3 },
+            p: { xs: 2, md: 3 },
           }}
         >
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, fontSize: { xs: "1rem", sm: "1.12rem" } }}>
           Password
         </Typography>
-        <Typography sx={{ color: "#6B7280", mb: 2 }}>
+        <Typography sx={{ color: "text.secondary", mb: 2, fontSize: { xs: "0.82rem", sm: "0.9rem" } }}>
           {passwordStatus.needsPasswordSetup || !passwordStatus.hasPassword
             ? "Set a password to enable email login."
             : "Update your existing password."}
@@ -438,7 +440,7 @@ const Settings = () => {
                 textTransform: "none",
                 borderRadius: 2,
                 fontWeight: 600,
-                borderColor: "rgba(126, 87, 194, 0.4)",
+                borderColor: theme.palette.primary.main,
                 color: profileTheme.primaryDark,
               }}
             >

@@ -27,10 +27,13 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
   return (
     <Box
       sx={{
-        p: isMobile ? 1 : 1.5,
+        p: isMobile ? 2 : 1.5,
         borderBottom: "1px solid",
         borderColor: "divider",
-        bgcolor: "background.paper",
+        bgcolor: (theme) =>
+          isMobile
+            ? (theme.palette.mode === "dark" ? "#0F1115" : theme.palette.background.default)
+            : "background.paper",
         position: "relative",
         "&:before": {
           content: '""',
@@ -54,10 +57,10 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              fontSize: isMobile ? "1.05rem" : "1.6rem",
+              fontSize: isMobile ? "1.55rem" : "1.6rem",
               lineHeight: 1.2,
               letterSpacing: "-0.01em",
-              mb: 0.4,
+              mb: isMobile ? 0 : 0.4,
               display: "-webkit-box",
               WebkitLineClamp: isMobile ? 2 : 3,
               WebkitBoxOrient: "vertical",

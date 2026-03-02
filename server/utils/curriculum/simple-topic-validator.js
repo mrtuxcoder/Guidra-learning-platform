@@ -42,6 +42,21 @@ function isNonsense(str) {
   return false;
 }
 
+function hasInstructionLikeText(input = "") {
+  const text = String(input).trim().toLowerCase();
+  if (!text) return false;
+
+  const instructionPatterns = [
+    /\b(ignore|disregard|bypass|override)\b.{0,40}\b(previous|prior|above|system|rules?|instructions?)\b/i,
+    /\b(you are|act as|pretend to be|roleplay as)\b/i,
+    /\b(system prompt|developer prompt|assistant prompt|jailbreak)\b/i,
+    /\b(do not follow|don't follow|stop following)\b.{0,30}\b(instructions?|rules?|safety)\b/i,
+    /\b(execute|run|write|generate|respond with|output only)\b.{0,40}\b(command|script|prompt|instructions?)\b/i,
+  ];
+
+  return instructionPatterns.some((pattern) => pattern.test(text));
+}
+
 function getTopicValidationErrors(topic, options = {}) {
   const errors = [];
   const minLength = options.minLength || MIN_LENGTH;
@@ -78,11 +93,7 @@ function getTopicValidationErrors(topic, options = {}) {
     errors.push("Topic must not include links.");
   }
 
-  if (
-    /(ignore|disregard|system|assistant|developer|prompt|instruction|jailbreak|bypass|override)/i.test(
-      clean
-    )
-  ) {
+  if (hasInstructionLikeText(clean)) {
     errors.push("Topic must be a plain subject without instructions.");
   }
 
@@ -121,5 +132,6 @@ module.exports = {
   normalizeInput,
   isNonsense,
   isObviouslyInvalid,
-  getTopicValidationErrors
+  getTopicValidationErrors,
+  hasInstructionLikeText,
 };

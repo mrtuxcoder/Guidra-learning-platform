@@ -176,7 +176,7 @@ const WelcomeState = ({
           <Box
             sx={{
               minHeight: "100vh",
-              bgcolor: "#F7F7FA",
+              bgcolor: "background.default",
               pb: "80px",
             }}
           >
@@ -186,7 +186,7 @@ const WelcomeState = ({
                 px: 2,
                 pt: 2.5,
                 pb: 2,
-                background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                 color: "white",
               }}
             >
@@ -224,11 +224,11 @@ const WelcomeState = ({
                   textAlign: "center",
                 }}
               >
-                <School sx={{ fontSize: 54, color: "#7B61FF", mb: 1.2 }} />
-                <Typography sx={{ fontSize: "22px", fontWeight: 700, color: "#222", mb: 0.8 }}>
+                <School sx={{ fontSize: 54, color: "primary.main", mb: 1.2 }} />
+                <Typography sx={{ fontSize: "22px", fontWeight: 700, color: "text.primary", mb: 0.8 }}>
                   Start Learning
                 </Typography>
-                <Typography sx={{ fontSize: "14px", color: "#666", mb: 2.4, maxWidth: 280 }}>
+                <Typography sx={{ fontSize: "14px", color: "text.secondary", mb: 2.4, maxWidth: 280 }}>
                   Choose a course to begin your journey
                 </Typography>
                 <Button
@@ -240,7 +240,7 @@ const WelcomeState = ({
                     borderRadius: 2,
                     textTransform: "none",
                     fontWeight: 700,
-                    background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                   }}
                 >
                   Browse Courses
@@ -262,7 +262,10 @@ const WelcomeState = ({
                   theme.palette.background.paper,
                   0.85
                 )} 0%, ${theme.palette.background.default} 100%)`
-              : "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+              : `linear-gradient(135deg, ${alpha(
+                  theme.palette.background.paper,
+                  0.95
+                )} 0%, ${theme.palette.background.default} 100%)`,
             display: "flex",
             flexDirection: "column",
           }}
@@ -290,7 +293,7 @@ const WelcomeState = ({
         <Box
           sx={{
             minHeight: "100vh",
-            bgcolor: "#F7F7FA",
+            bgcolor: "background.default",
             pb: "80px",
           }}
         >
@@ -300,7 +303,7 @@ const WelcomeState = ({
               px: 2,
               pt: 2.5,
               pb: 2,
-              background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
               color: "white",
             }}
           >
@@ -333,22 +336,22 @@ const WelcomeState = ({
               sx={{
                 borderRadius: 3,
                 p: 2,
-                bgcolor: "#fff",
+                bgcolor: "background.paper",
                 border: "1px solid",
                 borderColor: "divider",
                 mb: 2,
               }}
             >
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.4 }}>
-                <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#222" }}>
+                <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "text.primary" }}>
                   {normalizedSelectedTopic}
                 </Typography>
                 <Chip
                   label={`${completedCount} / ${totalCount}`}
                   size="small"
                   sx={{
-                    bgcolor: "rgba(123,97,255,0.12)",
-                    color: "#7B61FF",
+                    bgcolor: alpha(theme.palette.primary.main, 0.12),
+                    color: "primary.main",
                     fontWeight: 700,
                     borderRadius: "999px",
                   }}
@@ -361,16 +364,16 @@ const WelcomeState = ({
                 sx={{
                   height: 8,
                   borderRadius: 999,
-                  bgcolor: "rgba(123,97,255,0.12)",
+                  bgcolor: alpha(theme.palette.primary.main, 0.12),
                   mb: 1,
                   "& .MuiLinearProgress-bar": {
                     borderRadius: 999,
-                    background: "linear-gradient(90deg, #7B61FF 0%, #9C6BFF 100%)",
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                   },
                 }}
               />
 
-              <Typography sx={{ color: "#666", fontSize: "0.88rem", mb: 1.6, fontWeight: 500 }}>
+              <Typography sx={{ color: "text.secondary", fontSize: "0.88rem", mb: 1.6, fontWeight: 500 }}>
                 {progressPercent}% completed
               </Typography>
 
@@ -385,8 +388,8 @@ const WelcomeState = ({
                   fontSize: "16px",
                   fontWeight: 700,
                   color: "white",
-                  background: "linear-gradient(135deg, #7B61FF 0%, #9C6BFF 100%)",
-                  boxShadow: "0 6px 18px rgba(123,97,255,0.24)",
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  boxShadow: "none",
                 }}
               >
                 Continue
@@ -402,8 +405,8 @@ const WelcomeState = ({
                   height: 40,
                   borderRadius: 2,
                   textTransform: "none",
-                  color: "#666",
-                  borderColor: "rgba(123,97,255,0.25)",
+                  color: "text.secondary",
+                  borderColor: alpha(theme.palette.primary.main, 0.25),
                 }}
               >
                 View Courses
@@ -416,15 +419,15 @@ const WelcomeState = ({
                   height: 40,
                   borderRadius: 2,
                   textTransform: "none",
-                  color: "#666",
-                  borderColor: "rgba(123,97,255,0.25)",
+                  color: "text.secondary",
+                  borderColor: alpha(theme.palette.primary.main, 0.25),
                 }}
               >
                 Explore Topics
               </Button>
             </Stack>
 
-            <Typography sx={{ mt: 3, mb: 1, fontSize: "0.95rem", fontWeight: 700, color: "#222" }}>
+            <Typography sx={{ mt: 3, mb: 1, fontSize: "0.95rem", fontWeight: 700, color: "text.primary" }}>
               Your Courses
             </Typography>
 
@@ -432,7 +435,7 @@ const WelcomeState = ({
               elevation={0}
               sx={{
                 borderRadius: 3,
-                bgcolor: "#fff",
+                bgcolor: "background.paper",
                 border: "1px solid",
                 borderColor: "divider",
               }}
@@ -441,12 +444,12 @@ const WelcomeState = ({
                 <Box sx={{ p: 2 }}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.1 }}>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <MenuBook sx={{ fontSize: 18, color: "#7B61FF" }} />
-                      <Typography sx={{ fontSize: "0.98rem", fontWeight: 700, color: "#222" }}>
+                      <MenuBook sx={{ fontSize: 18, color: "primary.main" }} />
+                      <Typography sx={{ fontSize: "0.98rem", fontWeight: 700, color: "text.primary" }}>
                         {normalizedSelectedTopic}
                       </Typography>
                     </Stack>
-                    <IconButton size="small" sx={{ color: "#7B61FF" }}>
+                    <IconButton size="small" sx={{ color: "primary.main" }}>
                       <ArrowForward fontSize="small" />
                     </IconButton>
                   </Stack>
@@ -457,20 +460,20 @@ const WelcomeState = ({
                     sx={{
                       height: 6,
                       borderRadius: 999,
-                      bgcolor: "rgba(123,97,255,0.12)",
+                      bgcolor: alpha(theme.palette.primary.main, 0.12),
                       mb: 0.9,
                       "& .MuiLinearProgress-bar": {
                         borderRadius: 999,
-                        background: "linear-gradient(90deg, #7B61FF 0%, #9C6BFF 100%)",
+                        background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                       },
                     }}
                   />
 
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography sx={{ fontSize: "0.82rem", color: "#666" }}>
+                    <Typography sx={{ fontSize: "0.82rem", color: "text.secondary" }}>
                       {completedCount} / {totalCount} Lessons
                     </Typography>
-                    <Typography sx={{ fontSize: "0.82rem", color: "#666", fontWeight: 600 }}>
+                    <Typography sx={{ fontSize: "0.82rem", color: "text.secondary", fontWeight: 600 }}>
                       {progressPercent}% Complete
                     </Typography>
                   </Stack>
@@ -493,7 +496,10 @@ const WelcomeState = ({
                 theme.palette.background.paper,
                 0.85
               )} 0%, ${theme.palette.background.default} 100%)`
-            : "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+            : `linear-gradient(135deg, ${alpha(
+                theme.palette.background.paper,
+                0.95
+              )} 0%, ${theme.palette.background.default} 100%)`,
           display: "flex",
           flexDirection: "column",
         }}

@@ -17,6 +17,7 @@ import {
   Chip,
   Avatar,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   AccountCircle,
   QueryStats,
@@ -188,15 +189,13 @@ export default function Profile() {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: isMobile ? "#F7F8FC" : "background.default",
+        bgcolor: "background.default",
       }}
     >
       {/* Enhanced Header */}
       <Box
         sx={{
-          background: isMobile
-            ? "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)"
-            : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: "white",
           position: "relative",
           overflow: "hidden",
@@ -206,7 +205,7 @@ export default function Profile() {
           {isMobile ? (
             <Stack spacing={1.3}>
               <Stack direction="row" alignItems="center" spacing={1.2}>
-                <Avatar sx={{ width: 56, height: 56, bgcolor: "rgba(255,255,255,0.25)" }}>
+                <Avatar sx={{ width: 56, height: 56, bgcolor: alpha("#fff", 0.25) }}>
                   {(user?.name?.[0] || "U").toUpperCase()}
                 </Avatar>
                 <Box
@@ -264,9 +263,10 @@ export default function Profile() {
               elevation={0}
               sx={{
                 borderRadius: 3,
-                bgcolor: "#FFFFFF",
-                border: "1px solid #E7EAF3",
-                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
+                bgcolor: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: "none",
                 overflow: "hidden",
               }}
             >
@@ -280,7 +280,7 @@ export default function Profile() {
                     >
                       <ArrowBack fontSize="small" />
                     </IconButton>
-                    <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#0F172A" }}>
+                    <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "text.primary" }}>
                       {currentSection.label}
                     </Typography>
                   </Stack>
@@ -289,10 +289,10 @@ export default function Profile() {
               ) : (
                 <>
                   <Box sx={{ px: 2, py: 1.6 }}>
-                    <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#0F172A" }}>
+                    <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "text.primary" }}>
                       Profile sections
                     </Typography>
-                    <Typography sx={{ fontSize: "0.76rem", color: "#64748B", mt: 0.25 }}>
+                    <Typography sx={{ fontSize: "0.76rem", color: "text.secondary", mt: 0.25 }}>
                       Manage account, progress, and insights.
                     </Typography>
                   </Box>
@@ -307,7 +307,7 @@ export default function Profile() {
                           }}
                           sx={{ py: 1.5, px: 2 }}
                         >
-                          <ListItemIcon sx={{ minWidth: 36, color: "#4F46E5" }}>
+                          <ListItemIcon sx={{ minWidth: 36, color: "primary.main" }}>
                             {section.icon}
                           </ListItemIcon>
                           <ListItemText
@@ -316,15 +316,15 @@ export default function Profile() {
                             primaryTypographyProps={{
                               fontWeight: 700,
                               fontSize: "0.92rem",
-                              color: "#0F172A",
+                              color: "text.primary",
                             }}
                             secondaryTypographyProps={{
                               variant: "body2",
-                              color: "#64748B",
+                              color: "text.secondary",
                               fontSize: "0.75rem",
                             }}
                           />
-                          <ChevronRight sx={{ color: "#94A3B8", fontSize: 18 }} />
+                          <ChevronRight sx={{ color: "text.disabled", fontSize: 18 }} />
                         </ListItemButton>
                         <Divider component="li" />
                       </React.Fragment>
@@ -334,7 +334,7 @@ export default function Profile() {
                       onClick={() => navigate("/settings")}
                       sx={{ py: 1.5, px: 2 }}
                     >
-                      <ListItemIcon sx={{ minWidth: 36, color: "#4F46E5" }}>
+                      <ListItemIcon sx={{ minWidth: 36, color: "primary.main" }}>
                         <Settings fontSize="small" />
                       </ListItemIcon>
                       <ListItemText
@@ -343,15 +343,15 @@ export default function Profile() {
                         primaryTypographyProps={{
                           fontWeight: 700,
                           fontSize: "0.92rem",
-                          color: "#0F172A",
+                          color: "text.primary",
                         }}
                         secondaryTypographyProps={{
                           variant: "body2",
-                          color: "#64748B",
+                          color: "text.secondary",
                           fontSize: "0.75rem",
                         }}
                       />
-                      <ChevronRight sx={{ color: "#94A3B8", fontSize: 18 }} />
+                      <ChevronRight sx={{ color: "text.disabled", fontSize: 18 }} />
                     </ListItemButton>
                     <Divider component="li" />
                   </List>

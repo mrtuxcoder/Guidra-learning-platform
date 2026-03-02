@@ -54,7 +54,7 @@ const LearningContent = ({
   const [regeneratingMindmap, setRegeneratingMindmap] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     concept: true,
-    explanation: true,
+    explanation: false,
     learningActions: true,
     examples: true,
     practice: true,
@@ -406,7 +406,7 @@ const LearningContent = ({
     setLimitMessage("");
     setExpandedSections({
       concept: true,
-      explanation: true,
+      explanation: false,
       learningActions: true,
       examples: true,
       coreExample: true,
@@ -510,7 +510,10 @@ const LearningContent = ({
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      bgcolor: 'background.paper',
+      bgcolor: (theme) =>
+        isMobile
+          ? (theme.palette.mode === "dark" ? "#0F1115" : theme.palette.background.default)
+          : 'background.paper',
       '& ::-webkit-scrollbar': {
         width: '6px',
       },
@@ -905,7 +908,9 @@ const LearningContent = ({
       <Box sx={{ 
         flex: 1,
         overflow: 'auto',
-        p: isMobile ? 1.5 : 2
+        px: isMobile ? 2 : 2,
+        pt: isMobile ? 2.5 : 2,
+        pb: isMobile ? 2 : 2,
       }}>
         {limitMessage && (
           <Alert severity="warning" onClose={() => setLimitMessage("")} sx={{ mb: 2 }}>

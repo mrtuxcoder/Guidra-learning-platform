@@ -163,7 +163,10 @@ const Landing = () => {
               theme.palette.primary.main,
               0.2
             )} 0%, ${theme.palette.background.default} 55%)`
-          : "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+          : `linear-gradient(135deg, ${alpha(
+              theme.palette.primary.main,
+              0.06
+            )} 0%, ${theme.palette.background.paper} 100%)`,
         color: theme.palette.text.primary,
       }}
     >

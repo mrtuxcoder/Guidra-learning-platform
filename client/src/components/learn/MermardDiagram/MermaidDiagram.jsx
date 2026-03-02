@@ -14,6 +14,7 @@ const MermaidDiagram = ({
   remainingGenerations = 5,
   isRegenerating = false,
   initialError = false,
+  showViewButton = false,
 }) => {
   const ref = useRef(null);
   const [error, setError] = useState(initialError || null);
@@ -363,6 +364,18 @@ const MermaidDiagram = ({
 
   // Reset autoRegenerated when chart changes
   useEffect(() => {
+    const handleOpenZoom = () => {
+      setZoomOpen(true);
+    };
+
+    window.addEventListener("guidra-open-mindmap-zoom", handleOpenZoom);
+
+    return () => {
+      window.removeEventListener("guidra-open-mindmap-zoom", handleOpenZoom);
+    };
+  }, []);
+
+  useEffect(() => {
     setAutoRegenerated(false);
   }, [chart]);
 
@@ -441,7 +454,7 @@ const MermaidDiagram = ({
           }}
         />
 
-        {!isLoading && (
+        {!isLoading && !showViewButton && (
           <Box
             sx={{
               textAlign: "center",
