@@ -52,7 +52,7 @@ const ContentSection = ({
   const extractExampleParts = (value) => {
     if (typeof value !== "string") {
       return {
-        code: 'print("Hello World")',
+        code: "",
         explanation: "This prints a message to the console.",
       };
     }
@@ -62,7 +62,7 @@ const ContentSection = ({
     const cleanText = value.replace(/```(?:\w+)?\n[\s\S]*?```/g, "").trim();
 
     return {
-      code: code || 'print("Hello World")',
+      code: code || "",
       explanation:
         cleanText ||
         "This simple statement demonstrates how Python outputs text.",

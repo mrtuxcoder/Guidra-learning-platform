@@ -84,6 +84,14 @@ const LoadingSpinner = () => {
 };
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+
+function AppContent() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
   const appSessionStartRef = useRef(Date.now());
@@ -174,23 +182,22 @@ export default function App() {
 
   // Show loading spinner for theme which might not be ready
   return (
-    <ThemeProvider>
-      <TimerProvider>
-        <DailyRegenProvider>
-          {/* Offline Indicator */}
-          <OfflineIndicator />
+    <TimerProvider>
+      <DailyRegenProvider>
+        {/* Offline Indicator */}
+        <OfflineIndicator />
 
-          {/* Password Setup Modal */}
-          <PasswordSetupModal
-            open={showPasswordModal}
-            onClose={() => setShowPasswordModal(false)}
-            onSuccess={handlePasswordSetupSuccess}
-            required={needsPasswordSetup}
-          />
+        {/* Password Setup Modal */}
+        <PasswordSetupModal
+          open={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={handlePasswordSetupSuccess}
+          required={needsPasswordSetup}
+        />
 
-          <Routes>
-            {/* Public routes - only accessible when not logged in */}
-            <Route
+        <Routes>
+          {/* Public routes - only accessible when not logged in */}
+          <Route
           path="/"
               element={!isAuth ? <Landing /> : <Navigate to={authedHomeRoute} replace />}
         />
@@ -282,9 +289,8 @@ export default function App() {
           path="*"
           element={<Navigate to={isAuth ? authedHomeRoute : "/login"} replace />}
         />
-          </Routes>
-        </DailyRegenProvider>
-      </TimerProvider>
-    </ThemeProvider>
+        </Routes>
+      </DailyRegenProvider>
+    </TimerProvider>
   );
 }

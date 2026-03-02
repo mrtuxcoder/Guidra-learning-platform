@@ -193,17 +193,28 @@ export default function Learning() {
         if (isMobile) {
           setMobileDrawerOpen(false);
         }
+
+        return orderedSubtopics;
       } catch (err) {
         const errorMsg =
           err.response?.data?.message || "Failed to load subtopics";
         setError(errorMsg);
         setShowError(true);
+        return [];
       } finally {
         setLoading(false);
       }
     },
     [isMobile]
   );
+
+  const getStartingSubtopic = useCallback((subtopicsArray) => {
+    if (!Array.isArray(subtopicsArray) || subtopicsArray.length === 0) {
+      return null;
+    }
+
+    return subtopicsArray.find((sub) => sub && !sub.completed) || subtopicsArray[0];
+  }, []);
 
   // Memoized fetch functions
   const fetchUserTopics = useCallback(
@@ -246,7 +257,11 @@ export default function Learning() {
 
       if (preferredTopicName) {
         setSelectedTopic(preferredTopicName);
-        await fetchSubtopics(preferredTopicName);
+        const orderedSubtopics = await fetchSubtopics(preferredTopicName);
+        const startingSubtopic = getStartingSubtopic(orderedSubtopics);
+        if (startingSubtopic) {
+          setSelectedSubtopic(startingSubtopic);
+        }
         return;
       }
 
@@ -270,7 +285,29 @@ export default function Learning() {
     } finally {
       setLoading(false);
     }
-  }, [user, getOrderedTopics, fetchSubtopics, updateDailyRegen]);
+  }, [
+    user,
+    getOrderedTopics,
+    fetchSubtopics,
+    updateDailyRegen,
+    getStartingSubtopic,
+  ]);
+
+  const handleTopicSelect = useCallback(
+    async (topicName) => {
+      const orderedSubtopics = await fetchSubtopics(topicName);
+
+      if (!preferredTopic) {
+        return;
+      }
+
+      const startingSubtopic = getStartingSubtopic(orderedSubtopics);
+      if (startingSubtopic) {
+        setSelectedSubtopic(startingSubtopic);
+      }
+    },
+    [fetchSubtopics, preferredTopic, getStartingSubtopic]
+  );
 
   // Function to reorder subtopics - incomplete first
   const getOrderedSubtopics = useCallback((subtopicsArray) => {
@@ -967,7 +1004,7 @@ export default function Learning() {
             updatingSubtopic={updatingSubtopic}
             contentCache={contentCache}
             generationCounts={generationCounts}
-            onTopicSelect={fetchSubtopics}
+            onTopicSelect={handleTopicSelect}
             onSubtopicSelect={handleSelectSubtopic}
             onUpdateUnderstanding={handleUpdateUnderstanding}
             progress={calculateProgress()}
@@ -991,7 +1028,7 @@ export default function Learning() {
             updatingSubtopic={updatingSubtopic}
             contentCache={contentCache}
             generationCounts={generationCounts}
-            onTopicSelect={fetchSubtopics}
+            onTopicSelect={handleTopicSelect}
             onSubtopicSelect={handleSelectSubtopic}
             onUpdateUnderstanding={handleUpdateUnderstanding}
             progress={calculateProgress()}
@@ -1162,6 +1199,9 @@ export default function Learning() {
               contentInfo={contentInfo}
               selectedTopic={selectedTopic}
               selectedSubtopic={selectedSubtopic}
+              currentSubtopicIndex={originalSubtopics.findIndex(
+                (sub) => sub.name === selectedSubtopic?.name
+              )}
               contentLoading={contentLoading}
               contentError={contentError}
               onRetry={handleRetryContent}
@@ -1181,7 +1221,7 @@ export default function Learning() {
               selectedTopic={selectedTopic}
               isDataLoading={loading}
               onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}
-              onTopicSelect={fetchSubtopics}
+              onTopicSelect={handleTopicSelect}
               onSubtopicSelect={handleSelectSubtopic}
               onOpenSidebar={() => setMobileDrawerOpen(true)}
               progress={calculateProgress()}

@@ -48,11 +48,12 @@ const DesktopHeader = ({
           {/* Title Area */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
-              variant="h6"
+              variant="subtitle1"
               fontWeight="700"
               sx={{
                 color: colorPalette?.[700] || "#5d3a9f",
                 mb: 0.5,
+                fontSize: "1rem",
                 background: `linear-gradient(135deg, ${
                   colorPalette?.[600] || "#6d48b5"
                 } 0%, ${colorPalette?.[700] || "#5d3a9f"} 100%)`,
@@ -61,7 +62,7 @@ const DesktopHeader = ({
                 WebkitTextFillColor: "transparent",
               }}
             >
-              {selectedSubtopic.name}
+              {`${currentIndex + 1}. ${selectedSubtopic.name}`}
             </Typography>
             <Typography
               variant="body2"

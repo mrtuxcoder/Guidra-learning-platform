@@ -37,6 +37,7 @@ const LearningContent = ({
   contentInfo, 
   selectedTopic, 
   selectedSubtopic, 
+  currentSubtopicIndex = -1,
   contentLoading, 
   onGenerateContent,
   onSelectFullVersion,
@@ -539,6 +540,7 @@ const LearningContent = ({
         title={safeContent.title}
         topic={selectedTopic}
         isMobile={isMobile}
+        currentSubtopicIndex={currentSubtopicIndex}
         colorPalette={colorPalette}
       />
 

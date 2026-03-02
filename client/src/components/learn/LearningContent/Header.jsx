@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 
-const Header = ({ title, topic, isMobile, colorPalette }) => {
+const Header = ({ title, topic, isMobile, currentSubtopicIndex = -1, colorPalette }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const accentMain = colorPalette?.[600] || "#6d48b5";
@@ -23,6 +23,14 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
     const cleanedTitle = title.replace(leadingTopicPattern, "").trim();
     return cleanedTitle || title;
   }, [isMobile, title, topic]);
+
+  const titleWithCount = React.useMemo(() => {
+    if (currentSubtopicIndex < 0) {
+      return displayTitle;
+    }
+
+    return `${currentSubtopicIndex + 1}. ${displayTitle}`;
+  }, [currentSubtopicIndex, displayTitle]);
 
   return (
     <Box
@@ -57,7 +65,7 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              fontSize: isMobile ? "1.55rem" : "1.6rem",
+              fontSize: isMobile ? "1.2rem" : "1.6rem",
               lineHeight: 1.2,
               letterSpacing: "-0.01em",
               mb: isMobile ? 0 : 0.4,
@@ -67,7 +75,7 @@ const Header = ({ title, topic, isMobile, colorPalette }) => {
               overflow: "hidden",
             }}
           >
-            {displayTitle}
+            {titleWithCount}
           </Typography>
           {!isMobile && (
             <Typography

@@ -1,14 +1,13 @@
 import React from "react";
 import { Container, Box, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useTheme } from "@mui/material/styles";
 import { RocketLaunch } from "@mui/icons-material";
 
 const LoadingState = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const accentGradient = isDark
-    ? "linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)"
-    : "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)";
+  const accentGradient = `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`;
 
   return (
     <Container
@@ -19,8 +18,14 @@ const LoadingState = () => {
         alignItems: "center",
         minHeight: "100vh",
         background: isDark
-          ? "linear-gradient(135deg, #120B1D 0%, #0B0B12 100%)"
-          : "linear-gradient(135deg, #FAF7FE 0%, #FFFFFF 100%)",
+          ? `radial-gradient(circle at top, ${alpha(
+              theme.palette.primary.main,
+              0.2
+            )} 0%, ${theme.palette.background.default} 60%)`
+          : `linear-gradient(135deg, ${alpha(
+              theme.palette.primary.main,
+              0.08
+            )} 0%, ${theme.palette.background.paper} 100%)`,
       }}
     >
       <Box sx={{ textAlign: "center", px: 2 }}>
@@ -61,7 +66,7 @@ const LoadingState = () => {
         </Typography>
         <Typography
           variant="body1"
-          color={isDark ? "rgba(226, 232, 240, 0.7)" : "text.secondary"}
+          color="text.secondary"
           sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
         >
           Preparing your learning dashboard
