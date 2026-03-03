@@ -54,7 +54,6 @@ export const {
   getUserProgress,
   updateUnderstandingLevel,
   markTopicComplete,
-  recordTimeSpent,
   getAvailableVersions,
   getFullContentByVersion,
   getLatestFullContent,

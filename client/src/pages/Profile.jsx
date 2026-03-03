@@ -142,10 +142,7 @@ export default function Profile() {
       content: (
         <Stack spacing={2.5}>
           <AnalysisCard />
-          <CompletedSubtopicsInsights
-            progress={user?.progress || []}
-            appTimeMs={user?.appTimeMs || 0}
-          />
+          <CompletedSubtopicsInsights progress={user?.progress || []} />
         </Stack>
       ),
     },

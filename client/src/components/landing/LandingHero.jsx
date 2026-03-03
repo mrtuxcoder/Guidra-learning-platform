@@ -160,9 +160,9 @@ const LandingHero = ({
                 fontSize: { xs: "0.95rem", md: "1.05rem" },
               }}
             >
-              Guidra is not a chatbot. It is a structured AI-powered learning
-              platform that organizes topics into subtopics, explanations,
-              mindmaps, quizzes, and practice so you can study without noise.
+              Guidra is not a chatbot. It gives you topic-based learning paths
+              with subtopics, explanations, mindmaps, practice, quizzes,
+              progress tracking, and recall mode for completed topics.
             </Typography>
             <Stack
               direction={{ xs: "column", sm: "row" }}

@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Box, CircularProgress, Typography, alpha, useTheme } from "@mui/material";
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
@@ -11,7 +11,6 @@ import Settings from "./pages/Settings";
 import Layout from "./components/Layout";
 import OfflineIndicator from "./components/OfflineIndicator";
 import PasswordSetupModal from "./components/PasswordSetupModal";
-import { recordTimeSpent } from "./api";
 import { usePasswordCheck } from "./hooks/usePasswordCheck";
 import { useUser } from "./contexts/UserContext";
 import { DailyRegenProvider } from "./contexts/DailyRegenContext";
@@ -94,8 +93,6 @@ export default function App() {
 function AppContent() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
-  const appSessionStartRef = useRef(Date.now());
-  const appTimerRef = useRef(null);
 
   // Get user from shared context - already fetching on mount
   const { user, isLoading: userLoading } = useUser();
@@ -132,43 +129,6 @@ function AppContent() {
       setShowPasswordModal(true);
     }
   }, [isAuth, needsPasswordSetup, passwordLoading]);
-
-  useEffect(() => {
-    const clearTimer = () => {
-      if (appTimerRef.current) {
-        clearInterval(appTimerRef.current);
-        appTimerRef.current = null;
-      }
-    };
-
-    if (!isAuth) {
-      clearTimer();
-      return;
-    }
-
-    appSessionStartRef.current = Date.now();
-
-    const trackAppTime = async () => {
-      const now = Date.now();
-      const durationMs = now - appSessionStartRef.current;
-      appSessionStartRef.current = now;
-
-      if (durationMs < 1000) return;
-
-      try {
-        await recordTimeSpent({ durationMs });
-      } catch (error) {
-        console.error("Failed to record app time:", error);
-      }
-    };
-
-    appTimerRef.current = setInterval(trackAppTime, 60000);
-
-    return () => {
-      clearTimer();
-      trackAppTime();
-    };
-  }, [isAuth]);
 
   const handlePasswordSetupSuccess = () => {
     setShowPasswordModal(false);

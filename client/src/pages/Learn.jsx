@@ -24,7 +24,6 @@ import {
   incrementGenerationCount,
   getGenerationCounts,
   getCachedSubtopics,
-  recordTimeSpent,
   getFullContentByVersion,
 } from "../api/learning";
 import LearningSidebar from "../components/learn/LearningSidebar/index";
@@ -66,9 +65,6 @@ export default function Learning() {
   const [generationCounts, setGenerationCounts] = useState({});
   const [contentCache, setContentCache] = useState({});
   const [cachedSubtopics, setCachedSubtopics] = useState([]);
-  const subtopicStartRef = useRef(null);
-  const activeTopicRef = useRef(null);
-  const activeSubtopicRef = useRef(null);
   
   // Use shared user context
   const { user } = useUser();
@@ -82,6 +78,7 @@ export default function Learning() {
   const [pendingCompleteSubtopic, setPendingCompleteSubtopic] = useState(null);
   const [teachingStyleSelectorOpen, setTeachingStyleSelectorOpen] = useState(false);
   const [selectedTeachingStyle, setSelectedTeachingStyle] = useState("default");
+  const [pendingAutoOpen, setPendingAutoOpen] = useState(null);
   
   // Ref to store the version dialog opener from LearningContent
   const versionDialogOpenerRef = useRef(null);
@@ -90,27 +87,6 @@ export default function Learning() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const MAX_GENERATIONS = 3;
-
-  const flushSubtopicTime = useCallback(async () => {
-    const startTime = subtopicStartRef.current;
-    const activeTopic = activeTopicRef.current;
-    const activeSubtopic = activeSubtopicRef.current;
-
-    if (!startTime || !activeTopic || !activeSubtopic) return;
-
-    const durationMs = Date.now() - startTime;
-    if (durationMs < 1000) return;
-
-    try {
-      await recordTimeSpent({
-        durationMs,
-        topic: activeTopic,
-        subtopicName: activeSubtopic,
-      });
-    } catch (error) {
-      console.error("Failed to record subtopic time:", error);
-    }
-  }, [recordTimeSpent]);
 
   // Register the version dialog opener from LearningContent
   const handleRegisterVersionDialogOpener = useCallback((openerFn) => {
@@ -139,14 +115,55 @@ export default function Learning() {
         if (hasIncomplete) {
           incompleteTopics.push(topic);
         }
-      } else {
-        // If no subtopics info, treat as incomplete
+      } else if (topic?.completed === false) {
+        // Use explicit topic-level completion only when subtopics are unavailable
         incompleteTopics.push(topic);
       }
     });
 
     return incompleteTopics;
   }, []);
+
+  const getCompletedTopics = useCallback((topicsArray) => {
+    if (!Array.isArray(topicsArray)) return [];
+
+    return topicsArray.filter((topic) => {
+      const subtopicList = topic?.subTopics || topic?.subtopics || [];
+      if (subtopicList.length === 0) return topic?.completed === true;
+      return subtopicList.every((sub) => sub && sub.completed);
+    });
+  }, []);
+
+  const getVisibleTopics = useCallback(
+    (topicsArray, recallTopicName) => {
+      const incompleteTopics = getOrderedTopics(topicsArray);
+
+      if (!recallTopicName) {
+        return incompleteTopics;
+      }
+
+      const completedTopics = getCompletedTopics(topicsArray);
+      if (completedTopics.length === 0) {
+        return incompleteTopics;
+      }
+
+      const recalledTopic = completedTopics.find(
+        (topic) => (topic?.topic || topic?.name) === recallTopicName
+      );
+
+      if (!recalledTopic) {
+        return completedTopics;
+      }
+
+      return [
+        recalledTopic,
+        ...completedTopics.filter(
+          (topic) => (topic?.topic || topic?.name) !== recallTopicName
+        ),
+      ];
+    },
+    [getOrderedTopics, getCompletedTopics]
+  );
 
   const preferredTopic = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -208,9 +225,15 @@ export default function Learning() {
     [isMobile]
   );
 
-  const getStartingSubtopic = useCallback((subtopicsArray) => {
+  const getStartingSubtopic = useCallback((subtopicsArray, options = {}) => {
+    const { startFromBeginning = false } = options;
+
     if (!Array.isArray(subtopicsArray) || subtopicsArray.length === 0) {
       return null;
+    }
+
+    if (startFromBeginning) {
+      return subtopicsArray[0];
     }
 
     return subtopicsArray.find((sub) => sub && !sub.completed) || subtopicsArray[0];
@@ -232,6 +255,7 @@ export default function Learning() {
       const dailyUsed = Number(user.regenDailyCount || 0);
       updateDailyRegen(Math.max(0, 6 - dailyUsed), user.regenDailyResetAt || null);
       const orderedTopics = getOrderedTopics(progressTopics);
+      const visibleTopics = getVisibleTopics(progressTopics, preferredTopicName);
 
       if (preferredTopicName) {
         const recalledTopic = progressTopics.find(
@@ -240,27 +264,25 @@ export default function Learning() {
         );
 
         if (recalledTopic) {
-          const mergedTopics = [
-            recalledTopic,
-            ...orderedTopics.filter(
-              (topic) =>
-                (topic?.topic || topic?.name) !== preferredTopicName
-            ),
-          ];
-          setTopics(mergedTopics);
+          setTopics(visibleTopics);
         } else {
-          setTopics(orderedTopics);
+          setTopics(visibleTopics);
         }
       } else {
-        setTopics(orderedTopics);
+        setTopics(visibleTopics);
       }
 
       if (preferredTopicName) {
         setSelectedTopic(preferredTopicName);
         const orderedSubtopics = await fetchSubtopics(preferredTopicName);
-        const startingSubtopic = getStartingSubtopic(orderedSubtopics);
+        const startingSubtopic = getStartingSubtopic(orderedSubtopics, {
+          startFromBeginning: true,
+        });
         if (startingSubtopic) {
-          setSelectedSubtopic(startingSubtopic);
+          setPendingAutoOpen({
+            topic: preferredTopicName,
+            subtopic: startingSubtopic,
+          });
         }
         return;
       }
@@ -288,6 +310,7 @@ export default function Learning() {
   }, [
     user,
     getOrderedTopics,
+    getVisibleTopics,
     fetchSubtopics,
     updateDailyRegen,
     getStartingSubtopic,
@@ -297,16 +320,17 @@ export default function Learning() {
     async (topicName) => {
       const orderedSubtopics = await fetchSubtopics(topicName);
 
-      if (!preferredTopic) {
-        return;
-      }
-
-      const startingSubtopic = getStartingSubtopic(orderedSubtopics);
+      const startingSubtopic = getStartingSubtopic(orderedSubtopics, {
+        startFromBeginning: true,
+      });
       if (startingSubtopic) {
-        setSelectedSubtopic(startingSubtopic);
+        setPendingAutoOpen({
+          topic: topicName,
+          subtopic: startingSubtopic,
+        });
       }
     },
-    [fetchSubtopics, preferredTopic, getStartingSubtopic]
+    [fetchSubtopics, getStartingSubtopic]
   );
 
   // Function to reorder subtopics - incomplete first
@@ -512,6 +536,10 @@ export default function Learning() {
       cachedSubtopicSet.has(sub?.name?.toLowerCase())
     );
   }, [dailyRegenRemaining, subtopics, cachedSubtopicSet]);
+
+  const visibleTopics = useMemo(() => {
+    return getVisibleTopics(topics, preferredTopic);
+  }, [topics, preferredTopic, getVisibleTopics]);
 
   useEffect(() => {
     let isActive = true;
@@ -919,38 +947,13 @@ export default function Learning() {
   }, [selectedSubtopic]);
 
   useEffect(() => {
-    const currentTopic = selectedTopic;
-    const currentSubtopic = selectedSubtopic?.name;
-
-    if (!currentTopic || !currentSubtopic) {
-      if (activeTopicRef.current && activeSubtopicRef.current) {
-        flushSubtopicTime();
-        activeTopicRef.current = null;
-        activeSubtopicRef.current = null;
-        subtopicStartRef.current = null;
-      }
+    if (!pendingAutoOpen?.topic || !pendingAutoOpen?.subtopic) {
       return;
     }
 
-    if (
-      activeTopicRef.current &&
-      activeSubtopicRef.current &&
-      (activeTopicRef.current !== currentTopic ||
-        activeSubtopicRef.current !== currentSubtopic)
-    ) {
-      flushSubtopicTime();
-    }
-
-    activeTopicRef.current = currentTopic;
-    activeSubtopicRef.current = currentSubtopic;
-    subtopicStartRef.current = Date.now();
-  }, [selectedTopic, selectedSubtopic, flushSubtopicTime]);
-
-  useEffect(() => {
-    return () => {
-      flushSubtopicTime();
-    };
-  }, [flushSubtopicTime]);
+    handleSelectSubtopic(pendingAutoOpen.subtopic, pendingAutoOpen.topic);
+    setPendingAutoOpen(null);
+  }, [pendingAutoOpen, handleSelectSubtopic]);
 
   const currentError = contentError || error;
   const handleNavigateSubtopic = useCallback(
@@ -997,7 +1000,7 @@ export default function Learning() {
           }}
         >
           <LearningSidebar
-            topics={topics}
+            topics={visibleTopics}
             subtopics={displayedSubtopics}
             selectedTopic={selectedTopic}
             selectedSubtopic={selectedSubtopic}
@@ -1021,7 +1024,7 @@ export default function Learning() {
           }}
         >
           <LearningSidebar
-            topics={topics}
+            topics={visibleTopics}
             subtopics={displayedSubtopics}
             selectedTopic={selectedTopic}
             selectedSubtopic={selectedSubtopic}
@@ -1217,7 +1220,7 @@ export default function Learning() {
               isReady={!!selectedSubtopic}
               onGenerateContent={() => handleGenerateContent(selectedSubtopic)}
               subtopics={displayedSubtopics}
-              topics={topics}
+              topics={visibleTopics}
               selectedTopic={selectedTopic}
               isDataLoading={loading}
               onNavigateToFirstIncomplete={handleNavigateToFirstIncomplete}

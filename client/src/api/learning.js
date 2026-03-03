@@ -139,11 +139,6 @@ export const updateUnderstandingLevel = async (data) => {
   return response;
 };
 
-export const recordTimeSpent = async (data) => {
-  const response = await API.put("/api/v1/progress/time", data);
-  return response;
-};
-
 export const markTopicComplete = async (topic) => {
   const response = await API.put(
     `/api/v1/progress/topics/${encodeURIComponent(topic)}/complete`

@@ -9,12 +9,12 @@ import {
 import { profileTheme } from "../profile/constants";
 
 const regenerationPoints = [
-  "Regenerate specific components (explanation, quiz, mindmap, examples) with different styles.",
-  "AI usage is controlled and tracked daily to manage costs and quality.",
-  "Full content versioning—access all generated versions and compare them side-by-side.",
-  "Retrieve complete generated content from multiple versions in one place.",
-  "Component-level regeneration with teaching style customization.",
-  "Smart caching system keeps your learning efficient and fast.",
+  "Regenerate lessons with selected teaching styles instead of random retries.",
+  "Daily regeneration limits keep AI usage predictable and fair.",
+  "Cached content is reused automatically for faster loading.",
+  "Open full content by version when you want a previous output.",
+  "Track generation counts per subtopic so retries stay intentional.",
+  "When limits are reached, you can still continue with already cached subtopics.",
 ];
 
 const LandingRegeneration = () => {

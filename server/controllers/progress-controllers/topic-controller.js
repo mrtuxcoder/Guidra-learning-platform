@@ -90,7 +90,7 @@ exports.getUserProgress = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const user = await User.findById(userId).select("progress appTimeMs");
+    const user = await User.findById(userId).select("progress");
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -116,7 +116,6 @@ exports.getUserProgress = async (req, res) => {
         totalTopics: user.progress.length,
         totalSubtopics,
         completedSubtopics,
-        appTimeMs: user.appTimeMs || 0,
       },
     });
   } catch (error) {

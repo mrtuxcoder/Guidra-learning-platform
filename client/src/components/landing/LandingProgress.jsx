@@ -11,27 +11,27 @@ import { profileTheme } from "../profile/constants";
 const progressItems = [
   {
     title: "Topic completion",
-    detail: "Automatically calculated from subtopics and learning sessions.",
+    detail: "Calculated from completed subtopics so your course progress stays clear.",
   },
   {
     title: "Understanding level",
-    detail: "Track your mastery on a 1–5 scale and see progress over time.",
+    detail: "Rate each subtopic on a 1–5 scale to reflect confidence and mastery.",
   },
   {
     title: "Quiz analytics",
-    detail: "Detailed quiz scores, mistakes, and performance trends saved for review.",
+    detail: "Review quiz accuracy, strengths, and weak spots from your learning history.",
   },
   {
-    title: "Session tracking",
-    detail: "Monitor time spent per topic and subtopic to optimize learning.",
+    title: "Recall tracking",
+    detail: "Reopen completed topics in recall mode for focused revision.",
   },
   {
-    title: "Content versions",
-    detail: "Keep track of all content regenerations and access previous versions.",
+    title: "Generation insights",
+    detail: "See regeneration counts per subtopic and keep retries intentional.",
   },
   {
     title: "Daily stats",
-    detail: "Daily regeneration limit tracking and learning streak analytics.",
+    detail: "Track daily regeneration usage and timer-based focus sessions.",
   },
 ];
 

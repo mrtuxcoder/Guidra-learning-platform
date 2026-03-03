@@ -145,7 +145,7 @@ export const setupPassword = async (passwordData) => {
 };
 
 export const changePassword = async (passwordData) => {
-  return await API.post("/api/v1/users/me/password/change", passwordData);
+  return await API.put("/api/v1/users/me/password/change", passwordData);
 };
 
 export const completeLogout = async () => {

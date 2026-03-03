@@ -22,9 +22,6 @@ const {
   markSubtopicComplete,
 } = require("../../controllers/progress-controllers/subtopic-progress");
 const {
-  recordTimeSpent,
-} = require("../../controllers/progress-controllers/time-controller");
-const {
   analyzeQuizAnswers,
   getTopicAnalysis,
   getAllAnalysis,
@@ -39,9 +36,6 @@ router.put("/topics/:topic/complete", authMiddleware, markTopicComplete);
 
 // Subtopic progress
 router.put("/subtopics/complete", authMiddleware, markSubtopicComplete);
-
-// Time tracking
-router.put("/time", authMiddleware, recordTimeSpent);
 
 // Understanding level
 router.put("/understanding", authMiddleware, updateUnderstandingLevel);

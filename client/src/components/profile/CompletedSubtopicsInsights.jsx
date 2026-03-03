@@ -30,7 +30,7 @@ const getAccuracy = (quizMark = {}) => {
   return Math.round((correct / total) * 100);
 };
 
-const buildInsights = ({ completedCount, avgTimeMs, avgAccuracy, appTimeMs }) => {
+const buildInsights = ({ completedCount, avgTimeMs, avgAccuracy }) => {
   const insights = [];
 
   if (completedCount === 0) {
@@ -51,14 +51,10 @@ const buildInsights = ({ completedCount, avgTimeMs, avgAccuracy, appTimeMs }) =>
     insights.push(accuracyNote);
   }
 
-  if (appTimeMs > 0) {
-    insights.push(`Total time in app: ${formatDuration(appTimeMs)}.`);
-  }
-
   return insights;
 };
 
-const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
+const CompletedSubtopicsInsights = ({ progress = [] }) => {
   const {
     completedSubtopics,
     totalTimeMs,
@@ -110,7 +106,6 @@ const CompletedSubtopicsInsights = ({ progress = [], appTimeMs = 0 }) => {
     completedCount: completedSubtopics.length,
     avgTimeMs: averageTimeMs,
     avgAccuracy: averageAccuracy,
-    appTimeMs,
   });
 
   return (

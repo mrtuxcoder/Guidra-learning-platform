@@ -9,10 +9,10 @@ import {
 import { profileTheme } from "../profile/constants";
 
 const problemPoints = [
-  "Chatbot replies are long and unstructured.",
-  "No saved progress or clear learning path.",
-  "Revision is scattered and hard to organize.",
-  "Responses are overwhelming for study use.",
+  "Most AI answers are one-off and hard to revise later.",
+  "Learners need a clear subtopic path, not random prompts.",
+  "Progress, quiz performance, and understanding are rarely tracked together.",
+  "Regeneration often creates inconsistency instead of stable study material.",
 ];
 
 const LandingProblem = () => {

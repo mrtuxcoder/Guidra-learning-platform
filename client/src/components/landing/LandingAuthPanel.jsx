@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Paper,
@@ -11,7 +11,10 @@ import {
   alpha,
   useTheme,
   useMediaQuery,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { profileTheme } from "../profile/constants";
 
 const LandingAuthPanel = ({
@@ -29,6 +32,8 @@ const LandingAuthPanel = ({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <Paper
@@ -124,23 +129,47 @@ const LandingAuthPanel = ({
         <TextField
           label="Password"
           name="password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={formData.password || ""}
           onChange={onChange}
           fullWidth
           required
           size={isDesktop ? "medium" : "small"}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  edge="end"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         {isRegister && (
           <TextField
             label="Confirm password"
             name="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             value={formData.confirmPassword || ""}
             onChange={onChange}
             fullWidth
             required
             size={isDesktop ? "medium" : "small"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         )}
 

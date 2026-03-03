@@ -19,10 +19,10 @@ const LandingNavPreview = () => {
           Minimal Navigation
         </Typography>
         <Typography sx={{ color: "text.secondary", mb: 2 }}>
-          Only three main sections keep the interface focused.
+          Navigation stays clean while covering your full study workflow.
         </Typography>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-          {["Learn", "Test", "Profile"].map((item) => (
+          {["Learn", "Explore", "Custom Topic", "Timer", "Profile"].map((item) => (
             <Chip
               key={item}
               label={item}

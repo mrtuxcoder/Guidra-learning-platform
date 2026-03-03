@@ -19,55 +19,69 @@ Guidra fixes this by enforcing a strict lesson format and caching every piece of
 
 ---
 
-## ✨ Key Features (V1)
+## ✨ Key Features (Current)
 
-### 🔹 Structured Lessons
-Each subtopic follows an identical format:
+### 🔹 Modern UI/UX Flow
+- Clean and responsive UI across desktop and mobile
+- Unified flow: **Explore → Learn → Recall → Profile/Insights**
+- Reduced friction in auth, topic selection, and subtopic navigation
+- Password UX improvements (show/hide toggles and clearer success/error messages)
+
+### 🔹 Structured Learning Content
+Each subtopic is delivered in a predictable format:
 - Core Concept  
 - Detailed Explanation  
 - Real-World Example  
 - Mermaid Mind Map  
-- Learning Steps
-- Practice
-- Quick Quiz  
+- Learning Steps  
+- Practice  
+- Quick Quiz
 
-### 🔹 Progress Tracking
-Guidra keeps track of:
-- Your topics  
-- Finished subtopics  
-- Completion percentage  
-- Your last visited subtopic  
-- Quiz marks
+### 🔹 Recall Mode for Completed Topics
+- Completed topics can be reopened in dedicated recall mode
+- Recall starts from the beginning of the selected topic for revision
+- Normal learning view prioritizes incomplete topics for active progress
 
-### 🔹 Smart Caching  
-Once a lesson is generated, it’s stored permanently.  
-No inconsistency, no reruns.
+### 🔹 Progress + Insights
+Guidra tracks and surfaces:
+- Topic and subtopic completion
+- Understanding level (1–5)
+- Quiz performance and analysis insights
+- Completed-topic and completed-subtopic review signals
 
-### 🔹 Explore Library  
-40 curated foundational topics ready to learn instantly.
+### 🔹 Global Daily Regeneration Control
+- Daily regeneration is enforced globally
+- Subtopic generation counts are tracked
+- Cached content remains available when daily limit is reached
 
-### 🔹 Custom Topics (Beta)
-Enter any beginner-friendly topic and Guidra:
-1. Validates it (using external AI models)  
-2. Creates a 10–15 subtopic learning path  
-3. Generates structured lessons for each part  
+### 🔹 Content Caching + Version Access
+- Generated content is cached for consistency and speed
+- Multiple content versions can be accessed and reviewed
+- Regeneration supports different teaching styles
 
-### 🔹 Multi-Model AI Pipeline  
-Guidra intelligently uses:
-- **Gemini API** for validation and structured generation  
-- **Groq (LLaMA family)** for lightweight checks  
-- **HuggingFace models** for utility tasks like classification  
+### 🔹 Explore + Custom Topic Pipeline
+- Curated topic library for fast onboarding
+- Custom topic validation and generated subtopic roadmap
+- Direct handoff into Learn flow with generated paths
 
-This keeps it fast and cost-efficient.
+### 🔹 Study Timer + Focus Workflow
+- Built-in focus timer for study sessions
+- Session completion cues integrated in-app
+- Timer is available in primary navigation flow
 
-### 🔹 Auto-Fix Mermaid Diagrams  
-If a mind map has syntax errors, Guidra auto-regenerates it and shows a manual regenerate option.
+### 🔹 Dark Mode + Theming
+- Full light/dark mode support
+- Consistent design tokens and theme-aware components
+
+### 🔹 Navigation Architecture
+- Clear top-level navigation for Learn, Explore, Custom Topic, Timer, and Profile
+- Mobile-friendly navigation with optimized access patterns
 
 ---
 
 ## 🏗️ Tech Stack
 
-**Frontend:** React, Vite, Tailwind  
+**Frontend:** React, Vite, Material UI  
 **Backend:** Node.js, Express  
 **Database:** MongoDB  
 **Auth:** JWT + Google OAuth  

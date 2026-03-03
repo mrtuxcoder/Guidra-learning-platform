@@ -10,28 +10,28 @@ import { profileTheme } from "../profile/constants";
 
 const solutionSteps = [
   {
-    title: "Choose or customize a topic",
-    detail: "Pick from recommended subjects or add your own custom learning topic.",
+    title: "Start from curated or custom topics",
+    detail: "Use Explore for ready-to-learn topics or validate your own topic and generate a custom path.",
   },
   {
-    title: "Select your teaching style",
-    detail: "Choose how you want content generated—detailed, concise, visual, or academic.",
+    title: "Learn subtopic by subtopic",
+    detail: "Each topic is split into structured subtopics with explanation, examples, mindmap, practice, and quiz.",
   },
   {
-    title: "Get structured content",
-    detail: "Guidra builds a complete learning path with explanation, mindmap, and examples.",
+    title: "Generate and regenerate with control",
+    detail: "Use teaching styles, version history, and cached content to keep output consistent and useful.",
   },
   {
-    title: "Practice with interactive quizzes",
-    detail: "Test your understanding with AI-generated quizzes and track your performance.",
+    title: "Track mastery, not just completion",
+    detail: "Update understanding level, submit quizzes, and monitor performance from Learn and Profile insights.",
   },
   {
-    title: "Study with focus timer",
-    detail: "Use the built-in study timer to maintain focused sessions and track time spent.",
+    title: "Recall completed topics anytime",
+    detail: "Finished topics can be reopened in recall mode for quick revision from the first subtopic.",
   },
   {
-    title: "Review and regenerate",
-    detail: "Access all content versions, regenerate components, and compare different approaches.",
+    title: "Keep a daily learning rhythm",
+    detail: "Use daily regeneration limits and the focus timer to keep study sessions sustainable.",
   },
 ];
 

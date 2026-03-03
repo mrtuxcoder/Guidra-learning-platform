@@ -19,7 +19,7 @@ exports.profileController = async (req, res) => {
       return res.status(401).json({ error: "Not authorized" });
     }
 
-    const userData = await User.findById(userId).select("-password");
+    const userData = await User.findById(userId);
     if (!userData) {
       return res.status(404).json({ error: "User not found" });
     }

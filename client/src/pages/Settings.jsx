@@ -17,12 +17,17 @@ import {
   Switch,
   FormControlLabel,
   useTheme,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   updateUserPreferences,
   createPassword,
   updatePassword,
+  getPasswordStatus,
 } from "../api";
+import { setFrontendCookie } from "../api/utils/cookies";
 import { useUser } from "../contexts/UserContext";
 import { profileTheme, cardSx } from "../components/profile/constants";
 import { useThemeMode } from "../contexts/ThemeContext";
@@ -37,7 +42,7 @@ const toneOptions = [
 const Settings = () => {
   const theme = useTheme();
   const { mode, toggleTheme } = useThemeMode();
-  const { user, authInfo, fetchUserProfile } = useUser(); // Get user and refresh function from shared context
+  const { user, authInfo } = useUser(); // Get user from shared context
   const [isLoading, setIsLoading] = useState(!user); // Loading when no user yet
   const [profileError, setProfileError] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
@@ -66,6 +71,9 @@ const Settings = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Use shared user context instead of fetching independently
   useEffect(() => {
@@ -84,6 +92,35 @@ const Settings = () => {
       setIsLoading(false);
     }
   }, [user, authInfo]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchLivePasswordStatus = async () => {
+      try {
+        const response = await getPasswordStatus();
+        const status = response?.data || {};
+
+        if (!isActive) return;
+
+        setPasswordStatus({
+          hasPassword: !!status.hasPassword,
+          authProvider: status.authProvider || null,
+          needsPasswordSetup: !!status.needsPasswordSetup,
+        });
+      } catch {
+        // keep existing status fallback from authInfo
+      }
+    };
+
+    if (user) {
+      fetchLivePasswordStatus();
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [user]);
 
   const handlePreferenceChange = (event) => {
     const { name, value } = event.target || {};
@@ -162,8 +199,21 @@ const Settings = () => {
     try {
       setIsUpdatingPassword(true);
 
-      if (passwordStatus.needsPasswordSetup || !passwordStatus.hasPassword) {
-        await createPassword({
+      const statusResponse = await getPasswordStatus();
+      const latestStatus = statusResponse?.data || {};
+      const requiresSetup =
+        !!latestStatus.needsPasswordSetup || !latestStatus.hasPassword;
+
+      setPasswordStatus({
+        hasPassword: !!latestStatus.hasPassword,
+        authProvider: latestStatus.authProvider || null,
+        needsPasswordSetup: !!latestStatus.needsPasswordSetup,
+      });
+
+      let passwordResponse;
+
+      if (requiresSetup) {
+        passwordResponse = await createPassword({
           newPassword: passwordForm.newPassword,
           confirmPassword: passwordForm.confirmPassword,
         });
@@ -173,21 +223,35 @@ const Settings = () => {
           setIsUpdatingPassword(false);
           return;
         }
-        await updatePassword({
+        passwordResponse = await updatePassword({
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
           confirmPassword: passwordForm.confirmPassword,
         });
       }
 
-      setPasswordMessage("Password updated successfully.");
+      const nextToken = passwordResponse?.data?.token;
+      if (nextToken) {
+        setFrontendCookie(nextToken);
+      }
+
+      const successMessage =
+        passwordResponse?.data?.message || "Password updated successfully.";
+      setPasswordMessage(successMessage);
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      
-      // Refresh user data from the unified /me endpoint
-      await fetchUserProfile(true);
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+      setPasswordStatus((prev) => ({
+        ...prev,
+        hasPassword: true,
+        needsPasswordSetup: false,
+      }));
     } catch (error) {
       setPasswordError(
-        error.response?.data?.error || "Failed to update password"
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Failed to update password"
       );
     } finally {
       setIsUpdatingPassword(false);
@@ -402,27 +466,63 @@ const Settings = () => {
             <TextField
               label="Current password"
               name="currentPassword"
-              type="password"
+              type={showCurrentPassword ? "text" : "password"}
               value={passwordForm.currentPassword}
               onChange={handlePasswordChange}
               fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      edge="end"
+                      onClick={() => setShowCurrentPassword((prev) => !prev)}
+                    >
+                      {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           )}
           <TextField
             label="New password"
             name="newPassword"
-            type="password"
+            type={showNewPassword ? "text" : "password"}
             value={passwordForm.newPassword}
             onChange={handlePasswordChange}
             fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => setShowNewPassword((prev) => !prev)}
+                  >
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             label="Confirm new password"
             name="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             value={passwordForm.confirmPassword}
             onChange={handlePasswordChange}
             fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           {passwordMessage && (

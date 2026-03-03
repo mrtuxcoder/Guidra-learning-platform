@@ -2,18 +2,18 @@ import React from "react";
 import { Box, Container, Typography, alpha, useTheme } from "@mui/material";
 
 const features = [
-  "AI-Powered Content Generation",
-  "Teaching Style Customization",
-  "Full Content Versioning & Caching",
+  "Curated Topic Library + Search",
+  "Custom Topic Validation & Path Generation",
+  "Structured Subtopic Learning Flow",
+  "Teaching Style Regeneration",
+  "Content Caching & Version History",
+  "Quiz Submission and Performance Tracking",
+  "Understanding Level Updates (1-5)",
+  "Recall Mode for Completed Topics",
+  "Daily Regeneration Limits",
   "Focus Study Timer",
-  "Interactive Quiz Analysis",
-  "Custom Topic Support",
-  "Session Time Tracking",
-  "Component-Level Regeneration",
-  "Exam Practice Ready",
-  "Progress Analytics",
-  "Content Version Comparison",
-  "Daily Regeneration Control",
+  "Profile Insights & Analysis",
+  "PWA-Friendly Mobile Experience",
 ];
 
 const LandingFeatures = () => {

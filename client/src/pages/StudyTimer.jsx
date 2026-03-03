@@ -29,8 +29,6 @@ import { useTimer } from "../contexts/TimerContext";
 const PRESET_MINUTES = [25, 40, 60];
 const DAILY_SESSION_GOAL = 6;
 const DAILY_SESSIONS_STORAGE_KEY = "timerDailySessions";
-const DAILY_FOCUS_SECONDS_STORAGE_KEY = "timerDailyFocusSeconds";
-const FOCUS_PERSIST_CHUNK_SECONDS = 10;
 
 const getTodayKey = () => new Date().toISOString().slice(0, 10);
 
@@ -55,44 +53,11 @@ const writeDailySessions = (key, value) => {
   }
 };
 
-const readDailyFocusSeconds = (key) => {
-  try {
-    const raw = localStorage.getItem(DAILY_FOCUS_SECONDS_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return Number(parsed[key] || 0);
-  } catch {
-    return 0;
-  }
-};
-
-const writeDailyFocusSeconds = (key, value) => {
-  try {
-    const raw = localStorage.getItem(DAILY_FOCUS_SECONDS_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    parsed[key] = value;
-    localStorage.setItem(DAILY_FOCUS_SECONDS_STORAGE_KEY, JSON.stringify(parsed));
-  } catch {
-    // noop
-  }
-};
-
 const formatTime = (totalSeconds) => {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   const paddedSeconds = String(seconds).padStart(2, "0");
   return `${minutes}:${paddedSeconds}`;
-};
-
-const formatDuration = (totalSeconds) => {
-  const safe = Math.max(0, Number(totalSeconds) || 0);
-  const hours = Math.floor(safe / 3600);
-  const minutes = Math.floor((safe % 3600) / 60);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-
-  return `${minutes}m`;
 };
 
 const clampMinutes = (value) => {
@@ -124,19 +89,11 @@ export default function StudyTimer() {
   );
   const [notificationMessage, setNotificationMessage] = useState("");
   const completionLoggedRef = useRef(false);
-  const pendingPersistSecondsRef = useRef(0);
-  const previousRemainingRef = useRef(
-    Math.max(0, Number(remainingSeconds) || 0)
-  );
-  const wasActiveRef = useRef(false);
 
   const [todayKey, setTodayKey] = useState(getTodayKey);
 
   const [dailySessions, setDailySessions] = useState(() =>
     readDailySessions(getTodayKey())
-  );
-  const [dailyFocusSeconds, setDailyFocusSeconds] = useState(() =>
-    readDailyFocusSeconds(getTodayKey())
   );
 
   const computedMinutes = useMemo(() => {
@@ -175,17 +132,6 @@ export default function StudyTimer() {
         return next;
       });
 
-      if (pendingPersistSecondsRef.current > 0) {
-        const carrySeconds = pendingPersistSecondsRef.current;
-        pendingPersistSecondsRef.current = 0;
-
-        setDailyFocusSeconds((prev) => {
-          const next = prev + carrySeconds;
-          writeDailyFocusSeconds(todayKey, next);
-          return next;
-        });
-      }
-
       completionLoggedRef.current = true;
     }
 
@@ -195,82 +141,24 @@ export default function StudyTimer() {
   }, [hasCompleted, todayKey]);
 
   useEffect(() => {
-    const currentRemaining = Math.max(0, Number(remainingSeconds) || 0);
-
-    if (isActive) {
-      if (!wasActiveRef.current) {
-        wasActiveRef.current = true;
-        previousRemainingRef.current = currentRemaining;
-        return;
-      }
-
-      const previousRemaining = Math.max(
-        0,
-        Number(previousRemainingRef.current) || 0
-      );
-      const delta = previousRemaining - currentRemaining;
-
-      if (delta > 0) {
-        pendingPersistSecondsRef.current += delta;
-
-        if (pendingPersistSecondsRef.current >= FOCUS_PERSIST_CHUNK_SECONDS) {
-          const persistSeconds =
-            Math.floor(
-              pendingPersistSecondsRef.current / FOCUS_PERSIST_CHUNK_SECONDS
-            ) * FOCUS_PERSIST_CHUNK_SECONDS;
-          pendingPersistSecondsRef.current -= persistSeconds;
-
-          setDailyFocusSeconds((prev) => {
-            const next = prev + persistSeconds;
-            writeDailyFocusSeconds(todayKey, next);
-            return next;
-          });
-        }
-      }
-
-      previousRemainingRef.current = currentRemaining;
-      return;
-    }
-
-    if (wasActiveRef.current && pendingPersistSecondsRef.current > 0) {
-      const carrySeconds = pendingPersistSecondsRef.current;
-      pendingPersistSecondsRef.current = 0;
-
-      setDailyFocusSeconds((prev) => {
-        const next = prev + carrySeconds;
-        writeDailyFocusSeconds(todayKey, next);
-        return next;
-      });
-    }
-
-    wasActiveRef.current = false;
-    previousRemainingRef.current = currentRemaining;
-  }, [isActive, remainingSeconds, todayKey]);
-
-  useEffect(() => {
     const syncDayAndSessions = () => {
       const nextTodayKey = getTodayKey();
 
       if (nextTodayKey !== todayKey) {
         setTodayKey(nextTodayKey);
         setDailySessions(readDailySessions(nextTodayKey));
-        setDailyFocusSeconds(readDailyFocusSeconds(nextTodayKey));
         completionLoggedRef.current = false;
         return;
       }
 
       setDailySessions(readDailySessions(nextTodayKey));
-      setDailyFocusSeconds(readDailyFocusSeconds(nextTodayKey));
     };
 
     syncDayAndSessions();
     const intervalId = setInterval(syncDayAndSessions, 60 * 1000);
 
     const handleStorage = (event) => {
-      if (
-        event.key === DAILY_SESSIONS_STORAGE_KEY ||
-        event.key === DAILY_FOCUS_SECONDS_STORAGE_KEY
-      ) {
+      if (event.key === DAILY_SESSIONS_STORAGE_KEY) {
         syncDayAndSessions();
       }
     };
@@ -280,18 +168,6 @@ export default function StudyTimer() {
     return () => {
       clearInterval(intervalId);
       window.removeEventListener("storage", handleStorage);
-    };
-  }, [todayKey]);
-
-  useEffect(() => {
-    return () => {
-      if (pendingPersistSecondsRef.current > 0) {
-        const carrySeconds = pendingPersistSecondsRef.current;
-        pendingPersistSecondsRef.current = 0;
-
-        const currentStored = readDailyFocusSeconds(todayKey);
-        writeDailyFocusSeconds(todayKey, currentStored + carrySeconds);
-      }
     };
   }, [todayKey]);
 
@@ -804,41 +680,6 @@ export default function StudyTimer() {
                     </Alert>
                   )}
                 </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              border: `1px solid ${theme.palette.divider}`,
-              boxShadow: "none",
-            }}
-          >
-            <CardContent sx={{ p: 2 }}>
-              <Stack spacing={1.1}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography sx={{ fontSize: "0.94rem", fontWeight: 700, color: "text.primary" }}>
-                    Total time spent today
-                  </Typography>
-                  <Typography sx={{ fontSize: "0.82rem", color: "text.secondary", fontWeight: 600 }}>
-                    {formatDuration(dailyFocusSeconds)}
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={dailyProgressPercent}
-                  sx={{
-                    height: 8,
-                    borderRadius: 999,
-                    bgcolor: alpha(theme.palette.primary.main, 0.12),
-                    "& .MuiLinearProgress-bar": {
-                      borderRadius: 999,
-                      background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    },
-                  }}
-                />
               </Stack>
             </CardContent>
           </Card>

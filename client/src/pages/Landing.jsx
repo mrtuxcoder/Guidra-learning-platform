@@ -239,7 +239,7 @@ const Landing = () => {
                         fontSize: { xs: "0.95rem", md: "1rem" },
                       }}
                     >
-                      Your dashboard organizes lessons, content versions, quiz scores, and learning analytics in one place. Customize your experience with teaching styles, custom topics, and study timers.
+                      Guidra brings Explore, Learn, Recall, and Profile insights into one workflow. Build structured paths, regenerate with teaching styles, and review progress without losing continuity.
                     </Typography>
                     <Typography
                       sx={{
@@ -250,7 +250,7 @@ const Landing = () => {
                         mb: { xs: 0.5, md: 0 },
                       }}
                     >
-                      Track progress, manage time, and ace exams with AI-powered personalized learning.
+                      Sign in to continue your active subtopics or start a new topic with clear, step-by-step guidance.
                     </Typography>
                   </Box>
                   <LandingAuthPanel
