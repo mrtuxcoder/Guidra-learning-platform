@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getProfile } from "../../api";
-import { hasAuthCookie } from "../../api";
-import { authHelpers } from "../../api";
+import { getProfile, authHelpers, completeLogout } from "../../api";
 
 const { setFrontendCookie } = authHelpers;
 
@@ -239,5 +237,4 @@ export const getProgressStats = (user) => {
   };
 };
 
-// Need to import completeLogout
-import { completeLogout } from "../../api";
+// imports consolidated at top

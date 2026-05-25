@@ -16,32 +16,38 @@ import {
 } from "@mui/icons-material";
 import { getThemeGradient } from "../constants.jsx";
 
-// Tour steps
+// Tour steps — updated to match current pages: Learn, Explore, Timer, Settings
 const tourSteps = [
   {
     label: "Welcome to Guidra!",
-    description: "Let me show you around your new learning platform.",
+    description: "Let me show you around your learning dashboard and key pages.",
   },
   {
-    label: "Your Learning Hub",
+    label: "Learn",
     description:
-      "Start learning with structured courses and track your progress.",
+      "This is where you study courses and lessons — your main learning hub.",
   },
   {
-    label: "Explore Courses",
-    description: "Discover new topics and expand your knowledge.",
+    label: "Explore",
+    description: "Browse and discover new topics, courses, and community content.",
   },
   {
-    label: "Custom Topics",
-    description: "Create personalized learning paths on any topic you choose.",
+    label: "Study Timer",
+    description:
+      "Use the Timer page to run focused study sessions and track time spent.",
+  },
+  {
+    label: "Settings",
+    description:
+      "Customize your experience (preferences, notifications, and account settings).",
   },
   {
     label: "Your Profile",
-    description: "View your progress, achievements, and learning statistics.",
+    description: "Review your progress, achievements, and personalized stats.",
   },
   {
     label: "Ready to Learn!",
-    description: "You're all set! Start your learning journey now.",
+    description: "You're set — try `Learn`, open `Explore`, or start a `Timer` session.",
   },
 ];
 

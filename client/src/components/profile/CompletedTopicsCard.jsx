@@ -5,14 +5,13 @@ import {
   Box,
   Typography,
   Button,
+  Stack,
   Chip,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
+  Grid,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
-import { CheckCircleOutline } from "@mui/icons-material";
-import { cardSx } from "./constants";
+import { profileTheme, cardSx } from "./constants";
 
 const isTopicCompleted = (topic) => {
   if (!topic) return false;
@@ -30,7 +29,13 @@ const getTopicName = (topic) =>
   topic?.topic || topic?.name || topic?.title || "Untitled Topic";
 
 const CompletedTopicsCard = ({ progress = [], onRecall }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const completedTopics = progress.filter(isTopicCompleted);
+
+  if (completedTopics.length === 0) {
+    return null;
+  }
 
   return (
     <Card sx={cardSx}>
@@ -41,95 +46,86 @@ const CompletedTopicsCard = ({ progress = [], onRecall }) => {
             fontWeight: 700,
             mb: 2,
             fontSize: { xs: "1rem", sm: "1.125rem" },
+            background: profileTheme.gradient,
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           }}
         >
           Completed Topics
         </Typography>
-        {completedTopics.length === 0 ? (
-          <Box
-            sx={{
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 2,
-              py: 3,
-              px: 2,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
-              textAlign: "center",
-            }}
-          >
-            <CheckCircleOutline sx={{ color: "text.disabled", fontSize: 28 }} />
-            <Box>
-              <Typography variant="body1" fontWeight={600}>
-                No topics are completed
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Complete a topic to see it here.
-              </Typography>
-            </Box>
-          </Box>
-        ) : (
-          <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, px: 1.5 }}>
-            <List disablePadding>
-              {completedTopics.slice(0, 4).map((topic, index) => {
-                const topicName = getTopicName(topic);
+        <Grid container spacing={2} sx={{ width: "100%" }}>
+          {completedTopics.slice(0, 4).map((topic) => {
+            const topicName = getTopicName(topic);
 
-                return (
-                  <React.Fragment key={topicName}>
-                    <ListItem
-                      disableGutters
+            return (
+              <Grid item xs={12} sm={6} key={topicName}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1.5,
+                    p: 2,
+                    borderRadius: 2,
+                    border: `1px solid ${profileTheme.border}`,
+                    background: "rgba(126, 87, 194, 0.05)",
+                    height: "100%",
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    sx={{ width: "100%" }}
+                  >
+                    <Chip
+                      label="Completed"
+                      size="small"
                       sx={{
-                        py: 1.25,
-                        gap: 1.25,
-                        flexWrap: { xs: "wrap", sm: "nowrap" },
+                        background: "rgba(16, 185, 129, 0.12)",
+                        color: "#059669",
+                        fontWeight: 700,
+                        fontSize: "0.7rem",
+                        alignSelf: { xs: "flex-start", sm: "center" },
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        color: "text.primary",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        width: "100%",
                       }}
                     >
-                      <ListItemText
-                        primary={topicName}
-                        secondary="Completed topic"
-                        primaryTypographyProps={{
-                          fontWeight: 700,
-                          noWrap: true,
-                        }}
-                        secondaryTypographyProps={{ variant: "caption" }}
-                      />
-                      <Chip
-                        label="Completed"
-                        size="small"
-                        sx={{
-                          background: "rgba(16, 185, 129, 0.12)",
-                          color: "success.main",
-                          fontWeight: 700,
-                          fontSize: "0.7rem",
-                        }}
-                      />
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => onRecall?.(topicName)}
-                        sx={{
-                          textTransform: "none",
-                          borderRadius: 2,
-                          fontWeight: 600,
-                          borderColor: "primary.light",
-                          color: "primary.main",
-                          whiteSpace: "nowrap",
-                          ml: { xs: "auto", sm: 0 },
-                        }}
-                      >
-                        Recall
-                      </Button>
-                    </ListItem>
-                    {index < Math.min(completedTopics.length, 4) - 1 && <Divider />}
-                  </React.Fragment>
-                );
-              })}
-            </List>
-          </Box>
-        )}
+                      {topicName}
+                    </Typography>
+                  </Stack>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => onRecall?.(topicName)}
+                    fullWidth={isMobile}
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      alignSelf: { xs: "stretch", sm: "flex-start" },
+                      borderColor: "rgba(126, 87, 194, 0.3)",
+                      color: profileTheme.primary,
+                    }}
+                  >
+                    Recall Topic
+                  </Button>
+                </Box>
+              </Grid>
+            );
+          })}
+        </Grid>
       </CardContent>
     </Card>
   );

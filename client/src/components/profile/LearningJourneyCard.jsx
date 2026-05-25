@@ -4,17 +4,14 @@ import {
   CardContent,
   Box,
   Typography,
+  Grid,
   Button,
   Stack,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import { RocketLaunch } from "@mui/icons-material";
-import { cardSx } from "./constants";
+import { profileTheme, cardSx } from "./constants";
 
 const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
   const theme = useTheme();
@@ -35,8 +32,8 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
               sx={{
                 width: { xs: 44, sm: 52 },
                 height: { xs: 44, sm: 52 },
-                borderRadius: 2,
-                bgcolor: "primary.main",
+                borderRadius: "50%",
+                background: profileTheme.gradient,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -55,6 +52,10 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
                 sx={{
                   fontWeight: 800,
                   fontSize: { xs: "1.4rem", sm: "1.7rem", md: "1.9rem" },
+                  background: profileTheme.gradient,
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
                   lineHeight: 1.2,
                 }}
               >
@@ -78,13 +79,15 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
               onClick={onLaunchLesson}
               sx={{
                 borderRadius: 3,
-                bgcolor: "primary.main",
+                background: profileTheme.gradient,
                 fontWeight: 700,
                 px: 3,
                 py: 1.5,
                 fontSize: "0.95rem",
+                boxShadow: "0 8px 24px rgba(126, 87, 194, 0.25)",
                 "&:hover": {
-                  bgcolor: "primary.dark",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 32px rgba(126, 87, 194, 0.35)",
                 },
               }}
             >
@@ -93,33 +96,105 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
           )}
         </Stack>
 
-        <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, px: 1.5, mb: { xs: 2, sm: 3 } }}>
-          <List disablePadding>
-            <ListItem disableGutters sx={{ py: 1.3 }}>
-              <ListItemText
-                primary="Overall Progress"
-                secondary="Current completion across your learning"
-                primaryTypographyProps={{ fontWeight: 600 }}
-                secondaryTypographyProps={{ variant: "caption" }}
-              />
-              <Typography variant="h5" fontWeight={800} color="primary.main">
+        <Grid
+          container
+          spacing={2}
+          alignItems="stretch"
+          sx={{ mb: { xs: 2, sm: 3 }, width: "100%" }}
+        >
+          <Grid item xs={12} sm={6}>
+            <Box
+              sx={{
+                textAlign: "center",
+                p: { xs: 2, sm: 3 },
+                borderRadius: 3,
+                background: "rgba(126, 87, 194, 0.06)",
+                border: `1px solid ${profileTheme.border}`,
+                height: "100%",
+                width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 700, letterSpacing: 0.6, fontSize: "0.65rem" }}
+              >
+                OVERALL PROGRESS
+              </Typography>
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                  color: profileTheme.primary,
+                  lineHeight: 1,
+                  mt: 0.75,
+                }}
+              >
                 {stats.progressPercentage}%
               </Typography>
-            </ListItem>
-            <Divider />
-            <ListItem disableGutters sx={{ py: 1.3 }}>
-              <ListItemText
-                primary="In Progress"
-                secondary="Topics currently active"
-                primaryTypographyProps={{ fontWeight: 600 }}
-                secondaryTypographyProps={{ variant: "caption" }}
-              />
-              <Typography variant="h5" fontWeight={800} color="primary.dark">
+              <Typography
+                variant="body1"
+                fontWeight={600}
+                color="text.primary"
+                sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
+              >
+                Overall Progress
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Box
+              sx={{
+                textAlign: "center",
+                p: { xs: 2, sm: 3 },
+                borderRadius: 3,
+                background: "rgba(126, 87, 194, 0.06)",
+                border: `1px solid ${profileTheme.border}`,
+                height: "100%",
+                width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 700, letterSpacing: 0.6, fontSize: "0.65rem" }}
+              >
+                IN PROGRESS
+              </Typography>
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                  color: profileTheme.primaryDark,
+                  lineHeight: 1,
+                  mt: 0.75,
+                }}
+              >
                 {stats.inProgress}
               </Typography>
-            </ListItem>
-          </List>
-        </Box>
+              <Typography
+                variant="body1"
+                fontWeight={600}
+                color="text.primary"
+                sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
+              >
+                In Progress
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
 
         {isMobile && (
           <Button
@@ -130,12 +205,14 @@ const LearningJourneyCard = ({ stats, onLaunchLesson }) => {
             onClick={onLaunchLesson}
             sx={{
               borderRadius: 3,
-              bgcolor: "primary.main",
+              background: profileTheme.gradient,
               fontWeight: 700,
               py: { xs: 1.5, sm: 2 },
               fontSize: { xs: "0.9rem", sm: "1rem" },
+              boxShadow: "0 8px 24px rgba(126, 87, 194, 0.25)",
               "&:hover": {
-                bgcolor: "primary.dark",
+                transform: "translateY(-2px)",
+                boxShadow: "0 12px 32px rgba(126, 87, 194, 0.35)",
               },
             }}
           >
