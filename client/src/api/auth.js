@@ -156,7 +156,7 @@ export const completeLogout = async () => {
   API.post("/api/v1/auth/logout").catch(() => {});
 };
 
-export const handleManualLogin = (token, userData = null) => {
+export const handleManualLogin = (token) => {
   setFrontendCookie(token);
 };
 
@@ -199,17 +199,6 @@ export const debugAuth = async () => {
 
 export const initializeAuth = async () => {
   try {
-    const token = getStoredToken();
-
-    if (!token) {
-      return {
-        authenticated: false,
-        user: null,
-        authInfo: null,
-        token: null,
-      };
-    }
-
     const authResponse = await isAuthenticatedWithInfo();
 
     if (authResponse.authenticated) {
@@ -236,6 +225,12 @@ export const initializeAuth = async () => {
 export const startGoogleOAuth = () => {
   const resolvedApiBaseUrl =
     import.meta.env.VITE_API_BASE_URL || window.location.origin;
+  let apiOrigin = "";
+  try {
+    apiOrigin = new URL(resolvedApiBaseUrl).origin;
+  } catch {
+    apiOrigin = "";
+  }
 
   const popup = window.open(
     `${resolvedApiBaseUrl}/api/v1/auth/google`,
@@ -256,6 +251,10 @@ export const startGoogleOAuth = () => {
       "http://localhost:5000",
       "https://guidra.vercel.app",
       "https://guidra-learning-platform.onrender.com",
+      "https://api.guidra.tech",
+      "https://www.guidra.tech",
+      "https://guidra.tech",
+      apiOrigin,
       window.location.origin,
     ].filter((origin) => origin);
 
@@ -289,7 +288,7 @@ export const startGoogleOAuth = () => {
           ? "/explore"
           : redirectPath || "/learn";
         window.location.href = finalPath;
-      } catch (err) {
+      } catch {
         window.location.href = "/login?error=oauth_processing_failed";
       }
     } else if (type === "OAUTH_ERROR") {
