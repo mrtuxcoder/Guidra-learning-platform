@@ -2,6 +2,21 @@ const { signJwt } = require("../../configs/jwt");
 const passport = require("../../configs/passport");
 const { setTokenCookie } = require("./set-token-cookie");
 
+const buildFrontendOrigins = () => {
+  const origins = [
+    process.env.CLIENT_URL,
+    process.env.CLIENT_ORIGIN,
+    process.env.FRONTEND_URL,
+    "https://www.guidra.tech",
+    "https://guidra.tech",
+    "http://localhost:5173",
+  ]
+    .filter(Boolean)
+    .map((value) => value.trim().replace(/\/$/, ""));
+
+  return Array.from(new Set(origins));
+};
+
 // ===== GOOGLE OAUTH CONTROLLERS =====
 
 /**
@@ -65,6 +80,7 @@ exports.googleCallbackController = (req, res, next) => {
       try {
         if (err) {
           console.error("❌ [GOOGLE CALLBACK] Auth error:", err);
+          const frontendOrigins = buildFrontendOrigins();
           return res.send(`
           <!DOCTYPE html>
           <html>
@@ -73,14 +89,17 @@ exports.googleCallbackController = (req, res, next) => {
             </head>
             <body>
               <script>
+                const frontendOrigins = ${JSON.stringify(frontendOrigins)};
                 if (window.opener) {
-                  window.opener.postMessage(
-                    { 
-                      type: 'OAUTH_ERROR', 
-                      error: 'Authentication failed' 
-                    },
-                    "${process.env.CLIENT_URL}"
-                  );
+                  frontendOrigins.forEach(function(origin) {
+                    window.opener.postMessage(
+                      { 
+                        type: 'OAUTH_ERROR', 
+                        error: 'Authentication failed' 
+                      },
+                      origin
+                    );
+                  });
                 }
                 setTimeout(() => window.close(), 2000);
               </script>
@@ -92,6 +111,7 @@ exports.googleCallbackController = (req, res, next) => {
 
         if (!user) {
           console.error("❌ [GOOGLE CALLBACK] No user returned");
+          const frontendOrigins = buildFrontendOrigins();
           return res.send(`
           <!DOCTYPE html>
           <html>
@@ -100,14 +120,17 @@ exports.googleCallbackController = (req, res, next) => {
             </head>
             <body>
               <script>
+                const frontendOrigins = ${JSON.stringify(frontendOrigins)};
                 if (window.opener) {
-                  window.opener.postMessage(
-                    { 
-                      type: 'OAUTH_ERROR', 
-                      error: 'No user found' 
-                    },
-                    "${process.env.CLIENT_URL}"
-                  );
+                  frontendOrigins.forEach(function(origin) {
+                    window.opener.postMessage(
+                      { 
+                        type: 'OAUTH_ERROR', 
+                        error: 'No user found' 
+                      },
+                      origin
+                    );
+                  });
                 }
                 setTimeout(() => window.close(), 2000);
               </script>
@@ -141,6 +164,7 @@ exports.googleCallbackController = (req, res, next) => {
           user.progress.length === 0;
 
         const redirectPath = needsPersonalization ? "/explore" : "/learn";
+        const frontendOrigins = buildFrontendOrigins();
 
         // Send HTML that communicates token to frontend via postMessage
         res.send(`
@@ -175,12 +199,12 @@ exports.googleCallbackController = (req, res, next) => {
             <script>
               (function() {
                 const token = "${token}";
-                const frontendOrigin = "${process.env.CLIENT_URL}";
+                const frontendOrigins = ${JSON.stringify(frontendOrigins)};
                 const needsPersonalization = ${needsPersonalization};
                 const redirectPath = "${redirectPath}";
                 
                 console.log('🔑 [OAUTH POPUP] Token length:', token.length);
-                console.log('🎯 [OAUTH POPUP] Target origin:', frontendOrigin);
+                console.log('🎯 [OAUTH POPUP] Target origins:', frontendOrigins);
                 
                 let messageSent = false;
                 let attempts = 0;
@@ -192,15 +216,17 @@ exports.googleCallbackController = (req, res, next) => {
                   
                   if (window.opener && !window.opener.closed) {
                     try {
-                      window.opener.postMessage(
-                        { 
-                          type: 'OAUTH_SUCCESS', 
-                          token: token,
-                          needsPersonalization: needsPersonalization,
-                          redirectPath: redirectPath
-                        },
-                        frontendOrigin
-                      );
+                      frontendOrigins.forEach(function(origin) {
+                        window.opener.postMessage(
+                          { 
+                            type: 'OAUTH_SUCCESS', 
+                            token: token,
+                            needsPersonalization: needsPersonalization,
+                            redirectPath: redirectPath
+                          },
+                          origin
+                        );
+                      });
                       messageSent = true;
                       console.log('✅ [OAUTH POPUP] Message sent successfully on attempt', attempts);
                       
@@ -230,7 +256,8 @@ exports.googleCallbackController = (req, res, next) => {
                 
                 function useFallback() {
                   console.log('🔄 [OAUTH POPUP] Using URL fallback');
-                  window.location.href = frontendOrigin + redirectPath + '?token=' + encodeURIComponent(token) + '&source=google&fallback=true';
+                  const fallbackOrigin = frontendOrigins[0] || window.location.origin;
+                  window.location.href = fallbackOrigin + redirectPath + '?token=' + encodeURIComponent(token) + '&source=google&fallback=true';
                 }
                 
                 // Start sending messages immediately
@@ -252,14 +279,17 @@ exports.googleCallbackController = (req, res, next) => {
           </head>
           <body>
             <script>
+              const frontendOrigins = ${JSON.stringify(buildFrontendOrigins())};
               if (window.opener) {
-                window.opener.postMessage(
-                  { 
-                    type: 'OAUTH_ERROR', 
-                    error: 'Server error occurred' 
-                  },
-                  "${process.env.CLIENT_URL}"
-                );
+                frontendOrigins.forEach(function(origin) {
+                  window.opener.postMessage(
+                    { 
+                      type: 'OAUTH_ERROR', 
+                      error: 'Server error occurred' 
+                    },
+                    origin
+                  );
+                });
               }
               setTimeout(() => window.close(), 2000);
             </script>
