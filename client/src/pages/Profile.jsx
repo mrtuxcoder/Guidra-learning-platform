@@ -56,9 +56,6 @@ import {
   getProgressStats,
 } from "../components/profile/ProfileLogic";
 
-// Import other dependencies
-import PasswordSetupModal from "../components/PasswordSetupModal";
-
 export default function Profile() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -70,11 +67,7 @@ export default function Profile() {
     user,
     loading,
     error,
-    showPasswordModal,
-    setShowPasswordModal,
     handleLogout,
-    handlePasswordSuccess,
-    handlePasswordSetupClick,
     handleRefresh,
   } = useProfileLogic(navigate);
 
@@ -113,7 +106,7 @@ export default function Profile() {
           <PersonalInfo user={user} />
           <AuthenticationCard
             user={user}
-            onPasswordSetup={handlePasswordSetupClick}
+            onPasswordSetup={() => navigate("/settings")}
           />
         </Stack>
       ),
@@ -430,13 +423,6 @@ export default function Profile() {
           </Box>
         )}
       </Container>
-
-      {/* Password Setup Modal */}
-      <PasswordSetupModal
-        open={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        onSuccess={handlePasswordSuccess}
-      />
     </Box>
   );
 }

@@ -19,7 +19,7 @@ exports.profileController = async (req, res) => {
       return res.status(401).json({ error: "Not authorized" });
     }
 
-    const userData = await User.findById(userId);
+    const userData = await User.findById(userId).select("-password");
     if (!userData) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -61,7 +61,7 @@ exports.checkUserExists = async (req, res) => {
     }
 
     const user = await User.findOne({ email: email.toLowerCase() }).select(
-      "-password"
+      "password authProvider"
     );
 
     if (user) {
@@ -70,8 +70,8 @@ exports.checkUserExists = async (req, res) => {
 
       return res.status(200).json({
         exists: true,
-        user: user,
         hasPassword: hasPassword,
+        authProvider: user.authProvider,
       });
     }
 

@@ -1,11 +1,6 @@
 // /src/api/utils/cookies.js - SIMPLIFIED
-export const setFrontendCookie = (token, days = 7) => {
-  const maxAge = days * 24 * 60 * 60;
-  const isHttps =
-    typeof window !== "undefined" && window.location.protocol === "https:";
-  const secureFlag = isHttps ? "secure; " : "";
-
-  document.cookie = `authToken=${token}; path=/; max-age=${maxAge}; ${secureFlag}samesite=lax`;
+export const setFrontendCookie = (token) => {
+  return token;
 };
 
 export const removeFrontendCookie = () => {
@@ -17,11 +12,6 @@ export const removeFrontendCookie = () => {
 };
 
 export const getFrontendCookie = () => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; authToken=`);
-  if (parts.length === 2) {
-    return parts.pop().split(";").shift();
-  }
   return null;
 };
 

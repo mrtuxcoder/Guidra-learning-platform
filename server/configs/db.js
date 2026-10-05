@@ -1,15 +1,13 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-    });
-    console.log("✅ MongoDB Connected");
-  } catch (err) {
-    console.error("❌ DB Connection Failed", err);
-    process.exit(1);
-  }
+  await mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: Number(process.env.MONGO_SERVER_SELECTION_TIMEOUT_MS || 10000),
+    maxPoolSize: Number(process.env.MONGO_MAX_POOL_SIZE || 20),
+    minPoolSize: Number(process.env.MONGO_MIN_POOL_SIZE || 2),
+  });
+  console.log("✅ MongoDB Connected");
+  return mongoose.connection;
 };
 
 module.exports = connectDB;

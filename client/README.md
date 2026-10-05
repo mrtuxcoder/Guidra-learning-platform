@@ -1,16 +1,44 @@
-# React + Vite
+# Guidra Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a React 19 application built with Vite and Material UI.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+From this directory:
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Set `VITE_API_BASE_URL` to the backend URL when the API is not served from the same origin. The Docker setup passes this value during the image build.
 
-## Expanding the ESLint configuration
+## Production Build
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run build
+npm run preview
+```
+
+The application uses route-level lazy loading. Heavy learning and diagram dependencies are loaded when the user opens the learning experience rather than during the initial landing page load.
+
+The Vite PWA configuration caches static assets and selected content-cache responses for offline use. User authentication, profile, progress, and preference responses are intentionally excluded from browser offline caching.
+
+## Main Routes
+
+- `/` and `/login`: landing and authentication
+- `/explore`: browse or create learning topics
+- `/learn`: structured lessons and recall mode
+- `/custom-topic`: create a custom learning path
+- `/study-timer`: focus timer
+- `/profile`: profile, progress, and account security
+- `/settings`: preferences, appearance, timer visibility, and password management
+
+## Quality Checks
+
+```bash
+npm run lint
+npm run build
+```
+
+The repository currently contains existing ESLint issues outside the recent optimization changes; the production build remains the primary release check until those are addressed.

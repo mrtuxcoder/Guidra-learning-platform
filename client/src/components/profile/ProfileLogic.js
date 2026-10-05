@@ -7,9 +7,6 @@ export const useProfileLogic = (navigate) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
   const hasMountedRef = useRef(false);
 
   const fetchProfile = useCallback(
@@ -27,13 +24,11 @@ export const useProfileLogic = (navigate) => {
           const parsedUser = JSON.parse(cachedProfile);
           setUser(parsedUser);
           setLoading(false);
-          checkPasswordStatus(parsedUser);
           return;
         }
 
         const response = await getProfile();
         const userData = response.data?.user || response.data || response;
-        const authInfo = response.data?.authInfo;
 
         const enhancedUserData = {
           ...userData,
@@ -42,14 +37,11 @@ export const useProfileLogic = (navigate) => {
         };
 
         setUser(enhancedUserData);
-        setLastUpdated(Date.now());
 
         // Update cache
         sessionStorage.setItem("userProfile", JSON.stringify(enhancedUserData));
         sessionStorage.setItem("userProfileTimestamp", Date.now().toString());
 
-        // Check password status from the unified response (no separate API call needed)
-        checkPasswordStatus(enhancedUserData, authInfo);
       } catch (err) {
         console.error("Profile fetch error:", err);
 
@@ -65,33 +57,6 @@ export const useProfileLogic = (navigate) => {
     },
     [navigate]
   );
-
-  const checkPasswordStatus = async (userData, authInfo = null) => {
-    try {
-      // Use authInfo from the unified /me response if available
-      if (authInfo && authInfo.needsPasswordSetup) {
-        setNeedsPasswordSetup(true);
-      } else if (
-        userData &&
-        userData.authProvider === "google" &&
-        !userData.password
-      ) {
-        // Fallback for cases where authInfo is not provided (legacy)
-        const { checkNeedsPasswordSetup } = await import("../../api");
-        const passwordInfo = await checkNeedsPasswordSetup();
-
-        if (passwordInfo.needsPasswordSetup) {
-          setNeedsPasswordSetup(true);
-        } else {
-          setNeedsPasswordSetup(false);
-        }
-      } else {
-        setNeedsPasswordSetup(false);
-      }
-    } catch (error) {
-      console.error("Error checking password status:", error);
-    }
-  };
 
   const handleOAuthToken = useCallback(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -109,16 +74,6 @@ export const useProfileLogic = (navigate) => {
     sessionStorage.removeItem("userProfile");
     sessionStorage.removeItem("userProfileTimestamp");
     completeLogout();
-  };
-
-  const handlePasswordSuccess = () => {
-    setShowPasswordModal(false);
-    setNeedsPasswordSetup(false);
-    fetchProfile(true);
-  };
-
-  const handlePasswordSetupClick = () => {
-    setShowPasswordModal(true);
   };
 
   const handleRefresh = () => {
@@ -162,13 +117,8 @@ export const useProfileLogic = (navigate) => {
     user,
     loading,
     error,
-    showPasswordModal,
-    needsPasswordSetup,
-    setShowPasswordModal,
     fetchProfile,
     handleLogout,
-    handlePasswordSuccess,
-    handlePasswordSetupClick,
     handleRefresh,
   };
 };

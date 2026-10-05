@@ -14,10 +14,10 @@ async function getCachedContent(userId, topic, subtopic) {
     return null; // No cache found
   }
 
-  // Update access metrics
-  cacheDoc.timesAccessed += 1;
-  cacheDoc.lastAccessed = new Date();
-  await cacheDoc.save();
+  void ContentCache.updateOne(
+    { _id: cacheDoc._id },
+    { $inc: { timesAccessed: 1 }, $set: { lastAccessed: new Date() } }
+  ).catch((error) => console.warn("Failed to update cache metrics:", error.message));
 
   return cacheDoc;
 }
@@ -49,10 +49,10 @@ async function getCachedComponent(userId, topic, subtopic, componentName) {
 
   const latestComponent = componentVersions[0];
 
-  // Update access metrics
-  cacheDoc.timesAccessed += 1;
-  cacheDoc.lastAccessed = new Date();
-  await cacheDoc.save();
+  void ContentCache.updateOne(
+    { _id: cacheDoc._id },
+    { $inc: { timesAccessed: 1 }, $set: { lastAccessed: new Date() } }
+  ).catch((error) => console.warn("Failed to update cache metrics:", error.message));
 
   return {
     version: latestComponent.version,

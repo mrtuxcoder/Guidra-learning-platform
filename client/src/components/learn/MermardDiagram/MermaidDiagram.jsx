@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import mermaid from "mermaid";
+import DOMPurify from "dompurify";
 import { Box, useTheme, useMediaQuery } from "@mui/material";
 import { Fullscreen } from "@mui/icons-material";
 import ZoomModal from "./ZoomModal";
@@ -47,11 +48,11 @@ const MermaidDiagram = ({
       mermaid.initialize({
         startOnLoad: false,
         theme: theme.palette.mode === "dark" ? "dark" : "default",
-        securityLevel: "loose",
+        securityLevel: "strict",
         fontFamily: "Arial, sans-serif",
         flowchart: {
           useMaxWidth: false,
-          htmlLabels: true,
+          htmlLabels: false,
           curve: "basis",
         },
         themeCSS: `
@@ -144,7 +145,7 @@ const MermaidDiagram = ({
     try {
       await mermaid.parse(input);
       return true;
-    } catch (parseError) {
+    } catch {
       return false;
     }
   }, []);
@@ -152,13 +153,18 @@ const MermaidDiagram = ({
   const sanitizeMermaidSvg = useCallback((svg) => {
     if (!svg || typeof svg !== "string") return svg;
 
-    return svg
+    const cleanedSvg = svg
       .replace(
         /<text[^>]*>[^]*?(Syntax error in text|mermaid version)[^]*?<\/text>/gi,
         ""
       )
       .replace(/Syntax error in text/gi, "")
       .replace(/mermaid version\s*\d+\.\d+\.\d+/gi, "");
+
+    return DOMPurify.sanitize(cleanedSvg, {
+      USE_PROFILES: { svg: true },
+      FORBID_TAGS: ["foreignObject", "script"],
+    });
   }, []);
 
   // Render diagram effect
@@ -219,7 +225,7 @@ const MermaidDiagram = ({
 
           const result = await mermaid.render(id, cleanedChart);
           finalSvg = sanitizeMermaidSvg(result.svg);
-        } catch (renderError) {
+        } catch {
           try {
             const fallbackChart = buildFallbackMindmap();
             const fallbackValid = await isMermaidSyntaxValid(fallbackChart);
@@ -234,7 +240,7 @@ const MermaidDiagram = ({
               fallbackChart
             );
             finalSvg = sanitizeMermaidSvg(fallbackResult.svg);
-          } catch (fallbackError) {
+          } catch {
             if (
               !autoRegenerated &&
               onManualRegenerate &&
@@ -322,7 +328,7 @@ const MermaidDiagram = ({
           setError(null);
           setIsLoading(false);
         }
-      } catch (renderError) {
+      } catch {
         if (isMounted) {
           setError("Mindmap unavailable");
           setIsLoading(false);

@@ -8,12 +8,11 @@ RUN npm ci --only=production
 
 COPY . .
 
-EXPOSE 3000
+RUN addgroup -g 1001 -S nodejs \
+	&& adduser -S nodejs -u 1001 -G nodejs
 
-RUN addgroup -g 1001 -S nodejs
+USER nodejs
 
-USER useradd -S nodejs -u 1001
+EXPOSE 5000
 
-EXPOSE 3000
-
-CMD ["node","server.js"]
+CMD ["npm", "start"]

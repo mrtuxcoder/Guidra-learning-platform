@@ -51,7 +51,7 @@ const loadTimerState = () => {
 };
 
 export const TimerProvider = ({ children }) => {
-  const initialState = loadTimerState();
+  const [initialState] = useState(loadTimerState);
 
   const [isActive, setIsActive] = useState(initialState.isActive);
   const [remainingSeconds, setRemainingSeconds] = useState(

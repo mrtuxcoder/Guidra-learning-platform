@@ -6,11 +6,6 @@ export const { setFrontendCookie, removeFrontendCookie, getStoredToken } =
   authHelpers;
 
 export const getFrontendCookie = () => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; authToken=`);
-  if (parts.length === 2) {
-    return parts.pop().split(";").shift();
-  }
   return null;
 };
 
@@ -54,10 +49,6 @@ export const isAuthenticated = async () => {
     const isAuth = response.status === 200;
 
     if (isAuth && response.data?.user) {
-      const token = getStoredToken();
-      if (!token && response.data.token) {
-        setFrontendCookie(response.data.token);
-      }
       return true;
     }
 
@@ -86,16 +77,11 @@ export const isAuthenticatedWithInfo = async () => {
         needsPasswordSetup: false,
       };
 
-      const token = getStoredToken();
-      if (!token && response.data.token) {
-        setFrontendCookie(response.data.token);
-      }
-
       return {
         authenticated: true,
         user: response.data.user,
         authInfo: authInfo,
-        token: response.data.token || token,
+        token: null,
       };
     }
 
@@ -133,10 +119,6 @@ export const setupPassword = async (passwordData) => {
       passwordData
     );
 
-    if (response.data.token) {
-      setFrontendCookie(response.data.token);
-    }
-
     return response;
   } catch (error) {
     console.error("Error setting password:", error);
@@ -156,9 +138,7 @@ export const completeLogout = async () => {
   API.post("/api/v1/auth/logout").catch(() => {});
 };
 
-export const handleManualLogin = (token) => {
-  setFrontendCookie(token);
-};
+export const handleManualLogin = () => {};
 
 export const requireAuth = async (redirectPath = "/login") => {
   const authenticated = await isAuthenticated();
@@ -225,90 +205,7 @@ export const initializeAuth = async () => {
 export const startGoogleOAuth = () => {
   const resolvedApiBaseUrl =
     import.meta.env.VITE_API_BASE_URL || window.location.origin;
-  let apiOrigin = "";
-  try {
-    apiOrigin = new URL(resolvedApiBaseUrl).origin;
-  } catch {
-    apiOrigin = "";
-  }
-
-  const popup = window.open(
-    `${resolvedApiBaseUrl}/api/v1/auth/google`,
-    "oauth_popup",
-    "width=600,height=700,scrollbars=no,resizable=no"
-  );
-
-  if (!popup) {
-    alert("Popup blocked! Please allow popups for this site.");
-    return;
-  }
-
-  let messageReceived = false;
-
-  const messageHandler = async (event) => {
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:5000",
-      "https://guidra.vercel.app",
-      "https://guidra-learning-platform.onrender.com",
-      "https://api.guidra.tech",
-      "https://www.guidra.tech",
-      "https://guidra.tech",
-      apiOrigin,
-      window.location.origin,
-    ].filter((origin) => origin);
-
-    if (!event.data || !event.data.type || !event.data.type.includes("OAUTH")) {
-      return;
-    }
-
-    if (!allowedOrigins.includes(event.origin)) {
-      return;
-    }
-
-    const { type, token, error, needsPersonalization, redirectPath } =
-      event.data;
-
-    if (type === "OAUTH_SUCCESS" && token) {
-      messageReceived = true;
-
-      try {
-        window.removeEventListener("message", messageHandler);
-        if (timeoutId) clearTimeout(timeoutId);
-
-        const maxAge = 7 * 24 * 60 * 60;
-        const isLocalhost =
-          window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1";
-        const secureFlag = isLocalhost ? "" : "secure; ";
-
-        document.cookie = `authToken=${token}; path=/; max-age=${maxAge}; ${secureFlag}samesite=lax`;
-
-        const finalPath = needsPersonalization
-          ? "/explore"
-          : redirectPath || "/learn";
-        window.location.href = finalPath;
-      } catch {
-        window.location.href = "/login?error=oauth_processing_failed";
-      }
-    } else if (type === "OAUTH_ERROR") {
-      messageReceived = true;
-      window.removeEventListener("message", messageHandler);
-      if (timeoutId) clearTimeout(timeoutId);
-      window.location.href = `/login?error=oauth_failed&message=${encodeURIComponent(
-        error || "Unknown error"
-      )}`;
-    }
-  };
-
-  window.addEventListener("message", messageHandler);
-
-  const timeoutId = setTimeout(() => {
-    if (!messageReceived) {
-      window.removeEventListener("message", messageHandler);
-      window.location.href = "/login?error=oauth_timeout";
-    }
-  }, 60000);
+  window.location.assign(`${resolvedApiBaseUrl}/api/v1/auth/google`);
 };
 
 export { clearAllTokens, clearAuthCache };

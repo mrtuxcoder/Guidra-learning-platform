@@ -31,8 +31,7 @@ export default defineConfig({
           // Content cache endpoints - Stale While Revalidate
           {
             urlPattern: ({ url }) =>
-              url.pathname.startsWith("/api/v1/content/cache") ||
-              url.pathname.startsWith("/api/v1/content/history"),
+              url.pathname.startsWith("/api/v1/content/cache"),
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "content-cache",
@@ -40,40 +39,6 @@ export default defineConfig({
               expiration: {
                 maxEntries: 80,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-              },
-            },
-          },
-          // Preferences/progress - Network First with short timeout
-          {
-            urlPattern: ({ url }) =>
-              url.pathname.startsWith("/api/v1/learning/preferences") ||
-              url.pathname.startsWith("/api/v1/users/me/preferences") ||
-              url.pathname.startsWith("/api/v1/progress"),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "user-data-cache",
-              networkTimeoutSeconds: 5,
-              cacheableResponse: { statuses: [0, 200] },
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 6, // 6 hours
-              },
-            },
-          },
-          // API calls - Network First with 24hr cache
-          {
-            urlPattern: ({ url }) =>
-              url.pathname.startsWith("/api/") &&
-              !url.pathname.startsWith("/api/v1/auth") &&
-              !url.pathname.startsWith("/api/v1/users/me"),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "api-cache",
-              networkTimeoutSeconds: 10,
-              cacheableResponse: { statuses: [0, 200] },
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
               },
             },
           },

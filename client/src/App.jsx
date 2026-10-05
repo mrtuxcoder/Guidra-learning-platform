@@ -1,21 +1,20 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Box, CircularProgress, Typography, alpha, useTheme } from "@mui/material";
-import Landing from "./pages/Landing";
-import Profile from "./pages/Profile";
-import Learn from "./pages/Learn";
-import Explore from "./pages/Explore";
-import CustomTopicSearch from "./pages/CustomTopicSearch";
-import StudyTimer from "./pages/StudyTimer";
-import Settings from "./pages/Settings";
 import Layout from "./components/Layout";
 import OfflineIndicator from "./components/OfflineIndicator";
-import PasswordSetupModal from "./components/PasswordSetupModal";
-import { usePasswordCheck } from "./hooks/usePasswordCheck";
 import { useUser } from "./contexts/UserContext";
 import { DailyRegenProvider } from "./contexts/DailyRegenContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
+
+const Landing = lazy(() => import("./pages/Landing"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Learn = lazy(() => import("./pages/Learn"));
+const Explore = lazy(() => import("./pages/Explore"));
+const CustomTopicSearch = lazy(() => import("./pages/CustomTopicSearch"));
+const StudyTimer = lazy(() => import("./pages/StudyTimer"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 const LAST_PROTECTED_ROUTE_KEY = "guidra:last-protected-route";
 const PROTECTED_ROUTE_PATHS = [
@@ -82,6 +81,19 @@ const LoadingSpinner = () => {
   );
 };
 
+const RouteLoading = () => (
+  <Box
+    sx={{
+      minHeight: "60vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -91,18 +103,10 @@ export default function App() {
 }
 
 function AppContent() {
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const location = useLocation();
 
   // Get user from shared context - already fetching on mount
   const { user, isLoading: userLoading } = useUser();
-  
-  // Use the password check hook - now uses shared context
-  const {
-    needsPasswordSetup,
-    loading: passwordLoading,
-    setNeedsPasswordSetup,
-  } = usePasswordCheck();
 
   // Determine if authenticated based on user context
   const isAuth = !!user;
@@ -123,18 +127,6 @@ function AppContent() {
     );
   }, [isAuth, location.pathname, location.search, location.hash]);
 
-  // Show password modal when needed
-  useEffect(() => {
-    if (isAuth && needsPasswordSetup && !passwordLoading) {
-      setShowPasswordModal(true);
-    }
-  }, [isAuth, needsPasswordSetup, passwordLoading]);
-
-  const handlePasswordSetupSuccess = () => {
-    setShowPasswordModal(false);
-    setNeedsPasswordSetup(false);
-  };
-
   // Show loading while user data is being fetched
   if (userLoading) {
     return <LoadingSpinner />;
@@ -147,15 +139,8 @@ function AppContent() {
         {/* Offline Indicator */}
         <OfflineIndicator />
 
-        {/* Password Setup Modal */}
-        <PasswordSetupModal
-          open={showPasswordModal}
-          onClose={() => setShowPasswordModal(false)}
-          onSuccess={handlePasswordSetupSuccess}
-          required={needsPasswordSetup}
-        />
-
-        <Routes>
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
           {/* Public routes - only accessible when not logged in */}
           <Route
           path="/"
@@ -249,7 +234,8 @@ function AppContent() {
           path="*"
           element={<Navigate to={isAuth ? authedHomeRoute : "/login"} replace />}
         />
-        </Routes>
+          </Routes>
+        </Suspense>
       </DailyRegenProvider>
     </TimerProvider>
   );

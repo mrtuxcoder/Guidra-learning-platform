@@ -14,6 +14,8 @@ const API = axios.create({
   withCredentials: true,
 });
 
+const isOfflineCacheableUrl = (url = "") =>
+  url.startsWith("/api/v1/content/cache");
 
 export const authHelpers = {
   setFrontendCookie,
@@ -36,10 +38,6 @@ API.interceptors.request.use(
 
 API.interceptors.response.use(
   (response) => {
-    if (response.data?.token) {
-      setFrontendCookie(response.data.token);
-    }
-
     if (
       response.data?.message?.includes("logout") ||
       response.data?.clearFrontendCookie
@@ -48,7 +46,11 @@ API.interceptors.response.use(
     }
 
     // Cache successful GET responses for offline access
-    if (response.config.method === "get" && response.status === 200) {
+    if (
+      response.config.method === "get" &&
+      response.status === 200 &&
+      isOfflineCacheableUrl(response.config.url)
+    ) {
       const cacheUrl = response.config.url;
       offlineCacheService.setCache(cacheUrl, {
         data: response.data,
@@ -61,13 +63,18 @@ API.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       removeFrontendCookie();
-      if (!window.location.pathname.includes("/login")) {
+      const isAuthProbe = error.config?.url?.includes("/users/me");
+      if (!isAuthProbe && !window.location.pathname.includes("/login")) {
         window.location.href = "/login";
       }
     }
 
     // If offline and request failed, try to return cached data
-    if (!navigator.onLine && error.response?.status !== 401) {
+    if (
+      !navigator.onLine &&
+      error.response?.status !== 401 &&
+      isOfflineCacheableUrl(error.config?.url)
+    ) {
       const cachedData = offlineCacheService.getCache(error.config.url);
       if (cachedData) {
         console.warn(

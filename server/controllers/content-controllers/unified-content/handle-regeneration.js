@@ -139,8 +139,13 @@ async function handleRegeneration(
   } catch (error) {
     console.error("Error during content regeneration:", error);
     return res
-      .status(500)
-      .json({ error: "An error occurred during content regeneration" });
+      .status(error.statusCode || 500)
+      .json({
+        error:
+          error.statusCode === 503
+            ? "AI services are temporarily unavailable. Please try again shortly."
+            : "An error occurred during content regeneration",
+      });
   }
 }
 

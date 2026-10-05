@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const { signJwt } = require("../configs/jwt");
 
 /**
  * Set password for Google OAuth users
@@ -42,14 +41,6 @@ exports.setPassword = async (req, res) => {
     // Set the new password
     await user.setPassword(newPassword);
 
-    // Generate new token with updated auth info
-    const token = signJwt({
-      id: user._id,
-      email: user.email,
-      name: user.name,
-      authProvider: user.authProvider,
-    });
-
     console.log("✅ [SET PASSWORD] Password set for user:", user.email);
 
     res.status(200).json({
@@ -57,7 +48,6 @@ exports.setPassword = async (req, res) => {
         "Password set successfully! You can now login with email and password.",
       hasPassword: true,
       authProvider: user.authProvider,
-      token: token,
     });
   } catch (error) {
     console.error("❌ [SET PASSWORD] Error:", error);

@@ -54,9 +54,12 @@ exports.generateContentController = async (req, res) => {
       );
 
       if (versionEntry) {
-        cacheDoc.timesAccessed += 1;
-        cacheDoc.lastAccessed = new Date();
-        await cacheDoc.save();
+        void ContentCache.updateOne(
+          { _id: cacheDoc._id },
+          { $inc: { timesAccessed: 1 }, $set: { lastAccessed: new Date() } }
+        ).catch((error) =>
+          console.warn("Failed to update cache metrics:", error.message)
+        );
 
         console.log(
           `📦 [CONTENT] Cache hit for ${topic} / ${subtopic} (v${versionEntry.version})`
@@ -151,7 +154,11 @@ exports.generateContentController = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in generateContentController:", error);
-    res.status(500).json({ message: "Failed to generate content" });
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode === 503
+        ? "AI services are temporarily unavailable. Please try again shortly."
+        : "Failed to generate content",
+    });
   }
 }
 

@@ -18,7 +18,6 @@ import LandingSolution from "../components/landing/LandingSolution";
 import LandingRegeneration from "../components/landing/LandingRegeneration";
 import LandingFeatures from "../components/landing/LandingFeatures";
 import LandingProgress from "../components/landing/LandingProgress";
-import LandingMobileApp from "../components/landing/LandingMobileApp";
 import LandingNavPreview from "../components/landing/LandingNavPreview";
 import LandingCTA from "../components/landing/LandingCTA";
 import LandingFooter from "../components/landing/LandingFooter";
@@ -201,7 +200,6 @@ const Landing = () => {
           <LandingRegeneration />
           <LandingFeatures />
           <LandingProgress />
-          <LandingMobileApp />
           <LandingNavPreview />
 
           <Box

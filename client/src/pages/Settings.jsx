@@ -44,7 +44,6 @@ const Settings = () => {
   const { mode, toggleTheme } = useThemeMode();
   const { user, authInfo } = useUser(); // Get user from shared context
   const [isLoading, setIsLoading] = useState(!user); // Loading when no user yet
-  const [profileError, setProfileError] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
@@ -304,12 +303,6 @@ const Settings = () => {
             Manage your learning preferences and account security.
           </Typography>
         </Box>
-
-        {profileError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {profileError}
-          </Alert>
-        )}
 
         <Paper
           elevation={0}

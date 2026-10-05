@@ -1,6 +1,5 @@
 const { setTokenCookie, getTokenCookieOptions } = require("./set-token-cookie");
 const User = require("../../models/User");
-const { signJwt } = require("../../configs/jwt");
 
 exports.loginController = async (req, res) => {
   try {
@@ -57,13 +56,6 @@ exports.loginController = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = signJwt({
-      id: user._id,
-      email: user.email,
-      name: user.name,
-      authProvider: user.authProvider,
-    });
-
     // Set backend cookie
     setTokenCookie(res, user);
 
@@ -75,7 +67,6 @@ exports.loginController = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       user: userObj,
-      token: token,
       authProvider: user.authProvider,
     });
   } catch (err) {
@@ -111,13 +102,6 @@ exports.registerController = async (req, res) => {
       authProvider: "local", // This ensures proper validation
     });
 
-    const token = signJwt({
-      id: user._id,
-      email: user.email,
-      name: user.name,
-      authProvider: user.authProvider, // Include in token
-    });
-
     // Set backend cookie
     setTokenCookie(res, user);
 
@@ -127,7 +111,6 @@ exports.registerController = async (req, res) => {
     return res.status(201).json({
       message: "Registration successful",
       user: userObj,
-      token: token,
       authProvider: user.authProvider, // Send to frontend
     });
   } catch (err) {

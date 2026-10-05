@@ -87,6 +87,15 @@ export const offlineCacheService = {
         }
       }
       keys.forEach((key) => localStorage.removeItem(key));
+
+      const expiryKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(CACHE_EXPIRY_PREFIX)) {
+          expiryKeys.push(key);
+        }
+      }
+      expiryKeys.forEach((key) => localStorage.removeItem(key));
     } catch (error) {
       console.warn("Failed to clear all cache:", error);
     }
