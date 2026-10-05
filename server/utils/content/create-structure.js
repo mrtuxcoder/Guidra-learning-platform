@@ -15,7 +15,7 @@ function createStructuredContentFromText(text, topic, subtopic) {
     title: `${subtopic} - ${topic}`,
     explanation: paragraphs.length > 1 ? paragraphs.slice(1).join('\n\n') : text,
     coreExample: extractExampleFromText(text, subtopic),
-    practice: generatePracticeFromTopic(subtopic),
+    practice: generatePracticeFallback(subtopic),
     mindmap: generateFallbackMindmap(subtopic)
   };
 }

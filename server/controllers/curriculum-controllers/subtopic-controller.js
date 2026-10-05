@@ -2,7 +2,6 @@ const User = require("../../models/User");
 const cleanSubtopicOutput = require("../../utils/curriculum/clean-subtopic")
 const generateSubtopicPrompt = require("../../prompts/subtopic-generator");
 const {
-  isNonsense,
   normalizeInput,
   getTopicValidationErrors,
 } = require("../../utils/curriculum/simple-topic-validator");

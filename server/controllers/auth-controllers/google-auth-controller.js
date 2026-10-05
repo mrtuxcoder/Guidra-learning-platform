@@ -28,7 +28,7 @@ exports.googleCallbackController = (req, res, next) => {
     {
       session: false,
     },
-    (err, user, info) => {
+    (err, user) => {
       const frontendOrigin = getFrontendOrigin();
 
       if (err || !user) {

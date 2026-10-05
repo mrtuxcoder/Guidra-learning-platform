@@ -34,7 +34,7 @@ function parseResponseText(aiResponses) {
       const line = lines[i];
       
       // Check if this line is a section header (allows hyphens)
-      if (line.match(/^[A-Z][A-Z\s\-]+:$/)) {
+      if (line.match(/^[A-Z][A-Z\s-]+:$/)) {
         // Save previous section if exists
         if (currentSection) {
           const sectionKey = currentSection.toLowerCase().replace(/\s+/g, '');

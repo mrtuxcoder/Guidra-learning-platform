@@ -16,7 +16,6 @@ const {
 
 // IMPORT THE UTILITY FUNCTIONS
 const {
-  cleanComponentData,
   extractComponentFromAIResponse
 } = require("../../../utils/content/component/parse-component"); 
 

@@ -4,9 +4,8 @@ const ContentCache = require("../../../models/Content-cache");
 const callAIAPI = require("../../../utils/call-AI");
 const generateUnifiedPrompt = require("../../../utils/prompt/unified-prompt-generator");
 const buildContentFromAI = require('../../../utils/content/response/buildContentFromAI');
-const crypto = require("crypto");
 const validateContentStructure = require("../../../utils/content/validation/validate-content-structure");
-const { saveToCache, saveComponentToCache } = require("../../../utils/cache/save-cache");
+const { saveToCache } = require("../../../utils/cache/save-cache");
 const {
   DAILY_REGEN_LIMIT,
   ensureDailyRegenWindow,

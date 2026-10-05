@@ -111,7 +111,7 @@ function validateMermaidSyntax(mindmap) {
     errors: isValid
       ? []
       : Object.entries(checks)
-          .filter(([_, check]) => !check)
+          .filter(([, check]) => !check)
           .map(([key]) => key),
     details: checks,
   };

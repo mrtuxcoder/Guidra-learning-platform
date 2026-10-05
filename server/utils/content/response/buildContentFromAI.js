@@ -27,7 +27,7 @@ async function buildContentFromAI(aiResponse, topic, subtopic, user) {
       try {
         structuredContent = JSON.parse(jsonString);
         console.log("✅ Successfully parsed JSON response");
-      } catch (directError) {
+      } catch {
         const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           structuredContent = JSON.parse(jsonMatch[0]);
@@ -36,7 +36,7 @@ async function buildContentFromAI(aiResponse, topic, subtopic, user) {
           throw new Error("No valid JSON found in response");
         }
       }
-    } catch (parseError) {
+    } catch {
       // Step 3: Final fallback to text extraction
       console.log("❌ JSON parsing failed, using text extraction");
       structuredContent = createStructuredContentFromText(

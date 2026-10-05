@@ -5,14 +5,14 @@ function cleanSubtopicOutput(text) {
   const lines = text.split('\n')
     .map(line => {
       // Remove numbering and bullets
-      let cleaned = line.replace(/^\d+[\.\)]\s*/, '')
+      let cleaned = line.replace(/^\d+[.)]\s*/, '')
                        .replace(/^[-•*]\s*/, '')
                        .trim();
       
       // Remove content in parentheses and after dashes
       cleaned = cleaned.replace(/\s*\([^)]*\)/g, '')
-                       .replace(/\s*\-.*$/g, '')
-                       .replace(/\s*\—.*$/g, '');
+               .replace(/\s*-.*$/g, '')
+               .replace(/\s*—.*$/g, '');
       
       return cleaned;
     })

@@ -33,7 +33,7 @@ exports.getComponentVersionsController = async (req, res) => {
       ? cacheDoc.content.versions
       : [];
 
-    const componentVersions = allVersions
+    let componentVersions = allVersions
       .filter(
         (v) =>
           v.contentType === "component" &&
