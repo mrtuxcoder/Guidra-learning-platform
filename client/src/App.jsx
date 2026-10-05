@@ -125,7 +125,7 @@ function AppContent() {
       LAST_PROTECTED_ROUTE_KEY,
       `${pathname}${search}${hash}`
     );
-  }, [isAuth, location.pathname, location.search, location.hash]);
+  }, [isAuth, location]);
 
   // Show loading while user data is being fetched
   if (userLoading) {

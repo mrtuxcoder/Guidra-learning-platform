@@ -16,7 +16,6 @@ import SubtopicItem from "./SubtopicItem";
 
 const TopicItem = ({
   topic,
-  index,
   isSelected,
   isExpanded,
   onTopicClick,

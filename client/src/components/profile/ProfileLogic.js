@@ -87,12 +87,12 @@ export const useProfileLogic = (navigate) => {
     hasMountedRef.current = true;
 
     fetchProfile();
-  }, []); // Empty dependency array - runs ONCE on mount only
+  }, [fetchProfile]);
 
   // Handle OAuth redirect
   useEffect(() => {
     handleOAuthToken();
-  }, []); // Run once on mount
+  }, [handleOAuthToken]);
 
   // Visibility change listener - check if data is stale when tab becomes active
   useEffect(() => {

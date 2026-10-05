@@ -1,10 +1,8 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-import { useTheme } from "@mui/material";
 import { getThemeGradient } from "../constants.jsx";
 
 const Logo = ({ randomIcon, user, navigate }) => {
-  const theme = useTheme();
   const mobileLabel = "Guidra";
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import mermaid from "mermaid";
 import DOMPurify from "dompurify";
 import { Box, useTheme, useMediaQuery } from "@mui/material";
@@ -28,7 +28,7 @@ const MermaidDiagram = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // Default color palette if not provided
-  const colors = {
+  const colors = useMemo(() => ({
     50: "#FAF7FE",
     100: "#F3E8FF",
     200: "#E9D5FF",
@@ -40,7 +40,7 @@ const MermaidDiagram = ({
     800: "#6B21A8",
     900: "#581C87",
     ...colorPalette,
-  };
+  }), [colorPalette]);
 
   // Initialize mermaid
   useEffect(() => {
@@ -77,7 +77,7 @@ const MermaidDiagram = ({
     } catch (error) {
       console.warn("Mermaid initialization warning:", error);
     }
-  }, [isMobile, colors]);
+  }, [isMobile, colors, theme.palette.mode]);
 
   // Handle manual regeneration
   const handleManualRegenerate = useCallback(async () => {
@@ -366,6 +366,9 @@ const MermaidDiagram = ({
     remainingGenerations,
     handleManualRegenerate,
     cleanMermaidSyntax,
+    buildFallbackMindmap,
+    isMermaidSyntaxValid,
+    sanitizeMermaidSvg,
   ]);
 
   // Reset autoRegenerated when chart changes

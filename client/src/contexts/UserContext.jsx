@@ -60,7 +60,7 @@ export const UserProvider = ({ children }) => {
   // Single fetch on mount
   useEffect(() => {
     fetchUserProfile();
-  }, []);
+  }, [fetchUserProfile]);
 
   // Refetch when window becomes visible and data is stale
   useEffect(() => {
@@ -88,9 +88,10 @@ export const UserProvider = ({ children }) => {
 
   // Cleanup on unmount
   useEffect(() => {
+    const timeout = fetchTimeoutRef.current;
     return () => {
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
+      if (timeout) {
+        clearTimeout(timeout);
       }
     };
   }, []);

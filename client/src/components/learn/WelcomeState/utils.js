@@ -43,7 +43,7 @@ export const getRecentlyAccessedSubtopics = (contentCache, subtopics) => {
       .filter(Boolean);
 
     return recentlyAccessed;
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -63,7 +63,7 @@ export const getHighPrioritySubtopics = (subtopics, generationCounts) => {
         return aScore - bScore;
       })
       .slice(0, 3);
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -74,7 +74,7 @@ export const getRecommendedTopics = (topics, currentTopic) => {
     return topics
       .filter((topic) => topic && (topic.topic || topic.name) !== currentTopic)
       .slice(0, 3);
-  } catch (error) {
+  } catch {
     return [];
   }
 };

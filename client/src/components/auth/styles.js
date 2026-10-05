@@ -1,5 +1,3 @@
-import { alpha } from "@mui/material/styles";
-
 export const desktopSidebarStyles = {
   sidebar: {
     flex: 1,
@@ -74,7 +72,7 @@ export const formStyles = {
       ? "0 10px 40px rgba(0,0,0,0.1)"
       : "0 25px 80px rgba(0,0,0,0.2)",
   }),
-  formContainer: (isMobile) => ({
+  formContainer: () => ({
     flex: { xs: "none", md: 1 },
     width: { xs: "100%", md: "50%" },
     p: { xs: 3, sm: 5, md: 8 },

@@ -2,7 +2,7 @@ import React from "react";
 import { Box } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 
-const CompletionIndicator = ({ completed, isSelected, colorPalette }) => {
+const CompletionIndicator = ({ completed, colorPalette }) => {
   return (
     <Box
       sx={{

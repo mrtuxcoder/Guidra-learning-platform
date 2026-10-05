@@ -42,7 +42,6 @@ const WelcomeState = ({
   onTopicSelect,
   onSubtopicSelect,
   onOpenSidebar,
-  progress = 0,
   generationCounts = {},
   contentCache = {},
   isDataLoading = false,

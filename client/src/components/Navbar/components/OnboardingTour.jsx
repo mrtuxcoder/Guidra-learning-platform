@@ -57,7 +57,6 @@ const OnboardingTour = ({
   handleTourSkip,
   handleTourBack,
   handleTourNext,
-  handleTourComplete,
   randomIcon,
 }) => {
   const theme = useTheme();

@@ -56,7 +56,7 @@ export default function Explore() {
   const [customGenerating, setCustomGenerating] = useState(false);
   const [customError, setCustomError] = useState("");
   const [isCustomTopicValid, setIsCustomTopicValid] = useState(false);
-  const [lastValidatedQuery, setLastValidatedQuery] = useState("");
+  const [, setLastValidatedQuery] = useState("");
 
   // Memoized filtered topics
   const filteredTopics = useMemo(() => {

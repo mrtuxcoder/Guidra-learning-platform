@@ -3,7 +3,7 @@ import { Box, Typography, Avatar } from "@mui/material";
 import { Psychology } from "@mui/icons-material";
 import { mobileHeaderStyles } from "./styles";
 
-const AuthHeader = ({ title, subtitle }) => {
+const AuthHeader = ({ subtitle }) => {
   return (
     <Box sx={(theme) => mobileHeaderStyles.header(theme)}>
       <Box

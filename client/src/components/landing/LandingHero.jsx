@@ -14,7 +14,6 @@ import { profileTheme } from "../profile/constants";
 const LandingHero = ({
   onStartLearning,
   onLogin,
-  onRegister,
   onNavLogin,
   onNavRegister,
   isMobile,

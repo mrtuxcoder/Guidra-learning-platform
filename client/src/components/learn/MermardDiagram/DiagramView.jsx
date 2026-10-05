@@ -5,7 +5,6 @@ const DiagramView = ({
   zoomLevel,
   isRotated,
   isMobile,
-  colors,
 }) => (
   <Box
     sx={{

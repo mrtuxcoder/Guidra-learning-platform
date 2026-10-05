@@ -70,14 +70,14 @@ export default function Learning() {
   const { user } = useUser();
   
   // Use daily regen context
-  const { dailyRegenRemaining, dailyRegenResetAt, updateDailyRegen } = useDailyRegen();
+  const { dailyRegenRemaining, updateDailyRegen } = useDailyRegen();
   
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [showError, setShowError] = useState(false);
   const [quizModalOpen, setQuizModalOpen] = useState(false);
   const [pendingCompleteSubtopic, setPendingCompleteSubtopic] = useState(null);
   const [teachingStyleSelectorOpen, setTeachingStyleSelectorOpen] = useState(false);
-  const [selectedTeachingStyle, setSelectedTeachingStyle] = useState("default");
+  const [, setSelectedTeachingStyle] = useState("default");
   const [pendingAutoOpen, setPendingAutoOpen] = useState(null);
   
   // Ref to store the version dialog opener from LearningContent
@@ -222,6 +222,7 @@ export default function Learning() {
         setLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isMobile]
   );
 
@@ -680,7 +681,7 @@ export default function Learning() {
     } finally {
       setContentLoading(false);
     }
-  }, [selectedTopic, selectedSubtopic, canGenerate, handleIncrementGenerationCount, updateDailyRegen]);
+  }, [selectedTopic, selectedSubtopic, handleIncrementGenerationCount, updateDailyRegen]);
 
   const handleDailyRegenUpdate = useCallback((nextRemaining, nextResetAt) => {
     updateDailyRegen(nextRemaining, nextResetAt);
@@ -721,7 +722,7 @@ export default function Learning() {
           completed: subtopic.completed,
           understandingLevel: newUnderstanding,
         });
-      } catch (err) {
+      } catch {
         // Revert both arrays on error
         setSubtopics((prev) =>
           prev.map((sub) =>

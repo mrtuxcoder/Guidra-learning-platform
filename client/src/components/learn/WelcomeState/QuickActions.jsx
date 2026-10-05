@@ -38,7 +38,6 @@ const QuickActions = ({
   activeSuggestion,
   onSetActiveSuggestion,
   onQuickAction,
-  colorPalette,
 }) => {
   const isDesktop = useMediaQuery("(min-width: 900px)");
 

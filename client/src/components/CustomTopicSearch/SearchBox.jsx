@@ -11,7 +11,6 @@ const SearchBox = ({
   isValidTopic,
 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {

@@ -11,7 +11,7 @@ import AuthHeader from "./AuthHeader";
 import AuthSidebar from "./AuthSidebar";
 import { formStyles } from "./styles";
 
-const AuthLayout = ({ children, formType, features, sidebarTitle }) => {
+const AuthLayout = ({ children, formType, features }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 

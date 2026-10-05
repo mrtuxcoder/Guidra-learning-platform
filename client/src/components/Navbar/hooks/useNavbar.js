@@ -4,7 +4,7 @@ import { iconSet } from '../constants.jsx';
 import { useDailyRegen } from '../../../contexts/DailyRegenContext';
 import { useUser } from '../../../contexts/UserContext';
 
-export const useNavbar = (navigate, location, isMobile) => {
+export const useNavbar = (navigate, location) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [randomIcon, setRandomIcon] = useState(null);
   const [tourOpen, setTourOpen] = useState(false);

@@ -90,7 +90,7 @@ export default function TeachingStyleSelector({
   // Load cached preference on mount
   useEffect(() => {
     setSelectedStyle(getSavedStyle());
-  }, []);
+  }, [getSavedStyle]);
 
   const handleConfirm = () => {
     saveStyle(selectedStyle); // Cache the selection

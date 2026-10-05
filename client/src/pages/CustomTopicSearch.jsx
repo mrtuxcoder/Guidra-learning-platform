@@ -9,7 +9,7 @@ import {
   Typography,
   Chip,
 } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import { AutoAwesome } from "@mui/icons-material";
 import { useNavigate, Navigate } from "react-router-dom";
 
@@ -26,7 +26,6 @@ export default function CustomTopicSearch() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const isDark = theme.palette.mode === "dark";
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);

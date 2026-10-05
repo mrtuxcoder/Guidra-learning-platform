@@ -5,7 +5,6 @@ const DesktopQuickActions = ({
   quickActions,
   learningInsights,
   suggestions,
-  activeSuggestion,
   onSetActiveSuggestion,
   onQuickAction,
 }) => {

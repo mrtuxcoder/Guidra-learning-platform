@@ -5,8 +5,6 @@ import CompletionIndicator from "./CompletionIndicator";
 
 const SubtopicItem = ({
   subtopic,
-  index,
-  topicName,
   isSelected,
   isUpdating,
   hasContent,

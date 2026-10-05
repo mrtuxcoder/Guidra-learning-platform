@@ -100,7 +100,7 @@ const StatBox = ({ icon: Icon, value, label, color, isMobile }) => (
         flexShrink: 0,
       }}
     >
-      <Icon sx={{ fontSize: isMobile ? 14 : 18 }} />
+      {React.createElement(Icon, { sx: { fontSize: isMobile ? 14 : 18 } })}
     </Box>
     <Box>
       <Typography

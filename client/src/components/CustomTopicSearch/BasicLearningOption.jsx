@@ -4,10 +4,9 @@ import { alpha, useTheme } from "@mui/material/styles";
 import { ArrowForward } from "@mui/icons-material";
 
 const BasicLearningOption = ({ isValidTopic, generating, onClick }) => {
-  if (!isValidTopic || generating) return null;
-
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+
+  if (!isValidTopic || generating) return null;
 
   return (
     <Fade in={isValidTopic}>

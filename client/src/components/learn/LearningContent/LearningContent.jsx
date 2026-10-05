@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   useTheme,
@@ -29,7 +29,6 @@ import {
   getComponentVersions,
   getComponentVersion,
   getAvailableVersions,
-  getFullContentByVersion,
 } from '../../../api/learning';
 
 const LearningContent = ({ 
@@ -42,7 +41,6 @@ const LearningContent = ({
   onGenerateContent,
   onSelectFullVersion,
   colorPalette,
-  userRemainingGenerations = 5,
   dailyRemaining = 6,
   onDailyRegenUpdate,
   onVersionDialogOpen,
@@ -82,7 +80,7 @@ const LearningContent = ({
     if (typeof onVersionDialogOpen === "function") {
       onVersionDialogOpen(setVersionDialogOpen);
     }
-  }, []);
+  }, [onVersionDialogOpen]);
 
   const getComponentGenerationCount = (componentName) =>
     (componentVersions[componentName] || []).filter(
@@ -248,7 +246,7 @@ const LearningContent = ({
     }
   };
 
-  const loadComponentVersions = async (componentName) => {
+  const loadComponentVersions = useCallback(async (componentName) => {
     if (!selectedTopic || !selectedSubtopic?.name) {
       return;
     }
@@ -274,7 +272,7 @@ const LearningContent = ({
         ...prev,
         [componentName]: versions.length > 0 ? versions[0].version : null,
       }));
-    } catch (error) {
+    } catch {
       setComponentVersions((prev) => ({
         ...prev,
         [componentName]: [],
@@ -289,9 +287,9 @@ const LearningContent = ({
         [componentName]: false,
       }));
     }
-  };
+  }, [selectedTopic, selectedSubtopic]);
 
-  const loadFullVersions = async () => {
+  const loadFullVersions = useCallback(async () => {
     if (!selectedTopic || !selectedSubtopic?.name) {
       return;
     }
@@ -313,7 +311,7 @@ const LearningContent = ({
     } finally {
       setLoadingFullVersions(false);
     }
-  };
+  }, [selectedTopic, selectedSubtopic]);
 
   const handleComponentVersionSelect = async (componentName, versionNumber) => {
     if (!selectedTopic || !selectedSubtopic?.name) {
@@ -445,7 +443,7 @@ const LearningContent = ({
     return () => {
       isMounted = false;
     };
-  }, [selectedTopic, selectedSubtopic]);
+  }, [selectedTopic, selectedSubtopic, loadComponentVersions]);
 
   const componentOptions = [
     { value: "concept", label: "Core Concept" },
@@ -477,7 +475,7 @@ const LearningContent = ({
     } else {
       loadComponentVersions(selectedComponent);
     }
-  }, [versionDialogOpen, selectedComponent, versionMode]);
+  }, [versionDialogOpen, selectedComponent, versionMode, loadComponentVersions, loadFullVersions]);
 
   if (contentLoading) {
     return <LoadingState isContentLoading={true} source={contentInfo?.source} colorPalette={colorPalette} />;

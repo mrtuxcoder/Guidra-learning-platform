@@ -3,7 +3,7 @@ import { Box, Typography, Avatar } from "@mui/material";
 import { Psychology } from "@mui/icons-material";
 import { desktopSidebarStyles } from "./styles";
 
-const AuthSidebar = ({ features, title, subtitle }) => {
+const AuthSidebar = ({ features, subtitle }) => {
   return (
     <Box sx={desktopSidebarStyles.sidebar}>
       {/* Background Shapes */}

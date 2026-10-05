@@ -3,7 +3,6 @@ import { Warning } from "@mui/icons-material";
 
 const ErrorView = ({
   error,
-  isMobile,
   onManualRegenerate,
   remainingGenerations,
   isRegenerating,

@@ -15,8 +15,7 @@ const DiagramControls = ({
   colors,
   onManualRegenerate,
   isRegenerating,
-  remainingGenerations,
-  CircularProgress
+  remainingGenerations
 }) => (
   <Box sx={{ 
     position: 'sticky', 

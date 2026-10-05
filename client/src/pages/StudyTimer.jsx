@@ -92,7 +92,7 @@ export default function StudyTimer() {
 
   const [todayKey, setTodayKey] = useState(getTodayKey);
 
-  const [dailySessions, setDailySessions] = useState(() =>
+  const [, setDailySessions] = useState(() =>
     readDailySessions(getTodayKey())
   );
 
@@ -118,11 +118,6 @@ export default function StudyTimer() {
     : hasStarted
     ? "Resume Focus Session"
     : "Start Focus Session";
-
-  const dailyProgressPercent = Math.min(
-    100,
-    Math.round((dailySessions / DAILY_SESSION_GOAL) * 100)
-  );
 
   useEffect(() => {
     if (hasCompleted && !completionLoggedRef.current) {

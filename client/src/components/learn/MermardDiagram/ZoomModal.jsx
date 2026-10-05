@@ -10,7 +10,6 @@ const ZoomModal = ({
   onClose,
   renderedSvg,
   chart,
-  error,
   isMobile,
   colors,
   onManualRegenerate,

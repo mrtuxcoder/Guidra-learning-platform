@@ -23,10 +23,9 @@ const guidelines = [
 ];
 
 const Guidelines = ({ show }) => {
-  if (!show) return null;
-
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+
+  if (!show) return null;
 
   return (
     <Fade in={show}>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Box, Card, useTheme, useMediaQuery, alpha } from "@mui/material";
+import { Box, Card, useTheme, useMediaQuery } from "@mui/material";
 import Header from "./Header";
 import TopicItem from "./TopicItem";
 import { syncTopicsWithSubtopics } from "./utils";
@@ -11,11 +11,8 @@ const LearningSidebar = ({
   selectedSubtopic,
   updatingSubtopic,
   contentCache,
-  generationCounts,
   onTopicSelect,
   onSubtopicSelect,
-  onUpdateUnderstanding,
-  progress,
   colorPalette,
 }) => {
   const theme = useTheme();

@@ -305,7 +305,7 @@ const ContentSection = ({
 };
 
 // Specialized Mindmap Section
-ContentSection.MindmapSection = ({
+const MindmapSection = ({
   isMobile,
   colorPalette,
   safeContent,
@@ -392,5 +392,7 @@ ContentSection.MindmapSection = ({
   </Card>
   );
 };
+
+ContentSection.MindmapSection = MindmapSection;
 
 export default ContentSection;

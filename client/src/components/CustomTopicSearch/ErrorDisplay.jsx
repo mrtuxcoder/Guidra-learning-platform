@@ -3,10 +3,10 @@ import { Alert, Typography, Box } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 
 const ErrorDisplay = ({ error }) => {
-  if (!error) return null;
-
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+
+  if (!error) return null;
 
   const getRetrySuggestion = () => {
     if (!error) return null;
