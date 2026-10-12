@@ -1,32 +1,39 @@
-name: Guidra Lint
+name: Guidra CI
 on:
   push:
     branches:
         - main
 
+env:
+  PORT: ${{ secrets.PORT }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+
 jobs:
   lint:
     name: lint frontend and backend
     runs-on: ubuntu-latest
+    container:
+      image: node:22-alpine
 
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Cache npm
+        uses: actions/cache@v4
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: |
-             client/package-lock.json
-             server/package-lock.json
-      
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: install client dependencies
         working-directory: client
         run: npm ci
 
-      - name: install backent dependencies
+      - name: install backend dependencies
         working-directory: server
         run: npm ci
 
@@ -38,4 +45,20 @@ jobs:
         working-directory: server
         run: npm run lint
 
-     
+  test:
+    name: Test Backend via Docker Compose
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+
+      
+      - name: Run tests inside Docker Compose
+        env:
+          PORT: ${{ secrets.PORT }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+        run: |
+          docker compose -f docker-compose.test.yml up --build --exit-code-from server-test
