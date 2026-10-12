@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "lint": "eslint .",
-    "test": "node --test",
-    "test:ai": "RUN_AI_PROVIDER_TESTS=1 node --test test/ai-providers.test.js",
+    "test": "node --test test/*.test.js",
+    "test:ai": "node --test test/ai-providers.test.js",
     "start": "node server.js",
     "dev": "NODE_ENV=development nodemon server"
   },
