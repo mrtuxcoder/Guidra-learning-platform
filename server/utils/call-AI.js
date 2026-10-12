@@ -19,8 +19,7 @@ const GEMINI_MODELS = ["gemini-3.8-flash"];
 
 // ====== HUGGINGFACE MODELS ======
 const HUGGINGFACE_MODELS = [
-  "openai/gpt-oss-120b",
-  "meta-llama/Llama-3.1-8B-Instruct",
+  "Qwen/Qwen3-4B-Instruct-2507",
 ];
 
 const AI_HEALTH_PROMPT = "Reply with the single word OK.";
