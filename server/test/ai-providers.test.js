@@ -1,10 +1,10 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const path = require("path");
 const dotenv = require("dotenv");
 
 const nodeEnv = process.env.NODE_ENV || "development";
-dotenv.config({ path: `.env.${nodeEnv}` });
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, `../../.env.${nodeEnv}`) });
 
 const { checkAIProviders } = require("../utils/call-AI");
 

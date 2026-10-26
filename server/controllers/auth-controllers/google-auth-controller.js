@@ -4,8 +4,6 @@ const { setTokenCookie } = require("./set-token-cookie");
 const getFrontendOrigin = () =>
   (
     process.env.CLIENT_URL ||
-    process.env.CLIENT_ORIGIN ||
-    process.env.FRONTEND_URL ||
     "http://localhost:5173"
   )
     .trim()

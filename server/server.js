@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
@@ -6,8 +7,7 @@ const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const nodeEnv = process.env.NODE_ENV || "development";
-dotenv.config({ path: `.env.${nodeEnv}` });
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, `../.env.${nodeEnv}`) });
 
 if (!process.env.MONGO_URI) {
   throw new Error("MONGO_URI must be configured");
@@ -38,26 +38,13 @@ const normalizeOrigin = (value) => {
   return value.trim().replace(/\/$/, "");
 };
 
-const envOrigins = [
-  process.env.CLIENT_URL,
-  process.env.CLIENT_ORIGIN,
-  process.env.FRONTEND_URL,
-  ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : []),
-]
-  .map(normalizeOrigin)
-  .filter(Boolean);
-
-const allowedOrigins = new Set([
-  ...envOrigins,
-  "https://www.guidra.tech",
-  "https://guidra.tech",
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:4173",
-]);
+const allowedOrigin = normalizeOrigin(process.env.CLIENT_URL);
+if (!allowedOrigin) {
+  throw new Error("CLIENT_URL must be configured");
+}
 
 const isAllowedOrigin = (origin) =>
-  allowedOrigins.has(normalizeOrigin(origin));
+  normalizeOrigin(origin) === allowedOrigin;
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
