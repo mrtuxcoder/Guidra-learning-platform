@@ -65,7 +65,7 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-The server reads the root `.env.development` file. The client still uses `client/.env` for `VITE_API_BASE_URL`, because Vite consumes that value at build and dev-server time.
+The server reads the root `.env.development` file. The client uses `client/.env` for `VITE_API_BASE_URL` when running Vite directly. Docker frontend builds use same-origin `/api/` requests, which Nginx proxies to the backend service.
 
 ---
 
