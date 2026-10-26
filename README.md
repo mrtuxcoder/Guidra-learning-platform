@@ -5,18 +5,58 @@ Instead of unpredictable chatbot replies, Guidra delivers consistent mini-lesson
 
 Built for students and beginners who want clarity, not chaos.
 
-## 🚀 Run Locally
+## 🚀 Docker Compose
 
-### Docker Compose
+The stack is split into three files:
 
-Copy the server environment template, fill in the required values, then start the full stack:
+- `docker-compose.yml` contains the shared services, network, and MongoDB volume.
+- `docker-compose.override.yml` is loaded automatically for local development and builds the server and client from source.
+- `docker-compose.prod.yml` replaces local builds with published GHCR images.
+
+Containers are named `guidra-dev-*` in development and `guidra-prod-*` in production.
+
+Environment files are intentionally git-ignored. Copy an example file before first use and keep secrets only in the copied file.
+
+### Development
+
+Copy the development template, fill in the required values, then start the full stack. Docker Compose reads server runtime configuration from this file; the client build reads `client/.env`.
 
 ```bash
-cp server/.env.example server/.env.development
-docker compose up --build
+cp .env.development.example .env.development
+docker compose --env-file .env.development up --build
 ```
 
-The frontend is available at `http://localhost` and the API at `http://localhost:5000`.
+The frontend is available at `http://localhost` and the API at `http://localhost:5000`. To stop the local stack, run:
+
+```bash
+docker compose --env-file .env.development down
+```
+
+`CLIENT_URL` is the only browser origin allowed by the API's CORS policy and is also the Google OAuth redirect target. Use `http://localhost` for the Docker frontend. If the client is run directly with Vite, use `http://localhost:5173` instead.
+
+### Production / GHCR image test
+
+Copy the production template and set `BACKEND_IMAGE` and `FRONTEND_IMAGE` to the published GHCR image references. Also set production secrets and `CLIENT_URL` (for example, `https://guidra.tech`). The production command explicitly combines only the base and production files, so it does not use the local-development override.
+
+If the GHCR packages are private, authenticate on the deployment host first:
+
+```bash
+docker login ghcr.io
+```
+
+Pull and start the production image stack:
+
+```bash
+cp .env.production.example .env.production
+docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull
+docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+Use a release or commit tag for `BACKEND_IMAGE` and `FRONTEND_IMAGE` rather than `latest` when deploying. To stop the stack while keeping MongoDB data, run:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml down
+```
 
 ### Separate Development Servers
 
@@ -25,7 +65,7 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-The client uses `VITE_API_BASE_URL` to locate the API. See the environment example files for available configuration values.
+The server reads the root `.env.development` file. The client still uses `client/.env` for `VITE_API_BASE_URL`, because Vite consumes that value at build and dev-server time.
 
 ---
 
