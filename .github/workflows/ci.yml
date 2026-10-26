@@ -57,7 +57,7 @@ jobs:
         run: |
           docker compose -f docker-compose.test.yml up --build --exit-code-from server-test
 
-  publish:
+  publish-AWS-ECR:
     name: Build and publish Docker images
     needs: test
     runs-on: ubuntu-latest
@@ -100,3 +100,43 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-frontend:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-frontend:latest
+
+  publish-GHCR:
+    name: Build and publish Docker images to GitHub Container Registry
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend image to GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ghcr.io/mrtuxcoder/guidra-backend:${{ github.sha }}
+            ghcr.io/mrtuxcoder/guidra-backend:latest
+
+      - name: Build and push frontend image to GHCR
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ghcr.io/mrtuxcoder/guidra-frontend:${{ github.sha }}
+            ghcr.io/mrtuxcoder/guidra-frontend:latest
