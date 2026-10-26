@@ -18,7 +18,9 @@ export default defineConfig({
         "src/assets/guidra-icon.png",
       ],
       workbox: {
-        navigateFallback: "/index.html",
+        // Nginx handles SPA routes. Do not intercept navigations in the
+        // service worker, or OAuth/API navigations can be served as the SPA.
+        navigateFallback: null,
         globPatterns: ["**/*.{js,css,html,svg,png,ico,webp}"],
         runtimeCaching: [
           // Auth/profile endpoints should never be served from cache
