@@ -1,19 +1,16 @@
 import React from "react";
-import { Box, Typography, LinearProgress, useTheme, alpha } from "@mui/material";
+import { Box, Typography, LinearProgress } from "@mui/material";
 
 const QuizProgress = ({
   answeredCount,
   totalQuestions,
   allQuestionsAnswered,
-  colorPalette,
-  isMobile,
 }) => {
-  const theme = useTheme();
   const progressPercentage =
     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 2.5 }}>
       <Box
         sx={{
           display: "flex",
@@ -23,34 +20,41 @@ const QuizProgress = ({
         }}
       >
         <Typography
-          variant="body2"
-          fontWeight="600"
-          sx={{ fontSize: isMobile ? "0.8rem" : "0.875rem" }}
+          variant="caption"
+          sx={{
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            color: "text.secondary",
+            fontSize: "0.72rem",
+          }}
         >
-          Progress
+          Quiz Progress
         </Typography>
         <Typography
-          variant="body2"
-          fontWeight="600"
-          sx={{ fontSize: isMobile ? "0.8rem" : "0.875rem" }}
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            color: allQuestionsAnswered ? "success.main" : "text.secondary",
+            fontSize: "0.75rem",
+          }}
         >
-          {answeredCount} / {totalQuestions}
+          {`${answeredCount} of ${totalQuestions} answered`}
         </Typography>
       </Box>
       <LinearProgress
         variant="determinate"
         value={progressPercentage}
         sx={{
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: theme.palette.mode === "dark" 
-            ? alpha(colorPalette[500], 0.2)
-            : colorPalette[100],
+          height: 4,
+          borderRadius: 2,
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.08)"
+              : "rgba(0, 0, 0, 0.06)",
           "& .MuiLinearProgress-bar": {
-            backgroundColor: allQuestionsAnswered
-              ? "#10b981"
-              : colorPalette[500],
-            borderRadius: 3,
+            bgcolor: allQuestionsAnswered ? "success.main" : "primary.main",
+            borderRadius: 2,
           },
         }}
       />

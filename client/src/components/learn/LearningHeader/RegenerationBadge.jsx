@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   IconButton,
   Button,
   Tooltip,
@@ -13,25 +12,25 @@ const RegenerationBadge = ({
   remainingGenerations,
   contentLoading,
   onRegenerateContent,
-  colorPalette,
   variant = "desktop",
 }) => {
   const isMobile = variant === "mobile";
+  const isLocked = remainingGenerations === 0;
 
   if (isMobile) {
     return (
       <Tooltip
         title={
-          remainingGenerations === 0
-            ? "No regenerations available"
-            : `${remainingGenerations} regenerations available`
+          isLocked
+            ? "No regenerations remaining"
+            : `${remainingGenerations} regenerations left`
         }
         placement="top"
       >
         <Badge
           badgeContent={remainingGenerations}
           max={99}
-          color={remainingGenerations === 0 ? "error" : "primary"}
+          color={isLocked ? "error" : "primary"}
           overlap="circular"
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           sx={{
@@ -39,49 +38,38 @@ const RegenerationBadge = ({
               minWidth: 16,
               height: 16,
               fontSize: "0.62rem",
-              fontWeight: 800,
-              lineHeight: 1,
-              border: "1px solid rgba(255,255,255,0.35)",
+              fontWeight: 700,
             },
           }}
         >
-          <IconButton
-            onClick={onRegenerateContent}
-            disabled={contentLoading || remainingGenerations === 0}
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: "10px",
-              color:
-                remainingGenerations === 0
-                  ? "#ef4444"
-                  : colorPalette?.[600] || "#6d48b5",
-              background:
-                remainingGenerations === 0
-                  ? "rgba(239, 68, 68, 0.1)"
-                  : "rgba(126, 87, 194, 0.1)",
-              border:
-                remainingGenerations === 0
-                  ? "1px solid rgba(239, 68, 68, 0.22)"
-                  : "1px solid rgba(126, 87, 194, 0.15)",
-              "&:hover":
-                !contentLoading && remainingGenerations > 0
-                  ? {
-                      background: "rgba(126, 87, 194, 0.18)",
-                      transform: "translateY(-1px)",
-                    }
-                  : {},
-              transition: "all 0.2s ease",
-            }}
-          >
-            {contentLoading ? (
-              <CircularProgress size={16} />
-            ) : remainingGenerations === 0 ? (
-              <Lock sx={{ fontSize: 20 }} />
-            ) : (
-              <Refresh sx={{ fontSize: 20 }} />
-            )}
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={onRegenerateContent}
+              disabled={contentLoading || isLocked}
+              size="small"
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: "8px",
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                color: isLocked ? "text.secondary" : "primary.main",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  bgcolor: "action.hover",
+                },
+              }}
+            >
+              {contentLoading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : isLocked ? (
+                <Lock sx={{ fontSize: 16 }} />
+              ) : (
+                <Refresh sx={{ fontSize: 18 }} />
+              )}
+            </IconButton>
+          </span>
         </Badge>
       </Tooltip>
     );
@@ -90,54 +78,49 @@ const RegenerationBadge = ({
   return (
     <Tooltip
       title={
-        remainingGenerations === 0
-          ? `No regenerations available`
-          : `${remainingGenerations} regenerations available`
+        isLocked
+          ? "No regenerations left for this lesson"
+          : `${remainingGenerations} regenerations remaining`
       }
     >
-      <Button
-        startIcon={
-          remainingGenerations === 0 ? (
-            <Lock sx={{ fontSize: 18 }} />
-          ) : contentLoading ? (
-            <CircularProgress size={18} />
-          ) : (
-            <Refresh sx={{ fontSize: 18 }} />
-          )
-        }
-        onClick={onRegenerateContent}
-        disabled={contentLoading || remainingGenerations === 0}
-        variant="outlined"
-        size="small"
-        sx={{
-          borderColor:
-            remainingGenerations === 0
-              ? "#ef4444"
-              : colorPalette?.[500] || "#7e57c2",
-          color:
-            remainingGenerations === 0
-              ? "#ef4444"
-              : colorPalette?.[600] || "#6d48b5",
-          background:
-            remainingGenerations === 0
-              ? "rgba(239, 68, 68, 0.04)"
-              : "rgba(126, 87, 194, 0.04)",
-          fontWeight: 600,
-          borderRadius: 2,
-          px: 2,
-          "&:hover": {
-            background:
-              remainingGenerations === 0
-                ? "rgba(239, 68, 68, 0.08)"
-                : "rgba(126, 87, 194, 0.08)",
-            transform: "translateY(-1px)",
-            boxShadow: "0 4px 12px rgba(126, 87, 194, 0.1)",
-          },
-          transition: "all 0.2s ease",
-        }}
-      >
-        {contentLoading ? "Regenerating..." : "Regenerate"}
-      </Button>
+      <span>
+        <Button
+          onClick={onRegenerateContent}
+          disabled={contentLoading || isLocked}
+          size="small"
+          variant="outlined"
+          startIcon={
+            contentLoading ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : isLocked ? (
+              <Lock sx={{ fontSize: 14 }} />
+            ) : (
+              <Refresh sx={{ fontSize: 15 }} />
+            )
+          }
+          sx={{
+            height: 32,
+            borderColor: "divider",
+            color: isLocked ? "text.secondary" : "text.secondary",
+            bgcolor: "background.paper",
+            fontWeight: 500,
+            borderRadius: "6px",
+            px: 1.25,
+            fontSize: "0.8rem",
+            "&:hover": {
+              borderColor: "divider",
+              color: "text.primary",
+              bgcolor: "action.hover",
+            },
+            "&.Mui-disabled": {
+              opacity: 0.5,
+            },
+            transition: "all 0.15s ease",
+          }}
+        >
+          {contentLoading ? "Generating..." : `Regenerate (${remainingGenerations})`}
+        </Button>
+      </span>
     </Tooltip>
   );
 };

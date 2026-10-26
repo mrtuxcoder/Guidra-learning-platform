@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   Box,
   Card,
@@ -15,18 +15,13 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
-import { ArrowForward, MenuBook, School } from "@mui/icons-material";
+import { ArrowForward, MenuBook, School, AutoAwesome, CheckCircleOutline } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import TopicSelector from "./TopicSelector";
-import ProgressCard from "./ProgressCard";
-import QuickActions from "./QuickActions";
 import EmptyState from "./EmptyState";
 import LoadingState from "./LoadingState";
 import {
-  getRecentlyAccessedSubtopics,
-  getHighPrioritySubtopics,
-  getRecommendedTopics,
   calculateLearningInsights,
   getMostRecentIncompleteSubtopic,
 } from "./utils";
@@ -42,8 +37,6 @@ const WelcomeState = ({
   onTopicSelect,
   onSubtopicSelect,
   onOpenSidebar,
-  generationCounts = {},
-  contentCache = {},
   isDataLoading = false,
   isRecalledTopic = false,
   isMobile = false,
@@ -62,24 +55,11 @@ const WelcomeState = ({
 }) => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const isDark = theme.palette.mode === "dark";
-  const [activeSuggestion, setActiveSuggestion] = useState("continue");
 
   // Memoized calculations
   const learningInsights = useMemo(() => {
     return calculateLearningInsights(subtopics);
   }, [subtopics]);
-
-  const suggestions = useMemo(() => {
-    return {
-      recentlyAccessed: getRecentlyAccessedSubtopics(contentCache, subtopics),
-      highPrioritySubtopics: getHighPrioritySubtopics(
-        subtopics,
-        generationCounts
-      ),
-      recommendedTopics: getRecommendedTopics(topics, selectedTopic),
-    };
-  }, [contentCache, subtopics, generationCounts, topics, selectedTopic]);
 
   const mostRecentIncompleteSubtopic = useMemo(() => {
     return (
@@ -87,24 +67,6 @@ const WelcomeState = ({
       learningInsights.firstIncompleteSubtopic
     );
   }, [subtopics, learningInsights.firstIncompleteSubtopic]);
-
-  const inProgressTopicName = useMemo(() => {
-    if (!Array.isArray(topics) || topics.length === 0) {
-      return selectedTopic || "";
-    }
-
-    const inProgressTopic = topics.find((topic) => {
-      const subtopicList = topic?.subTopics || topic?.subtopics || [];
-      return subtopicList.some((sub) => sub && !sub.completed);
-    });
-
-    return (
-      inProgressTopic?.topic ||
-      inProgressTopic?.name ||
-      selectedTopic ||
-      ""
-    );
-  }, [topics, selectedTopic]);
 
   // Check if we have any topics at all
   const hasTopics = Array.isArray(topics) && topics.length > 0;
@@ -141,26 +103,6 @@ const WelcomeState = ({
 
   const handleExploreTopics = () => {
     navigate("/explore");
-  };
-
-  const handleQuickAction = (actionType) => {
-    let targetSubtopic = null;
-
-    switch (actionType) {
-      case "continue":
-        targetSubtopic = learningInsights.firstIncompleteSubtopic;
-        break;
-      case "recent":
-        targetSubtopic = suggestions.recentlyAccessed[0];
-        break;
-      case "priority":
-        targetSubtopic = suggestions.highPrioritySubtopics[0];
-        break;
-    }
-
-    if (targetSubtopic && onSubtopicSelect) {
-      onSubtopicSelect(targetSubtopic);
-    }
   };
 
   // Show loader first, then content
@@ -255,16 +197,8 @@ const WelcomeState = ({
       <Fade in={true} timeout={400}>
         <Box
           sx={{
-            minHeight: "100vh",
-            background: isDark
-              ? `linear-gradient(135deg, ${alpha(
-                  theme.palette.background.paper,
-                  0.85
-                )} 0%, ${theme.palette.background.default} 100%)`
-              : `linear-gradient(135deg, ${alpha(
-                  theme.palette.background.paper,
-                  0.95
-                )} 0%, ${theme.palette.background.default} 100%)`,
+            minHeight: "100%",
+            bgcolor: "background.default",
             display: "flex",
             flexDirection: "column",
           }}
@@ -280,7 +214,7 @@ const WelcomeState = ({
             onOpenSidebar={onOpenSidebar}
             isRecalledTopic={isRecalledTopic}
           />
-          <EmptyState colorPalette={colorPalette} />
+          <EmptyState />
         </Box>
       </Fade>
     );
@@ -489,16 +423,8 @@ const WelcomeState = ({
     <Fade in={true} timeout={400}>
       <Box
         sx={{
-          minHeight: "100vh",
-          background: isDark
-            ? `linear-gradient(135deg, ${alpha(
-                theme.palette.background.paper,
-                0.85
-              )} 0%, ${theme.palette.background.default} 100%)`
-            : `linear-gradient(135deg, ${alpha(
-                theme.palette.background.paper,
-                0.95
-              )} 0%, ${theme.palette.background.default} 100%)`,
+          minHeight: "100%",
+          bgcolor: "background.default",
           display: "flex",
           flexDirection: "column",
         }}
@@ -547,85 +473,176 @@ const WelcomeState = ({
                 onTopicSelect={onTopicSelect}
               />
 
-              {/* Progress Card */}
-              <ProgressCard
-                selectedTopic={selectedTopic}
-                learningInsights={learningInsights}
-                colorPalette={colorPalette}
-              />
-
-              {/* Continue where you left off */}
-              {selectedTopic && mostRecentIncompleteSubtopic && (
+              {/* Course Completed State */}
+              {selectedTopic && learningInsights.isTopicCompleted && (
                 <Paper
                   elevation={0}
                   sx={{
-                    p: { xs: 2, md: 2.5 },
-                    mb: 3,
-                    borderRadius: 2,
+                    p: { xs: 3, md: 4 },
+                    borderRadius: "10px",
                     border: "1px solid",
                     borderColor: "divider",
                     bgcolor: "background.paper",
+                    textAlign: "center",
+                    mb: 3,
                   }}
                 >
-                  <Stack
-                    spacing={1.5}
-                    direction={{ xs: "column", sm: "row" }}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                    justifyContent="space-between"
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: "50%",
+                      bgcolor: "rgba(16, 185, 129, 0.12)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mx: "auto",
+                      mb: 2,
+                    }}
                   >
-                    <Box>
-                      <Typography variant="h6" fontWeight={700}>
-                        Continue where you left off
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        In progress: {inProgressTopicName || selectedTopic}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.primary"
-                        sx={{ fontWeight: 600, mt: 0.5 }}
-                      >
-                        Next up: {mostRecentIncompleteSubtopic.name}
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={() =>
-                        onSubtopicSelect?.(mostRecentIncompleteSubtopic)
-                      }
-                      sx={{
-                        textTransform: "none",
-                        borderRadius: 2,
-                        fontWeight: 700,
-                        px: 3,
-                        background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-                      }}
-                    >
-                      Continue
-                    </Button>
-                  </Stack>
+                    <CheckCircleOutline sx={{ fontSize: 32, color: "success.main" }} />
+                  </Box>
+
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: "text.primary", mb: 0.75 }}>
+                    All Lessons Completed!
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 440, mx: "auto", mb: 3 }}>
+                    You have mastered all {learningInsights.totalSubtopics} lessons in {selectedTopic}. Select another course from the sidebar or review past lessons.
+                  </Typography>
+
+                  <Button
+                    variant="outlined"
+                    onClick={() => onNavigateToFirstIncomplete ? onNavigateToFirstIncomplete() : onTopicSelect(selectedTopic)}
+                    sx={{
+                      borderRadius: "6px",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      px: 3,
+                      py: 1,
+                    }}
+                  >
+                    Review Course Lessons
+                  </Button>
                 </Paper>
               )}
 
-              {/* Quick Actions */}
-              <QuickActions
-                selectedTopic={selectedTopic}
-                learningInsights={learningInsights}
-                suggestions={suggestions}
-                activeSuggestion={activeSuggestion}
-                onSetActiveSuggestion={setActiveSuggestion}
-                onQuickAction={handleQuickAction}
-                colorPalette={colorPalette}
-              />
+              {/* Active Topic - Consolidated Focused Next Lesson Card */}
+              {selectedTopic && !learningInsights.isTopicCompleted && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: { xs: 2.5, md: 3 },
+                    borderRadius: "8px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    mb: 3,
+                  }}
+                >
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", fontSize: "0.72rem" }}>
+                        Current Course
+                      </Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.15rem", color: "text.primary", mt: 0.25 }}>
+                        {selectedTopic}
+                      </Typography>
+                    </Box>
+                    <Chip
+                      label={`${learningInsights.completedSubtopics} of ${learningInsights.totalSubtopics} completed (${Math.round(learningInsights.progressPercentage)}%)`}
+                      size="small"
+                      sx={{
+                        borderRadius: "4px",
+                        fontWeight: 600,
+                        fontSize: "0.75rem",
+                        bgcolor: (theme) => theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)",
+                        color: "text.secondary",
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    />
+                  </Box>
 
-              {/* Main CTA Button */}
-              {isReady && !learningInsights.isTopicCompleted && (
-                <Box sx={{ mt: 3 }}>
-                  <MainCTA
-                    subtopicName={subtopicName}
-                    onGenerateContent={onGenerateContent}
-                    colorPalette={colorPalette}
+                  <LinearProgress
+                    variant="determinate"
+                    value={learningInsights.progressPercentage}
+                    sx={{
+                      height: 4,
+                      borderRadius: 2,
+                      bgcolor: (theme) => theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)",
+                      mb: 2.5,
+                      "& .MuiLinearProgress-bar": {
+                        borderRadius: 2,
+                        bgcolor: "primary.main",
+                      },
+                    }}
                   />
+
+                  {mostRecentIncompleteSubtopic && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: 2,
+                        pt: 1.5,
+                        borderTop: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: "block", mb: 0.25 }}>
+                          Next Lesson Up
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "1rem" }}>
+                          {mostRecentIncompleteSubtopic.name}
+                        </Typography>
+                      </Box>
+
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => onSubtopicSelect?.(mostRecentIncompleteSubtopic)}
+                        endIcon={<ArrowForward sx={{ fontSize: 16 }} />}
+                        sx={{
+                          textTransform: "none",
+                          fontWeight: 600,
+                          borderRadius: "6px",
+                          px: 2.5,
+                          height: 38,
+                          fontSize: "0.88rem",
+                        }}
+                      >
+                        Continue Lesson
+                      </Button>
+                    </Box>
+                  )}
+                </Paper>
+              )}
+
+              {/* Main CTA Button when a subtopic is explicitly selected but content is ungenerated */}
+              {isReady && !learningInsights.isTopicCompleted && (
+                <Box sx={{ mt: 2.5 }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={onGenerateContent}
+                    startIcon={<AutoAwesome />}
+                    sx={{
+                      width: "100%",
+                      py: 1.5,
+                      borderRadius: "8px",
+                      fontSize: "0.95rem",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      bgcolor: "primary.main",
+                      "&:hover": { bgcolor: "primary.dark" },
+                    }}
+                  >
+                    Start Learning: {subtopicName}
+                  </Button>
                 </Box>
               )}
             </Box>
@@ -633,37 +650,6 @@ const WelcomeState = ({
         </Box>
       </Box>
     </Fade>
-  );
-};
-
-// Main CTA Component
-const MainCTA = ({ subtopicName, onGenerateContent, colorPalette }) => {
-  return (
-    <Button
-      variant="contained"
-      size="large"
-      onClick={onGenerateContent}
-      startIcon={<AutoAwesome />}
-      sx={{
-        width: "100%",
-        py: { xs: 1.5, md: 2 },
-        borderRadius: 2,
-        fontSize: { xs: "1rem", md: "1.1rem" },
-        fontWeight: "700",
-        background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-        boxShadow: `0 8px 24px ${colorPalette[300]}`,
-        "&:hover": {
-          transform: { md: "translateY(-2px)" },
-          boxShadow: `0 12px 32px ${colorPalette[400]}`,
-        },
-        transition: "all 0.3s ease",
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <SmartToy sx={{ fontSize: { xs: 20, md: 24 } }} />
-        Start Learning {subtopicName}
-      </Box>
-    </Button>
   );
 };
 

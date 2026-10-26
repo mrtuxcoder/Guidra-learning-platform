@@ -196,9 +196,7 @@ function AppContent() {
           path="/custom-topic"
           element={
             isAuth ? (
-              <Layout>
-                <CustomTopicSearch />
-              </Layout>
+              <Navigate to="/explore?tab=custom" replace />
             ) : (
               <Navigate to="/login" replace />
             )

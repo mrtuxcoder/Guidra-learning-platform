@@ -1,6 +1,5 @@
 import React from "react";
-import { Box, ListItem, Typography, Tooltip, useTheme } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { Box, ListItem, Typography, Tooltip, CircularProgress, Chip, useTheme, alpha } from "@mui/material";
 import CompletionIndicator from "./CompletionIndicator";
 
 const SubtopicItem = ({
@@ -9,127 +8,107 @@ const SubtopicItem = ({
   isUpdating,
   hasContent,
   onSubtopicClick,
-  colorPalette,
 }) => {
   const theme = useTheme();
-  
+  const isDark = theme.palette.mode === "dark";
+  const quizAccuracy = subtopic.quizMark?.percentage;
+
   return (
     <ListItem
-      selected={isSelected}
       onClick={onSubtopicClick}
       disabled={isUpdating}
       sx={{
-        borderRadius: 1,
-        py: 1.25,
-        px: 3,
-        backgroundColor: isSelected
-          ? theme.palette.mode === "dark"
-            ? alpha(colorPalette[500], 0.15)
-            : alpha(colorPalette[50], 0.8)
+        borderRadius: "8px",
+        py: 1,
+        px: 1.5,
+        my: 0.5,
+        bgcolor: isSelected
+          ? isDark
+            ? alpha(theme.palette.primary.main, 0.15)
+            : alpha(theme.palette.primary.main, 0.08)
           : "transparent",
-        color: "text.primary",
-        border: "none",
-        position: "relative",
+        border: "1px solid",
+        borderColor: isSelected
+          ? isDark
+            ? alpha(theme.palette.primary.main, 0.3)
+            : alpha(theme.palette.primary.main, 0.2)
+          : "transparent",
+        cursor: "pointer",
+        transition: "all 0.15s ease",
         "&:hover": {
-          backgroundColor: theme.palette.mode === "dark"
-            ? alpha(colorPalette[500], 0.08)
-            : alpha(colorPalette[50], 0.6),
+          bgcolor: isSelected
+            ? isDark
+              ? alpha(theme.palette.primary.main, 0.2)
+              : alpha(theme.palette.primary.main, 0.12)
+            : "action.hover",
         },
         "&.Mui-disabled": {
-          opacity: 0.5,
+          opacity: 0.6,
           pointerEvents: "none",
         },
-        cursor: "pointer",
-        transition: "all 0.2s ease",
-        borderLeft: isSelected
-          ? `3px solid ${colorPalette[500]}`
-          : "3px solid transparent",
       }}
     >
-      {/* Loading overlay */}
-      {isUpdating && <LoadingOverlay colorPalette={colorPalette} />}
+      <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1.5 }}>
+        {/* Completion Indicator */}
+        <CompletionIndicator completed={subtopic.completed} isSelected={isSelected} />
 
-      <Box sx={{ width: "100%", position: "relative", zIndex: 1 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          {/* Completion Indicator */}
-          <CompletionIndicator
-            completed={subtopic.completed}
-            isSelected={isSelected}
-            colorPalette={colorPalette}
-          />
-
-          {/* Subtopic Name */}
+        {/* Index & Name */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="body2"
-            fontWeight="400"
+            title={subtopic.name}
             sx={{
+              fontWeight: isSelected ? 600 : 500,
+              fontSize: "0.85rem",
+              color: isSelected ? "primary.main" : "text.primary",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              flex: 1,
-              fontSize: "0.85rem",
-              color: "text.primary",
-              lineHeight: 1.4,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              lineHeight: 1.35,
             }}
           >
             {subtopic.name}
           </Typography>
-
-          {/* Status Indicator */}
-          {hasContent && !isUpdating && (
-            <Tooltip title="Content ready">
-              <Box
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  backgroundColor: colorPalette[500],
-                }}
-              />
-            </Tooltip>
-          )}
         </Box>
+
+        {/* Quiz score chip if completed */}
+        {subtopic.completed && typeof quizAccuracy === "number" && (
+          <Chip
+            label={`${quizAccuracy}%`}
+            size="small"
+            sx={{
+              height: 18,
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              bgcolor: isDark ? "rgba(16, 185, 129, 0.2)" : "rgba(16, 185, 129, 0.1)",
+              color: "success.main",
+              borderRadius: "4px",
+              px: 0.25,
+            }}
+          />
+        )}
+
+        {/* Updating spinner or content ready dot */}
+        {isUpdating ? (
+          <CircularProgress size={14} color="inherit" />
+        ) : hasContent && !subtopic.completed ? (
+          <Tooltip title="Saved offline">
+            <Box
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                bgcolor: "primary.main",
+                opacity: 0.8,
+              }}
+            />
+          </Tooltip>
+        ) : null}
       </Box>
     </ListItem>
   );
 };
-
-// Loading Overlay Component
-const LoadingOverlay = ({ colorPalette }) => (
-  <Box
-    sx={{
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(255,255,255,0.9)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <Box
-      sx={{
-        width: 16,
-        height: 16,
-        borderRadius: "50%",
-        border: `2px solid ${colorPalette[100]}`,
-        borderTop: `2px solid ${colorPalette[600]}`,
-        animation: "spin 1s linear infinite",
-        "@keyframes spin": {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
-      }}
-    />
-  </Box>
-);
 
 export default SubtopicItem;

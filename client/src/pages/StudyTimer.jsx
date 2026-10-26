@@ -12,21 +12,28 @@ import {
   Alert,
   FormControlLabel,
   Switch,
-  useMediaQuery,
   Chip,
-  Divider,
+  Paper,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import {
   PlayArrow,
   Pause,
   RestartAlt,
   NotificationsActive,
-  Timer,
+  Timer as TimerIcon,
+  LocalFireDepartment,
+  CheckCircle,
 } from "@mui/icons-material";
-import { alpha, useTheme } from "@mui/material/styles";
 import { useTimer } from "../contexts/TimerContext";
+import { tokens } from "../theme/tokens";
 
-const PRESET_MINUTES = [25, 40, 60];
+const PRESET_MINUTES = [
+  { value: "25", label: "25m Pomodoro" },
+  { value: "40", label: "40m Deep Work" },
+  { value: "60", label: "60m Mastery" },
+];
 const DAILY_SESSION_GOAL = 6;
 const DAILY_SESSIONS_STORAGE_KEY = "timerDailySessions";
 
@@ -68,22 +75,19 @@ const clampMinutes = (value) => {
 export default function StudyTimer() {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const {
     isActive,
     remainingSeconds,
-    selectedMinutes,
     hasCompleted,
     setHasCompleted,
     startTimer,
     pauseTimer,
     resumeTimer,
     resetTimer,
-    setCustomMinutes: updateCustomMinutes,
   } = useTimer();
 
   const [mode, setMode] = useState("25");
-  const [customMinutes, setCustomMinutes] = useState(30);
+  const [customMinutes] = useState(30);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     localStorage.getItem("timerNotificationsEnabled") === "true"
   );
@@ -91,8 +95,7 @@ export default function StudyTimer() {
   const completionLoggedRef = useRef(false);
 
   const [todayKey, setTodayKey] = useState(getTodayKey);
-
-  const [, setDailySessions] = useState(() =>
+  const [dailySessions, setDailySessions] = useState(() =>
     readDailySessions(getTodayKey())
   );
 
@@ -114,9 +117,9 @@ export default function StudyTimer() {
   const ringProgress = Math.max(0, Math.min(100, progressValue));
   const hasStarted = remainingSeconds < computedMinutes * 60;
   const primaryActionLabel = isActive
-    ? "Pause Session"
+    ? "Pause Focus"
     : hasStarted
-    ? "Resume Focus Session"
+    ? "Resume Focus"
     : "Start Focus Session";
 
   useEffect(() => {
@@ -183,15 +186,6 @@ export default function StudyTimer() {
     resetTimer(computedMinutes);
   };
 
-  const handleCustomChange = (event) => {
-    const value = Number(event.target.value);
-    setCustomMinutes(value);
-    setMode("custom");
-    if (!isActive) {
-      updateCustomMinutes(value);
-    }
-  };
-
   const handleModeChange = (newMode) => {
     if (!isActive) {
       setMode(newMode);
@@ -224,468 +218,353 @@ export default function StudyTimer() {
     );
   };
 
-  if (!isMobile) {
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          bgcolor: "background.default",
-          py: { xs: 1.5, md: 4 },
-        }}
-      >
-        <Container maxWidth="sm" sx={{ px: { xs: 1.5, sm: 2.5 } }}>
-          <Stack spacing={1.5}>
-            <Box sx={{ px: 0.5, pt: 0.5, pb: 1 }}>
-              <Typography variant="h5" fontWeight={700}>
-                Study Timer
-              </Typography>
-              <Typography color="text.secondary" sx={{ fontSize: "0.92rem" }}>
-                Focus session with pause, resume, and notifications.
-              </Typography>
-            </Box>
-
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: `1px solid ${theme.palette.divider}`,
-                boxShadow: "none",
-                overflow: "hidden",
-              }}
-            >
-              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-                <Stack spacing={2}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Chip
-                      label={`${computedMinutes} min focus`}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ fontWeight: 700 }}
-                    />
-                    <Chip
-                      label={isActive ? "Running" : hasStarted ? "Paused" : "Ready"}
-                      color={isActive ? "success" : "default"}
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      textAlign: "center",
-                      py: { xs: 1.2, sm: 1.8 },
-                      px: 1,
-                      borderRadius: 2.5,
-                      background: alpha(theme.palette.primary.main, 0.04),
-                      border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "3rem", sm: "3.4rem" },
-                        lineHeight: 1,
-                        fontWeight: 800,
-                        letterSpacing: "0.02em",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {formatTime(remainingSeconds)}
-                    </Typography>
-                    <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: "0.8rem" }}>
-                      {selectedMinutes} minute session
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={progressValue}
-                      sx={{
-                        height: 9,
-                        borderRadius: 10,
-                        backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                        "& .MuiLinearProgress-bar": {
-                          borderRadius: 10,
-                          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                        },
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        mt: 0.7,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        color: "text.secondary",
-                        fontSize: "0.75rem",
-                      }}
-                    >
-                      <span>Progress</span>
-                      <span>{Math.max(0, progressValue)}%</span>
-                    </Box>
-                  </Box>
-
-                  <Stack spacing={1.2}>
-                    <Button
-                      variant="contained"
-                      onClick={handleStartPause}
-                      startIcon={isActive ? <Pause /> : <PlayArrow />}
-                      sx={{
-                        py: 1.45,
-                        borderRadius: 2,
-                        fontWeight: 800,
-                        textTransform: "none",
-                      }}
-                    >
-                      {primaryActionLabel}
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={handleReset}
-                      startIcon={<RestartAlt />}
-                      sx={{
-                        py: 1.1,
-                        borderRadius: 2,
-                        fontWeight: 700,
-                        textTransform: "none",
-                      }}
-                    >
-                      Reset Session
-                    </Button>
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: `1px solid ${theme.palette.divider}`,
-                boxShadow: "none",
-              }}
-            >
-              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-                <Stack spacing={1.6}>
-                  <Typography variant="subtitle1" fontWeight={700}>
-                    Session Length
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(3, 1fr)" },
-                      gap: 1,
-                    }}
-                  >
-                    {PRESET_MINUTES.map((minutes) => (
-                      <Button
-                        key={minutes}
-                        variant={mode === String(minutes) ? "contained" : "outlined"}
-                        onClick={() => handleModeChange(String(minutes))}
-                        disabled={isActive}
-                        sx={{
-                          py: 1.1,
-                          borderRadius: 2,
-                          fontWeight: 700,
-                          textTransform: "none",
-                        }}
-                      >
-                        {minutes} min
-                      </Button>
-                    ))}
-
-                    <TextField
-                      label="Custom"
-                      type="number"
-                      value={customMinutes}
-                      onChange={handleCustomChange}
-                      disabled={isActive}
-                      InputProps={{ inputProps: { min: 1, max: 180 } }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 2,
-                          fontWeight: 600,
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  <Box>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={notificationsEnabled}
-                          onChange={handleNotificationsToggle}
-                        />
-                      }
-                      label={
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                          <NotificationsActive sx={{ fontSize: 18, color: "text.secondary" }} />
-                          <Typography sx={{ fontSize: "0.95rem" }}>Timer notifications</Typography>
-                        </Box>
-                      }
-                      sx={{ ml: 0 }}
-                    />
-
-                    {notificationMessage && (
-                      <Alert severity="info" sx={{ mt: 1 }}>
-                        {notificationMessage}
-                      </Alert>
-                    )}
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {hasCompleted && (
-              <Alert
-                severity="success"
-                onClose={() => setHasCompleted(false)}
-                sx={{ borderRadius: 2 }}
-              >
-                Session completed. Great work — start your next focus block when ready.
-              </Alert>
-            )}
-          </Stack>
-        </Container>
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
-        pt: 1.5,
-        pb: 10,
+        py: { xs: 2.5, md: 5 },
+        pb: { xs: 12, md: 8 },
       }}
     >
-      <Container maxWidth="sm" sx={{ px: 2 }}>
-        <Stack spacing={2}>
-          <Box
-            sx={{
-              px: 0.5,
-              py: 0.5,
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "flex-start",
-            }}
-          >
-            <Box>
-              <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "text.primary" }}>
-                Focus Timer
-              </Typography>
-              <Typography sx={{ mt: 0.35, fontSize: "0.84rem", color: "text.secondary" }}>
-                Stay focused. One session at a time.
-              </Typography>
+      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Stack spacing={3}>
+          {/* Header */}
+          <Box sx={{ textAlign: "center", mb: 1 }}>
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: tokens.radii.lg,
+                bgcolor: isDark
+                  ? alpha(tokens.colors.primary.main, 0.16)
+                  : alpha(tokens.colors.primary.main, 0.1),
+                color: "primary.main",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 1.5,
+                border: "1px solid",
+                borderColor: isDark
+                  ? alpha(tokens.colors.primary.main, 0.3)
+                  : alpha(tokens.colors.primary.main, 0.2),
+              }}
+            >
+              <TimerIcon sx={{ fontSize: 28 }} />
             </Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                color: "text.primary",
+                letterSpacing: "-0.02em",
+                fontSize: { xs: "1.5rem", sm: "1.85rem" },
+              }}
+            >
+              Study Timer
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 0.5, fontSize: "0.9rem" }}
+            >
+              Calm, distraction-free focus intervals designed for deep learning.
+            </Typography>
           </Box>
 
+          {/* Main Timer Display Card */}
           <Card
             elevation={0}
             sx={{
-              borderRadius: 3,
-              p: 2,
-              border: `1px solid ${theme.palette.divider}`,
-              boxShadow: "none",
+              borderRadius: tokens.radii.lg,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              boxShadow: isDark
+                ? tokens.shadows.dark.card
+                : tokens.shadows.light.card,
+              overflow: "hidden",
             }}
           >
-            <Stack alignItems="center" spacing={1.5}>
-              <Box
-                sx={{
-                  width: 250,
-                  height: 250,
-                  borderRadius: "50%",
-                  p: "12px",
-                  background: `conic-gradient(${theme.palette.primary.main} ${ringProgress}%, ${alpha(
-                    theme.palette.primary.main,
-                    0.14
-                  )} ${ringProgress}% 100%)`,
-                  boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+            <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+              <Stack alignItems="center" spacing={3}>
+                {/* Status Indicator Chip */}
                 <Box
                   sx={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    bgcolor: "background.paper",
-                    boxShadow: isDark
-                      ? `0 10px 24px ${alpha(theme.palette.common.black, 0.36)}`
-                      : `0 12px 24px ${alpha(theme.palette.primary.main, 0.12)}`,
                     display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
                     alignItems: "center",
-                    textAlign: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
                   }}
                 >
                   <Chip
-                    icon={<Timer sx={{ fontSize: "0.9rem !important" }} />}
-                    label="Focus Session"
+                    label={`${computedMinutes} Min Session`}
                     size="small"
                     sx={{
-                      mb: 1,
-                      bgcolor: alpha(theme.palette.primary.main, 0.12),
+                      fontWeight: 700,
+                      borderRadius: tokens.radii.full,
+                      bgcolor: isDark
+                        ? alpha(tokens.colors.primary.main, 0.16)
+                        : alpha(tokens.colors.primary.main, 0.08),
                       color: "primary.main",
-                      fontWeight: 600,
+                      border: "1px solid",
+                      borderColor: alpha(tokens.colors.primary.main, 0.2),
                     }}
                   />
-                  <Typography
+
+                  <Chip
+                    label={isActive ? "Focusing" : hasStarted ? "Paused" : "Ready"}
+                    size="small"
+                    color={isActive ? "success" : hasStarted ? "warning" : "default"}
                     sx={{
-                      fontSize: "2.4rem",
-                      fontWeight: 800,
-                      lineHeight: 1,
-                      letterSpacing: "0.02em",
-                      color: "text.primary",
-                      fontVariantNumeric: "tabular-nums",
+                      fontWeight: 700,
+                      borderRadius: tokens.radii.full,
+                    }}
+                  />
+                </Box>
+
+                {/* Circular Progress Ring */}
+                <Box
+                  sx={{
+                    width: { xs: 240, sm: 260 },
+                    height: { xs: 240, sm: 260 },
+                    borderRadius: "50%",
+                    p: "10px",
+                    background: `conic-gradient(${tokens.colors.primary.main} ${ringProgress}%, ${
+                      isDark
+                        ? alpha(tokens.colors.neutral[700], 0.6)
+                        : alpha(tokens.colors.primary.main, 0.1)
+                    } ${ringProgress}% 100%)`,
+                    boxShadow: isDark
+                      ? `0 0 24px ${alpha(tokens.colors.primary.main, 0.2)}`
+                      : `0 0 24px ${alpha(tokens.colors.primary.main, 0.08)}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.4s ease",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      bgcolor: "background.paper",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      textAlign: "center",
                     }}
                   >
-                    {formatTime(remainingSeconds)}
-                  </Typography>
-                  <Typography sx={{ mt: 0.7, color: "text.secondary", fontSize: "0.8rem" }}>
-                    {computedMinutes} min session
-                  </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "3.2rem", sm: "3.6rem" },
+                        fontWeight: 800,
+                        lineHeight: 1,
+                        letterSpacing: "-0.02em",
+                        color: "text.primary",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {formatTime(remainingSeconds)}
+                    </Typography>
+
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        mt: 1,
+                        color: "text.secondary",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {isActive ? "Remaining" : hasStarted ? "Paused" : "Tap Start"}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
 
-              <Stack spacing={1.1} sx={{ width: "100%", mt: 0.6 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleStartPause}
-                  startIcon={isActive ? <Pause /> : <PlayArrow />}
+                {/* Preset Duration Buttons */}
+                <Box
                   sx={{
-                    height: 50,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    fontSize: "0.98rem",
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    boxShadow: "none",
+                    display: "flex",
+                    gap: 1,
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    width: "100%",
                   }}
                 >
-                  {primaryActionLabel}
-                </Button>
-                <Button
-                  variant="text"
-                  onClick={handleReset}
-                  startIcon={<RestartAlt />}
-                  sx={{
-                    height: 42,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    color: "text.secondary",
-                    bgcolor: "action.hover",
-                  }}
-                >
-                  Reset
-                </Button>
-              </Stack>
-            </Stack>
-          </Card>
-
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              border: `1px solid ${theme.palette.divider}`,
-              boxShadow: "none",
-            }}
-          >
-            <CardContent sx={{ p: 2 }}>
-              <Stack spacing={1.5}>
-                <Typography sx={{ fontSize: "0.97rem", fontWeight: 700, color: "text.primary" }}>
-                  Session Settings
-                </Typography>
-
-                <Stack direction="row" spacing={1}>
-                  {PRESET_MINUTES.map((minutes) => {
-                    const active = mode === String(minutes);
+                  {PRESET_MINUTES.map((preset) => {
+                    const isSelected = mode === preset.value;
                     return (
                       <Chip
-                        key={minutes}
-                        label={`${minutes} min`}
-                        clickable
+                        key={preset.value}
+                        label={preset.label}
                         disabled={isActive}
-                        onClick={() => handleModeChange(String(minutes))}
+                        clickable={!isActive}
+                        onClick={() => handleModeChange(preset.value)}
                         sx={{
-                          height: 34,
-                          borderRadius: "999px",
-                          bgcolor: active
-                            ? alpha(theme.palette.primary.main, 0.12)
-                            : "action.hover",
-                          color: active ? "primary.main" : "text.secondary",
+                          height: 36,
+                          borderRadius: tokens.radii.full,
+                          fontWeight: isSelected ? 700 : 500,
+                          fontSize: "0.82rem",
                           border: "1px solid",
-                          borderColor: active
-                            ? alpha(theme.palette.primary.main, 0.45)
-                            : theme.palette.divider,
-                          fontWeight: active ? 700 : 600,
+                          borderColor: isSelected ? "primary.main" : "divider",
+                          bgcolor: isSelected
+                            ? isDark
+                              ? alpha(tokens.colors.primary.main, 0.2)
+                              : alpha(tokens.colors.primary.main, 0.1)
+                            : "background.default",
+                          color: isSelected ? "primary.main" : "text.secondary",
                         }}
                       />
                     );
                   })}
-                </Stack>
-
-                <TextField
-                  label="Custom minutes"
-                  type="number"
-                  value={customMinutes}
-                  onChange={handleCustomChange}
-                  disabled={isActive}
-                  InputProps={{ inputProps: { min: 1, max: 180 } }}
-                  size="small"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      bgcolor: "background.paper",
-                    },
-                  }}
-                />
-
-                <Divider />
-
-                <Box>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={notificationsEnabled}
-                        onChange={handleNotificationsToggle}
-                      />
-                    }
-                    label={
-                      <Typography sx={{ fontSize: "0.9rem", color: "text.secondary" }}>
-                        End session notification
-                      </Typography>
-                    }
-                    sx={{ ml: 0, mr: 0, width: "100%", justifyContent: "space-between" }}
-                  />
-
-                  {notificationMessage && (
-                    <Alert severity="info" sx={{ mt: 1, borderRadius: 2 }}>
-                      {notificationMessage}
-                    </Alert>
-                  )}
                 </Box>
+
+                {/* Primary Action Buttons */}
+                <Stack direction="row" spacing={1.5} sx={{ width: "100%", pt: 1 }}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    onClick={handleStartPause}
+                    startIcon={isActive ? <Pause /> : <PlayArrow />}
+                    sx={{
+                      py: 1.35,
+                      borderRadius: tokens.radii.md,
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      textTransform: "none",
+                      bgcolor: isActive ? "warning.main" : "primary.main",
+                      "&:hover": {
+                        bgcolor: isActive ? "warning.dark" : "primary.dark",
+                      },
+                    }}
+                  >
+                    {primaryActionLabel}
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={handleReset}
+                    disabled={!hasStarted && remainingSeconds === computedMinutes * 60}
+                    sx={{
+                      px: 2.5,
+                      borderRadius: tokens.radii.md,
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderColor: "divider",
+                      color: "text.primary",
+                      "&:hover": {
+                        borderColor: "primary.main",
+                        bgcolor: alpha(tokens.colors.primary.main, 0.06),
+                      },
+                    }}
+                  >
+                    <RestartAlt />
+                  </Button>
+                </Stack>
               </Stack>
             </CardContent>
           </Card>
 
+          {/* Daily Goal Streak Tracker */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.5,
+              borderRadius: tokens.radii.md,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1.5,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <LocalFireDepartment sx={{ color: "warning.main", fontSize: 22 }} />
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Daily Focus Goal
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
+                {dailySessions} / {DAILY_SESSION_GOAL} Blocks
+              </Typography>
+            </Box>
+
+            <LinearProgress
+              variant="determinate"
+              value={Math.min(100, (dailySessions / DAILY_SESSION_GOAL) * 100)}
+              sx={{
+                height: 8,
+                borderRadius: tokens.radii.full,
+                bgcolor: isDark
+                  ? alpha(tokens.colors.neutral[700], 0.5)
+                  : alpha(tokens.colors.primary.main, 0.1),
+                "& .MuiLinearProgress-bar": {
+                  borderRadius: tokens.radii.full,
+                  bgcolor: "warning.main",
+                },
+              }}
+            />
+          </Paper>
+
+          {/* Settings & Notifications Toggle */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              borderRadius: tokens.radii.md,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={notificationsEnabled}
+                  onChange={handleNotificationsToggle}
+                  color="primary"
+                />
+              }
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <NotificationsActive sx={{ fontSize: 18, color: "primary.main" }} />
+                  <Typography variant="body2" fontWeight={600}>
+                    Sound & Browser Alerts on Completion
+                  </Typography>
+                </Box>
+              }
+              sx={{ ml: 0, width: "100%", justifyContent: "space-between" }}
+            />
+
+            {notificationMessage && (
+              <Alert severity="info" sx={{ mt: 1.5, borderRadius: tokens.radii.sm }}>
+                {notificationMessage}
+              </Alert>
+            )}
+          </Paper>
+
+          {/* Completion Celebration Alert */}
           {hasCompleted && (
             <Alert
+              icon={<CheckCircle />}
               severity="success"
               onClose={() => setHasCompleted(false)}
-              sx={{ borderRadius: 2 }}
+              sx={{ borderRadius: tokens.radii.md }}
             >
-              Great work. One focused session completed.
+              Session completed! Great work — start your next focus block when ready.
             </Alert>
           )}
         </Stack>

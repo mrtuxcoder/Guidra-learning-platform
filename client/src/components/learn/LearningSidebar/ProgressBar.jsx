@@ -1,19 +1,19 @@
 import React from "react";
 import { Box, LinearProgress } from "@mui/material";
 
-const ProgressBar = ({ progress, colorPalette, sx }) => {
+const ProgressBar = ({ progress, sx }) => {
   return (
-    <Box sx={{ px: 2, mt: 0.5, ...sx }}>
+    <Box sx={{ px: 1.5, mt: 0.75, ...sx }}>
       <LinearProgress
         variant="determinate"
         value={progress}
         sx={{
-          height: 3,
-          borderRadius: 2,
-          backgroundColor: colorPalette[100],
+          height: 4,
+          borderRadius: "999px",
+          bgcolor: "action.hover",
           "& .MuiLinearProgress-bar": {
-            backgroundColor: colorPalette[500],
-            borderRadius: 2,
+            bgcolor: progress === 100 ? "success.main" : "primary.main",
+            borderRadius: "999px",
           },
         }}
       />

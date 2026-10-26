@@ -1,45 +1,48 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { AutoStories } from "@mui/icons-material";
 
-const Header = ({ colorPalette }) => {
+const Header = () => {
   return (
     <Box
       sx={{
-        p: 3,
+        px: 2.5,
+        py: 2,
         borderBottom: "1px solid",
         borderColor: "divider",
         bgcolor: "background.paper",
+        display: "flex",
+        alignItems: "center",
+        gap: 1.25,
       }}
     >
-      <Typography
-        variant="h6"
-        fontWeight="700"
+      <Box
         sx={{
-          color: "text.primary",
+          width: 28,
+          height: 28,
+          borderRadius: "6px",
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(101, 88, 217, 0.15)"
+              : "rgba(101, 88, 217, 0.08)",
+          color: "primary.main",
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
+          justifyContent: "center",
         }}
       >
-        <Box
-          sx={{
-            width: 24,
-            height: 24,
-            borderRadius: "6px",
-            backgroundColor: colorPalette[600],
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 12,
-            color: "white",
-            fontWeight: "bold",
-            boxShadow: `0 2px 8px ${alpha(colorPalette[600], 0.3)}`,
-          }}
-        >
-          ●
-        </Box>
-        Course Content
+        <AutoStories sx={{ fontSize: 15 }} />
+      </Box>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: 700,
+          fontSize: "0.95rem",
+          color: "text.primary",
+          letterSpacing: "-0.01em",
+        }}
+      >
+        Curriculum
       </Typography>
     </Box>
   );

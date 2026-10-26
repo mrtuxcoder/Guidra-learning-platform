@@ -23,6 +23,7 @@ import WelcomeState from "../WelcomeState/index";
 import LoadingState from "../LoadingState";
 import Header from "./Header";
 import ContentSection from "./ContentSection";
+import QuizSection from "./QuizSection";
 import TeachingStyleSelector from "../TeachingStyleSelector";
 import {
   generateComponent,
@@ -44,6 +45,7 @@ const LearningContent = ({
   dailyRemaining = 6,
   onDailyRegenUpdate,
   onVersionDialogOpen,
+  onQuizSubmitted,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -905,140 +907,161 @@ const LearningContent = ({
       />
 
       {/* Content */}
-      <Box sx={{ 
-        flex: 1,
-        overflow: 'auto',
-        px: isMobile ? 2 : 2,
-        pt: isMobile ? 2.5 : 2,
-        pb: isMobile ? 2 : 2,
-      }}>
-        {limitMessage && (
-          <Alert severity="warning" onClose={() => setLimitMessage("")} sx={{ mb: 2 }}>
-            {limitMessage}
-          </Alert>
-        )}
-        {safeContent.concept && (
-          <ContentSection
-            title="Core Concept"
-            content={safeContent.concept}
-            emoji="💡"
-            isExpanded={expandedSections.concept}
-            onToggle={() => toggleSection('concept')}
-            onRegenerate={() => handleComponentRegenerate("concept")}
-            isRegenerating={!!regeneratingComponents.concept}
-            isRegenerateDisabled={
-              getComponentGenerationCount("concept") >= 3 || dailyLimitReached
-            }
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-          />
-        )}
+      <Box
+        id="learning-content-scroll-container"
+        sx={{ 
+          flex: 1,
+          overflow: 'auto',
+          px: { xs: 2, md: 3 },
+          py: { xs: 2, md: 3 },
+        }}
+      >
+        <Box sx={{ maxWidth: 860, mx: "auto", width: "100%" }}>
+          {limitMessage && (
+            <Alert severity="warning" onClose={() => setLimitMessage("")} sx={{ mb: 2 }}>
+              {limitMessage}
+            </Alert>
+          )}
+          {safeContent.concept && (
+            <ContentSection
+              title="Core Concept"
+              content={safeContent.concept}
+              emoji="💡"
+              isExpanded={expandedSections.concept}
+              onToggle={() => toggleSection('concept')}
+              onRegenerate={() => handleComponentRegenerate("concept")}
+              isRegenerating={!!regeneratingComponents.concept}
+              isRegenerateDisabled={
+                getComponentGenerationCount("concept") >= 3 || dailyLimitReached
+              }
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+            />
+          )}
 
-        {safeContent.explanation && (
-          <ContentSection
-            title="Detailed Explanation"
-            content={safeContent.explanation}
-            emoji="📚"
-            isExpanded={expandedSections.explanation}
-            onToggle={() => toggleSection('explanation')}
-            onRegenerate={() => handleComponentRegenerate("explanation")}
-            isRegenerating={!!regeneratingComponents.explanation}
-            isRegenerateDisabled={
-              getComponentGenerationCount("explanation") >= 3 ||
-              dailyLimitReached
-            }
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-          />
-        )}
+          {safeContent.explanation && (
+            <ContentSection
+              title="Detailed Explanation"
+              content={safeContent.explanation}
+              emoji="📚"
+              isExpanded={expandedSections.explanation}
+              onToggle={() => toggleSection('explanation')}
+              onRegenerate={() => handleComponentRegenerate("explanation")}
+              isRegenerating={!!regeneratingComponents.explanation}
+              isRegenerateDisabled={
+                getComponentGenerationCount("explanation") >= 3 ||
+                dailyLimitReached
+              }
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+            />
+          )}
 
-        {safeContent.learningActions.length > 0 && (
-          <ContentSection
-            title="Learning Steps"
-            content={safeContent.learningActions}
-            emoji="🛣️"
-            isList={true}
-            isExpanded={expandedSections.learningActions}
-            onToggle={() => toggleSection('learningActions')}
-            onRegenerate={() => handleComponentRegenerate("learningActions")}
-            isRegenerating={!!regeneratingComponents.learningActions}
-            isRegenerateDisabled={
-              getComponentGenerationCount("learningActions") >= 3 ||
-              dailyLimitReached
-            }
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-          />
-        )}
+          {safeContent.learningActions.length > 0 && (
+            <ContentSection
+              title="Learning Steps"
+              content={safeContent.learningActions}
+              emoji="🛣️"
+              isList={true}
+              isExpanded={expandedSections.learningActions}
+              onToggle={() => toggleSection('learningActions')}
+              onRegenerate={() => handleComponentRegenerate("learningActions")}
+              isRegenerating={!!regeneratingComponents.learningActions}
+              isRegenerateDisabled={
+                getComponentGenerationCount("learningActions") >= 3 ||
+                dailyLimitReached
+              }
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+            />
+          )}
 
-      {safeContent.coreExample && (
-  <ContentSection
-    title="Example"
-    content={safeContent.coreExample}
-    emoji="📝"
-    isExpanded={expandedSections.coreExample ?? true}
-    onToggle={() => toggleSection('coreExample')}
-    onRegenerate={() => handleComponentRegenerate("coreExample")}
-    isRegenerating={!!regeneratingComponents.coreExample}
-    isRegenerateDisabled={
-      getComponentGenerationCount("coreExample") >= 3 || dailyLimitReached
-    }
-    isMobile={isMobile}
-    colorPalette={colorPalette}
- 
-  />
-)}
+          {safeContent.coreExample && (
+            <ContentSection
+              title="Example"
+              content={safeContent.coreExample}
+              emoji="📝"
+              isExpanded={expandedSections.coreExample ?? true}
+              onToggle={() => toggleSection('coreExample')}
+              onRegenerate={() => handleComponentRegenerate("coreExample")}
+              isRegenerating={!!regeneratingComponents.coreExample}
+              isRegenerateDisabled={
+                getComponentGenerationCount("coreExample") >= 3 || dailyLimitReached
+              }
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+            />
+          )}
 
+          {safeContent.practice && (
+            <ContentSection
+              title="Practice"
+              content={safeContent.practice}
+              emoji="💪"
+              isExpanded={expandedSections.practice}
+              onToggle={() => toggleSection('practice')}
+              onRegenerate={() => handleComponentRegenerate("practice")}
+              isRegenerating={!!regeneratingComponents.practice}
+              isRegenerateDisabled={
+                getComponentGenerationCount("practice") >= 3 || dailyLimitReached
+              }
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+            />
+          )}
 
-        {safeContent.practice && (
-          <ContentSection
-            title="Practice"
-            content={safeContent.practice}
-            emoji="💪"
-            isExpanded={expandedSections.practice}
-            onToggle={() => toggleSection('practice')}
-            onRegenerate={() => handleComponentRegenerate("practice")}
-            isRegenerating={!!regeneratingComponents.practice}
-            isRegenerateDisabled={
-              getComponentGenerationCount("practice") >= 3 || dailyLimitReached
-            }
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-          />
-        )}
+          {safeContent.mindmap && (
+            <ContentSection.MindmapSection
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+              safeContent={safeContent}
+              selectedTopic={selectedTopic}
+              selectedSubtopic={selectedSubtopic}
+              handleManualMindmapRegenerate={handleManualMindmapRegenerate}
+              regeneratingMindmap={regeneratingMindmap}
+              userRemainingGenerations={Math.max(
+                0,
+                Math.min(
+                  3 - getComponentGenerationCount("mindmap"),
+                  dailyRemaining
+                )
+              )}
+              mindmapData={mindmapData}
+            />
+          )}
 
-        {safeContent.mindmap && (
-          <ContentSection.MindmapSection
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-            safeContent={safeContent}
-            selectedTopic={selectedTopic}
-            selectedSubtopic={selectedSubtopic}
-            handleManualMindmapRegenerate={handleManualMindmapRegenerate}
-            regeneratingMindmap={regeneratingMindmap}
-            userRemainingGenerations={Math.max(
-              0,
-              Math.min(
-                3 - getComponentGenerationCount("mindmap"),
-                dailyRemaining
-              )
-            )}
-            mindmapData={mindmapData}
-          />
-        )}
+          {/* Embedded Inline Knowledge Check */}
+          {Array.isArray(safeContent.quiz) && safeContent.quiz.length > 0 && (
+            <QuizSection
+              quizItems={safeContent.quiz}
+              selectedTopic={selectedTopic}
+              selectedSubtopic={selectedSubtopic}
+              isMobile={isMobile}
+              colorPalette={colorPalette}
+              onQuizSubmitted={onQuizSubmitted}
+              onRegenerate={() => handleComponentRegenerate("quiz")}
+              isRegenerating={!!regeneratingComponents.quiz}
+              isRegenerateDisabled={
+                getComponentGenerationCount("quiz") >= 3 || dailyLimitReached
+              }
+            />
+          )}
 
-        <Box
-          sx={{
-            mt: 2,
-            pb: 1,
-            textAlign: "center",
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
-            Made with love
-          </Typography>
+          <Box
+            sx={{
+              mt: 3,
+              pb: 3,
+              textAlign: "center",
+              borderTop: "1px solid",
+              borderColor: "divider",
+              pt: 2.5,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+              Guidra Structured Learning Flow • Step-by-Step AI Path
+            </Typography>
+          </Box>
         </Box>
-
       </Box>
     </Box>
   );

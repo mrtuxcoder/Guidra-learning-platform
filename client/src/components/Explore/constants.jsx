@@ -21,19 +21,19 @@ export const purplePalette = {
   900: "#581C87",
 };
 
-// Category icons and colors - consistent with profile theme
+// Category icons and colors - semantic palette aligned with Calm Cognitive Studio
 export const CATEGORY_DATA = {
-  programming: { icon: <Code />, color: "#7C3AED", name: "Programming" },
-  science: { icon: <Science />, color: "#9333EA", name: "Science" },
-  finance: { icon: <TrendingUp />, color: "#A855F7", name: "Finance" },
+  programming: { icon: <Code />, color: "#6366F1", name: "Programming" },
+  science: { icon: <Science />, color: "#06B6D4", name: "Science" },
+  finance: { icon: <TrendingUp />, color: "#10B981", name: "Finance" },
   "self-dev": {
     icon: <Psychology />,
-    color: "#6B21A8",
+    color: "#F59E0B",
     name: "Self Development",
   },
   "future-skills": {
     icon: <Rocket />,
-    color: "#581C87",
+    color: "#8B5CF6",
     name: "Future Skills",
   },
 };

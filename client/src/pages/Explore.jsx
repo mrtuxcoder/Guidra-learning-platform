@@ -13,9 +13,11 @@ import {
   Button,
   Paper,
   Divider,
+  alpha,
+  CircularProgress,
 } from "@mui/material";
-import { AutoAwesome } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { AutoAwesome, School, Search, ArrowForward } from "@mui/icons-material";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { personalizeAndGenerate, validateTopic } from "../api";
 
 // Import components
@@ -28,37 +30,54 @@ import Guidelines from "../components/CustomTopicSearch/Guidelines";
 import ValidatedTopic from "../components/CustomTopicSearch/ValidatedTopic";
 import ErrorDisplay from "../components/CustomTopicSearch/ErrorDisplay";
 import BasicLearningOption from "../components/CustomTopicSearch/BasicLearningOption";
+import SearchBox from "../components/CustomTopicSearch/SearchBox";
 
-// Import constants
+// Import constants and tokens
 import {
   PREDEFINED_TOPICS,
   CATEGORIES,
 } from "../components/Explore/constants.jsx";
+import { tokens } from "../theme/tokens";
 
 export default function Explore() {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Tab state synced with URL ?tab=curated | ?tab=custom
+  const currentTabParam = searchParams.get("tab");
+  const activeTab = currentTabParam === "custom" ? "custom" : "curated";
+
+  const handleTabChange = (newTab) => {
+    setSearchParams({ tab: newTab });
+    setError("");
+    setCustomError("");
+  };
 
   const suggestedTopics = [
     "Prompt Engineering",
     "Python Basics",
     "Data Analysis",
     "Public Speaking",
+    "Machine Learning",
   ];
 
-  const [loading, setLoading] = useState(false);
+  // Curated Catalog State
+  const [loadingTopicId, setLoadingTopicId] = useState(null);
   const [error, setError] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Custom AI Topic Generator State
+  const [customSearchQuery, setCustomSearchQuery] = useState("");
   const [customLoading, setCustomLoading] = useState(false);
   const [customGenerating, setCustomGenerating] = useState(false);
   const [customError, setCustomError] = useState("");
   const [isCustomTopicValid, setIsCustomTopicValid] = useState(false);
-  const [, setLastValidatedQuery] = useState("");
 
-  // Memoized filtered topics
+  // Filtered topics for curated catalog
   const filteredTopics = useMemo(() => {
     return PREDEFINED_TOPICS.filter((topic) => {
       const matchesCategory =
@@ -73,13 +92,47 @@ export default function Explore() {
   }, [selectedCategory, searchQuery]);
 
   const handleTopicSelect = (topicId) => {
-    setSelectedTopic(topicId);
+    setSelectedTopic((prev) => (prev === topicId ? "" : topicId));
     setError("");
   };
 
-  const handleCustomSearch = async (overrideQuery) => {
-    const query =
-      typeof overrideQuery === "string" ? overrideQuery.trim() : searchQuery.trim();
+  // Launch a curated course path
+  const handleStartCourse = async (topicObj) => {
+    const topic =
+      topicObj || PREDEFINED_TOPICS.find((t) => t.id === selectedTopic);
+    if (!topic?.name) {
+      setError("Please select a topic to continue");
+      return;
+    }
+
+    try {
+      setLoadingTopicId(topic.id);
+      setError("");
+
+      const response = await personalizeAndGenerate({ topic: topic.name });
+      navigate(`/learn?topic=${encodeURIComponent(topic.name)}`, {
+        state: {
+          customTopic: topic.name,
+          validated: true,
+          subtopics: response?.data?.data?.subTopics || [],
+          generatedContent: response?.data,
+        },
+      });
+    } catch (err) {
+      console.error("Course start error:", err);
+      setError(
+        err.response?.data?.message || "Failed to start course. Please try again."
+      );
+    } finally {
+      setLoadingTopicId(null);
+    }
+  };
+
+  // Custom topic search & validation
+  const handleCustomValidate = async (overrideQuery) => {
+    const query = (
+      typeof overrideQuery === "string" ? overrideQuery : customSearchQuery
+    ).trim();
 
     if (!query) {
       setCustomError("Please enter a topic to search");
@@ -90,7 +143,10 @@ export default function Explore() {
       setCustomLoading(true);
       setCustomError("");
       setIsCustomTopicValid(false);
-      setLastValidatedQuery(query);
+
+      if (query !== customSearchQuery) {
+        setCustomSearchQuery(query);
+      }
 
       const response = await validateTopic(query);
 
@@ -113,8 +169,9 @@ export default function Explore() {
     }
   };
 
+  // Generate subtopics from custom topic
   const handleGenerateCustomSubtopics = async () => {
-    const query = searchQuery.trim();
+    const query = customSearchQuery.trim();
     if (!query) return;
 
     try {
@@ -133,7 +190,7 @@ export default function Explore() {
         state: {
           customTopic: query,
           validated: true,
-          subtopics: response.data.data.subTopics,
+          subtopics: response.data?.data?.subTopics || [],
           generatedContent: response.data,
         },
       });
@@ -147,8 +204,9 @@ export default function Explore() {
     }
   };
 
-  const handleStartCustomLearning = () => {
-    const query = searchQuery.trim();
+  // Basic learning option fallback
+  const handleStartBasicCustomLearning = () => {
+    const query = customSearchQuery.trim();
     if (isCustomTopicValid && query) {
       navigate("/learn", {
         state: {
@@ -160,547 +218,311 @@ export default function Explore() {
   };
 
   const resetCustomSearch = () => {
-    setSearchQuery("");
+    setCustomSearchQuery("");
     setCustomError("");
     setIsCustomTopicValid(false);
     setCustomLoading(false);
     setCustomGenerating(false);
-    setLastValidatedQuery("");
-  };
-
-  const handleUnifiedSearchChange = (value) => {
-    setSearchQuery(value);
-    setSelectedTopic("");
-    setError("");
-    setCustomError("");
-    setIsCustomTopicValid(false);
-    setCustomLoading(false);
-    setLastValidatedQuery("");
-  };
-
-  const hasSearchQuery = searchQuery.trim().length > 0;
-  const shouldShowCustomFallback = hasSearchQuery && filteredTopics.length === 0;
-  const showCourseCollectionsUi = !shouldShowCustomFallback;
-
-  const handleStartLearning = async () => {
-    if (!selectedTopic) {
-      setError("Please select a topic to continue");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-
-      const topic = PREDEFINED_TOPICS.find((t) => t.id === selectedTopic);
-      if (!topic?.name) {
-        setError("Selected topic is invalid. Please choose another one.");
-        return;
-      }
-
-      const response = await personalizeAndGenerate({ topic: topic.name });
-      navigate(`/learn?topic=${encodeURIComponent(topic.name)}`, {
-        state: {
-          customTopic: topic.name,
-          validated: true,
-          subtopics: response?.data?.data?.subTopics || [],
-          generatedContent: response?.data,
-        },
-      });
-    } catch (err) {
-      console.error("API Error:", err);
-      setError(
-        err.response?.data?.message || "Something went wrong. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
   };
 
   const getSelectedTopicName = () => {
     return PREDEFINED_TOPICS.find((t) => t.id === selectedTopic)?.name || "";
   };
 
-  if (isMobile) {
-    const topicLabel = searchQuery.trim();
-    const discoverTopics = filteredTopics;
-
-    return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: "88px" }}>
-        <Container maxWidth="sm" sx={{ px: 2, pt: 1.6 }}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            sx={{ mb: 1.8 }}
-          >
-            <Typography sx={{ fontSize: "1.45rem", fontWeight: 700, color: "text.primary" }}>
-              Explore
-            </Typography>
-          </Stack>
-
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={handleUnifiedSearchChange}
-            placeholder="Search courses or create a learning topic"
-            helperText="Search existing courses or create a custom AI path"
-          />
-
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              mb: 2.3,
-              overflowX: "auto",
-              pb: 0.2,
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": { display: "none" },
-            }}
-          >
-            {suggestedTopics.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                onClick={() => handleUnifiedSearchChange(item)}
-                size="small"
-                sx={{
-                  borderRadius: "999px",
-                  bgcolor: "background.paper",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  color: "text.secondary",
-                  fontWeight: 500,
-                }}
-              />
-            ))}
-          </Stack>
-
-          <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "text.primary", mb: 1 }}>
-            Categories
-          </Typography>
-          <CategorySidebar
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            isMobile={true}
-          />
-
-          {!hasSearchQuery && (
-            <Paper
-              elevation={0}
-              sx={{
-                mt: 2.3,
-                p: 2,
-                borderRadius: 2.5,
-                border: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper",
-              }}
-            >
-              <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, color: "text.primary", mb: 0.6 }}>
-                Start learning something new
-              </Typography>
-              <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", mb: 1.6 }}>
-                Discover curated courses or build a custom AI learning path.
-              </Typography>
-              <Stack direction="row" spacing={1.2}>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => setSelectedCategory("all")}
-                  sx={{
-                    height: 44,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    borderColor: "divider",
-                    color: "text.secondary",
-                  }}
-                >
-                  Browse Courses
-                </Button>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={() => handleUnifiedSearchChange("AI Fundamentals")}
-                  sx={{
-                    height: 44,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                  }}
-                >
-                  Custom Path
-                </Button>
-              </Stack>
-            </Paper>
-          )}
-
-          <Box sx={{ mt: 3 }}>
-            <Typography sx={{ fontSize: "1rem", fontWeight: 600, color: "text.primary", mb: 1 }}>
-              Courses
-            </Typography>
-            <Stack spacing={1.5}>
-              {discoverTopics.map((topic, index) => (
-                <CourseCard
-                  key={topic.id}
-                  topic={topic}
-                  isSelected={selectedTopic === topic.id}
-                  onSelect={handleTopicSelect}
-                  index={index}
-                />
-              ))}
-              {discoverTopics.length === 0 && (
-                <Typography sx={{ py: 1, fontSize: "0.86rem", color: "text.secondary" }}>
-                  No matching courses found for “{searchQuery.trim()}”.
-                </Typography>
-              )}
-            </Stack>
-          </Box>
-
-          {hasSearchQuery && (
-            <Box sx={{ mt: 3 }}>
-              <Divider sx={{ mb: 2 }}>
-                <Typography sx={{ fontSize: "0.74rem", color: "text.secondary" }}>
-                  CREATE LEARNING PATH
-                </Typography>
-              </Divider>
-
-              <Card
-                sx={{
-                  borderRadius: 2.5,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  boxShadow: "none",
-                }}
-              >
-                <CardContent sx={{ p: 2 }}>
-                  <Typography sx={{ fontSize: "0.94rem", color: "text.primary", fontWeight: 600, mb: 0.5 }}>
-                    Create learning path for:
-                  </Typography>
-                  <Typography sx={{ fontSize: "1rem", color: "primary.main", fontWeight: 700, mb: 1.4 }}>
-                    {topicLabel}
-                  </Typography>
-
-                  {!isCustomTopicValid && (
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      onClick={() => handleCustomSearch(topicLabel)}
-                      disabled={customLoading || !topicLabel}
-                      sx={{
-                        height: 44,
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 700,
-                        mb: 1.2,
-                        borderColor: "primary.main",
-                        color: "primary.main",
-                      }}
-                    >
-                      {customLoading ? "Validating..." : "Validate Topic"}
-                    </Button>
-                  )}
-
-                  {isCustomTopicValid ? (
-                    <>
-                      <Box
-                        sx={{
-                          p: 1.2,
-                          borderRadius: 1.6,
-                          bgcolor: "success.light",
-                          border: "1px solid",
-                          borderColor: "success.main",
-                          mb: customError ? 0.9 : 1.4,
-                        }}
-                      >
-                        <Typography sx={{ fontSize: "0.82rem", color: "success.dark", fontWeight: 600 }}>
-                          Ready to build your learning path
-                        </Typography>
-                      </Box>
-                      <ErrorDisplay error={customError} />
-                    </>
-                  ) : (
-                    <ErrorDisplay error={customError} />
-                  )}
-
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    disabled={!isCustomTopicValid || customGenerating}
-                    onClick={handleGenerateCustomSubtopics}
-                    startIcon={<AutoAwesome sx={{ fontSize: 18 }} />}
-                    sx={{
-                      height: 48,
-                      borderRadius: 2,
-                      textTransform: "none",
-                      fontWeight: 700,
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    }}
-                  >
-                    {customGenerating ? "Generating..." : "Generate Path"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Box>
-          )}
-
-          {selectedTopic && (
-            <Box
-              sx={{
-                position: "fixed",
-                left: 0,
-                right: 0,
-                bottom: 64,
-                px: 2,
-                py: 1.2,
-                background: `linear-gradient(transparent, ${theme.palette.background.default} 40%)`,
-                zIndex: 1200,
-              }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 1,
-                  borderRadius: 2,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  boxShadow: "none",
-                }}
-              >
-                <Typography sx={{ fontSize: "0.78rem", color: "text.secondary", mb: 0.7, px: 0.4 }}>
-                  Selected course: {getSelectedTopicName()}
-                </Typography>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleStartLearning}
-                  disabled={loading}
-                  sx={{
-                    height: 48,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                  }}
-                >
-                  {loading ? "Generating..." : "Generate Subtopics & Learn Now"}
-                </Button>
-                {error && (
-                  <Typography
-                    sx={{
-                      mt: 0.8,
-                      px: 0.4,
-                      fontSize: "0.76rem",
-                      color: "error.main",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {error}
-                  </Typography>
-                )}
-              </Paper>
-            </Box>
-          )}
-        </Container>
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
-        pb: { xs: 10, md: 11 },
+        pt: { xs: 2.5, md: 4 },
+        pb: { xs: 12, md: 8 },
       }}
     >
-      <Container
-        maxWidth="xl"
-        sx={{
-          py: { xs: 1.25, md: 2.25 },
-          px: { xs: 1.25, sm: 2, md: 3 },
-        }}
-      >
-        {/* Header Section */}
-        {!isMobile && <Header />}
-
-        {/* Search Bar */}
-        <SearchBar
-          searchQuery={searchQuery}
-          setSearchQuery={handleUnifiedSearchChange}
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+        {/* Unified Explore Header with Segmented Switcher */}
+        <Header
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          totalCourses={PREDEFINED_TOPICS.length}
         />
 
-        {shouldShowCustomFallback && (
-          <Stack spacing={1.2} sx={{ mb: 1.5 }}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: `1px solid ${theme.palette.divider}`,
-                boxShadow: "none",
-              }}
-            >
-              <CardContent sx={{ p: { xs: 1.7, sm: 2 } }}>
-                {!isCustomTopicValid ? (
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 0.8 }}>
-                      No matching course found
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.6 }}>
-                      No existing course matched. Validate this topic to create a custom path.
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleCustomSearch(searchQuery.trim())}
-                      disabled={customLoading || !searchQuery.trim()}
-                      sx={{ textTransform: "none", fontWeight: 700, mb: 1 }}
-                    >
-                      {customLoading ? "Validating..." : "Validate Topic"}
-                    </Button>
-                    <ErrorDisplay error={customError} />
-                  </Box>
-                ) : (
-                  <ValidatedTopic
-                    searchQuery={searchQuery.trim()}
-                    error={customError}
-                    generating={customGenerating}
-                    onResetSearch={resetCustomSearch}
-                    onGenerateSubtopics={handleGenerateCustomSubtopics}
-                  />
-                )}
-              </CardContent>
-            </Card>
-
-            <Guidelines show={!isCustomTopicValid} />
-
-            <BasicLearningOption
-              isValidTopic={isCustomTopicValid}
-              generating={customGenerating}
-              onClick={handleStartCustomLearning}
-            />
-          </Stack>
+        {/* Global Error Alert */}
+        {error && (
+          <Alert
+            severity="error"
+            onClose={() => setError("")}
+            sx={{ mb: 3, borderRadius: tokens.radii.sm }}
+          >
+            {error}
+          </Alert>
         )}
 
-        {/* Main Content */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", lg: "row" },
-            alignItems: { xs: "stretch", lg: "flex-start" },
-            gap: { xs: 1.5, md: 2.5 },
-          }}
-        >
-          {/* Category Sidebar */}
-          {showCourseCollectionsUi && (
-            <CategorySidebar
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              isMobile={isMobile}
+        {/* TAB 1: CURATED CATALOG */}
+        {activeTab === "curated" && (
+          <Box>
+            {/* Search Bar */}
+            <SearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              placeholder="Search catalog or discover topics..."
             />
-          )}
 
-          {/* Courses Grid */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {/* Selected Category Info */}
-            {showCourseCollectionsUi && (
-              <Box
-                sx={{
-                  mb: { xs: 1.25, md: 2 },
-                  textAlign: "left",
-                  px: { xs: 0.5, sm: 0 },
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  fontWeight={700}
-                  color="primary"
-                  sx={{ fontSize: { xs: "1.25rem", md: "1.5rem" } }}
-                >
-                  {CATEGORIES.find((cat) => cat.id === selectedCategory)?.name}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ fontSize: { xs: "0.82rem", md: "0.92rem" } }}
-                >
-                  {filteredTopics.length} courses available
-                </Typography>
-              </Box>
-            )}
-
-            {/* Error Alert */}
-            {error && (
-              <Alert
-                severity="error"
-                sx={{
-                  mb: 2,
-                  borderRadius: 2,
-                  border: "1px solid",
-                  borderColor: "error.main",
-                  mx: { xs: 0.5, sm: 0 },
-                }}
-              >
-                {error}
-              </Alert>
-            )}
-
-            {/* Courses Grid - Responsive */}
+            {/* Quick Filter Chips */}
             <Box
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, 1fr)",
-                  md: "repeat(3, 1fr)",
-                  lg: "repeat(4, 1fr)",
-                },
-                gap: { xs: 1.5, sm: 2 },
-                alignContent: "start",
-                px: { xs: 0.25, sm: 0 },
+                display: "flex",
+                gap: 1,
+                justifyContent: "center",
+                flexWrap: "wrap",
+                mb: { xs: 2.5, md: 3.5 },
               }}
             >
-              {filteredTopics.map((topic, index) => (
-                <CourseCard
-                  key={topic.id}
-                  topic={topic}
-                  isSelected={selectedTopic === topic.id}
-                  onSelect={handleTopicSelect}
-                  index={index}
+              {suggestedTopics.map((topic) => (
+                <Chip
+                  key={topic}
+                  label={topic}
+                  size="small"
+                  clickable
+                  onClick={() => setSearchQuery(topic)}
+                  sx={{
+                    borderRadius: tokens.radii.full,
+                    bgcolor:
+                      searchQuery.toLowerCase() === topic.toLowerCase()
+                        ? alpha(tokens.colors.primary.main, 0.14)
+                        : "background.paper",
+                    color:
+                      searchQuery.toLowerCase() === topic.toLowerCase()
+                        ? "primary.main"
+                        : "text.secondary",
+                    border: "1px solid",
+                    borderColor:
+                      searchQuery.toLowerCase() === topic.toLowerCase()
+                        ? "primary.main"
+                        : "divider",
+                    fontWeight: 500,
+                    fontSize: "0.78rem",
+                  }}
                 />
               ))}
             </Box>
 
-            {/* No Results */}
-            {filteredTopics.length === 0 && !shouldShowCustomFallback && (
-              <Box sx={{ textAlign: "center", py: 6, px: { xs: 1.5, sm: 0 } }}>
-                <Typography
-                  variant="h6"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
-                >
-                  No courses found
+            {/* Main Content Layout */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                gap: { xs: 2, md: 3.5 },
+                alignItems: "flex-start",
+              }}
+            >
+              {/* Category Sidebar / Mobile Chip Bar */}
+              <CategorySidebar
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                isMobile={isMobile}
+              />
+
+              {/* Course Grid */}
+              <Box sx={{ flex: 1, width: "100%" }}>
+                {filteredTopics.length > 0 ? (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, 1fr)",
+                        lg: "repeat(3, 1fr)",
+                      },
+                      gap: 2,
+                    }}
+                  >
+                    {filteredTopics.map((topic, index) => (
+                      <CourseCard
+                        key={topic.id}
+                        topic={topic}
+                        isSelected={selectedTopic === topic.id}
+                        onSelect={handleTopicSelect}
+                        onStart={handleStartCourse}
+                        isLoading={loadingTopicId === topic.id}
+                        index={index}
+                      />
+                    ))}
+                  </Box>
+                ) : (
+                  /* Zero Match Fallback with AI Prompt CTA */
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 4,
+                      textAlign: "center",
+                      borderRadius: tokens.radii.md,
+                      border: "1px dashed",
+                      borderColor: "divider",
+                      bgcolor: "background.paper",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: "50%",
+                        bgcolor: alpha(tokens.colors.primary.main, 0.1),
+                        color: "primary.main",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mx: "auto",
+                        mb: 2,
+                      }}
+                    >
+                      <AutoAwesome sx={{ fontSize: 24 }} />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      sx={{ mb: 1, color: "text.primary" }}
+                    >
+                      No pre-made courses for "{searchQuery}"
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ maxWidth: 460, mx: "auto", mb: 2.5 }}
+                    >
+                      Guidra's AI can generate a custom, step-by-step curriculum
+                      with interactive quizzes on this exact topic.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        setCustomSearchQuery(searchQuery);
+                        handleTabChange("custom");
+                        handleCustomValidate(searchQuery);
+                      }}
+                      startIcon={<AutoAwesome sx={{ fontSize: 18 }} />}
+                      sx={{
+                        borderRadius: tokens.radii.md,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        px: 3,
+                        py: 1,
+                      }}
+                    >
+                      Create "{searchQuery}" with AI
+                    </Button>
+                  </Paper>
+                )}
+              </Box>
+            </Box>
+
+            {/* Elevated Action Bar (Floats safely above mobile bottom nav) */}
+            <ActionButton
+              selectedTopic={selectedTopic}
+              loading={Boolean(loadingTopicId)}
+              handleStartLearning={() => handleStartCourse()}
+              getSelectedTopicName={getSelectedTopicName}
+            />
+          </Box>
+        )}
+
+        {/* TAB 2: CREATE WITH AI */}
+        {activeTab === "custom" && (
+          <Box sx={{ maxWidth: 760, mx: "auto" }}>
+            {/* Topic Input Box */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 2.5, sm: 3.5 },
+                borderRadius: tokens.radii.lg,
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                mb: 3,
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ mb: 0.5, color: "text.primary" }}
+              >
+                What do you want to learn?
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 2.5 }}
+              >
+                Enter any subject, technology, or domain (e.g. "PostgreSQL Indexing", "Rust Concurrency", "Intro to Neuroscience").
+              </Typography>
+
+              <SearchBox
+                searchQuery={customSearchQuery}
+                onQueryChange={(val) => {
+                  setCustomSearchQuery(val);
+                  setIsCustomTopicValid(false);
+                  setCustomError("");
+                }}
+                onSearch={() => handleCustomValidate()}
+                loading={customLoading}
+                error={customError}
+                isValidTopic={isCustomTopicValid}
+              />
+
+              {/* Quick Prompt Ideas */}
+              <Box sx={{ mt: 1.5, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                  Try:
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontSize: { xs: "0.8rem", sm: "0.9rem" } }}
-                >
-                  Try a different search or category
-                </Typography>
+                {suggestedTopics.map((topic) => (
+                  <Chip
+                    key={topic}
+                    label={topic}
+                    size="small"
+                    clickable
+                    onClick={() => {
+                      setCustomSearchQuery(topic);
+                      handleCustomValidate(topic);
+                    }}
+                    sx={{
+                      borderRadius: tokens.radii.full,
+                      bgcolor: "background.default",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      fontSize: "0.75rem",
+                      "&:hover": { borderColor: "primary.main" },
+                    }}
+                  />
+                ))}
+              </Box>
+
+              {/* Validation Status & Error Alert */}
+              <Box sx={{ mt: 2 }}>
+                <ErrorDisplay error={customError} />
+              </Box>
+            </Paper>
+
+            {/* Validated Topic Card */}
+            {isCustomTopicValid && (
+              <Box sx={{ mb: 3 }}>
+                <ValidatedTopic
+                  searchQuery={customSearchQuery}
+                  error={customError}
+                  generating={customGenerating}
+                  onResetSearch={resetCustomSearch}
+                  onGenerateSubtopics={handleGenerateCustomSubtopics}
+                />
+
+                <BasicLearningOption
+                  isValidTopic={isCustomTopicValid}
+                  generating={customGenerating}
+                  onClick={handleStartBasicCustomLearning}
+                />
               </Box>
             )}
-          </Box>
-        </Box>
 
-        {/* Action Button */}
-        {!shouldShowCustomFallback && (
-          <ActionButton
-            selectedTopic={selectedTopic}
-            loading={loading}
-            handleStartLearning={handleStartLearning}
-            getSelectedTopicName={getSelectedTopicName}
-          />
+            {/* Helpful Guidelines */}
+            <Guidelines show={!isCustomTopicValid} />
+          </Box>
         )}
       </Container>
     </Box>

@@ -203,9 +203,20 @@ export const initializeAuth = async () => {
 };
 
 export const startGoogleOAuth = () => {
-  const resolvedApiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || window.location.origin;
-  window.location.assign(`${resolvedApiBaseUrl}/api/v1/auth/google`);
+  const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+  try {
+    window.location.assign(
+      new URL(
+        "/api/v1/auth/google",
+        configuredApiBaseUrl || window.location.origin
+      ).toString()
+    );
+  } catch {
+    window.location.assign(
+      new URL("/api/v1/auth/google", window.location.origin).toString()
+    );
+  }
 };
 
 export { clearAllTokens, clearAuthCache };

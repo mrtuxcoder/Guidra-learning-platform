@@ -1,16 +1,7 @@
 import React from "react";
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-  RadioGroup,
-  Box,
-  useTheme,
-  alpha,
-} from "@mui/material";
-import { ExpandMore, CheckCircle, Cancel } from "@mui/icons-material";
+import { Typography, Box, Button, useTheme } from "@mui/material";
 import AnswerOption from "./AnswerOption";
+import { renderFormattedText } from "./utils";
 
 const QuizQuestion = ({
   quizItem,
@@ -19,97 +10,141 @@ const QuizQuestion = ({
   quizSubmitted,
   onAnswer,
   isMobile,
-  colorPalette,
 }) => {
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const question =
     typeof quizItem === "string" ? { question: quizItem } : quizItem;
 
+  const correctAnswer =
+    question.choices?.[question.correctIndex] || question.answer;
+  const isCorrect = userAnswer === correctAnswer;
+
   const getAnswerStatus = (option) => {
     if (!quizSubmitted) return "default";
-
-    const correctAnswer =
-      question.choices?.[question.correctIndex] || question.answer;
     if (option === correctAnswer) return "correct";
     if (option === userAnswer && userAnswer !== correctAnswer) return "wrong";
     return "default";
   };
 
   return (
-    <Accordion
-      key={index}
+    <Box
       sx={{
-        mb: 1.25,
-        borderRadius: 0,
-        border: "none",
-        background: "transparent",
-        "&:before": { display: "none" },
-        boxShadow: "none",
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.45)}`,
+        mb: 2.5,
+        p: { xs: 1.75, md: 2.25 },
+        borderRadius: "8px",
+        bgcolor: isDark ? "rgba(255, 255, 255, 0.02)" : "rgba(0, 0, 0, 0.015)",
+        border: "1px solid",
+        borderColor: "divider",
       }}
     >
-      <AccordionSummary
-        expandIcon={<ExpandMore sx={{ color: colorPalette[500] }} />}
-        sx={{ borderRadius: 0 }}
+      {/* Question Title */}
+      <Typography
+        variant="subtitle2"
+        sx={{
+          fontWeight: 600,
+          color: "text.primary",
+          fontSize: isMobile ? "0.88rem" : "0.93rem",
+          lineHeight: 1.45,
+          mb: 1.5,
+        }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-          <Typography
-            variant="body2"
-            fontWeight="600"
+        {renderFormattedText(`${index + 1}. ${question.question || quizItem}`)}
+      </Typography>
+
+      {/* Options */}
+      {question.options || question.choices ? (
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          {(question.options || question.choices).map((option, optIndex) => {
+            const answerStatus = getAnswerStatus(option);
+
+            return (
+              <AnswerOption
+                key={optIndex}
+                option={option}
+                value={option}
+                disabled={quizSubmitted}
+                answerStatus={answerStatus}
+                isSelected={userAnswer === option}
+                onSelect={() => !quizSubmitted && onAnswer(index, option)}
+                isMobile={isMobile}
+              />
+            );
+          })}
+        </Box>
+      ) : (
+        <Box sx={{ textAlign: "center", p: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              !quizSubmitted && !userAnswer && onAnswer(index, "Reflected")
+            }
+            disabled={quizSubmitted || !!userAnswer}
+            size="small"
             sx={{
-              flex: 1,
-              color: colorPalette[700],
-              fontSize: isMobile ? "0.8rem" : "0.875rem",
+              borderRadius: "6px",
+              fontWeight: 600,
             }}
           >
-            {question.question || quizItem}
+            {userAnswer ? "✓ Understood" : "Mark as Understood"}
+          </Button>
+        </Box>
+      )}
+
+      {/* Explanation Banner when Quiz Submitted */}
+      {quizSubmitted && question.explanation && (
+        <Box
+          sx={{
+            mt: 1.5,
+            p: 1.5,
+            borderRadius: "6px",
+            bgcolor: isCorrect
+              ? isDark
+                ? "rgba(16, 185, 129, 0.08)"
+                : "rgba(16, 185, 129, 0.04)"
+              : isDark
+              ? "rgba(239, 68, 68, 0.08)"
+              : "rgba(239, 68, 68, 0.04)",
+            borderLeft: `3px solid ${isCorrect ? theme.palette.success.main : theme.palette.error.main}`,
+            borderTop: "1px solid",
+            borderRight: "1px solid",
+            borderBottom: "1px solid",
+            borderColor: isCorrect
+              ? isDark
+                ? "rgba(16, 185, 129, 0.2)"
+                : "rgba(16, 185, 129, 0.15)"
+              : isDark
+              ? "rgba(239, 68, 68, 0.2)"
+              : "rgba(239, 68, 68, 0.15)",
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              fontWeight: 700,
+              color: isCorrect ? "success.main" : "error.main",
+              mb: 0.25,
+              fontSize: "0.72rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {isCorrect ? "Correct" : "Explanation"}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: "0.84rem",
+              color: "text.primary",
+              lineHeight: 1.5,
+            }}
+          >
+            {renderFormattedText(question.explanation)}
           </Typography>
         </Box>
-      </AccordionSummary>
-
-      <AccordionDetails>
-        {question.options || question.choices ? (
-          <RadioGroup
-            value={userAnswer || ""}
-            onChange={(e) => !quizSubmitted && onAnswer(index, e.target.value)}
-          >
-            {(question.options || question.choices).map((option, optIndex) => {
-              const answerStatus = getAnswerStatus(option);
-
-              return (
-                <AnswerOption
-                  key={optIndex}
-                  option={option}
-                  value={option}
-                  disabled={quizSubmitted}
-                  answerStatus={answerStatus}
-                  onSelect={() => !quizSubmitted && onAnswer(index, option)}
-                  isMobile={isMobile}
-                  colorPalette={colorPalette}
-                />
-              );
-            })}
-          </RadioGroup>
-        ) : (
-          <Box sx={{ textAlign: "center", p: 2 }}>
-            <Button
-              variant="outlined"
-              onClick={() =>
-                !quizSubmitted && !userAnswer && onAnswer(index, "Reflected")
-              }
-              disabled={quizSubmitted || userAnswer}
-              size={isMobile ? "small" : "medium"}
-              sx={{
-                borderColor: colorPalette[500],
-                color: colorPalette[500],
-              }}
-            >
-              {userAnswer ? "✓ Reflected" : "Mark as Reflected"}
-            </Button>
-          </Box>
-        )}
-      </AccordionDetails>
-    </Accordion>
+      )}
+    </Box>
   );
 };
 

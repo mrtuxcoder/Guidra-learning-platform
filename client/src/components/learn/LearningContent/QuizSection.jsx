@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import {
-  Card,
-  CardContent,
+  Paper,
   Box,
   Typography,
   Alert,
   Button,
   IconButton,
   Tooltip,
-  useTheme,
-  alpha,
+  CircularProgress,
 } from "@mui/material";
-import { Quiz, Refresh, Lock } from "@mui/icons-material";
+import { Quiz, Refresh, Lock, CheckCircle } from "@mui/icons-material";
 import QuizQuestion from "./QuizQuestion";
 import QuizProgress from "./QuizProgress";
 import { updateQuizMarks, analyzeQuizAnswers } from "../../../api";
@@ -21,13 +19,11 @@ const QuizSection = ({
   selectedTopic,
   selectedSubtopic,
   isMobile,
-  colorPalette,
   onRegenerate,
   isRegenerating = false,
   isRegenerateDisabled = false,
   onQuizSubmitted,
 }) => {
-  const theme = useTheme();
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizResults, setQuizResults] = useState({ correct: 0, wrong: 0 });
@@ -61,14 +57,13 @@ const QuizSection = ({
           currentQuestion.answer;
 
         const isCorrect = quizAnswers[index] === correctAnswer;
-        
+
         if (isCorrect) {
           correct++;
         } else {
           wrong++;
         }
 
-        // Prepare data for AI analysis
         analysisData.push({
           question: currentQuestion.question || question,
           userAnswer: quizAnswers[index],
@@ -85,7 +80,6 @@ const QuizSection = ({
     setSavingQuiz(true);
 
     try {
-      // Update quiz marks
       await updateQuizMarks({
         topic: selectedTopic,
         subtopic: selectedSubtopic.name,
@@ -94,7 +88,6 @@ const QuizSection = ({
         total,
       });
 
-      // Analyze quiz answers with AI (don't wait for it to complete)
       analyzeQuizAnswers({
         topic: selectedTopic,
         subtopic: selectedSubtopic.name,
@@ -103,7 +96,6 @@ const QuizSection = ({
         console.error("Quiz analysis failed (non-critical):", error);
       });
 
-      // Notify parent component that quiz was submitted successfully
       if (onQuizSubmitted) {
         onQuizSubmitted();
       }
@@ -131,152 +123,166 @@ const QuizSection = ({
   };
 
   return (
-    <Card
+    <Paper
+      elevation={0}
+      id="knowledge-check-section"
       sx={{
+        mt: 4,
         mb: 3,
-        bgcolor: "transparent",
-        border: "none",
-        borderRadius: 0,
-        boxShadow: "none",
+        p: { xs: 2.25, md: 3 },
+        borderRadius: "8px",
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
       }}
     >
-      <CardContent sx={{ p: 0 }}>
-        {/* Header */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+      {/* Header */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
           <Box
             sx={{
-              width: isMobile ? 32 : 40,
-              height: isMobile ? 32 : 40,
-              borderRadius: "12px",
-              background: `linear-gradient(135deg, ${colorPalette[400]} 0%, ${colorPalette[600]} 100%)`,
+              width: 30,
+              height: 30,
+              borderRadius: "6px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(0, 0, 0, 0.05)",
+              color: "text.primary",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              mr: 2,
-              boxShadow: `0 6px 16px ${alpha(colorPalette[500], 0.28)}`,
             }}
           >
-            <Quiz sx={{ fontSize: isMobile ? 18 : 20, color: "white" }} />
+            <Quiz sx={{ fontSize: 16 }} />
           </Box>
           <Box>
             <Typography
-              variant={isMobile ? "subtitle1" : "h6"}
-              fontWeight="600"
-              sx={{ color: "text.primary" }}
+              variant="subtitle1"
+              sx={{ fontWeight: 700, fontSize: "1.025rem", color: "text.primary", letterSpacing: "-0.01em" }}
             >
               Knowledge Check
             </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.78rem" }}>
+              Verify your understanding before completing this lesson
+            </Typography>
           </Box>
-          {onRegenerate && (
-            <Tooltip
-              title={
-                isRegenerateDisabled
-                  ? "Generation limit reached (max 3)"
-                  : "Regenerate quiz"
-              }
-            >
-              <span style={{ marginLeft: "auto" }}>
-                <IconButton
-                  size="small"
-                  sx={{
-                    color: isRegenerateDisabled
-                      ? "#ef4444"
-                      : colorPalette[500],
-                  }}
-                  onClick={onRegenerate}
-                  disabled={isRegenerating || isRegenerateDisabled}
-                >
-                  {isRegenerateDisabled ? (
-                    <Lock sx={{ fontSize: 18 }} />
-                  ) : (
-                    <Refresh
-                      sx={{
-                        animation: isRegenerating
-                          ? "spin 1s linear infinite"
-                          : "none",
-                        "@keyframes spin": {
-                          "0%": { transform: "rotate(0deg)" },
-                          "100%": { transform: "rotate(360deg)" },
-                        },
-                      }}
-                    />
-                  )}
-                </IconButton>
-              </span>
-            </Tooltip>
-          )}
         </Box>
-        <Box sx={{ height: 1, bgcolor: alpha(theme.palette.divider, 0.5), mb: 2 }} />
 
-        {/* Progress */}
-        <QuizProgress
-          answeredCount={answeredCount}
-          totalQuestions={quizItems.length}
-          allQuestionsAnswered={allQuestionsAnswered}
-          colorPalette={colorPalette}
+        {onRegenerate && (
+          <Tooltip
+            title={
+              isRegenerateDisabled
+                ? "Generation limit reached (max 3)"
+                : "Regenerate quiz questions"
+            }
+          >
+            <span>
+              <IconButton
+                size="small"
+                onClick={onRegenerate}
+                disabled={isRegenerating || isRegenerateDisabled}
+                sx={{
+                  color: isRegenerateDisabled ? "text.secondary" : "text.secondary",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: "6px",
+                  p: 0.6,
+                  "&:hover": {
+                    color: "text.primary",
+                    bgcolor: "action.hover",
+                  },
+                }}
+              >
+                {isRegenerateDisabled ? (
+                  <Lock sx={{ fontSize: 15 }} />
+                ) : (
+                  <Refresh
+                    sx={{
+                      fontSize: 15,
+                      animation: isRegenerating ? "spin 1s linear infinite" : "none",
+                    }}
+                  />
+                )}
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
+      </Box>
+
+      {/* Progress */}
+      <QuizProgress
+        answeredCount={answeredCount}
+        totalQuestions={quizItems.length}
+        allQuestionsAnswered={allQuestionsAnswered}
+        isMobile={isMobile}
+      />
+
+      {/* Questions */}
+      {quizItems.map((quizItem, index) => (
+        <QuizQuestion
+          key={index}
+          quizItem={quizItem}
+          index={index}
+          userAnswer={quizAnswers[index]}
+          quizSubmitted={quizSubmitted}
+          onAnswer={handleQuizAnswer}
           isMobile={isMobile}
         />
+      ))}
 
-        {/* Questions */}
-        {quizItems.map((quizItem, index) => (
-          <QuizQuestion
-            key={index}
-            quizItem={quizItem}
-            index={index}
-            userAnswer={quizAnswers[index]}
-            quizSubmitted={quizSubmitted}
-            onAnswer={handleQuizAnswer}
-            isMobile={isMobile}
-            colorPalette={colorPalette}
-          />
-        ))}
-
-        {/* Actions */}
-        <Box sx={{ display: "flex", gap: 1, mt: 2, alignItems: "center" }}>
-          {!quizSubmitted ? (
-            <Button
-              variant="contained"
-              size={isMobile ? "small" : "medium"}
-              sx={{
-                background: colorPalette[600],
-                flex: 1,
-              }}
-              onClick={handleSubmitQuiz}
-              disabled={!allQuestionsAnswered || savingQuiz}
-            >
-              {savingQuiz ? "Submitting..." : "Submit Answers"}
-            </Button>
-          ) : (
-            <Button
-              variant="outlined"
-              size={isMobile ? "small" : "medium"}
-              sx={{
-                borderColor: colorPalette[600],
-                color: colorPalette[600],
-                flex: 1,
-              }}
-              onClick={handleResetQuiz}
-            >
-              Try Again
-            </Button>
-          )}
-        </Box>
-
-        {/* Results */}
-        {quizSubmitted && (
-          <Alert severity="info" sx={{ mt: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{ fontSize: isMobile ? "0.8rem" : "0.875rem" }}
-            >
-              Results: {quizResults.correct} correct, {quizResults.wrong} wrong
-              ({scorePercentage}%)
-            </Typography>
-          </Alert>
+      {/* Actions */}
+      <Box sx={{ display: "flex", gap: 1.5, mt: 2.5, alignItems: "center" }}>
+        {!quizSubmitted ? (
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={handleSubmitQuiz}
+            disabled={!allQuestionsAnswered || savingQuiz}
+            startIcon={savingQuiz ? <CircularProgress size={16} color="inherit" /> : null}
+            sx={{
+              py: 0.9,
+              borderRadius: "6px",
+              fontWeight: 600,
+              fontSize: "0.88rem",
+            }}
+          >
+            {savingQuiz ? "Saving..." : "Submit Answers"}
+          </Button>
+        ) : (
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={handleResetQuiz}
+            sx={{
+              py: 0.9,
+              borderRadius: "6px",
+              fontWeight: 600,
+              fontSize: "0.88rem",
+              borderColor: "divider",
+              color: "text.primary",
+              "&:hover": { borderColor: "divider", bgcolor: "action.hover" },
+            }}
+          >
+            Retake Quiz
+          </Button>
         )}
+      </Box>
 
-      </CardContent>
-    </Card>
+      {/* Results */}
+      {quizSubmitted && (
+        <Alert
+          severity={scorePercentage >= 70 ? "success" : "info"}
+          icon={scorePercentage >= 70 ? <CheckCircle fontSize="inherit" /> : undefined}
+          sx={{ mt: 2, borderRadius: "6px", fontWeight: 500 }}
+        >
+          {scorePercentage >= 70
+            ? `Great job! You scored ${quizResults.correct}/${quizResults.correct + quizResults.wrong} (${scorePercentage}%). You're ready to complete this subtopic!`
+            : `You scored ${quizResults.correct}/${quizResults.correct + quizResults.wrong} (${scorePercentage}%). Review the explanations above and retake when ready.`}
+        </Alert>
+      )}
+    </Paper>
   );
 };
 

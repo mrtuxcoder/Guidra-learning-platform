@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Set `VITE_API_BASE_URL` to the backend URL when the API is not served from the same origin. The Docker setup passes this value during the image build.
+Set `VITE_API_BASE_URL` in `client/.env` to the backend URL when the API is not served from the same origin. This is used by the Vite dev server. Docker builds default to `/`, which uses Nginx to proxy `/api/` requests to the backend service.
 
 ## Production Build
 

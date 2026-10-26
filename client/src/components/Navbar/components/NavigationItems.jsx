@@ -71,38 +71,39 @@ const NavigationItems = ({ isMobile, isActive, navigate, user }) => {
             startIcon={item.icon}
             data-tour={item.path.replace("/", "")}
             sx={{
-              fontWeight: isActive(item.path) ? "700" : "500",
-              borderRadius: 2,
+              fontWeight: isActive(item.path) ? "600" : "500",
+              borderRadius: "6px",
               px: 2,
               py: 0.75,
               color: isActive(item.path)
                 ? isDark
                   ? theme.palette.primary.light
-                  : purpleTheme.primaryDark
+                  : purpleTheme.primary
                 : "text.secondary",
               bgcolor: isActive(item.path)
                 ? isDark
-                  ? alpha(theme.palette.primary.main, 0.18)
+                  ? alpha(theme.palette.primary.main, 0.14)
                   : purpleTheme.lightBg
                 : "transparent",
               border: isActive(item.path)
                 ? `1px solid ${
                     isDark
-                      ? alpha(theme.palette.primary.main, 0.35)
-                      : `${purpleTheme.primaryLight}20`
+                      ? alpha(theme.palette.primary.main, 0.3)
+                      : "rgba(101, 88, 217, 0.2)"
                   }`
                 : "1px solid transparent",
               minWidth: "auto",
-              fontSize: "0.9rem",
+              fontSize: "0.88rem",
               position: "relative",
               "&:hover": {
                 bgcolor: isActive(item.path)
                   ? isDark
-                    ? alpha(theme.palette.primary.main, 0.22)
+                    ? alpha(theme.palette.primary.main, 0.2)
                     : purpleTheme.lightBg
                   : isDark
-                    ? alpha(theme.palette.primary.main, 0.12)
-                    : "rgba(126, 87, 194, 0.04)",
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.04)",
+                color: "text.primary",
               },
             }}
           >

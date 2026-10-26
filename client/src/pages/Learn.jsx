@@ -34,20 +34,11 @@ import WelcomeState from "../components/learn/WelcomeState/index";
 import LoadingState from "../components/learn/LoadingState/index";
 import TeachingStyleSelector from "../components/learn/TeachingStyleSelector";
 import { useDailyRegen } from "../contexts/DailyRegenContext";
+import { tokens } from "../theme/tokens";
 
-// Consistent color palette
-const purplePalette = {
-  50: "#FAF7FE",
-  100: "#F3E8FF",
-  200: "#E9D5FF",
-  300: "#D8B4FE",
-  400: "#C084FC",
-  500: "#A855F7",
-  600: "#9333EA",
-  700: "#7C3AED",
-  800: "#6B21A8",
-  900: "#581C87",
-};
+// Unified design tokens palette
+const brandPalette = tokens.colors.primary;
+const purplePalette = brandPalette;
 
 export default function Learning() {
   const [topics, setTopics] = useState([]);
@@ -152,7 +143,7 @@ export default function Learning() {
       );
 
       if (!recalledTopic) {
-        return completedTopics;
+        return incompleteTopics;
       }
 
       return [
@@ -821,6 +812,11 @@ export default function Learning() {
         }
 
         setPendingCompleteSubtopic(subtopic);
+        const quizElement = document.getElementById("knowledge-check-section");
+        if (quizElement) {
+          quizElement.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
         setQuizModalOpen(true);
         return;
       }
@@ -1214,6 +1210,7 @@ export default function Learning() {
               onSelectFullVersion={handleSelectFullVersion}
               dailyRemaining={dailyRegenRemaining}
               onDailyRegenUpdate={handleDailyRegenUpdate}
+              onQuizSubmitted={handleQuizSubmitted}
             />
           ) : (
             <WelcomeState

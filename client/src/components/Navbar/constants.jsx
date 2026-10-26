@@ -30,18 +30,13 @@ export const iconSet = [
   { icon: <LearnIcon sx={{ fontSize: 20 }} />, color: "#9C27B0" },
 ];
 
-// Navigation items
+// Navigation items - unified to 4 focused destinations
 export const navItems = [
   { path: "/learn", label: "Learn", icon: <School sx={{ fontSize: 20 }} /> },
   {
     path: "/explore",
     label: "Explore",
     icon: <Explore sx={{ fontSize: 20 }} />,
-  },
-  {
-    path: "/custom-topic",
-    label: "Custom Topic",
-    icon: <Search sx={{ fontSize: 20 }} />,
   },
   {
     path: "/study-timer",
@@ -55,19 +50,19 @@ export const navItems = [
   },
 ];
 
-// Purple theme colors
+// Primary theme colors - Restrained purple accent
 export const purpleTheme = {
-  primary: "#7E57C2",
-  primaryLight: "#B39DDB",
-  primaryDark: "#5E35B1",
-  lightBg: "#F3E5F5",
-  subtleBg: "#FAF7FE",
+  primary: "#6558D9",
+  primaryLight: "#8477EC",
+  primaryDark: "#5245C4",
+  lightBg: "rgba(101, 88, 217, 0.08)",
+  subtleBg: "#F7F8FA",
 };
 
 // Get theme gradient based on random icon
 export const getThemeGradient = (icon) => {
   if (icon) {
-    return `linear-gradient(135deg, ${icon.color} 0%, #5E35B1 100%)`;
+    return `linear-gradient(135deg, ${icon.color} 0%, #4338CA 100%)`;
   }
-  return "linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)";
+  return "linear-gradient(135deg, #6366F1 0%, #4338CA 100%)";
 };

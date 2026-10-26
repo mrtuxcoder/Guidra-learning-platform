@@ -2,39 +2,42 @@ import React from "react";
 import { Chip, Box } from "@mui/material";
 import { CheckCircle, Cached, AutoAwesome } from "@mui/icons-material";
 
-const StatusChips = ({ selectedSubtopic, contentInfo, colorPalette }) => {
+const StatusChips = ({ selectedSubtopic, contentInfo }) => {
   return (
-    <Box sx={{ display: "flex", gap: 1 }}>
-      {selectedSubtopic.completed && (
+    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+      {selectedSubtopic?.completed && (
         <Chip
-          icon={<CheckCircle sx={{ fontSize: 16 }} />}
+          icon={<CheckCircle sx={{ fontSize: "14px !important", color: "inherit" }} />}
           label="Completed"
           color="success"
           size="small"
           sx={{
-            fontSize: "0.75rem",
+            fontSize: "0.72rem",
             fontWeight: 600,
-            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-            color: "white",
+            borderRadius: "6px",
+            height: "28px",
           }}
         />
       )}
       <Chip
         icon={
           contentInfo?.source === "cache" ? (
-            <Cached sx={{ fontSize: 16 }} />
+            <Cached sx={{ fontSize: "14px !important" }} />
           ) : (
-            <AutoAwesome sx={{ fontSize: 16 }} />
+            <AutoAwesome sx={{ fontSize: "13px !important" }} />
           )
         }
         label={contentInfo?.source === "cache" ? "Cached" : "AI Generated"}
         size="small"
+        variant="outlined"
         sx={{
-          fontSize: "0.75rem",
-          fontWeight: 600,
-          background: "rgba(126, 87, 194, 0.08)",
-          color: colorPalette?.[600] || "#6d48b5",
-          border: "1px solid rgba(126, 87, 194, 0.2)",
+          fontSize: "0.72rem",
+          fontWeight: 500,
+          borderRadius: "6px",
+          height: "28px",
+          borderColor: "divider",
+          bgcolor: "transparent",
+          color: "text.secondary",
         }}
       />
     </Box>

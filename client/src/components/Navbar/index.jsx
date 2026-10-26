@@ -66,11 +66,7 @@ const Navbar = () => {
           sx={{
             bgcolor: "background.paper",
             color: "text.primary",
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 1px 8px rgba(0, 0, 0, 0.3)"
-                : "0 1px 8px rgba(126, 87, 194, 0.08)",
-            backdropFilter: "blur(12px)",
+            boxShadow: "none",
             borderBottom: "1px solid",
             borderColor: "divider",
           }}

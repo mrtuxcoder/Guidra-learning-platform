@@ -1,160 +1,79 @@
 import React from "react";
-import { Box, Typography, Fade, alpha, useTheme } from "@mui/material";
-import GradientLoader from "./GradientLoader";
-import FloatingParticles from "./FloatingParticles";
-import ProgressDots from "./ProgressDots";
+import { Box, Typography, Fade, CircularProgress } from "@mui/material";
+import { AutoAwesome } from "@mui/icons-material";
 
-const ContentLoading = ({ source, isMobile, colorPalette }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-  const gradientColors = colorPalette
-    ? {
-        start: colorPalette[700] || "#7C3AED",
-        mid: colorPalette[500] || "#8B5CF6",
-        end: colorPalette[400] || "#A78BFA",
-        light: colorPalette[300] || "#C4B5FD",
-      }
-    : {
-        start: "#7C3AED",
-        mid: "#8B5CF6",
-        end: "#A78BFA",
-        light: "#C4B5FD",
-      };
-
-  const backgroundGradient = isDark
-    ? `linear-gradient(135deg, ${alpha(
-        theme.palette.primary.main,
-        0.18
-      )} 0%, ${alpha(theme.palette.background.paper, 0.9)} 55%, ${
-        theme.palette.background.default
-      } 100%)`
-    : colorPalette
-      ? `linear-gradient(135deg, ${colorPalette[50]} 0%, ${colorPalette[100]} 50%, ${colorPalette[200]} 100%)`
-      : "linear-gradient(135deg, #FAF7FE 0%, #F3E8FF 50%, #E9D5FF 100%)";
+const ContentLoading = ({ source, isMobile }) => {
+  const isAi = source === "ai";
 
   return (
-    <Fade in={true} timeout={600}>
+    <Fade in={true} timeout={400}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           height: "100%",
-          minHeight: isMobile ? "300px" : "400px",
+          minHeight: isMobile ? "300px" : "420px",
           width: "100%",
           flexDirection: "column",
-          gap: isMobile ? 3 : 4,
-          background: backgroundGradient,
-          borderRadius: isMobile ? 2 : 3,
-          p: isMobile ? 2 : 4,
-          position: "relative",
-          overflow: "hidden",
-          border: `1px solid ${alpha(
-            theme.palette.primary.main,
-            isDark ? 0.3 : 0.2
-          )}`,
-          boxShadow: `0 8px 32px ${alpha(
-            theme.palette.primary.main,
-            isDark ? 0.35 : 0.2
-          )}`,
+          gap: 2.5,
+          bgcolor: "background.paper",
+          borderRadius: "10px",
+          p: { xs: 3, md: 5 },
+          border: "1px solid",
+          borderColor: "divider",
           boxSizing: "border-box",
+          textAlign: "center",
         }}
       >
-        <FloatingParticles
-          count={isMobile ? 8 : 15}
-          color={colorPalette?.[400] || "#7C3AED"}
-          isMobile={isMobile}
-        />
-
-        <Box sx={{ position: "relative", zIndex: 1 }}>
-          <GradientLoader
-            size={isMobile ? 80 : 100}
-            speed={1.5}
-            colors={gradientColors}
+        <Box sx={{ position: "relative", display: "inline-flex" }}>
+          <CircularProgress
+            size={52}
+            thickness={3.5}
+            sx={{
+              color: "primary.main",
+            }}
           />
-
-          {/* Animated Icon */}
           <Box
             sx={{
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
               position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              animation: "pulse 2s ease-in-out infinite",
-              "@keyframes pulse": {
-                "0%, 100%": {
-                  opacity: 1,
-                  transform: "translate(-50%, -50%) scale(1)",
-                },
-                "50%": {
-                  opacity: 0.8,
-                  transform: "translate(-50%, -50%) scale(1.1)",
-                },
-              },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <Typography
-              sx={{
-                fontSize: isMobile ? 24 : 32,
-                fontWeight: "bold",
-                background: `linear-gradient(135deg, ${gradientColors.start} 0%, ${gradientColors.end} 100%)`,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              {source === "cache" ? "📚" : "✨"}
-            </Typography>
+            <AutoAwesome sx={{ fontSize: 20, color: "primary.main" }} />
           </Box>
         </Box>
 
-        <Box
-          sx={{
-            textAlign: "center",
-            position: "relative",
-            zIndex: 1,
-            width: "100%",
-          }}
-        >
+        <Box sx={{ maxWidth: 420 }}>
           <Typography
-            variant={isMobile ? "h6" : "h5"}
-            fontWeight="700"
+            variant="h6"
             sx={{
-              background: `linear-gradient(135deg, ${gradientColors.start} 0%, ${gradientColors.end} 100%)`,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              mb: isMobile ? 1 : 1.5,
-              fontSize: isMobile ? "1.1rem" : "1.5rem",
+              fontWeight: 700,
+              fontSize: "1.05rem",
+              color: "text.primary",
+              letterSpacing: "-0.01em",
+              mb: 0.75,
             }}
           >
-            {source === "cache"
-              ? "Loading Your Content"
-              : "Crafting Your Lesson"}
+            {isAi ? "Generating Personalized Lesson..." : "Loading Lesson Content..."}
           </Typography>
 
           <Typography
-            variant={isMobile ? "body2" : "body1"}
+            variant="body2"
             sx={{
               color: "text.secondary",
-              maxWidth: isMobile ? 280 : 300,
               lineHeight: 1.6,
-              margin: "0 auto",
-              fontSize: isMobile ? "0.875rem" : "1rem",
+              fontSize: "0.88rem",
             }}
           >
-            {source === "cache"
-              ? "Retrieving your personalized learning materials..."
-              : "Generating AI-powered content tailored just for you..."}
+            Structuring core concepts, interactive code examples, and knowledge checks tailored for focused learning.
           </Typography>
-
-          {/* Progress Dots */}
-          <ProgressDots
-            count={3}
-            color={gradientColors.start}
-            isMobile={isMobile}
-            sx={{ mt: isMobile ? 1.5 : 2 }}
-          />
         </Box>
       </Box>
     </Fade>

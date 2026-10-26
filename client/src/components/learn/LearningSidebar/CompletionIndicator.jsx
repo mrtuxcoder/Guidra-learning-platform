@@ -2,60 +2,64 @@ import React from "react";
 import { Box } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 
-const CompletionIndicator = ({ completed, colorPalette }) => {
+const CompletionIndicator = ({ completed, isSelected }) => {
+  if (completed) {
+    return (
+      <Box
+        sx={{
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          bgcolor: "success.main",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <CheckCircle sx={{ fontSize: 13, color: "white" }} />
+      </Box>
+    );
+  }
+
+  if (isSelected) {
+    return (
+      <Box
+        sx={{
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          border: "2px solid",
+          borderColor: "primary.main",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          sx={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            bgcolor: "primary.main",
+          }}
+        />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
-        position: "relative",
-        width: 20,
-        height: 20,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        width: 18,
+        height: 18,
+        borderRadius: "50%",
+        border: "1.5px solid",
+        borderColor: "divider",
+        flexShrink: 0,
       }}
-    >
-      {completed ? (
-        <Box
-          sx={{
-            width: 16,
-            height: 16,
-            borderRadius: "50%",
-            backgroundColor: colorPalette[600],
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: `0 2px 8px ${colorPalette[600]}40`,
-            animation: "scaleIn 0.3s ease-out",
-            "@keyframes scaleIn": {
-              "0%": { transform: "scale(0)" },
-              "70%": { transform: "scale(1.1)" },
-              "100%": { transform: "scale(1)" },
-            },
-          }}
-        >
-          <CheckCircle
-            sx={{
-              fontSize: 12,
-              color: "white",
-            }}
-          />
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            width: 14,
-            height: 14,
-            borderRadius: "50%",
-            border: `2px solid ${colorPalette[200]}`,
-            bgcolor: (theme) => theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "white",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              borderColor: colorPalette[300],
-            },
-          }}
-        />
-      )}
-    </Box>
+    />
   );
 };
 

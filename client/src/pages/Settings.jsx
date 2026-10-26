@@ -16,11 +16,16 @@ import {
   CircularProgress,
   Switch,
   FormControlLabel,
-  useTheme,
   IconButton,
   InputAdornment,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  Visibility,
+  VisibilityOff,
+  Tune,
+  Palette,
+  Lock,
+} from "@mui/icons-material";
 import {
   updateUserPreferences,
   createPassword,
@@ -29,21 +34,20 @@ import {
 } from "../api";
 import { setFrontendCookie } from "../api/utils/cookies";
 import { useUser } from "../contexts/UserContext";
-import { profileTheme, cardSx } from "../components/profile/constants";
 import { useThemeMode } from "../contexts/ThemeContext";
+import { tokens } from "../theme/tokens";
 
 const toneOptions = [
-  { value: "neutral", label: "Neutral" },
-  { value: "friendly", label: "Friendly" },
-  { value: "formal", label: "Formal" },
-  { value: "concise", label: "Concise" },
+  { value: "neutral", label: "Neutral (Balanced and direct)" },
+  { value: "friendly", label: "Friendly (Warm and encouraging)" },
+  { value: "formal", label: "Formal (Academic and precise)" },
+  { value: "concise", label: "Concise (Fast and bulleted)" },
 ];
 
-const Settings = () => {
-  const theme = useTheme();
+export default function Settings() {
   const { mode, toggleTheme } = useThemeMode();
-  const { user, authInfo } = useUser(); // Get user from shared context
-  const [isLoading, setIsLoading] = useState(!user); // Loading when no user yet
+  const { user, authInfo } = useUser();
+  const [isLoading, setIsLoading] = useState(!user);
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
@@ -74,7 +78,6 @@ const Settings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Use shared user context instead of fetching independently
   useEffect(() => {
     if (user) {
       setPreferences({
@@ -98,54 +101,43 @@ const Settings = () => {
     const fetchLivePasswordStatus = async () => {
       try {
         const response = await getPasswordStatus();
-        const status = response?.data || {};
-
         if (!isActive) return;
-
+        const data = response?.data || {};
         setPasswordStatus({
-          hasPassword: !!status.hasPassword,
-          authProvider: status.authProvider || null,
-          needsPasswordSetup: !!status.needsPasswordSetup,
+          hasPassword: !!data.hasPassword,
+          authProvider: data.authProvider || null,
+          needsPasswordSetup: !!data.needsPasswordSetup,
         });
       } catch {
-        // keep existing status fallback from authInfo
+        // Silent fallback
       }
     };
 
-    if (user) {
-      fetchLivePasswordStatus();
-    }
-
+    fetchLivePasswordStatus();
     return () => {
       isActive = false;
     };
-  }, [user]);
+  }, []);
 
   const handlePreferenceChange = (event) => {
-    const { name, value } = event.target || {};
-    if (!name) {
-      return;
-    }
-
-    setPreferences((prev) =>
-      prev[name] === value
-        ? prev
-        : {
-            ...prev,
-            [name]: value,
-          }
-    );
+    const { name, value } = event.target;
+    setPreferences((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSavePreferences = async () => {
     setSaveMessage("");
     setSaveError("");
 
-    const payload = {
-      reasonForLearning:
-        preferences.reasonForLearning?.trim() || "",
-      tonePreference: preferences.tonePreference || "neutral",
-    };
+    const payload = {};
+    if (preferences.reasonForLearning) {
+      payload.reasonForLearning = preferences.reasonForLearning.trim();
+    }
+    if (preferences.tonePreference) {
+      payload.tonePreference = preferences.tonePreference;
+    }
 
     if (!payload.reasonForLearning && !payload.tonePreference) {
       setSaveError("Please add at least one preference.");
@@ -169,8 +161,6 @@ const Settings = () => {
     const newValue = !showTimerInNavbar;
     setShowTimerInNavbar(newValue);
     localStorage.setItem("showTimerInNavbar", newValue ? "true" : "false");
-    
-    // Dispatch custom event for same-window updates
     window.dispatchEvent(new Event("timerNavbarToggle"));
   };
 
@@ -267,7 +257,7 @@ const Settings = () => {
           justifyContent: "center",
         }}
       >
-        <CircularProgress sx={{ color: profileTheme.primary }} />
+        <CircularProgress sx={{ color: "primary.main" }} />
       </Box>
     );
   }
@@ -277,274 +267,304 @@ const Settings = () => {
       sx={{
         minHeight: "100vh",
         bgcolor: "background.default",
-        py: { xs: 2, md: 5 },
+        py: { xs: 2.5, md: 5 },
+        pb: { xs: 12, md: 8 },
       }}
     >
-      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
-        <Box sx={{ mb: { xs: 2, md: 3 } }}>
-          <Typography
-            variant="h4"
+      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Stack spacing={3}>
+          {/* Header */}
+          <Box sx={{ mb: 1 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                color: "text.primary",
+                letterSpacing: "-0.02em",
+                fontSize: { xs: "1.5rem", sm: "1.85rem" },
+              }}
+            >
+              Settings
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 0.5, fontSize: "0.9rem" }}
+            >
+              Manage your learning preferences, UI theme, and account security.
+            </Typography>
+          </Box>
+
+          {/* Section 1: Learning Preferences */}
+          <Paper
+            elevation={0}
             sx={{
-              fontWeight: 800,
-              fontSize: { xs: "1.3rem", sm: "1.8rem" },
-              background: profileTheme.gradient,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: tokens.radii.lg,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
             }}
           >
-            Settings
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 0.35, fontSize: { xs: "0.82rem", sm: "0.875rem" } }}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 2 }}>
+              <Tune sx={{ color: "primary.main", fontSize: 22 }} />
+              <Typography variant="h6" fontWeight={700}>
+                Learning Preferences
+              </Typography>
+            </Box>
+
+            <Stack spacing={2.5}>
+              <TextField
+                label="Why are you learning?"
+                name="reasonForLearning"
+                value={preferences.reasonForLearning}
+                onChange={handlePreferenceChange}
+                placeholder="e.g. Preparing for full-stack engineering interviews..."
+                multiline
+                minRows={3}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: tokens.radii.md,
+                  },
+                }}
+              />
+
+              <FormControl fullWidth>
+                <InputLabel id="tone-preference-label">AI Explanation Tone</InputLabel>
+                <Select
+                  labelId="tone-preference-label"
+                  label="AI Explanation Tone"
+                  name="tonePreference"
+                  value={preferences.tonePreference}
+                  onChange={handlePreferenceChange}
+                  sx={{ borderRadius: tokens.radii.md }}
+                >
+                  {toneOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {saveMessage && (
+                <Alert severity="success" sx={{ borderRadius: tokens.radii.sm }}>
+                  {saveMessage}
+                </Alert>
+              )}
+              {saveError && (
+                <Alert severity="error" sx={{ borderRadius: tokens.radii.sm }}>
+                  {saveError}
+                </Alert>
+              )}
+
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  onClick={handleSavePreferences}
+                  disabled={isSaving}
+                  sx={{
+                    borderRadius: tokens.radii.md,
+                    fontWeight: 700,
+                    textTransform: "none",
+                    px: 3,
+                    py: 1,
+                  }}
+                >
+                  {isSaving ? "Saving..." : "Save Preferences"}
+                </Button>
+              </Box>
+            </Stack>
+          </Paper>
+
+          {/* Section 2: Appearance & Focus */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: tokens.radii.lg,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+            }}
           >
-            Manage your learning preferences and account security.
-          </Typography>
-        </Box>
-
-        <Paper
-          elevation={0}
-          sx={{
-            ...cardSx,
-            p: { xs: 2, md: 3 },
-            mb: { xs: 2, md: 3 },
-          }}
-        >
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: { xs: "1rem", sm: "1.12rem" } }}>
-          Learning Preferences
-        </Typography>
-        <Stack spacing={2}>
-          <TextField
-            label="Reason for learning"
-            name="reasonForLearning"
-            value={preferences.reasonForLearning}
-            onChange={handlePreferenceChange}
-            multiline
-            minRows={3}
-            fullWidth
-          />
-          <FormControl fullWidth>
-            <InputLabel id="tone-preference-label">Tone preference</InputLabel>
-            <Select
-              labelId="tone-preference-label"
-              label="Tone preference"
-              name="tonePreference"
-              value={preferences.tonePreference}
-              onChange={handlePreferenceChange}
-            >
-              {toneOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {saveMessage && <Alert severity="success">{saveMessage}</Alert>}
-          {saveError && <Alert severity="error">{saveError}</Alert>}
-
-          <Box>
-            <Button
-              variant="contained"
-              onClick={handleSavePreferences}
-              disabled={isSaving}
-              sx={{
-                textTransform: "none",
-                borderRadius: 2,
-                fontWeight: 700,
-                background: profileTheme.gradient,
-              }}
-            >
-              {isSaving ? "Saving..." : "Save Preferences"}
-            </Button>
-          </Box>
-        </Stack>
-        </Paper>
-
-        {/* Appearance Settings */}
-        <Paper
-          elevation={0}
-          sx={{
-            ...cardSx,
-            p: { xs: 2, md: 3 },
-            mb: { xs: 2, md: 3 },
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, fontSize: { xs: "1rem", sm: "1.12rem" } }}>
-            Appearance
-          </Typography>
-          <Stack spacing={2}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                py: 1,
-              }}
-            >
-              <Box>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: "0.92rem", sm: "1rem" } }}>
-                  Dark Mode
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
-                  Switch between light and dark theme
-                </Typography>
-              </Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={mode === "dark"}
-                    onChange={toggleTheme}
-                    color="primary"
-                  />
-                }
-                label=""
-                sx={{ m: 0 }}
-              />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 2 }}>
+              <Palette sx={{ color: "primary.main", fontSize: 22 }} />
+              <Typography variant="h6" fontWeight={700}>
+                Appearance & Focus
+              </Typography>
             </Box>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                py: 1,
-                borderTop: "1px solid",
-                borderColor: "divider",
-                pt: 2,
-              }}
-            >
-              <Box>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: "0.92rem", sm: "1rem" } }}>
-                  Timer in Navbar
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
-                  Show live countdown in the navigation bar
-                </Typography>
+
+            <Stack spacing={2} divider={<Divider />}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Dark Mode
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Switch between Calm Studio light and deep slate dark theme
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={mode === "dark"}
+                  onChange={toggleTheme}
+                  color="primary"
+                />
               </Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showTimerInNavbar}
-                    onChange={handleTimerNavbarToggle}
-                    color="primary"
-                  />
-                }
-                label=""
-                sx={{ m: 0 }}
-              />
+
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Show Timer in Navigation Bar
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Display real-time countdown when focus sessions are active
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={showTimerInNavbar}
+                  onChange={handleTimerNavbarToggle}
+                  color="primary"
+                />
+              </Box>
+            </Stack>
+          </Paper>
+
+          {/* Section 3: Password & Security */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2.5, sm: 3.5 },
+              borderRadius: tokens.radii.lg,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 2 }}>
+              <Lock sx={{ color: "primary.main", fontSize: 22 }} />
+              <Typography variant="h6" fontWeight={700}>
+                Password & Security
+              </Typography>
             </Box>
-          </Stack>
-        </Paper>
 
-        <Paper
-          elevation={0}
-          sx={{
-            ...cardSx,
-            p: { xs: 2, md: 3 },
-          }}
-        >
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, fontSize: { xs: "1rem", sm: "1.12rem" } }}>
-          Password
-        </Typography>
-        <Typography sx={{ color: "text.secondary", mb: 2, fontSize: { xs: "0.82rem", sm: "0.9rem" } }}>
-          {passwordStatus.needsPasswordSetup || !passwordStatus.hasPassword
-            ? "Set a password to enable email login."
-            : "Update your existing password."}
-        </Typography>
+            <Stack spacing={2.5}>
+              {!passwordStatus.needsPasswordSetup && (
+                <TextField
+                  label="Current Password"
+                  name="currentPassword"
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={passwordForm.currentPassword}
+                  onChange={handlePasswordChange}
+                  fullWidth
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          edge="end"
+                        >
+                          {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: tokens.radii.md } }}
+                />
+              )}
 
-        <Stack spacing={2}>
-          {!passwordStatus.needsPasswordSetup && passwordStatus.hasPassword && (
-            <TextField
-              label="Current password"
-              name="currentPassword"
-              type={showCurrentPassword ? "text" : "password"}
-              value={passwordForm.currentPassword}
-              onChange={handlePasswordChange}
-              fullWidth
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      onClick={() => setShowCurrentPassword((prev) => !prev)}
-                    >
-                      {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          )}
-          <TextField
-            label="New password"
-            name="newPassword"
-            type={showNewPassword ? "text" : "password"}
-            value={passwordForm.newPassword}
-            onChange={handlePasswordChange}
-            fullWidth
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    edge="end"
-                    onClick={() => setShowNewPassword((prev) => !prev)}
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            label="Confirm new password"
-            name="confirmPassword"
-            type={showConfirmPassword ? "text" : "password"}
-            value={passwordForm.confirmPassword}
-            onChange={handlePasswordChange}
-            fullWidth
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    edge="end"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+              <TextField
+                label={passwordStatus.needsPasswordSetup ? "New Password" : "New Password"}
+                name="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        edge="end"
+                      >
+                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: tokens.radii.md } }}
+              />
 
-          {passwordMessage && (
-            <Alert severity="success">{passwordMessage}</Alert>
-          )}
-          {passwordError && <Alert severity="error">{passwordError}</Alert>}
+              <TextField
+                label="Confirm New Password"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        edge="end"
+                      >
+                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: tokens.radii.md } }}
+              />
 
-          <Divider />
-          <Box>
-            <Button
-              variant="outlined"
-              onClick={handleUpdatePassword}
-              disabled={isUpdatingPassword}
-              sx={{
-                textTransform: "none",
-                borderRadius: 2,
-                fontWeight: 600,
-                borderColor: theme.palette.primary.main,
-                color: profileTheme.primaryDark,
-              }}
-            >
-              {isUpdatingPassword ? "Updating..." : "Update Password"}
-            </Button>
-          </Box>
+              {passwordMessage && (
+                <Alert severity="success" sx={{ borderRadius: tokens.radii.sm }}>
+                  {passwordMessage}
+                </Alert>
+              )}
+              {passwordError && (
+                <Alert severity="error" sx={{ borderRadius: tokens.radii.sm }}>
+                  {passwordError}
+                </Alert>
+              )}
+
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  variant="contained"
+                  onClick={handleUpdatePassword}
+                  disabled={isUpdatingPassword}
+                  sx={{
+                    borderRadius: tokens.radii.md,
+                    fontWeight: 700,
+                    textTransform: "none",
+                    px: 3,
+                    py: 1,
+                  }}
+                >
+                  {isUpdatingPassword
+                    ? "Updating..."
+                    : passwordStatus.needsPasswordSetup
+                    ? "Set Password"
+                    : "Update Password"}
+                </Button>
+              </Box>
+            </Stack>
+          </Paper>
         </Stack>
-        </Paper>
       </Container>
     </Box>
   );
-};
-
-export default Settings;
+}

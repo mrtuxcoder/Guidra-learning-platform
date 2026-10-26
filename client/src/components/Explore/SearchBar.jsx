@@ -1,41 +1,53 @@
 import React from "react";
-import { Box, Paper, InputBase, Fade, Typography } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { Box, Paper, InputBase, Fade, Typography, IconButton } from "@mui/material";
+import { Search, Clear } from "@mui/icons-material";
+import { tokens } from "../../theme/tokens";
 
 const SearchBar = ({
   searchQuery,
   setSearchQuery,
-  placeholder = "Search courses or create a learning topic",
+  placeholder = "Search courses or create a learning topic...",
   helperText,
 }) => {
   return (
     <Box
       sx={{
-        mb: { xs: 1.5, md: 2.25 },
-        maxWidth: "720px",
+        mb: { xs: 2, md: 3 },
+        maxWidth: "680px",
         mx: "auto",
-        px: { xs: 0, sm: 0 },
+        width: "100%",
       }}
     >
-      <Fade in timeout={800}>
+      <Fade in timeout={600}>
         <Box>
           <Paper
+            elevation={0}
             sx={{
-              p: { xs: 1.1, md: 0.95 },
+              p: "6px 12px",
               display: "flex",
               alignItems: "center",
-              borderRadius: 2.5,
+              borderRadius: tokens.radii.md,
               bgcolor: "background.paper",
-              boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
               border: "1px solid",
-              borderColor: "rgba(79, 70, 229, 0.18)",
+              borderColor: "divider",
+              boxShadow: tokens.shadows.light.card,
+              transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+              "&:focus-within": {
+                borderColor: "primary.main",
+                boxShadow: (theme) =>
+                  `0 0 0 3px ${
+                    theme.palette.mode === "dark"
+                      ? "rgba(99, 102, 241, 0.25)"
+                      : "rgba(99, 102, 241, 0.12)"
+                  }`,
+              },
             }}
           >
             <Search
               sx={{
-                color: "#4F46E5",
-                mx: 0.9,
-                fontSize: { xs: "1.2rem", md: "1.3rem" },
+                color: "primary.main",
+                mr: 1,
+                fontSize: { xs: "1.2rem", md: "1.35rem" },
               }}
             />
             <InputBase
@@ -44,16 +56,26 @@ const SearchBar = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               sx={{
                 flex: 1,
-                py: 0.35,
-                fontSize: { xs: "0.92rem", md: "0.96rem" },
+                py: 0.5,
+                fontSize: { xs: "0.92rem", md: "0.98rem" },
+                color: "text.primary",
               }}
             />
+            {searchQuery && (
+              <IconButton
+                size="small"
+                onClick={() => setSearchQuery("")}
+                sx={{ color: "text.secondary", p: 0.5 }}
+              >
+                <Clear sx={{ fontSize: 18 }} />
+              </IconButton>
+            )}
           </Paper>
           {helperText && (
             <Typography
               sx={{
-                mt: 0.9,
-                ml: 0.3,
+                mt: 1,
+                ml: 1,
                 fontSize: "0.78rem",
                 color: "text.secondary",
               }}

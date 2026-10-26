@@ -10,33 +10,30 @@ const CompleteButton = ({
 }) => {
   const isMobile = variant === "mobile";
   const isUpdating = updatingSubtopic === selectedSubtopic.name;
-  const isDisabled =
-    isUpdating ||
-    !selectedSubtopic.understandingLevel ||
-    selectedSubtopic.understandingLevel < 1;
+  const isCompleted = !!selectedSubtopic.completed;
 
-  if (selectedSubtopic.completed) {
+  if (isCompleted) {
     return (
       <Tooltip title="Lesson completed" placement="top">
-        <IconButton
-          sx={{
-            width: isMobile ? 34 : 36,
-            height: isMobile ? 34 : 36,
-            borderRadius: isMobile ? "10px" : "12px",
-            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-            color: "white",
-            border: "1px solid rgba(16, 185, 129, 0.3)",
-            boxShadow: "0 2px 8px rgba(16, 185, 129, 0.25)",
-            cursor: "default",
-            "&:hover": {
-              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-              transform: "none",
-            },
-          }}
-          disabled
-        >
-          <CheckCircle sx={{ fontSize: isMobile ? 16 : 20 }} />
-        </IconButton>
+        <span>
+          <IconButton
+            size="small"
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "8px",
+              bgcolor: "success.main",
+              color: "white",
+              cursor: "default",
+              "&:hover": {
+                bgcolor: "success.main",
+              },
+            }}
+            disabled
+          >
+            <CheckCircle sx={{ fontSize: 18 }} />
+          </IconButton>
+        </span>
       </Tooltip>
     );
   }
@@ -44,42 +41,32 @@ const CompleteButton = ({
   if (isMobile) {
     return (
       <Tooltip
-        title={
-          isUpdating
-            ? "Completing..."
-            : isDisabled
-            ? "Complete the content first"
-            : "Mark as complete"
-        }
+        title={isUpdating ? "Completing..." : "Complete subtopic"}
         placement="top"
       >
-        <IconButton
-          onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
-          disabled={isDisabled}
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "10px",
-            background: `linear-gradient(135deg, #10b981 0%, #059669 100%)`,
-            color: "white",
-            border: "1px solid rgba(16, 185, 129, 0.3)",
-            boxShadow: "0 2px 8px rgba(16, 185, 129, 0.25)",
-            "&:hover": !isDisabled
-              ? {
-                  background: `linear-gradient(135deg, #059669 0%, #047857 100%)`,
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 4px 12px rgba(16, 185, 129, 0.35)",
-                }
-              : {},
-            transition: "all 0.2s ease",
-          }}
-        >
-          {isUpdating ? (
-            <CircularProgress size={16} sx={{ color: "white" }} />
-          ) : (
-            <CheckCircle sx={{ fontSize: 20 }} />
-          )}
-        </IconButton>
+        <span>
+          <IconButton
+            onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
+            disabled={isUpdating}
+            size="small"
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "8px",
+              bgcolor: "success.main",
+              color: "white",
+              "&:hover": {
+                bgcolor: "success.dark",
+              },
+            }}
+          >
+            {isUpdating ? (
+              <CircularProgress size={16} sx={{ color: "white" }} />
+            ) : (
+              <CheckCircle sx={{ fontSize: 18 }} />
+            )}
+          </IconButton>
+        </span>
       </Tooltip>
     );
   }
@@ -88,27 +75,27 @@ const CompleteButton = ({
     <Button
       startIcon={
         isUpdating ? (
-          <CircularProgress size={18} />
+          <CircularProgress size={14} color="inherit" />
         ) : (
-          <CheckCircle sx={{ fontSize: 18 }} />
+          <CheckCircle sx={{ fontSize: 15 }} />
         )
       }
       onClick={() => onCompleteSubtopic?.(selectedSubtopic)}
-      disabled={isDisabled}
+      disabled={isUpdating}
       variant="contained"
+      color="primary"
       size="small"
       sx={{
-        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+        height: 32,
         fontWeight: 600,
-        borderRadius: 2,
-        px: 2.5,
-        boxShadow: "0 2px 12px rgba(16, 185, 129, 0.3)",
+        borderRadius: "6px",
+        px: 1.75,
+        fontSize: "0.82rem",
+        boxShadow: "none",
         "&:hover": {
-          background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-          transform: "translateY(-1px)",
-          boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
+          boxShadow: "none",
         },
-        transition: "all 0.2s ease",
+        transition: "all 0.15s ease",
       }}
     >
       {isUpdating ? "Completing..." : "Complete"}

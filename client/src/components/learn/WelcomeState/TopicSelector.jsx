@@ -1,19 +1,23 @@
 import React from "react";
-import { Box, Typography, Chip, Stack, useMediaQuery } from "@mui/material";
+import { Box, Typography, Chip, Stack } from "@mui/material";
 
 const TopicSelector = ({ topics, selectedTopic, onTopicSelect }) => {
-  const isMobile = useMediaQuery("(max-width: 600px)");
-
   if (!Array.isArray(topics) || topics.length === 0) return null;
 
   return (
     <Box sx={{ mb: 3 }}>
       <Typography
-        variant={isMobile ? "subtitle1" : "h6"}
-        fontWeight="700"
-        sx={{ mb: 2, color: "text.primary" }}
+        variant="subtitle2"
+        sx={{
+          fontWeight: 700,
+          color: "text.secondary",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          fontSize: "0.75rem",
+          mb: 1.25,
+        }}
       >
-        Choose a Topic
+        Select Course
       </Typography>
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
         {topics.map((topic, index) => {
@@ -25,20 +29,24 @@ const TopicSelector = ({ topics, selectedTopic, onTopicSelect }) => {
               key={index}
               label={topicName}
               onClick={() => onTopicSelect && onTopicSelect(topicName)}
-              variant={isSelected ? "filled" : "outlined"}
-              size={isMobile ? "small" : "medium"}
+              size="small"
               sx={{
-                mb: 1,
-                background: isSelected
-                  ? `linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)`
+                borderRadius: "6px",
+                fontWeight: 600,
+                fontSize: "0.82rem",
+                py: 1.75,
+                px: 0.5,
+                bgcolor: isSelected
+                  ? "primary.main"
                   : "background.paper",
-                color: isSelected ? "white" : "text.primary",
-                borderColor: isSelected ? "#7c3aed" : "divider",
-                fontWeight: "600",
+                color: isSelected ? "#FFFFFF" : "text.primary",
+                border: "1px solid",
+                borderColor: isSelected ? "primary.main" : "divider",
+                transition: "all 0.15s ease",
                 "&:hover": {
-                  background: isSelected
-                    ? "#7c3aed"
-                    : (theme) => theme.palette.action.hover,
+                  bgcolor: isSelected
+                    ? "primary.dark"
+                    : "action.hover",
                 },
               }}
             />

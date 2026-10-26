@@ -1,6 +1,6 @@
 import React from "react";
-import { Box, Typography, useMediaQuery, IconButton, Chip } from "@mui/material";
-import { Menu } from "@mui/icons-material";
+import { Box, Typography, IconButton, Chip } from "@mui/material";
+import { Menu, School } from "@mui/icons-material";
 
 const Header = ({
   hasTopics,
@@ -8,114 +8,130 @@ const Header = ({
   subtopicName,
   isReady,
   learningInsights,
-  colorPalette,
-  isMobile: isMobileProp,
+  isMobile = false,
   onOpenSidebar,
   isRecalledTopic = false,
 }) => {
-  const isMobileMedia = useMediaQuery("(max-width: 600px)");
-  const isMobile = isMobileProp !== undefined ? isMobileProp : isMobileMedia;
-  const isDesktop = useMediaQuery("(min-width: 1200px)");
-
   const getHeaderText = () => {
-    if (!hasTopics) return "Welcome to Guidra!";
-    if (isRecalledTopic) return "Recalling Completed Topic";
-    if (learningInsights.isTopicCompleted) return "Course Completed! 🎉";
+    if (!hasTopics) return "Welcome to Guidra";
+    if (isRecalledTopic) return "Topic Review";
+    if (learningInsights?.isTopicCompleted) return "Course Completed";
     if (isReady) return "Ready to Learn";
     return "Continue Learning";
   };
 
   const getSubtitleText = () => {
     if (!hasTopics)
-      return "Start your learning journey with personalized AI-powered courses";
+      return "Start your learning journey with structured, AI-powered courses.";
     if (isRecalledTopic)
-      return `Review ${selectedTopic} - select a subtopic to refresh your knowledge`;
-    if (learningInsights.isTopicCompleted)
-      return `You've mastered ${selectedTopic}`;
-    if (isReady) return `Start learning "${subtopicName}"`;
-    if (selectedTopic) return `Continue your progress in ${selectedTopic}`;
-    return "Select a topic to begin";
+      return `Reviewing ${selectedTopic} — select a subtopic to refresh your understanding.`;
+    if (learningInsights?.isTopicCompleted)
+      return `You have mastered all lessons in ${selectedTopic}.`;
+    if (isReady) return `Start learning "${subtopicName}".`;
+    if (selectedTopic) return `Continue your progress in ${selectedTopic}.`;
+    return "Select a topic or lesson to begin studying.";
   };
 
   return (
     <Box
       sx={{
-        background: `linear-gradient(135deg, ${colorPalette[500]} 0%, ${colorPalette[700]} 100%)`,
-        color: "white",
-        p: isMobile ? 3 : isDesktop ? 4 : 3,
+        bgcolor: "background.paper",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        py: { xs: 3, md: 3.5 },
+        px: { xs: 2.5, md: 4 },
         position: "relative",
-        overflow: "hidden",
       }}
     >
       {/* Mobile Menu Button */}
       {isMobile && onOpenSidebar && (
         <IconButton
           onClick={onOpenSidebar}
+          size="small"
           sx={{
             position: "absolute",
-            top: 12,
-            left: 12,
-            width: 44,
-            height: 44,
-            background: "rgba(255, 255, 255, 0.15)",
-            color: "white",
+            top: 16,
+            left: 16,
+            bgcolor: "action.hover",
+            color: "text.primary",
             zIndex: 2,
-            backdropFilter: "blur(10px)",
-            "&:hover": {
-              background: "rgba(255, 255, 255, 0.25)",
-            },
           }}
         >
-          <Menu sx={{ fontSize: 20 }} />
+          <Menu fontSize="small" />
         </IconButton>
       )}
 
       <Box
         sx={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          background:
-            "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)",
-        }}
-      />
-
-      <Box
-        sx={{
-          position: "relative",
-          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           textAlign: "center",
+          maxWidth: 640,
+          mx: "auto",
         }}
       >
+        {/* Subtle Icon Badge */}
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: "10px",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(101, 88, 217, 0.15)"
+                : "rgba(101, 88, 217, 0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 1.5,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <School sx={{ fontSize: 24, color: "primary.main" }} />
+        </Box>
+
         {isRecalledTopic && (
           <Chip
             label="Recall Mode"
             size="small"
             sx={{
-              mb: 1.5,
-              background: "rgba(255, 255, 255, 0.2)",
-              color: "white",
+              mb: 1.25,
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(101, 88, 217, 0.15)"
+                  : "rgba(101, 88, 217, 0.08)",
+              color: "primary.main",
               fontWeight: 600,
               fontSize: "0.75rem",
-              backdropFilter: "blur(10px)",
+              borderRadius: "4px",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           />
         )}
+
         <Typography
-          variant={isMobile ? "h5" : isDesktop ? "h4" : "h5"}
-          fontWeight="800"
-          sx={{ mb: 1 }}
+          variant="h5"
+          sx={{
+            fontWeight: 800,
+            color: "text.primary",
+            letterSpacing: "-0.02em",
+            fontSize: { xs: "1.35rem", md: "1.6rem" },
+            mb: 0.75,
+          }}
         >
           {getHeaderText()}
         </Typography>
 
         <Typography
-          variant={isMobile ? "body2" : "body1"}
+          variant="body2"
           sx={{
-            opacity: 0.9,
-            lineHeight: 1.5,
+            color: "text.secondary",
+            lineHeight: 1.6,
+            fontSize: "0.92rem",
+            maxWidth: 520,
           }}
         >
           {getSubtitleText()}
