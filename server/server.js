@@ -43,8 +43,25 @@ if (!allowedOrigin) {
   throw new Error("CLIENT_URL must be configured");
 }
 
-const isAllowedOrigin = (origin) =>
-  normalizeOrigin(origin) === allowedOrigin;
+const isAllowedOrigin = (origin) => {
+  const norm = normalizeOrigin(origin);
+  if (norm === allowedOrigin) return true;
+  try {
+    const allowedUrl = new URL(allowedOrigin);
+    const originUrl = new URL(norm);
+    if (originUrl.protocol === allowedUrl.protocol) {
+      if (
+        originUrl.hostname === `www.${allowedUrl.hostname}` ||
+        `www.${originUrl.hostname}` === allowedUrl.hostname
+      ) {
+        return true;
+      }
+    }
+  } catch {
+    return false;
+  }
+  return false;
+};
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
