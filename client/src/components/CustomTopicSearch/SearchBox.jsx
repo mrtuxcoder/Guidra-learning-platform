@@ -18,11 +18,11 @@ const SearchBox = ({
     }
   };
 
-  const borderGradient = error
-    ? `1px solid ${theme.palette.error.main}`
-    : isValidTopic
-    ? `1px solid ${theme.palette.success.main}`
-    : `1px solid ${alpha(theme.palette.primary.main, 0.3)}`;
+  const getBorderColor = () => {
+    if (error) return theme.palette.error.main;
+    if (isValidTopic) return theme.palette.success.main;
+    return theme.palette.divider;
+  };
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -30,69 +30,91 @@ const SearchBox = ({
         sx={{
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
-          gap: 1,
-          mb: 2,
+          gap: 1.25,
+          mb: 1.5,
         }}
       >
         <Box
           sx={{
             flex: 1,
-            borderRadius: "14px",
-            border: borderGradient,
+            borderRadius: "8px",
+            border: "1px solid",
+            borderColor: getBorderColor(),
             bgcolor: "background.paper",
+            display: "flex",
+            alignItems: "center",
+            px: 1.5,
+            height: 44,
+            transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+            "&:focus-within": {
+              borderColor: error ? theme.palette.error.main : "primary.main",
+              boxShadow: `0 0 0 3px ${alpha(
+                error ? theme.palette.error.main : theme.palette.primary.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.1
+              )}`,
+            },
           }}
         >
           <InputBase
-            placeholder="What do you want to learn? (e.g., Machine Learning Basics)"
+            placeholder="What do you want to learn? (e.g. Prompt Engineering, Rust Concurrency)"
             value={searchQuery}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleKeyDown}
             sx={{
               width: "100%",
-              p: 1.6,
-              borderRadius: "14px",
-              fontSize: "0.95rem",
+              fontSize: "0.92rem",
+              color: "text.primary",
             }}
           />
         </Box>
 
         <Button
           variant="contained"
+          color="primary"
           onClick={onSearch}
           disabled={loading || !searchQuery.trim()}
           sx={{
-            minWidth: { xs: "100%", sm: "120px" },
-            borderRadius: "12px",
+            minWidth: { xs: "100%", sm: "110px" },
+            height: 44,
+            borderRadius: "8px",
             fontWeight: 600,
+            fontSize: "0.88rem",
+            textTransform: "none",
             boxShadow: "none",
+            "&:hover": {
+              boxShadow: "none",
+            },
           }}
         >
           {loading ? (
-            <CircularProgress size={24} color="inherit" />
+            <CircularProgress size={18} color="inherit" />
           ) : (
             "Validate"
           )}
         </Button>
       </Box>
+
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          px: 0.5,
         }}
       >
         <Box
           sx={{
-            fontSize: "0.85rem",
+            fontSize: "0.8rem",
             color: "text.secondary",
           }}
         >
-          Keep it specific: 3-8 words works best.
+          Keep it specific: 2 to 8 words works best.
         </Box>
         <Box
           sx={{
             fontSize: "0.75rem",
-            color: alpha(theme.palette.text.primary, 0.5),
+            color: "text.secondary",
+            fontWeight: 500,
           }}
         >
           {searchQuery.trim().length}/60

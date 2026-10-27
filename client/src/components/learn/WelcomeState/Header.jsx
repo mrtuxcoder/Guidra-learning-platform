@@ -38,7 +38,7 @@ const Header = ({
         bgcolor: "background.paper",
         borderBottom: "1px solid",
         borderColor: "divider",
-        py: { xs: 3, md: 3.5 },
+        py: { xs: 2, md: 2.5 },
         px: { xs: 2.5, md: 4 },
         position: "relative",
       }}

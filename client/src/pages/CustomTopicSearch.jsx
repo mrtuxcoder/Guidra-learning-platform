@@ -3,8 +3,7 @@ import {
   Container,
   Box,
   useMediaQuery,
-  Card,
-  CardContent,
+  Paper,
   Stack,
   Typography,
   Chip,
@@ -131,88 +130,55 @@ export default function CustomTopicSearch() {
   };
 
   if (isMobile) {
-    return <Navigate to="/explore" replace />;
+    return <Navigate to="/explore?tab=custom" replace />;
   }
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         bgcolor: "background.default",
         display: "flex",
-        alignItems: { xs: "flex-start", md: "center" },
-        py: { xs: 1.5, md: 5 },
+        alignItems: "flex-start",
+        pt: { xs: 2, md: 2.5 },
+        pb: { xs: 10, md: 3 },
       }}
     >
-      <Container maxWidth="sm" sx={{ px: { xs: 1.5, sm: 2.5 } }}>
-        <Stack spacing={1.5}>
-          {!isMobile && <Header />}
+      <Container maxWidth="md" sx={{ maxWidth: { xs: "100%", sm: 760, md: 840 }, px: { xs: 2, sm: 3 } }}>
+        <Stack spacing={2.5}>
+          <Header />
 
-          {isMobile && (
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: `1px solid ${theme.palette.divider}`,
-                boxShadow: "none",
-              }}
-            >
-              <CardContent sx={{ p: 2 }}>
-                <Stack spacing={1}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <AutoAwesome sx={{ color: "primary.main", fontSize: 20 }} />
-                    <Typography variant="subtitle1" fontWeight={700}>
-                      Build your custom learning path
-                    </Typography>
-                  </Box>
-                  <Typography sx={{ color: "text.secondary", fontSize: "0.88rem" }}>
-                    Enter any topic, validate it, then generate a structured path in one tap.
-                  </Typography>
-                  <Box>
-                    <Chip
-                      label="10–15 structured lessons"
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      sx={{ fontWeight: 600 }}
-                    />
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              borderRadius: 3,
-              border: `1px solid ${theme.palette.divider}`,
-              boxShadow: "none",
-              overflow: "hidden",
+              p: { xs: 2.5, sm: 3 },
+              borderRadius: "8px",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
             }}
           >
-            <CardContent sx={{ p: { xs: 1.8, sm: 2.4 } }}>
-              {!isValidTopic ? (
-                <Box>
-                  <SearchBox
-                    searchQuery={searchQuery}
-                    onQueryChange={handleQueryChange}
-                    onSearch={handleSearch}
-                    loading={loading}
-                    error={error}
-                    isValidTopic={isValidTopic}
-                  />
-                  <ErrorDisplay error={error} />
-                </Box>
-              ) : (
-                <ValidatedTopic
+            {!isValidTopic ? (
+              <Box>
+                <SearchBox
                   searchQuery={searchQuery}
+                  onQueryChange={handleQueryChange}
+                  onSearch={handleSearch}
+                  loading={loading}
                   error={error}
-                  generating={generating}
-                  onResetSearch={resetSearch}
-                  onGenerateSubtopics={handleGenerateSubtopics}
+                  isValidTopic={isValidTopic}
                 />
-              )}
-            </CardContent>
-          </Card>
+                <ErrorDisplay error={error} />
+              </Box>
+            ) : (
+              <ValidatedTopic
+                searchQuery={searchQuery}
+                error={error}
+                generating={generating}
+                onResetSearch={resetSearch}
+                onGenerateSubtopics={handleGenerateSubtopics}
+              />
+            )}
+          </Paper>
 
           <Guidelines show={!isValidTopic} />
 

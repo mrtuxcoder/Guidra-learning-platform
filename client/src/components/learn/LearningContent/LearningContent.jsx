@@ -911,12 +911,37 @@ const LearningContent = ({
         id="learning-content-scroll-container"
         sx={{ 
           flex: 1,
-          overflow: 'auto',
+          overflowY: 'auto',
+          overflowX: 'hidden',
           px: { xs: 2, md: 3 },
           py: { xs: 2, md: 3 },
+          scrollbarWidth: 'thin',
+          scrollbarColor: (theme) =>
+            theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.2) transparent'
+              : 'rgba(0, 0, 0, 0.2) transparent',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(255, 255, 255, 0.2)'
+                : 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '4px',
+            '&:hover': {
+              background: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.35)'
+                  : 'rgba(0, 0, 0, 0.35)',
+            },
+          },
         }}
       >
-        <Box sx={{ maxWidth: 860, mx: "auto", width: "100%" }}>
+        <Box sx={{ width: "100%" }}>
           {limitMessage && (
             <Alert severity="warning" onClose={() => setLimitMessage("")} sx={{ mb: 2 }}>
               {limitMessage}

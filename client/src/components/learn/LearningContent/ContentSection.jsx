@@ -157,52 +157,71 @@ const ContentSection = ({
   // 1. Core Concept — Editorial Callout / Lead Box
   if (isConceptSection) {
     return (
-      <Box
-        sx={{
-          mb: 3.5,
-          p: { xs: 2.25, md: 2.75 },
-          borderRadius: "8px",
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(101, 88, 217, 0.06)"
-              : "rgba(101, 88, 217, 0.03)",
-          borderLeft: (theme) => `3px solid ${theme.palette.primary.main}`,
-          borderTop: "1px solid",
-          borderRight: "1px solid",
-          borderBottom: "1px solid",
-          borderColor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(101, 88, 217, 0.2)"
-              : "rgba(101, 88, 217, 0.12)",
-        }}
-      >
+      <Box sx={{ mb: 3.5 }}>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             cursor: "pointer",
-            mb: isExpanded ? 1.5 : 0,
+            pb: 1,
+            mb: isExpanded ? 2 : 0,
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
           onClick={onToggle}
         >
-          <Typography
-            variant="caption"
-            sx={{
-              fontWeight: 700,
-              fontSize: "0.78rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              color: "primary.main",
-            }}
-          >
-            Core Concept
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                fontSize: "1.025rem",
+                color: "text.primary",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Core Concept
+            </Typography>
+            <Chip
+              label="KEY IDEA"
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: "0.68rem",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                borderRadius: "4px",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(101, 88, 217, 0.2)"
+                    : "rgba(101, 88, 217, 0.08)",
+                color: "primary.main",
+              }}
+            />
+          </Box>
           {renderActions()}
         </Box>
 
         <Collapse in={isExpanded} timeout={250} unmountOnExit>
-          <Box>
+          <Box
+            sx={{
+              p: { xs: 2, md: 2.5 },
+              borderRadius: "8px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(101, 88, 217, 0.06)"
+                  : "rgba(101, 88, 217, 0.03)",
+              borderLeft: (theme) => `3px solid ${theme.palette.primary.main}`,
+              borderTop: "1px solid",
+              borderRight: "1px solid",
+              borderBottom: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(101, 88, 217, 0.2)"
+                  : "rgba(101, 88, 217, 0.12)",
+            }}
+          >
             {paragraphs.map((paragraph, index) => (
               <Typography
                 key={index}

@@ -265,13 +265,12 @@ export default function Settings() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         bgcolor: "background.default",
-        py: { xs: 2.5, md: 5 },
-        pb: { xs: 12, md: 8 },
+        py: { xs: 2, md: 3 },
+        pb: { xs: 10, md: 3 },
       }}
     >
-      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Container maxWidth="md" sx={{ maxWidth: { xs: "100%", md: 840, lg: 900 }, px: { xs: 2, sm: 3 } }}>
         <Stack spacing={3}>
           {/* Header */}
           <Box sx={{ mb: 1 }}>

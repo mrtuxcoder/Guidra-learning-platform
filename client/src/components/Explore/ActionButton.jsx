@@ -5,12 +5,10 @@ import {
   Typography,
   Fade,
   CircularProgress,
-  alpha,
   useTheme,
   Paper,
 } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
-import { tokens } from "../../theme/tokens";
 
 const ActionButton = ({
   selectedTopic,
@@ -24,11 +22,11 @@ const ActionButton = ({
   if (!selectedTopic) return null;
 
   return (
-    <Fade in={Boolean(selectedTopic)} timeout={300}>
+    <Fade in={Boolean(selectedTopic)} timeout={250}>
       <Box
         sx={{
           position: "fixed",
-          bottom: { xs: 76, md: 24 }, // Floats safely above mobile bottom nav
+          bottom: { xs: 76, md: 24 },
           left: 0,
           right: 0,
           zIndex: 1050,
@@ -39,7 +37,7 @@ const ActionButton = ({
         }}
       >
         <Paper
-          elevation={4}
+          elevation={0}
           sx={{
             pointerEvents: "auto",
             display: "flex",
@@ -48,16 +46,14 @@ const ActionButton = ({
             gap: 2,
             py: 1,
             px: 2,
-            borderRadius: tokens.radii.lg,
+            borderRadius: "8px",
             bgcolor: "background.paper",
             border: "1px solid",
-            borderColor: isDark
-              ? alpha(tokens.colors.primary.main, 0.4)
-              : alpha(tokens.colors.primary.main, 0.25),
+            borderColor: "divider",
             boxShadow: isDark
-              ? "0 12px 32px rgba(0,0,0,0.5)"
-              : "0 12px 32px rgba(99, 102, 241, 0.18)",
-            maxWidth: 540,
+              ? "0 8px 24px rgba(0,0,0,0.6)"
+              : "0 8px 24px rgba(0,0,0,0.08)",
+            maxWidth: 500,
             width: "100%",
           }}
         >
@@ -65,11 +61,11 @@ const ActionButton = ({
             <Typography
               variant="caption"
               sx={{
-                color: "primary.main",
-                fontWeight: 700,
+                color: "text.secondary",
+                fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
-                fontSize: "0.7rem",
+                fontSize: "0.68rem",
                 display: "block",
               }}
             >
@@ -81,7 +77,7 @@ const ActionButton = ({
               sx={{
                 fontWeight: 700,
                 color: "text.primary",
-                fontSize: "0.92rem",
+                fontSize: "0.9rem",
               }}
             >
               {getSelectedTopicName()}
@@ -90,28 +86,33 @@ const ActionButton = ({
 
           <Button
             variant="contained"
-            size="medium"
+            color="primary"
+            size="small"
             disabled={loading}
             onClick={handleStartLearning}
             endIcon={
               loading ? (
-                <CircularProgress size={16} color="inherit" />
+                <CircularProgress size={14} color="inherit" />
               ) : (
-                <ArrowForward sx={{ fontSize: 16 }} />
+                <ArrowForward sx={{ fontSize: 15 }} />
               )
             }
             sx={{
-              borderRadius: tokens.radii.md,
+              height: 34,
+              borderRadius: "6px",
+              px: 2,
+              fontWeight: 600,
+              fontSize: "0.82rem",
               textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.88rem",
-              px: 2.5,
-              py: 0.85,
+              boxShadow: "none",
               whiteSpace: "nowrap",
               flexShrink: 0,
+              "&:hover": {
+                boxShadow: "none",
+              },
             }}
           >
-            {loading ? "Preparing..." : "Start Learning"}
+            {loading ? "Starting..." : "Start Learning"}
           </Button>
         </Paper>
       </Box>

@@ -1,7 +1,6 @@
 import React from "react";
-import { Box, Chip, useTheme, alpha, Typography } from "@mui/material";
+import { Box, Chip, useTheme, alpha, Typography, Button } from "@mui/material";
 import { CATEGORIES } from "./constants.jsx";
-import { tokens } from "../../theme/tokens";
 
 const CategorySidebar = ({
   selectedCategory,
@@ -11,86 +10,129 @@ const CategorySidebar = ({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
+  if (isMobile) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          gap: 1,
+          alignItems: "center",
+          overflowX: "auto",
+          pb: 1.5,
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        {CATEGORIES.map((category) => {
+          const isSelected = selectedCategory === category.id;
+
+          return (
+            <Chip
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              icon={React.cloneElement(category.icon, { sx: { fontSize: 16 } })}
+              label={category.name}
+              clickable
+              size="small"
+              sx={{
+                height: 32,
+                borderRadius: "999px",
+                px: 0.75,
+                border: "1px solid",
+                borderColor: isSelected ? "primary.main" : "divider",
+                bgcolor: isSelected
+                  ? isDark
+                    ? alpha(theme.palette.primary.main, 0.16)
+                    : alpha(theme.palette.primary.main, 0.08)
+                  : "background.paper",
+                color: isSelected ? "primary.main" : "text.secondary",
+                fontWeight: isSelected ? 600 : 500,
+                fontSize: "0.8rem",
+                "& .MuiChip-icon": {
+                  color: isSelected ? "primary.main" : "text.secondary",
+                },
+              }}
+            />
+          );
+        })}
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
-        width: isMobile ? "100%" : { md: 220, lg: 240 },
+        width: { md: 210, lg: 220 },
         display: "flex",
-        flexDirection: isMobile ? "row" : "column",
-        gap: 1,
-        justifyContent: "flex-start",
-        alignItems: isMobile ? "center" : "stretch",
+        flexDirection: "column",
+        gap: 0.5,
         flexShrink: 0,
-        overflowX: isMobile ? "auto" : "visible",
-        overflowY: isMobile ? "visible" : "auto",
-        position: isMobile ? "static" : "sticky",
-        top: isMobile ? "auto" : 88,
-        pb: isMobile ? 1.5 : 0,
-        scrollbarWidth: "none",
-        "&::-webkit-scrollbar": { display: "none" },
+        position: "sticky",
+        top: 16,
       }}
     >
-      {!isMobile && (
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-            color: "text.secondary",
-            px: 1,
-            mb: 0.5,
-          }}
-        >
-          Categories
-        </Typography>
-      )}
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "text.secondary",
+          px: 1.25,
+          mb: 0.75,
+          fontSize: "0.72rem",
+        }}
+      >
+        Categories
+      </Typography>
 
       {CATEGORIES.map((category) => {
         const isSelected = selectedCategory === category.id;
 
         return (
-          <Chip
+          <Button
             key={category.id}
             onClick={() => setSelectedCategory(category.id)}
-            icon={category.icon}
-            label={category.name}
-            clickable
+            startIcon={React.cloneElement(category.icon, {
+              sx: {
+                fontSize: 16,
+                color: isSelected ? "primary.main" : "text.secondary",
+              },
+            })}
             sx={{
-              height: isMobile ? 36 : 42,
-              borderRadius: isMobile ? tokens.radii.full : tokens.radii.md,
-              px: isMobile ? 1 : 1.5,
-              width: isMobile ? "auto" : "100%",
-              justifyContent: isMobile ? "center" : "flex-start",
+              height: 36,
+              borderRadius: "6px",
+              px: 1.25,
+              justifyContent: "flex-start",
+              textTransform: "none",
+              fontWeight: isSelected ? 600 : 500,
+              fontSize: "0.84rem",
               border: "1px solid",
               borderColor: isSelected
-                ? "primary.main"
-                : "divider",
+                ? isDark
+                  ? alpha(theme.palette.primary.main, 0.3)
+                  : alpha(theme.palette.primary.main, 0.2)
+                : "transparent",
               bgcolor: isSelected
                 ? isDark
-                  ? alpha(tokens.colors.primary.main, 0.16)
-                  : alpha(tokens.colors.primary.main, 0.08)
-                : "background.paper",
+                  ? alpha(theme.palette.primary.main, 0.15)
+                  : alpha(theme.palette.primary.main, 0.08)
+                : "transparent",
               color: isSelected ? "primary.main" : "text.secondary",
-              fontWeight: isSelected ? 700 : 500,
-              fontSize: "0.85rem",
               transition: "all 0.15s ease",
-              "& .MuiChip-icon": {
-                color: isSelected ? "primary.main" : "text.secondary",
-                fontSize: "1.1rem",
-                mr: 1,
-              },
               "&:hover": {
+                color: "text.primary",
                 bgcolor: isSelected
                   ? isDark
-                    ? alpha(tokens.colors.primary.main, 0.22)
-                    : alpha(tokens.colors.primary.main, 0.12)
-                  : isDark
-                  ? alpha("#fff", 0.05)
-                  : alpha("#000", 0.04),
+                    ? alpha(theme.palette.primary.main, 0.2)
+                    : alpha(theme.palette.primary.main, 0.12)
+                  : "action.hover",
               },
             }}
-          />
+          >
+            {category.name}
+          </Button>
         );
       })}
     </Box>

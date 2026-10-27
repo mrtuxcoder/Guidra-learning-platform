@@ -8,34 +8,34 @@ const Header = ({ activeTab = "curated", onTabChange, totalCourses = 45 }) => {
   const isDark = theme.palette.mode === "dark";
 
   return (
-    <Box sx={{ textAlign: "center", mb: { xs: 3, md: 4 } }}>
-      <Fade in timeout={500}>
+    <Box sx={{ textAlign: "center", mb: { xs: 1.5, md: 2 } }}>
+      <Fade in timeout={400}>
         <Box>
-          {/* Badge Icon */}
+          {/* Subtle Icon Badge */}
           <Box
             sx={{
-              width: { xs: 52, md: 64 },
-              height: { xs: 52, md: 64 },
-              borderRadius: tokens.radii.lg,
+              width: 38,
+              height: 38,
+              borderRadius: "8px",
               bgcolor: isDark
-                ? alpha(tokens.colors.primary.main, 0.16)
-                : alpha(tokens.colors.primary.main, 0.1),
+                ? alpha(tokens.colors.primary.main, 0.15)
+                : alpha(tokens.colors.primary.main, 0.08),
               color: "primary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              margin: "0 auto",
-              mb: 2,
+              mx: "auto",
+              mb: 1,
               border: "1px solid",
               borderColor: isDark
-                ? alpha(tokens.colors.primary.main, 0.3)
-                : alpha(tokens.colors.primary.main, 0.2),
+                ? alpha(tokens.colors.primary.main, 0.25)
+                : alpha(tokens.colors.primary.main, 0.15),
             }}
           >
             {activeTab === "custom" ? (
-              <AutoAwesome sx={{ fontSize: { xs: 26, md: 32 } }} />
+              <AutoAwesome sx={{ fontSize: 18 }} />
             ) : (
-              <School sx={{ fontSize: { xs: 26, md: 32 } }} />
+              <School sx={{ fontSize: 18 }} />
             )}
           </Box>
 
@@ -43,11 +43,11 @@ const Header = ({ activeTab = "curated", onTabChange, totalCourses = 45 }) => {
           <Typography
             variant="h4"
             sx={{
-              fontWeight: 800,
+              fontWeight: 700,
               color: "text.primary",
-              letterSpacing: "-0.02em",
-              mb: 1,
-              fontSize: { xs: "1.5rem", sm: "1.85rem", md: "2.25rem" },
+              letterSpacing: "-0.015em",
+              mb: 0.5,
+              fontSize: { xs: "1.35rem", sm: "1.65rem", md: "1.85rem" },
             }}
           >
             {activeTab === "custom" ? "Create Learning Path" : "Explore Curated Paths"}
@@ -57,24 +57,25 @@ const Header = ({ activeTab = "curated", onTabChange, totalCourses = 45 }) => {
             variant="body1"
             sx={{
               color: "text.secondary",
-              maxWidth: 580,
+              maxWidth: 540,
               mx: "auto",
-              fontSize: { xs: "0.88rem", md: "1rem" },
-              mb: 3,
+              fontSize: { xs: "0.85rem", md: "0.9rem" },
+              lineHeight: 1.5,
+              mb: 2,
             }}
           >
             {activeTab === "custom"
               ? "Validate any topic and generate an AI-tailored step-by-step curriculum with interactive quizzes."
-              : `${totalCourses} structured courses across modern software, science, and professional skills.`}
+              : `${totalCourses} structured courses across modern software, computer science, and engineering.`}
           </Typography>
 
           {/* Segmented Tab Switcher */}
           <Box
             sx={{
               display: "inline-flex",
-              p: "4px",
-              borderRadius: tokens.radii.md,
-              bgcolor: isDark ? "background.paper" : tokens.neutral.light.surfaceSubtle,
+              p: "3px",
+              borderRadius: "8px",
+              bgcolor: isDark ? "background.paper" : "rgba(0, 0, 0, 0.04)",
               border: "1px solid",
               borderColor: "divider",
             }}
@@ -82,69 +83,74 @@ const Header = ({ activeTab = "curated", onTabChange, totalCourses = 45 }) => {
             <Tabs
               value={activeTab}
               onChange={(_, val) => onTabChange && onTabChange(val)}
-              textColor="primary"
-              indicatorColor="primary"
+              textColor="inherit"
               sx={{
-                minHeight: 40,
+                minHeight: 34,
                 "& .MuiTabs-indicator": { display: "none" },
               }}
             >
               <Tab
                 value="curated"
-                icon={<School sx={{ fontSize: 18 }} />}
+                icon={<School sx={{ fontSize: 16 }} />}
                 iconPosition="start"
                 label="Curated Paths"
                 sx={{
-                  minHeight: 38,
-                  py: 0.75,
-                  px: { xs: 1.5, sm: 2.5 },
-                  borderRadius: tokens.radii.sm,
+                  minHeight: 32,
+                  py: 0.5,
+                  px: { xs: 1.5, sm: 2.25 },
+                  borderRadius: "6px",
                   textTransform: "none",
-                  fontWeight: activeTab === "curated" ? 700 : 500,
-                  fontSize: "0.88rem",
-                  color: activeTab === "curated" ? "primary.main" : "text.secondary",
+                  fontWeight: activeTab === "curated" ? 600 : 500,
+                  fontSize: "0.82rem",
+                  color: activeTab === "curated" ? "text.primary" : "text.secondary",
                   bgcolor:
                     activeTab === "curated"
                       ? isDark
-                        ? alpha(tokens.colors.primary.main, 0.16)
-                        : "background.paper"
+                        ? "rgba(255, 255, 255, 0.08)"
+                        : "#FFFFFF"
                       : "transparent",
                   boxShadow:
                     activeTab === "curated"
                       ? isDark
                         ? "none"
-                        : "0 1px 3px rgba(0,0,0,0.06)"
+                        : "0 1px 2px rgba(0, 0, 0, 0.05)"
                       : "none",
                   transition: "all 0.15s ease",
+                  "&:hover": {
+                    color: "text.primary",
+                  },
                 }}
               />
               <Tab
                 value="custom"
-                icon={<AutoAwesome sx={{ fontSize: 18 }} />}
+                icon={<AutoAwesome sx={{ fontSize: 16 }} />}
                 iconPosition="start"
                 label="Create with AI"
                 sx={{
-                  minHeight: 38,
-                  py: 0.75,
-                  px: { xs: 1.5, sm: 2.5 },
-                  borderRadius: tokens.radii.sm,
+                  minHeight: 32,
+                  py: 0.5,
+                  px: { xs: 1.5, sm: 2.25 },
+                  borderRadius: "6px",
                   textTransform: "none",
-                  fontWeight: activeTab === "custom" ? 700 : 500,
-                  fontSize: "0.88rem",
-                  color: activeTab === "custom" ? "primary.main" : "text.secondary",
+                  fontWeight: activeTab === "custom" ? 600 : 500,
+                  fontSize: "0.82rem",
+                  color: activeTab === "custom" ? "text.primary" : "text.secondary",
                   bgcolor:
                     activeTab === "custom"
                       ? isDark
-                        ? alpha(tokens.colors.primary.main, 0.16)
-                        : "background.paper"
+                        ? "rgba(255, 255, 255, 0.08)"
+                        : "#FFFFFF"
                       : "transparent",
                   boxShadow:
                     activeTab === "custom"
                       ? isDark
                         ? "none"
-                        : "0 1px 3px rgba(0,0,0,0.06)"
+                        : "0 1px 2px rgba(0, 0, 0, 0.05)"
                       : "none",
                   transition: "all 0.15s ease",
+                  "&:hover": {
+                    color: "text.primary",
+                  },
                 }}
               />
             </Tabs>

@@ -1,48 +1,54 @@
 import React from "react";
 import { Box, Typography, Button, Fade } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
 import { ArrowForward } from "@mui/icons-material";
 
 const BasicLearningOption = ({ isValidTopic, generating, onClick }) => {
-  const theme = useTheme();
-
   if (!isValidTopic || generating) return null;
 
   return (
-    <Fade in={isValidTopic}>
+    <Fade in={isValidTopic} timeout={250}>
       <Box
         sx={{
-          mt: { xs: 2, md: 3 },
-          p: 2.5,
-          borderRadius: "14px",
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-          background: "background.paper",
+          mt: 2,
+          p: 2,
+          borderRadius: "8px",
+          border: "1px dashed",
+          borderColor: "divider",
+          bgcolor: "background.paper",
           textAlign: "center",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1.5,
         }}
       >
-        <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
-          Prefer a lighter start?
+        <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.82rem" }}>
+          Prefer a lighter start without full curriculum generation?
         </Typography>
 
         <Button
           variant="outlined"
-          size="large"
+          size="small"
           onClick={onClick}
           sx={{
-            px: 3.5,
-            py: 1.2,
-            fontWeight: 600,
-            borderColor: alpha(theme.palette.primary.main, 0.5),
-            color: theme.palette.primary.main,
-            borderRadius: "10px",
+            px: 2,
+            height: 32,
+            fontWeight: 500,
+            borderColor: "divider",
+            color: "text.secondary",
+            borderRadius: "6px",
+            fontSize: "0.78rem",
             textTransform: "none",
+            "&:hover": {
+              borderColor: "divider",
+              color: "text.primary",
+              bgcolor: "action.hover",
+            },
           }}
-          endIcon={<ArrowForward />}
+          endIcon={<ArrowForward sx={{ fontSize: 14 }} />}
         >
-          Start basic learning
+          Start Basic Learning
         </Button>
       </Box>
     </Fade>

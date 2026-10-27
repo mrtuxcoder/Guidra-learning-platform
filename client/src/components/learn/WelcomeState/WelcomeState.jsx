@@ -423,10 +423,14 @@ const WelcomeState = ({
     <Fade in={true} timeout={400}>
       <Box
         sx={{
-          minHeight: "100%",
+          height: "100%",
+          maxHeight: "100%",
           bgcolor: "background.default",
           display: "flex",
           flexDirection: "column",
+          overflowY: "auto",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
         }}
       >
         {/* Full-screen content */}
@@ -456,16 +460,11 @@ const WelcomeState = ({
             maxWidth={false}
             sx={{
               flex: 1,
-              py: { xs: 3, md: 4 },
+              py: { xs: 2, md: 2.5 },
               px: { xs: 2, md: 3 },
             }}
           >
-            <Box
-              sx={{
-                maxWidth: { md: "800px" },
-                margin: "0 auto",
-              }}
-            >
+            <Box sx={{ width: "100%" }}>
               {/* Topic Selector at the top */}
               <TopicSelector
                 topics={topics}

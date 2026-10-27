@@ -25,57 +25,67 @@ const ValidatedTopic = ({
       elevation={0}
       sx={{
         p: { xs: 2.5, sm: 3 },
-        borderRadius: "16px",
-        background: "background.paper",
-        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: "8px",
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
         textAlign: "left",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 2 }}>
         <Box
           sx={{
-            width: 44,
-            height: 44,
-            borderRadius: "14px",
-            background: theme.palette.success.main,
+            width: 32,
+            height: 32,
+            borderRadius: "6px",
+            bgcolor: isDark
+              ? alpha(theme.palette.success.main, 0.2)
+              : alpha(theme.palette.success.main, 0.1),
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "white",
+            color: "success.main",
           }}
         >
-          <CheckCircle />
+          <CheckCircle sx={{ fontSize: 18 }} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.25 }}>
-            Topic validated
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: "1rem", lineHeight: 1.2, mb: 0.25 }}>
+            Topic Validated
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Great choice. Ready to build your learning path.
+          <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.8rem" }}>
+            Ready to generate your personalized learning path
           </Typography>
         </Box>
       </Box>
 
       <Box
         sx={{
-          p: 2,
-          borderRadius: "12px",
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-          background: alpha(theme.palette.primary.main, isDark ? 0.15 : 0.08),
-          fontWeight: 700,
-          color: "text.primary",
-          mb: 2.5,
+          p: 1.75,
+          borderRadius: "6px",
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.02)",
+          mb: 2,
         }}
       >
-        {searchQuery}
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 700,
+            color: "text.primary",
+            fontSize: "1.05rem",
+          }}
+        >
+          {searchQuery}
+        </Typography>
+        <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mt: 0.25 }}>
+          Structured curriculum • 10–15 step-by-step lessons
+        </Typography>
       </Box>
 
-      <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
-        This topic fits a structured sequence of 10-15 lessons.
-      </Typography>
-
       {error && (
-        <Alert severity="warning" sx={{ mb: 3, borderRadius: "12px" }}>
+        <Alert severity="warning" sx={{ mb: 2.5, borderRadius: "6px" }}>
           {error}
         </Alert>
       )}
@@ -84,19 +94,29 @@ const ValidatedTopic = ({
         sx={{
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
-          gap: 2,
-          justifyContent: { xs: "stretch", md: "center" },
-          alignItems: { xs: "stretch", md: "center" },
+          gap: 1.5,
+          justifyContent: "flex-end",
+          alignItems: "center",
         }}
       >
         <Button
           variant="outlined"
           onClick={onResetSearch}
+          disabled={generating}
           sx={{
-            borderRadius: "12px",
-            borderColor: alpha(theme.palette.primary.main, 0.5),
-            color: theme.palette.primary.main,
-            fontWeight: 600,
+            height: 38,
+            borderRadius: "6px",
+            borderColor: "divider",
+            color: "text.secondary",
+            fontWeight: 500,
+            fontSize: "0.84rem",
+            textTransform: "none",
+            width: { xs: "100%", sm: "auto" },
+            "&:hover": {
+              borderColor: "divider",
+              color: "text.primary",
+              bgcolor: "action.hover",
+            },
           }}
         >
           Change Topic
@@ -104,26 +124,31 @@ const ValidatedTopic = ({
 
         <Button
           variant="contained"
+          color="primary"
           onClick={onGenerateSubtopics}
           disabled={generating}
           startIcon={
             generating ? (
-              <CircularProgress size={20} color="inherit" />
+              <CircularProgress size={16} color="inherit" />
             ) : (
-              <Psychology />
+              <Psychology sx={{ fontSize: 18 }} />
             )
           }
           sx={{
-            borderRadius: "12px",
+            height: 38,
+            borderRadius: "6px",
             fontWeight: 600,
+            fontSize: "0.84rem",
+            textTransform: "none",
             boxShadow: "none",
-            bgcolor: "success.main",
+            width: { xs: "100%", sm: "auto" },
+            px: 2.5,
             "&:hover": {
-              bgcolor: "success.dark",
+              boxShadow: "none",
             },
           }}
         >
-          {generating ? "Generating..." : "Generate Learning Path"}
+          {generating ? "Generating Path..." : "Generate Learning Path"}
         </Button>
       </Box>
     </Paper>

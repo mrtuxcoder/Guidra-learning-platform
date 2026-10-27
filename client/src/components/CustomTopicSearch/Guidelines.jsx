@@ -1,48 +1,47 @@
 import React from "react";
 import { Paper, Box, Typography, Fade } from "@mui/material";
 import { TipsAndUpdates } from "@mui/icons-material";
-import { alpha, useTheme } from "@mui/material/styles";
 
 const guidelines = [
   {
     title: "Finish Current Topics First",
-    desc: "Stay on one learning path at a time. It keeps your progress accurate and avoids confusion.",
+    desc: "Stay focused on one learning path at a time to keep your progress and retention optimal.",
   },
   {
-    title: "Use Clear, Beginner-Friendly Topics",
-    desc: "Enter simple topics like 'Basics of Git' or 'Intro to Psychology' for the best results.",
+    title: "Use Clear, Specific Titles",
+    desc: "Enter targeted topics like 'Python Control Flow' or 'PostgreSQL Indexing' for the best results.",
   },
   {
     title: "Rephrase If Validation Fails",
     desc: "Try clearer wording or add terms like 'fundamentals', 'introduction', or 'basics'.",
   },
   {
-    title: "Guided Lessons Only",
-    desc: "This tool creates structured lessons and learning paths, not general chat-style answers.",
+    title: "Structured Lessons Only",
+    desc: "Guidra creates structured curriculum lessons and quizzes, not general chat answers.",
   },
 ];
 
 const Guidelines = ({ show }) => {
-  const theme = useTheme();
-
   if (!show) return null;
 
   return (
-    <Fade in={show}>
+    <Fade in={show} timeout={300}>
       <Paper
         elevation={0}
         sx={{
-          p: { xs: 2.5, sm: 3 },
-          mt: { xs: 0, md: 3 },
-          borderRadius: "16px",
-          background: "background.paper",
-          border: `1px solid ${theme.palette.divider}`,
+          p: { xs: 2.25, sm: 2.75 },
+          mt: 3,
+          borderRadius: "8px",
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
         }}
       >
         <Typography
-          variant="h6"
+          variant="subtitle2"
           sx={{
             fontWeight: 700,
+            fontSize: "0.92rem",
             color: "text.primary",
             mb: 2,
             display: "flex",
@@ -50,11 +49,17 @@ const Guidelines = ({ show }) => {
             gap: 1,
           }}
         >
-          <TipsAndUpdates sx={{ fontSize: 20 }} />
-          Helpful Guidelines
+          <TipsAndUpdates sx={{ fontSize: 18, color: "text.secondary" }} />
+          Guidelines for Custom Topics
         </Typography>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+            gap: 2,
+          }}
+        >
           {guidelines.map((guideline, index) => (
             <GuidelineItem key={index} index={index} guideline={guideline} />
           ))}
@@ -65,45 +70,57 @@ const Guidelines = ({ show }) => {
 };
 
 const GuidelineItem = ({ index, guideline }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-
   return (
     <Box
       sx={{
         display: "flex",
-        gap: 2,
-        p: 1.4,
-        borderRadius: "12px",
-        border: `1px solid ${theme.palette.divider}`,
-        background: "background.paper",
+        alignItems: "flex-start",
+        gap: 1.5,
       }}
     >
       <Box
         sx={{
-          width: 28,
-          height: 28,
-          borderRadius: "10px",
-          background: alpha(theme.palette.primary.main, isDark ? 0.3 : 0.12),
+          width: 22,
+          height: 22,
+          borderRadius: "50%",
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.08)"
+              : "rgba(0, 0, 0, 0.05)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          mt: 0.25,
+          mt: 0.2,
           flexShrink: 0,
-          color: theme.palette.primary.main,
+          color: "text.primary",
           fontWeight: 700,
+          fontSize: "0.72rem",
         }}
       >
-        <Typography variant="caption" sx={{ fontWeight: 700 }}>
-          {index + 1}
-        </Typography>
+        {index + 1}
       </Box>
 
-      <Box>
-        <Typography variant="body2" fontWeight={700}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 600,
+            fontSize: "0.85rem",
+            color: "text.primary",
+            lineHeight: 1.3,
+            mb: 0.35,
+          }}
+        >
           {guideline.title}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            fontSize: "0.8rem",
+            color: "text.secondary",
+            lineHeight: 1.45,
+          }}
+        >
           {guideline.desc}
         </Typography>
       </Box>

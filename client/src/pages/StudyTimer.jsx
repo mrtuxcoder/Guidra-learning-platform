@@ -221,37 +221,32 @@ export default function StudyTimer() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         bgcolor: "background.default",
-        py: { xs: 2.5, md: 5 },
-        pb: { xs: 12, md: 8 },
+        py: { xs: 2.5, md: 3.5 },
+        pb: { xs: 10, md: 4 },
       }}
     >
-      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
-        <Stack spacing={3}>
+      <Container maxWidth="md" sx={{ maxWidth: { xs: "100%", sm: 580, md: 640 }, px: { xs: 2, sm: 3 } }}>
+        <Stack spacing={2.5}>
           {/* Header */}
-          <Box sx={{ textAlign: "center", mb: 1 }}>
+          <Box sx={{ textAlign: "center" }}>
             <Box
               sx={{
-                width: 52,
-                height: 52,
-                borderRadius: tokens.radii.lg,
+                width: 40,
+                height: 40,
+                borderRadius: "8px",
                 bgcolor: isDark
                   ? alpha(tokens.colors.primary.main, 0.16)
-                  : alpha(tokens.colors.primary.main, 0.1),
+                  : alpha(tokens.colors.primary.main, 0.08),
                 color: "primary.main",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 mx: "auto",
                 mb: 1.5,
-                border: "1px solid",
-                borderColor: isDark
-                  ? alpha(tokens.colors.primary.main, 0.3)
-                  : alpha(tokens.colors.primary.main, 0.2),
               }}
             >
-              <TimerIcon sx={{ fontSize: 28 }} />
+              <TimerIcon sx={{ fontSize: 22 }} />
             </Box>
             <Typography
               variant="h4"
@@ -267,29 +262,26 @@ export default function StudyTimer() {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: 0.5, fontSize: "0.9rem" }}
+              sx={{ mt: 0.5, fontSize: "0.88rem" }}
             >
               Calm, distraction-free focus intervals designed for deep learning.
             </Typography>
           </Box>
 
-          {/* Main Timer Display Card */}
+          {/* Unified Digital Timer Card */}
           <Card
             elevation={0}
             sx={{
-              borderRadius: tokens.radii.lg,
+              borderRadius: "8px",
               border: "1px solid",
               borderColor: "divider",
               bgcolor: "background.paper",
-              boxShadow: isDark
-                ? tokens.shadows.dark.card
-                : tokens.shadows.light.card,
               overflow: "hidden",
             }}
           >
             <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
               <Stack alignItems="center" spacing={3}>
-                {/* Status Indicator Chip */}
+                {/* Status Indicator Row */}
                 <Box
                   sx={{
                     display: "flex",
@@ -302,8 +294,10 @@ export default function StudyTimer() {
                     label={`${computedMinutes} Min Session`}
                     size="small"
                     sx={{
-                      fontWeight: 700,
-                      borderRadius: tokens.radii.full,
+                      fontWeight: 600,
+                      borderRadius: "6px",
+                      height: 24,
+                      fontSize: "0.76rem",
                       bgcolor: isDark
                         ? alpha(tokens.colors.primary.main, 0.16)
                         : alpha(tokens.colors.primary.main, 0.08),
@@ -318,75 +312,70 @@ export default function StudyTimer() {
                     size="small"
                     color={isActive ? "success" : hasStarted ? "warning" : "default"}
                     sx={{
-                      fontWeight: 700,
-                      borderRadius: tokens.radii.full,
+                      fontWeight: 600,
+                      borderRadius: "6px",
+                      height: 24,
+                      fontSize: "0.76rem",
                     }}
                   />
                 </Box>
 
-                {/* Circular Progress Ring */}
-                <Box
-                  sx={{
-                    width: { xs: 240, sm: 260 },
-                    height: { xs: 240, sm: 260 },
-                    borderRadius: "50%",
-                    p: "10px",
-                    background: `conic-gradient(${tokens.colors.primary.main} ${ringProgress}%, ${
-                      isDark
-                        ? alpha(tokens.colors.neutral[700], 0.6)
-                        : alpha(tokens.colors.primary.main, 0.1)
-                    } ${ringProgress}% 100%)`,
-                    boxShadow: isDark
-                      ? `0 0 24px ${alpha(tokens.colors.primary.main, 0.2)}`
-                      : `0 0 24px ${alpha(tokens.colors.primary.main, 0.08)}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "all 0.4s ease",
-                  }}
-                >
-                  <Box
+                {/* Minimal Digital Countdown Display */}
+                <Box sx={{ textAlign: "center", py: 1, width: "100%" }}>
+                  <Typography
                     sx={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      bgcolor: "background.paper",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      textAlign: "center",
+                      fontSize: { xs: "3.75rem", sm: "4.75rem" },
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      letterSpacing: "-0.03em",
+                      color: "text.primary",
+                      fontVariantNumeric: "tabular-nums",
+                      userSelect: "none",
                     }}
                   >
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "3.2rem", sm: "3.6rem" },
-                        fontWeight: 800,
-                        lineHeight: 1,
-                        letterSpacing: "-0.02em",
-                        color: "text.primary",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {formatTime(remainingSeconds)}
-                    </Typography>
+                    {formatTime(remainingSeconds)}
+                  </Typography>
 
-                    <Typography
-                      variant="caption"
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: "block",
+                      mt: 1.25,
+                      color: "text.secondary",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      fontSize: "0.72rem",
+                    }}
+                  >
+                    {isActive ? "Interval in progress" : hasStarted ? "Session paused" : "Ready to begin"}
+                  </Typography>
+
+                  {/* Thin Progress Bar */}
+                  <Box sx={{ mt: 2.5, px: 1 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={ringProgress}
                       sx={{
-                        mt: 1,
-                        color: "text.secondary",
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
+                        height: 4,
+                        borderRadius: 2,
+                        bgcolor: isDark
+                          ? alpha(tokens.colors.neutral[700], 0.5)
+                          : alpha(tokens.colors.primary.main, 0.08),
+                        "& .MuiLinearProgress-bar": {
+                          borderRadius: 2,
+                          bgcolor: isActive
+                            ? "primary.main"
+                            : hasStarted
+                            ? "warning.main"
+                            : "primary.main",
+                        },
                       }}
-                    >
-                      {isActive ? "Remaining" : hasStarted ? "Paused" : "Tap Start"}
-                    </Typography>
+                    />
                   </Box>
                 </Box>
 
-                {/* Preset Duration Buttons */}
+                {/* Compact Duration Presets */}
                 <Box
                   sx={{
                     display: "flex",
@@ -406,41 +395,46 @@ export default function StudyTimer() {
                         clickable={!isActive}
                         onClick={() => handleModeChange(preset.value)}
                         sx={{
-                          height: 36,
-                          borderRadius: tokens.radii.full,
-                          fontWeight: isSelected ? 700 : 500,
-                          fontSize: "0.82rem",
+                          height: 32,
+                          borderRadius: "6px",
+                          fontWeight: isSelected ? 600 : 500,
+                          fontSize: "0.8rem",
                           border: "1px solid",
                           borderColor: isSelected ? "primary.main" : "divider",
                           bgcolor: isSelected
                             ? isDark
                               ? alpha(tokens.colors.primary.main, 0.2)
-                              : alpha(tokens.colors.primary.main, 0.1)
-                            : "background.default",
+                              : alpha(tokens.colors.primary.main, 0.08)
+                            : "background.paper",
                           color: isSelected ? "primary.main" : "text.secondary",
+                          transition: "all 0.15s ease",
+                          "&:hover": {
+                            borderColor: isSelected ? "primary.main" : "text.secondary",
+                          },
                         }}
                       />
                     );
                   })}
                 </Box>
 
-                {/* Primary Action Buttons */}
-                <Stack direction="row" spacing={1.5} sx={{ width: "100%", pt: 1 }}>
+                {/* Primary Action Controls */}
+                <Stack direction="row" spacing={1.5} sx={{ width: "100%", pt: 0.5 }}>
                   <Button
                     fullWidth
                     variant="contained"
-                    size="large"
                     onClick={handleStartPause}
                     startIcon={isActive ? <Pause /> : <PlayArrow />}
                     sx={{
-                      py: 1.35,
-                      borderRadius: tokens.radii.md,
-                      fontWeight: 700,
-                      fontSize: "0.95rem",
+                      height: 44,
+                      borderRadius: "8px",
+                      fontWeight: 600,
+                      fontSize: "0.92rem",
                       textTransform: "none",
+                      boxShadow: "none",
                       bgcolor: isActive ? "warning.main" : "primary.main",
                       "&:hover": {
                         bgcolor: isActive ? "warning.dark" : "primary.dark",
+                        boxShadow: "none",
                       },
                     }}
                   >
@@ -449,120 +443,129 @@ export default function StudyTimer() {
 
                   <Button
                     variant="outlined"
-                    size="large"
                     onClick={handleReset}
                     disabled={!hasStarted && remainingSeconds === computedMinutes * 60}
                     sx={{
-                      px: 2.5,
-                      borderRadius: tokens.radii.md,
-                      fontWeight: 600,
-                      textTransform: "none",
+                      width: 44,
+                      minWidth: 44,
+                      height: 44,
+                      borderRadius: "8px",
                       borderColor: "divider",
                       color: "text.primary",
+                      p: 0,
                       "&:hover": {
                         borderColor: "primary.main",
                         bgcolor: alpha(tokens.colors.primary.main, 0.06),
                       },
                     }}
                   >
-                    <RestartAlt />
+                    <RestartAlt sx={{ fontSize: 20 }} />
                   </Button>
                 </Stack>
               </Stack>
             </CardContent>
-          </Card>
 
-          {/* Daily Goal Streak Tracker */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2.5,
-              borderRadius: tokens.radii.md,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
+            {/* Integrated Understated Statistics & Settings Subpanel */}
             <Box
               sx={{
+                px: { xs: 3, sm: 4 },
+                py: 2,
+                borderTop: "1px solid",
+                borderColor: "divider",
+                bgcolor: isDark
+                  ? alpha(tokens.colors.neutral[800], 0.3)
+                  : alpha(tokens.colors.neutral[100], 0.6),
                 display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "flex-start", sm: "center" },
                 justifyContent: "space-between",
-                alignItems: "center",
-                mb: 1.5,
+                gap: 2,
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <LocalFireDepartment sx={{ color: "warning.main", fontSize: 22 }} />
-                <Typography variant="subtitle2" fontWeight={700}>
-                  Daily Focus Goal
-                </Typography>
-              </Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
-                {dailySessions} / {DAILY_SESSION_GOAL} Blocks
-              </Typography>
-            </Box>
-
-            <LinearProgress
-              variant="determinate"
-              value={Math.min(100, (dailySessions / DAILY_SESSION_GOAL) * 100)}
-              sx={{
-                height: 8,
-                borderRadius: tokens.radii.full,
-                bgcolor: isDark
-                  ? alpha(tokens.colors.neutral[700], 0.5)
-                  : alpha(tokens.colors.primary.main, 0.1),
-                "& .MuiLinearProgress-bar": {
-                  borderRadius: tokens.radii.full,
-                  bgcolor: "warning.main",
-                },
-              }}
-            />
-          </Paper>
-
-          {/* Settings & Notifications Toggle */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              borderRadius: tokens.radii.md,
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={notificationsEnabled}
-                  onChange={handleNotificationsToggle}
-                  color="primary"
-                />
-              }
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <NotificationsActive sx={{ fontSize: 18, color: "primary.main" }} />
-                  <Typography variant="body2" fontWeight={600}>
-                    Sound & Browser Alerts on Completion
-                  </Typography>
+              {/* Daily Streak Indicator */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: alpha(theme.palette.warning.main, 0.12),
+                    color: "warning.main",
+                  }}
+                >
+                  <LocalFireDepartment sx={{ fontSize: 18 }} />
                 </Box>
-              }
-              sx={{ ml: 0, width: "100%", justifyContent: "space-between" }}
-            />
+                <Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: "text.primary", fontSize: "0.78rem" }}>
+                      Daily Goal
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.74rem" }}>
+                      {dailySessions} / {DAILY_SESSION_GOAL} blocks
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={Math.min(100, (dailySessions / DAILY_SESSION_GOAL) * 100)}
+                    sx={{
+                      width: 120,
+                      height: 4,
+                      mt: 0.5,
+                      borderRadius: 2,
+                      bgcolor: isDark
+                        ? alpha(tokens.colors.neutral[700], 0.5)
+                        : alpha(tokens.colors.primary.main, 0.1),
+                      "& .MuiLinearProgress-bar": {
+                        borderRadius: 2,
+                        bgcolor: "warning.main",
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
 
-            {notificationMessage && (
-              <Alert severity="info" sx={{ mt: 1.5, borderRadius: tokens.radii.sm }}>
-                {notificationMessage}
-              </Alert>
-            )}
-          </Paper>
+              {/* Sound & Notifications Toggle */}
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={notificationsEnabled}
+                      onChange={handleNotificationsToggle}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                      <NotificationsActive sx={{ fontSize: 16, color: "text.secondary" }} />
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: "0.76rem" }}>
+                        Completion alerts
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ m: 0 }}
+                />
+              </Box>
+            </Box>
+          </Card>
+
+          {/* Notification Info Alert */}
+          {notificationMessage && (
+            <Alert severity="info" sx={{ borderRadius: "6px", fontSize: "0.82rem", py: 0.5 }}>
+              {notificationMessage}
+            </Alert>
+          )}
 
           {/* Completion Celebration Alert */}
           {hasCompleted && (
             <Alert
-              icon={<CheckCircle />}
+              icon={<CheckCircle sx={{ fontSize: 20 }} />}
               severity="success"
               onClose={() => setHasCompleted(false)}
-              sx={{ borderRadius: tokens.radii.md }}
+              sx={{ borderRadius: "6px", fontSize: "0.84rem" }}
             >
               Session completed! Great work — start your next focus block when ready.
             </Alert>

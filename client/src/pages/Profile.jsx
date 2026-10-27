@@ -102,13 +102,20 @@ export default function Profile() {
       subtitle: "Personal info and account security",
       icon: <AccountCircle fontSize="small" />,
       content: (
-        <Stack spacing={2.5}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "7fr 5fr" },
+            gap: 2.5,
+            alignItems: "start",
+          }}
+        >
           <PersonalInfo user={user} />
           <AuthenticationCard
             user={user}
             onPasswordSetup={() => navigate("/settings")}
           />
-        </Stack>
+        </Box>
       ),
     },
     {
@@ -117,14 +124,23 @@ export default function Profile() {
       subtitle: "Learning stats and momentum",
       icon: <QueryStats fontSize="small" />,
       content: (
-        <Stack spacing={2.5}>
-          <ProgressStats stats={stats} />
-          <QuickStatsCard stats={stats} />
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "5fr 7fr" },
+            gap: 2.5,
+            alignItems: "start",
+          }}
+        >
+          <Stack spacing={2.5}>
+            <ProgressStats stats={stats} />
+            <QuickStatsCard stats={stats} />
+          </Stack>
           <LearningJourneyCard
             stats={stats}
             onLaunchLesson={() => navigate("/learn")}
           />
-        </Stack>
+        </Box>
       ),
     },
     {
@@ -133,10 +149,17 @@ export default function Profile() {
       subtitle: "Analysis and subtopic understanding",
       icon: <Insights fontSize="small" />,
       content: (
-        <Stack spacing={2.5}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
+            gap: 2.5,
+            alignItems: "start",
+          }}
+        >
           <AnalysisCard />
           <CompletedSubtopicsInsights progress={user?.progress || []} />
-        </Stack>
+        </Box>
       ),
     },
     {
@@ -178,73 +201,99 @@ export default function Profile() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         bgcolor: "background.default",
       }}
     >
-      {/* Enhanced Header */}
+      {/* Editorial Profile Header */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: "white",
-          position: "relative",
-          overflow: "hidden",
+          bgcolor: "background.paper",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          py: { xs: 2.5, md: 3 },
         }}
       >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: isMobile ? 3 : 3 }}>
-          {isMobile ? (
-            <Stack spacing={1.3}>
-              <Stack direction="row" alignItems="center" spacing={1.2}>
-                <Avatar sx={{ width: 56, height: 56, bgcolor: alpha("#fff", 0.25) }}>
-                  {(user?.name?.[0] || "U").toUpperCase()}
-                </Avatar>
-                <Box
+        <Container maxWidth="xl" sx={{ maxWidth: { xs: "100%", lg: 1360, xl: 1480 }, px: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar
+                sx={{
+                  width: { xs: 52, md: 64 },
+                  height: { xs: 52, md: 64 },
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
+                  color: "primary.main",
+                  fontWeight: 800,
+                  fontSize: { xs: "1.2rem", md: "1.5rem" },
+                  border: "2px solid",
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.25),
+                }}
+              >
+                {(user?.name?.[0] || "U").toUpperCase()}
+              </Avatar>
+              <Box>
+                <Typography
+                  variant="h5"
                   sx={{
-                    minWidth: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
+                    fontWeight: 800,
+                    color: "text.primary",
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                    fontSize: { xs: "1.25rem", md: "1.5rem" },
                   }}
                 >
-                  <Typography sx={{ fontSize: "1.2rem", fontWeight: 700, lineHeight: 1.2 }} noWrap>
-                    {user?.name || "User"}
-                  </Typography>
-                  <Typography
-                    sx={{ fontSize: "0.92rem", opacity: 0.9, mt: 0.2 }}
-                    noWrap
-                  >
-                    {user?.email || "No email"}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Stack>
-          ) : (
-            <ProfileHeader user={user} />
-          )}
-        </Container>
+                  {user?.name || "User"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: "0.88rem" }}>
+                  {user?.email || "No email"}
+                </Typography>
+              </Box>
+            </Box>
 
-        {/* Wave decoration */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: -1,
-            left: 0,
-            right: 0,
-            height: 20,
-            bgcolor: "background.default",
-            borderTopLeftRadius: 40,
-            borderTopRightRadius: 40,
-          }}
-        />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Chip
+                icon={<LocalFireDepartment sx={{ fontSize: 16, color: "warning.main !important" }} />}
+                label="4-Day Streak"
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  borderRadius: "6px",
+                  height: 28,
+                  bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
+                  color: "warning.dark",
+                  border: "1px solid",
+                  borderColor: (theme) => alpha(theme.palette.warning.main, 0.2),
+                }}
+              />
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Settings sx={{ fontSize: 16 }} />}
+                onClick={() => navigate("/settings")}
+                sx={{
+                  borderRadius: "6px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "0.82rem",
+                  borderColor: "divider",
+                  color: "text.primary",
+                  height: 32,
+                  "&:hover": { borderColor: "primary.main" },
+                }}
+              >
+                Settings
+              </Button>
+            </Box>
+          </Box>
+        </Container>
       </Box>
 
-      {/* Enhanced Main Content */}
+      {/* Main Content */}
       <Container
         maxWidth="xl"
         sx={{
+          maxWidth: { xs: "100%", lg: 1360, xl: 1480 },
           px: { xs: 2, sm: 3 },
-          py: { xs: 2, md: 4 },
-          mt: -1,
+          py: { xs: 1.5, md: 2.5 },
         }}
       >
         {isMobile ? (
@@ -414,7 +463,7 @@ export default function Profile() {
               </Stack>
             </Box>
 
-            <Box sx={{ maxWidth: 1240, mx: "auto" }}>
+            <Box sx={{ maxWidth: { xs: "100%", lg: 1360, xl: 1480 }, mx: "auto" }}>
               <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
                 {currentSection.label}
               </Typography>

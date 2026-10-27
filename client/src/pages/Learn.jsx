@@ -973,7 +973,7 @@ export default function Learning() {
     <Box
       sx={{
         display: "flex",
-        height: "100vh",
+        height: "100%",
         bgcolor: "background.default",
         flexDirection: { xs: "column", md: "row" },
         overflow: "hidden",
@@ -1184,7 +1184,10 @@ export default function Learning() {
           sx={{
             flex: 1,
             minHeight: 0,
-            overflow: "auto",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           {contentLoading ? (

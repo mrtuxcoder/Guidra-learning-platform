@@ -12,23 +12,25 @@ const ErrorDisplay = ({ error }) => {
     if (!error) return null;
 
     if (error.includes("not suitable") || error.includes("try")) {
-      return "Try using more specific terms or different wording";
+      return "Try using more specific terms or a well-known technical concept.";
     }
 
-    return "Try rephrasing your topic or using more specific keywords";
+    return "Try rephrasing your topic with keywords like 'Introduction to...' or 'Fundamentals'.";
   };
 
   return (
-    <Box>
+    <Box sx={{ mt: 1.5 }}>
       <Alert
         severity="error"
         sx={{
-          borderRadius: "14px",
-          mb: 1.5,
-          border: `1px solid ${alpha(theme.palette.error.main, 0.4)}`,
-          background: isDark
+          borderRadius: "6px",
+          mb: 1,
+          fontSize: "0.85rem",
+          border: "1px solid",
+          borderColor: alpha(theme.palette.error.main, isDark ? 0.3 : 0.2),
+          bgcolor: isDark
             ? alpha(theme.palette.error.main, 0.12)
-            : alpha(theme.palette.error.main, 0.08),
+            : alpha(theme.palette.error.main, 0.06),
         }}
       >
         {error}
@@ -38,12 +40,15 @@ const ErrorDisplay = ({ error }) => {
         variant="body2"
         sx={{
           textAlign: "left",
-          color: theme.palette.primary.main,
-          fontStyle: "italic",
-          fontWeight: 500,
+          color: "text.secondary",
+          fontSize: "0.8rem",
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
         }}
       >
-        💡 {getRetrySuggestion()}
+        <Box component="span" sx={{ color: "warning.main", fontWeight: 700 }}>Tip:</Box>
+        {getRetrySuggestion()}
       </Typography>
     </Box>
   );

@@ -12,8 +12,7 @@ import {
   alpha,
 } from "@mui/material";
 import { CATEGORY_DATA } from "./constants.jsx";
-import { AutoStories, ArrowForward, CheckCircle } from "@mui/icons-material";
-import { tokens } from "../../theme/tokens";
+import { AutoStories, ArrowForward } from "@mui/icons-material";
 
 const CourseCard = ({
   topic,
@@ -29,105 +28,99 @@ const CourseCard = ({
     CATEGORY_DATA[topic.category] || CATEGORY_DATA.programming;
 
   return (
-    <Fade in timeout={300 + index * 40}>
+    <Fade in timeout={250 + Math.min(index * 25, 400)}>
       <Card
         elevation={0}
         onClick={() => onSelect && onSelect(topic.id)}
         sx={{
-          borderRadius: tokens.radii.md,
+          borderRadius: "8px",
           border: "1px solid",
           borderColor: isSelected
             ? "primary.main"
             : "divider",
           backgroundColor: isSelected
             ? isDark
-              ? alpha(tokens.colors.primary.main, 0.08)
-              : alpha(tokens.colors.primary.main, 0.04)
+              ? alpha(theme.palette.primary.main, 0.08)
+              : alpha(theme.palette.primary.main, 0.04)
             : "background.paper",
-          boxShadow: isSelected
-            ? `0 0 0 2px ${alpha(tokens.colors.primary.main, 0.35)}`
-            : isDark
-            ? tokens.shadows.dark.card
-            : tokens.shadows.light.card,
-          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "border-color 0.15s ease, background-color 0.15s ease",
           cursor: "pointer",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           height: "100%",
           position: "relative",
-          overflow: "hidden",
           "&:hover": {
             borderColor: isSelected
               ? "primary.main"
               : isDark
-              ? "rgba(255, 255, 255, 0.16)"
-              : "rgba(15, 23, 42, 0.18)",
-            transform: "translateY(-2px)",
-            boxShadow: isDark
-              ? tokens.shadows.dark.hover
-              : tokens.shadows.light.hover,
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
           },
         }}
       >
         <CardContent
           sx={{
-            p: 2.25,
+            p: 2,
             display: "flex",
             flexDirection: "column",
             flexGrow: 1,
-            "&:last-child": { pb: 2.25 },
+            "&:last-child": { pb: 2 },
           }}
         >
-          {/* Category Chip & Icon */}
+          {/* Category Chip & Match Rate */}
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              mb: 1.5,
+              mb: 1.25,
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
               <Box
                 sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: tokens.radii.sm,
+                  width: 24,
+                  height: 24,
+                  borderRadius: "4px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  bgcolor: alpha(categoryData.color, isDark ? 0.2 : 0.1),
-                  color: categoryData.color,
+                  bgcolor: isDark
+                    ? "rgba(255, 255, 255, 0.06)"
+                    : "rgba(0, 0, 0, 0.04)",
+                  color: "text.secondary",
                 }}
               >
-                <AutoStories sx={{ fontSize: 17 }} />
+                <AutoStories sx={{ fontSize: 13 }} />
               </Box>
-              <Chip
-                label={categoryData.name}
-                size="small"
-                sx={{
-                  backgroundColor: alpha(categoryData.color, isDark ? 0.16 : 0.08),
-                  color: categoryData.color,
-                  fontWeight: 600,
-                  fontSize: "0.72rem",
-                  height: 22,
-                  border: `1px solid ${alpha(categoryData.color, 0.2)}`,
-                }}
-              />
-            </Box>
-
-            {topic.popularity && (
               <Typography
                 variant="caption"
                 sx={{
                   color: "text.secondary",
                   fontWeight: 600,
-                  fontSize: "0.72rem",
+                  fontSize: "0.74rem",
                 }}
               >
-                {topic.popularity}% Match
+                {categoryData.name}
               </Typography>
+            </Box>
+
+            {topic.popularity && (
+              <Chip
+                label={`${topic.popularity}% Match`}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: "0.68rem",
+                  fontWeight: 600,
+                  borderRadius: "4px",
+                  bgcolor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+                  color: "text.secondary",
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              />
             )}
           </Box>
 
@@ -136,11 +129,11 @@ const CourseCard = ({
             variant="h6"
             sx={{
               fontWeight: 700,
-              fontSize: "1.05rem",
+              fontSize: "0.98rem",
               lineHeight: 1.35,
               color: "text.primary",
               letterSpacing: "-0.01em",
-              mb: 1,
+              mb: 0.75,
             }}
           >
             {topic.name}
@@ -152,7 +145,7 @@ const CourseCard = ({
             color="text.secondary"
             sx={{
               lineHeight: 1.5,
-              fontSize: "0.85rem",
+              fontSize: "0.84rem",
               mb: 2,
               flexGrow: 1,
             }}
@@ -163,7 +156,7 @@ const CourseCard = ({
           {/* Card Action Row */}
           <Box
             sx={{
-              pt: 1.5,
+              pt: 1.25,
               borderTop: "1px solid",
               borderColor: "divider",
               display: "flex",
@@ -173,7 +166,7 @@ const CourseCard = ({
           >
             <Typography
               variant="caption"
-              sx={{ color: "text.secondary", fontWeight: 500 }}
+              sx={{ color: "text.secondary", fontWeight: 500, fontSize: "0.74rem" }}
             >
               Curated Curriculum
             </Typography>
@@ -181,6 +174,7 @@ const CourseCard = ({
             <Button
               size="small"
               variant={isSelected ? "contained" : "outlined"}
+              color={isSelected ? "primary" : "inherit"}
               disabled={isLoading}
               onClick={(e) => {
                 e.stopPropagation();
@@ -189,32 +183,22 @@ const CourseCard = ({
               }}
               endIcon={
                 isLoading ? (
-                  <CircularProgress size={14} color="inherit" />
+                  <CircularProgress size={13} color="inherit" />
                 ) : (
-                  <ArrowForward sx={{ fontSize: 15 }} />
+                  <ArrowForward sx={{ fontSize: 14 }} />
                 )
               }
               sx={{
-                borderRadius: tokens.radii.sm,
+                height: 30,
+                borderRadius: "6px",
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.8rem",
-                py: 0.5,
-                px: 1.75,
-                ...(isSelected
-                  ? {
-                      bgcolor: "primary.main",
-                      color: "white",
-                      "&:hover": { bgcolor: "primary.dark" },
-                    }
-                  : {
-                      borderColor: "divider",
-                      color: "text.primary",
-                      "&:hover": {
-                        borderColor: "primary.main",
-                        bgcolor: alpha(tokens.colors.primary.main, 0.06),
-                      },
-                    }),
+                fontSize: "0.78rem",
+                px: 1.5,
+                boxShadow: "none",
+                "&:hover": {
+                  boxShadow: "none",
+                },
               }}
             >
               {isLoading ? "Starting..." : isSelected ? "Start Learning" : "Select"}

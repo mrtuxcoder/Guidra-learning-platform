@@ -37,7 +37,6 @@ import {
   PREDEFINED_TOPICS,
   CATEGORIES,
 } from "../components/Explore/constants.jsx";
-import { tokens } from "../theme/tokens";
 
 export default function Explore() {
   const theme = useTheme();
@@ -231,14 +230,48 @@ export default function Explore() {
 
   return (
     <Box
+      id="explore-scroll-container"
       sx={{
-        minHeight: "100vh",
+        height: "100%",
+        maxHeight: "100%",
+        overflowY: "auto",
+        overflowX: "hidden",
         bgcolor: "background.default",
-        pt: { xs: 2.5, md: 4 },
-        pb: { xs: 12, md: 8 },
+        scrollbarWidth: "thin",
+        scrollbarColor: (theme) =>
+          theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.2) transparent"
+            : "rgba(0, 0, 0, 0.2) transparent",
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "transparent",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.2)"
+              : "rgba(0, 0, 0, 0.2)",
+          borderRadius: "4px",
+          "&:hover": {
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.35)"
+                : "rgba(0, 0, 0, 0.35)",
+          },
+        },
+        pt: { xs: 2, md: 2.5 },
+        pb: { xs: 10, md: 4 },
       }}
     >
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: { xs: "100%", md: 1440, xl: 1600 },
+          px: { xs: 2, sm: 3, md: 4 },
+        }}
+      >
         {/* Unified Explore Header with Segmented Switcher */}
         <Header
           activeTab={activeTab}
@@ -251,7 +284,7 @@ export default function Explore() {
           <Alert
             severity="error"
             onClose={() => setError("")}
-            sx={{ mb: 3, borderRadius: tokens.radii.sm }}
+            sx={{ mb: 2.5, borderRadius: "6px" }}
           >
             {error}
           </Alert>
@@ -274,36 +307,41 @@ export default function Explore() {
                 gap: 1,
                 justifyContent: "center",
                 flexWrap: "wrap",
-                mb: { xs: 2.5, md: 3.5 },
+                mb: { xs: 2, md: 2.5 },
               }}
             >
-              {suggestedTopics.map((topic) => (
-                <Chip
-                  key={topic}
-                  label={topic}
-                  size="small"
-                  clickable
-                  onClick={() => setSearchQuery(topic)}
-                  sx={{
-                    borderRadius: tokens.radii.full,
-                    bgcolor:
-                      searchQuery.toLowerCase() === topic.toLowerCase()
-                        ? alpha(tokens.colors.primary.main, 0.14)
+              {suggestedTopics.map((topic) => {
+                const isSelected = searchQuery.toLowerCase() === topic.toLowerCase();
+                return (
+                  <Chip
+                    key={topic}
+                    label={topic}
+                    size="small"
+                    clickable
+                    onClick={() => setSearchQuery(isSelected ? "" : topic)}
+                    sx={{
+                      borderRadius: "6px",
+                      height: 28,
+                      bgcolor: isSelected
+                        ? (theme) =>
+                            theme.palette.mode === "dark"
+                              ? alpha(theme.palette.primary.main, 0.16)
+                              : alpha(theme.palette.primary.main, 0.08)
                         : "background.paper",
-                    color:
-                      searchQuery.toLowerCase() === topic.toLowerCase()
-                        ? "primary.main"
-                        : "text.secondary",
-                    border: "1px solid",
-                    borderColor:
-                      searchQuery.toLowerCase() === topic.toLowerCase()
-                        ? "primary.main"
-                        : "divider",
-                    fontWeight: 500,
-                    fontSize: "0.78rem",
-                  }}
-                />
-              ))}
+                      color: isSelected ? "primary.main" : "text.secondary",
+                      border: "1px solid",
+                      borderColor: isSelected ? "primary.main" : "divider",
+                      fontWeight: isSelected ? 600 : 500,
+                      fontSize: "0.78rem",
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        borderColor: isSelected ? "primary.main" : "text.secondary",
+                        color: "text.primary",
+                      },
+                    }}
+                  />
+                );
+              })}
             </Box>
 
             {/* Main Content Layout */}
@@ -311,7 +349,7 @@ export default function Explore() {
               sx={{
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
-                gap: { xs: 2, md: 3.5 },
+                gap: { xs: 2, md: 3 },
                 alignItems: "flex-start",
               }}
             >
@@ -332,6 +370,7 @@ export default function Explore() {
                         xs: "1fr",
                         sm: "repeat(2, 1fr)",
                         lg: "repeat(3, 1fr)",
+                        xl: "repeat(4, 1fr)",
                       },
                       gap: 2,
                     }}
@@ -355,7 +394,7 @@ export default function Explore() {
                     sx={{
                       p: 4,
                       textAlign: "center",
-                      borderRadius: tokens.radii.md,
+                      borderRadius: "8px",
                       border: "1px dashed",
                       borderColor: "divider",
                       bgcolor: "background.paper",
@@ -363,49 +402,57 @@ export default function Explore() {
                   >
                     <Box
                       sx={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: "50%",
-                        bgcolor: alpha(tokens.colors.primary.main, 0.1),
+                        width: 40,
+                        height: 40,
+                        borderRadius: "8px",
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.primary.main,
+                            theme.palette.mode === "dark" ? 0.15 : 0.08
+                          ),
                         color: "primary.main",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         mx: "auto",
-                        mb: 2,
+                        mb: 1.5,
                       }}
                     >
-                      <AutoAwesome sx={{ fontSize: 24 }} />
+                      <AutoAwesome sx={{ fontSize: 20 }} />
                     </Box>
                     <Typography
                       variant="h6"
                       fontWeight={700}
-                      sx={{ mb: 1, color: "text.primary" }}
+                      sx={{ mb: 0.75, color: "text.primary", fontSize: "1.05rem" }}
                     >
                       No pre-made courses for "{searchQuery}"
                     </Typography>
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ maxWidth: 460, mx: "auto", mb: 2.5 }}
+                      sx={{ maxWidth: 460, mx: "auto", mb: 2.5, fontSize: "0.88rem" }}
                     >
                       Guidra's AI can generate a custom, step-by-step curriculum
                       with interactive quizzes on this exact topic.
                     </Typography>
                     <Button
                       variant="contained"
+                      color="primary"
                       onClick={() => {
                         setCustomSearchQuery(searchQuery);
                         handleTabChange("custom");
                         handleCustomValidate(searchQuery);
                       }}
-                      startIcon={<AutoAwesome sx={{ fontSize: 18 }} />}
+                      startIcon={<AutoAwesome sx={{ fontSize: 16 }} />}
                       sx={{
-                        borderRadius: tokens.radii.md,
+                        borderRadius: "6px",
                         textTransform: "none",
-                        fontWeight: 700,
-                        px: 3,
-                        py: 1,
+                        fontWeight: 600,
+                        fontSize: "0.85rem",
+                        px: 2.5,
+                        height: 36,
+                        boxShadow: "none",
+                        "&:hover": { boxShadow: "none" },
                       }}
                     >
                       Create "{searchQuery}" with AI
@@ -427,13 +474,13 @@ export default function Explore() {
 
         {/* TAB 2: CREATE WITH AI */}
         {activeTab === "custom" && (
-          <Box sx={{ maxWidth: 760, mx: "auto" }}>
+          <Box sx={{ maxWidth: { xs: "100%", sm: 760, md: 840 }, mx: "auto" }}>
             {/* Topic Input Box */}
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 2.5, sm: 3.5 },
-                borderRadius: tokens.radii.lg,
+                p: { xs: 2.5, sm: 3 },
+                borderRadius: "8px",
                 border: "1px solid",
                 borderColor: "divider",
                 bgcolor: "background.paper",
@@ -441,18 +488,18 @@ export default function Explore() {
               }}
             >
               <Typography
-                variant="h6"
+                variant="subtitle1"
                 fontWeight={700}
-                sx={{ mb: 0.5, color: "text.primary" }}
+                sx={{ mb: 0.5, color: "text.primary", fontSize: "1.05rem" }}
               >
                 What do you want to learn?
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ mb: 2.5 }}
+                sx={{ mb: 2, fontSize: "0.86rem" }}
               >
-                Enter any subject, technology, or domain (e.g. "PostgreSQL Indexing", "Rust Concurrency", "Intro to Neuroscience").
+                Enter any subject, technology, or domain (e.g. "Prompt Engineering", "PostgreSQL Indexing", "Rust Concurrency").
               </Typography>
 
               <SearchBox
@@ -469,8 +516,8 @@ export default function Explore() {
               />
 
               {/* Quick Prompt Ideas */}
-              <Box sx={{ mt: 1.5, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              <Box sx={{ mt: 1.5, display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: "0.74rem" }}>
                   Try:
                 </Typography>
                 {suggestedTopics.map((topic) => (
@@ -484,21 +531,24 @@ export default function Explore() {
                       handleCustomValidate(topic);
                     }}
                     sx={{
-                      borderRadius: tokens.radii.full,
-                      bgcolor: "background.default",
+                      borderRadius: "6px",
+                      height: 24,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "rgba(0, 0, 0, 0.03)",
                       border: "1px solid",
                       borderColor: "divider",
-                      fontSize: "0.75rem",
-                      "&:hover": { borderColor: "primary.main" },
+                      fontSize: "0.74rem",
+                      fontWeight: 500,
+                      "&:hover": { borderColor: "primary.main", color: "text.primary" },
                     }}
                   />
                 ))}
               </Box>
 
               {/* Validation Status & Error Alert */}
-              <Box sx={{ mt: 2 }}>
-                <ErrorDisplay error={customError} />
-              </Box>
+              <ErrorDisplay error={customError} />
             </Paper>
 
             {/* Validated Topic Card */}

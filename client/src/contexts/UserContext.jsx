@@ -38,12 +38,17 @@ export const UserProvider = ({ children }) => {
       setError(null);
       
       const response = await getProfile();
-      const userData = response.data?.user || response.data || response;
+      const userData = response.data?.user;
       const authInfoData = response.data?.authInfo || null;
       
-      setUser(userData);
-      setAuthInfo(authInfoData);
-      setLastFetchTime(Date.now());
+      if (userData && typeof userData === "object" && (userData._id || userData.id || userData.email)) {
+        setUser(userData);
+        setAuthInfo(authInfoData);
+        setLastFetchTime(Date.now());
+      } else {
+        setUser(null);
+        setAuthInfo(null);
+      }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
       if (err.response?.status === 401) {
