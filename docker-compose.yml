@@ -1,24 +1,8 @@
 services:
-  mongodb:
-    image: mongo:7.0
-    restart: unless-stopped
-    networks:
-      - guidra-network
-    volumes:
-      - mongodb_data:/data/db
-    healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' localhost:27017/test | grep 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     image: guidra-server:latest
     networks:
       - guidra-network
-    depends_on:
-      mongodb:
-        condition: service_healthy
 
   frontend:
     image: guidra-client:latest
@@ -30,7 +14,4 @@ services:
 networks:
   guidra-network:
     driver: bridge
-
-volumes:
-  mongodb_data:
 

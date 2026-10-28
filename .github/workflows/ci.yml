@@ -173,6 +173,8 @@ jobs:
             --comment "Deploying Guidra Production Stack via ECR" \
             --parameters commands="[
               \"cd /opt/guidra\",
+              \"curl -f -sSL https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/refs/heads/main/docker-compose.yml -o docker-compose.yml || echo 'Download failed, keeping old file'\",
+              \"curl -f -sSL https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/refs/heads/main/docker-compose.prod.yml -o docker-compose.prod.yml || echo 'Download failed, keeping old file'\",
               \"aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $REGISTRY_URI\",
               \"sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull\",
               \"sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d\",

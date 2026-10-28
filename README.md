@@ -9,9 +9,9 @@ Built for students and beginners who want clarity, not chaos.
 
 The stack is split into three files:
 
-- `docker-compose.yml` contains the shared services, network, and MongoDB volume.
-- `docker-compose.override.yml` is loaded automatically for local development and builds the server and client from source.
-- `docker-compose.prod.yml` replaces local builds with published GHCR images.
+- `docker-compose.yml` contains the shared application services (backend, frontend) and network.
+- `docker-compose.override.yml` is loaded automatically for local development, spins up the local MongoDB container with healthchecks, and builds from source.
+- `docker-compose.prod.yml` runs published production images without a local MongoDB container, connecting directly to MongoDB Atlas.
 
 Containers are named `guidra-dev-*` in development and `guidra-prod-*` in production.
 
