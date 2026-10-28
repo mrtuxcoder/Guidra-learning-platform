@@ -66,6 +66,9 @@ jobs:
       contents: read
       id-token: write
 
+    outputs:
+      ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,7 +77,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ECR_ROLE_ARN }}
-          aws-region: ap-south-1
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -140,3 +143,59 @@ jobs:
           tags: |
             ghcr.io/mrtuxcoder/guidra-frontend:${{ github.sha }}
             ghcr.io/mrtuxcoder/guidra-frontend:latest
+
+  deploy-to-ec2:
+    name: Deploy via Docker Compose on Private EC2
+    needs: publish-AWS-ECR
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        instance_id:
+          - ${{ vars.EC2_INSTANCE_ID_1 }}
+          - ${{ vars.EC2_INSTANCE_ID_2 }}
+
+    steps:
+      - name: Configure AWS Credentials for SSM Proxy
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install AWS SSM Session Manager Plugin on Runner
+        run: |
+          curl "https://amazonaws.com" -o "session-manager-plugin.deb"
+          sudo dpkg -i session-manager-plugin.deb
+
+      - name: Configure SSH Config for SSM Tunneling
+        run: |
+          mkdir -p ~/.ssh
+          echo "Host i-* mi-*" >> ~/.ssh/config
+          echo "  ProxyCommand sh -c \"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'\"" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      - name: SSH via SSM Proxy and Run Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ matrix.instance_id }} # Uses the Instance ID instead of an IP address
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 1. Navigate to your compose project directory
+            cd /opt/guidra
+
+            # 2. Dynamically resolve ECR values from upstream environment variables
+            REGISTRY_URI="${{ needs.publish-AWS-ECR.outputs.ecr_registry }}"
+            AWS_REGION="${{ secrets.AWS_REGION }}"
+
+            # 3. Authenticate with ECR locally using the EC2 instance role
+            aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $REGISTRY_URI
+
+            # 4. Pull fresh container images
+            sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull
+
+            # 5. Recreate and start the containers 
+            sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+            # 6. Housekeep disk space
+            sudo docker system prune -af
