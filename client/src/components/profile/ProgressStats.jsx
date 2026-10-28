@@ -57,10 +57,7 @@ const CircularProgressWithLabel = ({ value, size = 80, thickness = 4 }) => {
           component="div"
           fontWeight="700"
           sx={{
-            background: `linear-gradient(135deg, ${profileTheme.primary} 0%, ${profileTheme.primaryDark} 100%)`,
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            color: value === 100 ? "#10b981" : profileTheme.primary,
           }}
         >
           {value}%
@@ -83,8 +80,9 @@ const StatBox = ({ icon: Icon, value, label, color, isMobile }) => (
       alignItems: "center",
       gap: 1.25,
       borderRadius: 2,
-      border: `1px solid ${profileTheme.border}`,
-      background: "rgba(126, 87, 194, 0.04)",
+      border: `1px solid`,
+      borderColor: "divider",
+      bgcolor: "background.default",
     }}
   >
     <Box
@@ -109,10 +107,7 @@ const StatBox = ({ icon: Icon, value, label, color, isMobile }) => (
         sx={{
           mb: 0.25,
           lineHeight: 1.2,
-          background: `linear-gradient(135deg, ${color} 0%, ${color}99 100%)`,
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
+          color: color,
         }}
       >
         {value}
@@ -189,44 +184,9 @@ const ProgressStats = ({ stats }) => {
             justifyContent: "space-between",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
-              sx={{
-                width: isMobile ? 32 : 40,
-                height: isMobile ? 32 : 40,
-                borderRadius: 2,
-                background: profileTheme.gradient,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <TrendingUp sx={{ fontSize: isMobile ? 16 : 20, color: "white" }} />
-            </Box>
-            <Box>
-              <Typography
-                variant={isMobile ? "subtitle1" : "h6"}
-                fontWeight="700"
-                sx={{
-                  background: profileTheme.gradient,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  lineHeight: 1.2,
-                }}
-              >
-                Progress Overview
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ fontSize: isMobile ? "0.7rem" : "0.75rem" }}
-              >
-                Keep your learning streak alive
-              </Typography>
-            </Box>
-          </Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
+            Progress Overview
+          </Typography>
           <Typography
             variant="caption"
             color="text.secondary"
@@ -296,10 +256,7 @@ const ProgressStats = ({ stats }) => {
               variant="caption"
               fontWeight="700"
               sx={{
-                background: profileTheme.gradient,
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                color: profileTheme.primary,
                 fontSize: isMobile ? "0.7rem" : "0.75rem",
               }}
             >

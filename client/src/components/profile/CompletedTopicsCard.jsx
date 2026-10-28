@@ -5,13 +5,13 @@ import {
   Box,
   Typography,
   Button,
-  Stack,
   Chip,
   Grid,
+  alpha,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { profileTheme, cardSx } from "./constants";
+import { cardSx } from "./constants";
 
 const isTopicCompleted = (topic) => {
   if (!topic) return false;
@@ -34,77 +34,99 @@ const CompletedTopicsCard = ({ progress = [], onRecall }) => {
   const completedTopics = progress.filter(isTopicCompleted);
 
   if (completedTopics.length === 0) {
-    return null;
+    return (
+      <Card sx={cardSx}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>
+            Completed Topics
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            No completed topics yet. Keep learning to see your finished topics here.
+          </Typography>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <Card sx={cardSx}>
       <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            mb: 2,
-            fontSize: { xs: "1rem", sm: "1.125rem" },
-            background: profileTheme.gradient,
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          Completed Topics
-        </Typography>
+        <Box sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 700,
+              color: "text.primary",
+            }}
+          >
+            Completed Topics
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {completedTopics.length} topic{completedTopics.length !== 1 ? "s" : ""} completed
+          </Typography>
+        </Box>
+
         <Grid container spacing={2} sx={{ width: "100%" }}>
-          {completedTopics.slice(0, 4).map((topic) => {
+          {completedTopics.map((topic) => {
             const topicName = getTopicName(topic);
+            const subtopics = topic.subTopics || topic.subtopics || [];
+            const subCount = subtopics.length;
+            const completedSubCount = subtopics.filter((s) => s.completed).length;
 
             return (
-              <Grid item xs={12} sm={6} key={topicName}>
+              <Grid item xs={12} sm={6} md={4} key={topicName}>
                 <Box
                   sx={{
                     display: "flex",
                     flexDirection: "column",
+                    justifyContent: "space-between",
                     gap: 1.5,
                     p: 2,
                     borderRadius: 2,
-                    border: `1px solid ${profileTheme.border}`,
-                    background: "rgba(126, 87, 194, 0.05)",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.default",
                     height: "100%",
-                    width: "100%",
-                    maxWidth: "100%",
-                    boxSizing: "border-box",
                   }}
                 >
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={1}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                    sx={{ width: "100%" }}
-                  >
-                    <Chip
-                      label="Completed"
-                      size="small"
+                  <Box>
+                    <Box
                       sx={{
-                        background: "rgba(16, 185, 129, 0.12)",
-                        color: "#059669",
-                        fontWeight: 700,
-                        fontSize: "0.7rem",
-                        alignSelf: { xs: "flex-start", sm: "center" },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1,
+                        mb: 1,
                       }}
-                    />
+                    >
+                      <Chip
+                        label="Completed"
+                        size="small"
+                        sx={{
+                          bgcolor: alpha(theme.palette.success.main, 0.1),
+                          color: "success.main",
+                          fontWeight: 700,
+                          fontSize: "0.68rem",
+                          height: 22,
+                        }}
+                      />
+                      {subCount > 0 && (
+                        <Typography variant="caption" color="text.secondary">
+                          {completedSubCount}/{subCount} subtopics
+                        </Typography>
+                      )}
+                    </Box>
                     <Typography
+                      variant="body2"
                       sx={{
                         fontWeight: 700,
                         color: "text.primary",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        width: "100%",
                       }}
                     >
                       {topicName}
                     </Typography>
-                  </Stack>
+                  </Box>
+
                   <Button
                     variant="outlined"
                     size="small"
@@ -112,11 +134,12 @@ const CompletedTopicsCard = ({ progress = [], onRecall }) => {
                     fullWidth={isMobile}
                     sx={{
                       textTransform: "none",
-                      borderRadius: 2,
+                      borderRadius: "6px",
                       fontWeight: 600,
+                      borderColor: "divider",
+                      color: "text.primary",
                       alignSelf: { xs: "stretch", sm: "flex-start" },
-                      borderColor: "rgba(126, 87, 194, 0.3)",
-                      color: profileTheme.primary,
+                      "&:hover": { borderColor: "primary.main" },
                     }}
                   >
                     Recall Topic

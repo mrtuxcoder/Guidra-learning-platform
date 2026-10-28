@@ -11,7 +11,7 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
-import { AccessTime, Checklist, Quiz } from "@mui/icons-material";
+import { AccessTime, Quiz } from "@mui/icons-material";
 import { cardSx } from "./constants";
 
 const formatDuration = (ms) => {
@@ -111,33 +111,9 @@ const CompletedSubtopicsInsights = ({ progress = [] }) => {
   return (
     <Card sx={cardSx}>
       <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              bgcolor: "primary.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Checklist sx={{ fontSize: 20, color: "white" }} />
-          </Box>
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-              }}
-            >
-              Completed Subtopics
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Time spent and quiz performance
-            </Typography>
-          </Box>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Completed Subtopics</Typography>
+          <Typography variant="caption" color="text.secondary">Time spent and quiz performance</Typography>
         </Box>
 
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>

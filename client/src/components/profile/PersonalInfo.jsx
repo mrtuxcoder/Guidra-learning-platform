@@ -6,77 +6,37 @@ import {
   Box,
   Chip,
   Grid,
+  Divider,
   useTheme,
-  alpha,
   useMediaQuery,
 } from "@mui/material";
-import { Email, CalendarToday, Lightbulb, Person } from "@mui/icons-material";
-import { profileTheme, cardSx } from "./constants";
+import { Lightbulb } from "@mui/icons-material";
+import { cardSx } from "./constants";
 
 const PersonalInfo = ({ user }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const InfoItem = ({ icon, label, value }) => (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1.5,
-        p: 2,
-        borderRadius: 2,
-        border: `1px solid ${profileTheme.border}`,
-        background: "rgba(126, 87, 194, 0.04)",
-        height: "100%",
-        width: "100%",
-        maxWidth: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <Box
+  const InfoItem = ({ label, value }) => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+      <Typography
+        variant="caption"
         sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 2,
-          background: profileTheme.gradient,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
+          color: "text.secondary",
+          fontWeight: 600,
+          fontSize: "0.7rem",
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
         }}
       >
-        {React.cloneElement(icon, {
-          sx: { fontSize: 18, color: "white" },
-        })}
-      </Box>
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: 0.6,
-            fontSize: "0.65rem",
-            display: "block",
-            mb: 0.5,
-          }}
-        >
-          {label}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.primary",
-            fontWeight: 600,
-            wordBreak: "break-word",
-          }}
-        >
-          {value || "Not specified"}
-        </Typography>
-      </Box>
+        {label}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{ color: "text.primary", fontWeight: 500, wordBreak: "break-word" }}
+      >
+        {value || "Not specified"}
+      </Typography>
     </Box>
   );
 
@@ -86,86 +46,27 @@ const PersonalInfo = ({ user }) => {
       sx={{
         ...cardSx,
         overflow: "visible",
-        height: { md: "100%" },
-        display: "flex",
-        flexDirection: "column",
+        width: "100%",
       }}
     >
       <CardContent
         sx={{
           p: isMobile ? 2 : 2.5,
           "&:last-child": { pb: isMobile ? 2 : 2.5 },
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
         }}
       >
         {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            mb: 2.5,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: 2,
-                background: profileTheme.gradient,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Person sx={{ fontSize: 18, color: "white" }} />
-            </Box>
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: isMobile ? "1.05rem" : "1.2rem",
-                  background: profileTheme.gradient,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Personal Info
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ fontSize: "0.75rem" }}
-              >
-                Profile details and preferences
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary", mb: 2 }}>
+          Personal Info
+        </Typography>
 
         {/* Info Items - Responsive Grid */}
-        <Grid
-          container
-          spacing={2}
-          alignItems="flex-start"
-          sx={{ width: "100%" }}
-        >
-          <Grid item xs={12} sm={6}>
-            <InfoItem
-              icon={<Email />}
-              label="Email Address"
-              value={user?.email}
-            />
+        <Grid container spacing={2.5} alignItems="flex-start" sx={{ width: "100%", mb: 1 }}>
+          <Grid item xs={12} sm={6} md={4}>
+            <InfoItem label="Email Address" value={user?.email} />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} md={4}>
             <InfoItem
-              icon={<CalendarToday />}
               label="Member Since"
               value={
                 user?.createdAt
@@ -174,70 +75,79 @@ const PersonalInfo = ({ user }) => {
                       month: "short",
                       day: "numeric",
                     })
-                  : null
+                  : "Active Member"
               }
             />
           </Grid>
-          <Grid item xs={12}>
-            <InfoItem
-              icon={<Lightbulb />}
-              label="Learning Goal"
-              value={user?.reasonForLearning || user?.learningMotivation}
-            />
-          </Grid>
+          {user?.learningStyle && (
+            <Grid item xs={12} sm={6} md={4}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Learning Style
+                </Typography>
+                <Chip
+                  icon={<Lightbulb sx={{ fontSize: 14 }} />}
+                  label={`${
+                    user.learningStyle.charAt(0).toUpperCase() +
+                    user.learningStyle.slice(1)
+                  } Learner`}
+                  size="small"
+                  sx={{
+                    alignSelf: "flex-start",
+                    bgcolor: "background.default",
+                    color: "text.primary",
+                    fontWeight: 600,
+                    fontSize: "0.75rem",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    height: 26,
+                    "& .MuiChip-icon": { color: "text.secondary" },
+                  }}
+                />
+              </Box>
+            </Grid>
+          )}
         </Grid>
 
-        {/* Learning Style Chip if available */}
-        {user?.learningStyle && (
-          <Box
+        <Divider sx={{ my: 2 }} />
+
+        {/* Learning Goal Section */}
+        <Box>
+          <Typography
+            variant="caption"
             sx={{
-              mt: 2,
-              pt: 2,
-              borderTop: "1px solid",
-              borderColor: profileTheme.border,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
+              color: "text.secondary",
+              fontWeight: 600,
+              fontSize: "0.7rem",
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              display: "block",
+              mb: 0.5,
             }}
           >
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontWeight: 600, fontSize: "0.75rem" }}
-            >
-              Learning Style
-            </Typography>
-            <Chip
-              icon={<Lightbulb sx={{ fontSize: 16 }} />}
-              label={`${
-                user.learningStyle.charAt(0).toUpperCase() +
-                user.learningStyle.slice(1)
-              } Learner`}
-              variant="filled"
-              sx={{
-                background: alpha(
-                  theme.palette.primary.main,
-                  isDark ? 0.2 : 0.12
-                ),
-                color: isDark
-                  ? theme.palette.primary.light
-                  : profileTheme.primaryDark,
-                fontWeight: 600,
-                fontSize: "0.75rem",
-                border: `1px solid ${alpha(
-                  theme.palette.primary.main,
-                  isDark ? 0.4 : 0.2
-                )}`,
-                "& .MuiChip-icon": {
-                  color: isDark
-                    ? theme.palette.primary.light
-                    : profileTheme.primary,
-                },
-              }}
-            />
-          </Box>
-        )}
+            Learning Goal
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.primary",
+              fontWeight: 500,
+              lineHeight: 1.6,
+              fontSize: "0.95rem",
+            }}
+          >
+            {user?.reasonForLearning || user?.learningMotivation || "No specific goal specified. Explore topics to set your focus."}
+          </Typography>
+        </Box>
       </CardContent>
     </Card>
   );

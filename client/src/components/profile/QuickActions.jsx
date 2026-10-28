@@ -5,176 +5,116 @@ import {
   Box,
   Typography,
   Button,
-  Grid,
+  Stack,
 } from "@mui/material";
 import { School, Explore, Logout } from "@mui/icons-material";
-import { profileTheme, cardSx } from "./constants";
+import { cardSx } from "./constants";
 
-const QuickActions = ({ isMobile, onNavigate, onLogout }) => {
+const QuickActions = ({ onNavigate, onLogout }) => {
   const actions = [
     {
-      icon: <School />,
+      icon: <School sx={{ fontSize: 20 }} />,
       label: "Continue Learning",
+      description: "Jump back into your active course and lessons",
+      buttonText: "Open Learn",
       action: () => onNavigate("/learn"),
       variant: "contained",
     },
     {
-      icon: <Explore />,
-      label: "Explore Courses",
+      icon: <Explore sx={{ fontSize: 20 }} />,
+      label: "Explore Topics",
+      description: "Discover curated learning roadmaps and subjects",
+      buttonText: "Browse",
       action: () => onNavigate("/explore"),
       variant: "outlined",
     },
     {
-      icon: <Logout />,
+      icon: <Logout sx={{ fontSize: 20 }} />,
       label: "Sign Out",
+      description: "Securely sign out of your account on this device",
+      buttonText: "Log Out",
       action: onLogout,
       variant: "outlined",
       color: "error",
     },
   ];
 
-  if (isMobile) {
-    return (
-      <Card sx={cardSx}>
-        <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              mb: 2,
-              fontSize: { xs: "1rem", sm: "1.125rem" },
-              background: profileTheme.gradient,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Quick Actions
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-            {actions.map((action, index) => (
-              <Button
-                key={index}
-                variant={action.variant}
-                startIcon={action.icon}
-                onClick={action.action}
-                fullWidth
-                sx={{
-                  borderRadius: 2,
-                  ...(action.variant === "contained"
-                    ? {
-                        background: profileTheme.gradient,
-                        fontWeight: 600,
-                      }
-                    : {
-                        borderColor:
-                          action.color === "error"
-                            ? "rgba(211, 47, 47, 0.3)"
-                            : "rgba(126, 87, 194, 0.3)",
-                        color:
-                          action.color === "error"
-                            ? "#d32f2f"
-                            : profileTheme.primary,
-                        fontWeight: 600,
-                      }),
-                  py: 1.4,
-                  fontSize: { xs: "0.9rem", sm: "1rem" },
-                }}
-              >
-                {action.label}
-              </Button>
-            ))}
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card sx={cardSx}>
-      <CardContent sx={{ p: 3 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            mb: 2.5,
-            fontSize: "1.125rem",
-            background: profileTheme.gradient,
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          Quick Navigation
+    <Card sx={{ ...cardSx, width: "100%" }}>
+      <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
+          Quick Actions
         </Typography>
-        <Grid container spacing={2} sx={{ width: "100%" }}>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+          Shortcuts to navigate your learning journey or manage your session.
+        </Typography>
+
+        <Stack spacing={1.5}>
           {actions.map((action, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <Box
-                sx={{
-                  borderRadius: 2,
-                  border: `1px solid ${profileTheme.border}`,
-                  background: "rgba(126, 87, 194, 0.04)",
-                  p: 2,
-                  height: "100%",
-                  width: "100%",
-                  maxWidth: "100%",
-                  boxSizing: "border-box",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: 1.5,
-                }}
-              >
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 2,
+                p: { xs: 1.5, sm: 2 },
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.default",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "stretch", sm: "center" },
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
                 <Box
                   sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 2,
-                    background: action.variant === "contained"
-                      ? profileTheme.gradient
-                      : "rgba(126, 87, 194, 0.1)",
+                    color: action.color === "error" ? "error.main" : "primary.main",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    color: action.variant === "contained" ? "white" : profileTheme.primary,
+                    flexShrink: 0,
                   }}
                 >
                   {action.icon}
                 </Box>
-                <Typography sx={{ fontWeight: 700, color: "text.primary" }}>
-                  {action.label}
-                </Typography>
-                <Button
-                  variant={action.variant === "contained" ? "contained" : "outlined"}
-                  onClick={action.action}
-                  fullWidth
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    ...(action.variant === "contained"
-                      ? {
-                          background: profileTheme.gradient,
-                        }
-                      : {
-                          borderColor:
-                            action.color === "error"
-                              ? "rgba(211, 47, 47, 0.3)"
-                              : "rgba(126, 87, 194, 0.3)",
-                          color:
-                            action.color === "error"
-                              ? "#d32f2f"
-                              : profileTheme.primary,
-                        }),
-                  }}
-                >
-                  {action.label}
-                </Button>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="body2" fontWeight={700} color="text.primary">
+                    {action.label}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {action.description}
+                  </Typography>
+                </Box>
               </Box>
-            </Grid>
+
+              <Button
+                variant={action.variant}
+                color={action.color || "primary"}
+                onClick={action.action}
+                size="small"
+                sx={{
+                  flexShrink: 0,
+                  borderRadius: "6px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2.5,
+                  minWidth: 110,
+                  height: 34,
+                  alignSelf: { xs: "stretch", sm: "center" },
+                  ...(action.variant === "outlined" && action.color !== "error"
+                    ? {
+                        borderColor: "divider",
+                        color: "text.primary",
+                        "&:hover": { borderColor: "primary.main" },
+                      }
+                    : {}),
+                }}
+              >
+                {action.buttonText}
+              </Button>
+            </Box>
           ))}
-        </Grid>
+        </Stack>
       </CardContent>
     </Card>
   );

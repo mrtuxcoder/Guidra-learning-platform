@@ -26,13 +26,11 @@ import {
   Bolt,
   ArrowBack,
   ChevronRight,
-  LocalFireDepartment,
   Settings,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 // Import existing components
-import ProfileHeader from "../components/profile/ProfileHeader";
 import ProgressStats from "../components/profile/ProgressStats";
 import PersonalInfo from "../components/profile/PersonalInfo";
 
@@ -94,6 +92,7 @@ export default function Profile() {
   }
 
   const stats = getProgressStats(user);
+  const hasAuthCard = user?.authProvider === "google" && !user?.password;
 
   const sections = [
     {
@@ -102,20 +101,15 @@ export default function Profile() {
       subtitle: "Personal info and account security",
       icon: <AccountCircle fontSize="small" />,
       content: (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "7fr 5fr" },
-            gap: 2.5,
-            alignItems: "start",
-          }}
-        >
+        <Stack spacing={2.5}>
           <PersonalInfo user={user} />
-          <AuthenticationCard
-            user={user}
-            onPasswordSetup={() => navigate("/settings")}
-          />
-        </Box>
+          {hasAuthCard && (
+            <AuthenticationCard
+              user={user}
+              onPasswordSetup={() => navigate("/settings")}
+            />
+          )}
+        </Stack>
       ),
     },
     {
@@ -124,23 +118,23 @@ export default function Profile() {
       subtitle: "Learning stats and momentum",
       icon: <QueryStats fontSize="small" />,
       content: (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "5fr 7fr" },
-            gap: 2.5,
-            alignItems: "start",
-          }}
-        >
-          <Stack spacing={2.5}>
-            <ProgressStats stats={stats} />
+        <Stack spacing={2.5}>
+          <ProgressStats stats={stats} />
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 2.5,
+              alignItems: "stretch",
+            }}
+          >
             <QuickStatsCard stats={stats} />
-          </Stack>
-          <LearningJourneyCard
-            stats={stats}
-            onLaunchLesson={() => navigate("/learn")}
-          />
-        </Box>
+            <LearningJourneyCard
+              stats={stats}
+              onLaunchLesson={() => navigate("/learn")}
+            />
+          </Box>
+        </Stack>
       ),
     },
     {
@@ -149,17 +143,10 @@ export default function Profile() {
       subtitle: "Analysis and subtopic understanding",
       icon: <Insights fontSize="small" />,
       content: (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-            gap: 2.5,
-            alignItems: "start",
-          }}
-        >
-          <AnalysisCard />
+        <Stack spacing={2.5}>
           <CompletedSubtopicsInsights progress={user?.progress || []} />
-        </Box>
+          <AnalysisCard />
+        </Stack>
       ),
     },
     {
@@ -251,17 +238,17 @@ export default function Profile() {
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Chip
-                icon={<LocalFireDepartment sx={{ fontSize: 16, color: "warning.main !important" }} />}
-                label="4-Day Streak"
+                label={`${stats.completed} topic${stats.completed !== 1 ? "s" : ""} done`}
                 size="small"
                 sx={{
                   fontWeight: 600,
                   borderRadius: "6px",
                   height: 28,
-                  bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
-                  color: "warning.dark",
+                  bgcolor: "background.default",
+                  color: "text.secondary",
                   border: "1px solid",
-                  borderColor: (theme) => alpha(theme.palette.warning.main, 0.2),
+                  borderColor: "divider",
+                  fontSize: "0.78rem",
                 }}
               />
               <Button
@@ -420,19 +407,18 @@ export default function Profile() {
                 position: "sticky",
                 top: 80,
                 zIndex: 2,
-                mb: 3,
+                bgcolor: "background.default",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                mb: 2.5,
                 overflowX: "auto",
-                display: "flex",
-                justifyContent: "center",
               }}
             >
               <Stack
                 direction="row"
-                spacing={1}
+                spacing={0}
                 sx={{
                   minWidth: "max-content",
-                  px: 0.5,
-                  justifyContent: "center",
                 }}
               >
                 {sections.map((section) => (
@@ -445,12 +431,14 @@ export default function Profile() {
                       textTransform: "none",
                       fontWeight: activeSection === section.id ? 700 : 600,
                       px: 2,
-                      py: 1,
+                      py: 1.25,
                       whiteSpace: "nowrap",
-                      color: activeSection === section.id ? "primary.main" : "text.primary",
+                      color: activeSection === section.id ? "primary.main" : "text.secondary",
                       backgroundColor: "transparent",
                       borderBottom: activeSection === section.id ? "2px solid" : "2px solid transparent",
+                      borderColor: activeSection === section.id ? "primary.main" : "transparent",
                       borderRadius: 0,
+                      mb: "-1px",
                       "&:hover": {
                         bgcolor: "transparent",
                         color: "primary.main",
@@ -464,9 +452,6 @@ export default function Profile() {
             </Box>
 
             <Box sx={{ maxWidth: { xs: "100%", lg: 1360, xl: 1480 }, mx: "auto" }}>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-                {currentSection.label}
-              </Typography>
               {currentSection.content}
             </Box>
           </Box>

@@ -21,7 +21,6 @@ import {
   TrendingUp,
   TrendingDown,
   ExpandMore,
-  Psychology,
   EmojiEvents,
   ErrorOutline,
   Refresh,
@@ -99,26 +98,7 @@ const AnalysisCard = () => {
       <Card sx={cardSx}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-            <Box
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: 2,
-                bgcolor: "primary.main",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Psychology sx={{ color: "white", fontSize: 20 }} />
-            </Box>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: "1rem", sm: "1.125rem" },
-              }}
-            >
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
               Learning Analysis
             </Typography>
           </Box>
@@ -135,28 +115,7 @@ const AnalysisCard = () => {
       <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
         {/* Header */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 2,
-              bgcolor: "primary.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Psychology sx={{ color: "white", fontSize: 20 }} />
-          </Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: "1rem", sm: "1.125rem" },
-              flex: 1,
-            }}
-          >
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
             Learning Analysis
           </Typography>
           <Tooltip title="Refresh analysis">

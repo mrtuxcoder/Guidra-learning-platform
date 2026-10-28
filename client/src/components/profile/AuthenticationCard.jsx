@@ -7,6 +7,7 @@ import {
   Button,
   Stack,
 } from "@mui/material";
+import { Lock } from "@mui/icons-material";
 import { cardSx } from "./constants";
 
 const AuthenticationCard = ({ user, onPasswordSetup }) => {
@@ -29,30 +30,12 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
           justifyContent="space-between"
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                bgcolor: "primary.main",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Typography
-                sx={{ color: "white", fontWeight: 700, fontSize: "0.9rem" }}
-              >
-                🔐
-              </Typography>
-            </Box>
+            <Lock sx={{ fontSize: 18, color: "text.secondary", flexShrink: 0 }} />
             <Box>
               <Typography
-                variant="h6"
+                variant="subtitle2"
                 sx={{
                   fontWeight: 700,
-                  fontSize: { xs: "0.95rem", sm: "1.05rem" },
                 }}
               >
                 Authentication Status
@@ -68,18 +51,19 @@ const AuthenticationCard = ({ user, onPasswordSetup }) => {
           </Box>
 
           <Button
-            variant="contained"
+            variant="outlined"
             size="small"
             onClick={onPasswordSetup}
             sx={{
               borderRadius: 2,
-              bgcolor: "primary.main",
               fontWeight: 600,
               px: 2.5,
               py: 1,
               fontSize: "0.85rem",
+              borderColor: "divider",
+              color: "text.primary",
               "&:hover": {
-                bgcolor: "primary.dark",
+                borderColor: "primary.main",
               },
             }}
           >
