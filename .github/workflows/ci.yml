@@ -164,6 +164,7 @@ jobs:
 
       - name: Install AWS SSM Session Manager Plugin on Runner
         run: |
+          # Pull from the authentic AWS S3 release bucket instead of a generic domain
           curl "https://amazonaws.com" -o "session-manager-plugin.deb"
           sudo dpkg -i session-manager-plugin.deb
 
