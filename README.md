@@ -103,7 +103,7 @@ Each subtopic is delivered in a predictable format:
 - Completed topics can be reopened in dedicated recall mode
 - Recall starts from the beginning of the selected topic for revision
 - Normal learning view prioritizes incomplete topics for active progress
-
+ 
 ### 🔹 Progress + Insights
 Guidra tracks and surfaces:
 - Topic and subtopic completion
