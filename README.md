@@ -122,7 +122,7 @@ Guidra tracks and surfaces:
 - Multiple content versions can be accessed and reviewed
 - Regeneration supports different teaching styles
 - Browser offline caching is limited to content-cache responses; authentication, progress, preferences, and profile data are not cached
-
+ 
 ### 🔹 Authentication and Account Security
 - JWT authentication with local and Google OAuth sign-in
 - Google-authenticated users can add or update an email-login password from **Settings**
