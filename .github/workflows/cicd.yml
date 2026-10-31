@@ -93,7 +93,6 @@ jobs:
           push: true
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-backend:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-backend:latest
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -102,7 +101,6 @@ jobs:
           push: true
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-frontend:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-frontend:latest
 
   publish-GHCR:
     name: Build and publish Docker images to GitHub Container Registry
