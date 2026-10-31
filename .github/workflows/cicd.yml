@@ -1,5 +1,5 @@
 
-name: Guidra CI/CD
+name: Guidra CI
 
 on:
   push:
@@ -9,27 +9,17 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: guidra-ci-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
 
   # -----------------------------------------------
   # 1. LINT
   # -----------------------------------------------
   lint:
-    name: Lint
+    name: Lint Frontend and Backend
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        directory:
-          - server
-          - client
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -37,74 +27,72 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
 
-      - name: Install dependencies
-        working-directory: ${{ matrix.directory }}
+      - name: Install client dependencies
+        working-directory: client
         run: npm ci
 
-      - name: Run lint
-        working-directory: ${{ matrix.directory }}
+      - name: Install backend dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Lint client
+        working-directory: client
+        run: npm run lint
+
+      - name: Lint server
+        working-directory: server
         run: npm run lint
 
 
   # -----------------------------------------------
-  # 2. TEST
+  # 2. BACKEND TESTS
   # -----------------------------------------------
   test:
-    env:
+    name: Test Backend via Docker Compose
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run tests inside Docker Compose
+        env:
           PORT: ${{ secrets.PORT }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
-    name: Backend Tests
-    runs-on: ubuntu-latest
-    needs:
-      - lint
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Run tests
         run: |
           docker compose \
             -f docker-compose.test.yml \
-            up \
-            --build \
-            --exit-code-from server-test
+            up --build --exit-code-from server-test
 
       - name: Cleanup test containers
         if: always()
         run: |
           docker compose \
             -f docker-compose.test.yml \
-            down -v --remove-orphans
+            down --remove-orphans
 
 
   # -----------------------------------------------
   # 3. PUBLISH TO AMAZON ECR
   # -----------------------------------------------
-  publish-ecr:
-    name: Publish Images to Amazon ECR
+  publish-AWS-ECR:
+    name: Build and publish Docker images to Amazon ECR
+    needs: test
     runs-on: ubuntu-latest
-    needs:
-      - test
 
     permissions:
       contents: read
       id-token: write
 
     outputs:
-      registry: ${{ steps.login-ecr.outputs.registry }}
-
-    env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      ECR_BACKEND_REPOSITORY: mrtuxcoder/guidra-backend
-      ECR_FRONTEND_REPOSITORY: mrtuxcoder/guidra-frontend
+      ecr_registry: ${{ steps.login-ecr.outputs.registry }}
 
     steps:
       - name: Checkout repository
@@ -116,26 +104,15 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ECR_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # IMPORTANT:
-      # This exact step ID is used by the job output above.
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Validate ECR registry
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${{ steps.login-ecr.outputs.registry }}" ]]; then
-            echo "::error::ECR login did not return a registry."
-            exit 1
-          fi
-
-          echo "ECR registry: ${{ steps.login-ecr.outputs.registry }}"
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # ECR repositories are IMMUTABLE.
+      # Therefore, publish only the unique Git SHA tag.
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
@@ -152,29 +129,14 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-frontend:${{ github.sha }}
 
-      - name: Verify published ECR images
-        run: |
-          set -euo pipefail
-
-          aws ecr describe-images \
-            --repository-name "$ECR_BACKEND_REPOSITORY" \
-            --image-ids imageTag="${GITHUB_SHA}" \
-            --region "$AWS_REGION"
-
-          aws ecr describe-images \
-            --repository-name "$ECR_FRONTEND_REPOSITORY" \
-            --image-ids imageTag="${GITHUB_SHA}" \
-            --region "$AWS_REGION"
-
 
   # -----------------------------------------------
   # 4. PUBLISH TO GITHUB CONTAINER REGISTRY
   # -----------------------------------------------
-  publish-ghcr:
-    name: Publish Images to GHCR
+  publish-GHCR:
+    name: Build and publish Docker images to GHCR
+    needs: test
     runs-on: ubuntu-latest
-    needs:
-      - test
 
     permissions:
       contents: read
@@ -184,7 +146,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Login to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -194,37 +156,41 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push backend image
+      - name: Build and push backend image to GHCR
         uses: docker/build-push-action@v6
         with:
           context: ./server
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/guidra-backend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/guidra-backend:latest
+            ghcr.io/mrtuxcoder/guidra-backend:${{ github.sha }}
+            ghcr.io/mrtuxcoder/guidra-backend:latest
 
-      - name: Build and push frontend image
+      - name: Build and push frontend image to GHCR
         uses: docker/build-push-action@v6
         with:
           context: ./client
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/guidra-frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/guidra-frontend:latest
+            ghcr.io/mrtuxcoder/guidra-frontend:${{ github.sha }}
+            ghcr.io/mrtuxcoder/guidra-frontend:latest
 
 
   # -----------------------------------------------
-  # 5. DEPLOY TO PRODUCTION EC2 INSTANCES
+  # 5. DEPLOY TO EC2 USING MATRIX
   # -----------------------------------------------
-  deploy:
-    name: Deploy to Production
+  deploy-to-ec2:
+    name: Deploy to EC2
+    needs:
+      - publish-AWS-ECR
+
     runs-on: ubuntu-latest
 
-    needs:
-      - publish-ecr
-
-    permissions:
-      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        instance_id:
+          - ${{ vars.EC2_INSTANCE_ID_1 }}
+          - ${{ vars.EC2_INSTANCE_ID_2 }}
 
     concurrency:
       group: guidra-production-deployment
@@ -232,62 +198,43 @@ jobs:
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      REGISTRY: ${{ needs.publish-ecr.outputs.registry }}
+      REGISTRY_URI: ${{ needs['publish-AWS-ECR'].outputs.ecr_registry }}
       IMAGE_TAG: ${{ github.sha }}
-      INSTANCE_ID_1: ${{ vars.EC2_INSTANCE_ID_1 }}
-      INSTANCE_ID_2: ${{ vars.EC2_INSTANCE_ID_2 }}
 
     steps:
       - name: Validate deployment configuration
         run: |
           set -euo pipefail
 
-          if [[ -z "${REGISTRY:-}" ]]; then
+          if [[ -z "${REGISTRY_URI:-}" ]]; then
             echo "::error::ECR registry output is empty."
-            echo "Check publish-ecr job outputs and login-ecr step ID."
             exit 1
           fi
 
           if [[ -z "${AWS_REGION:-}" ]]; then
-            echo "::error::AWS_REGION is empty."
+            echo "::error::AWS region is missing."
             exit 1
           fi
 
-          if [[ -z "${INSTANCE_ID_1:-}" || -z "${INSTANCE_ID_2:-}" ]]; then
-            echo "::error::EC2 instance IDs are missing."
-            exit 1
-          fi
-
-          echo "ECR registry: $REGISTRY"
-          echo "AWS region: $AWS_REGION"
+          echo "Registry: $REGISTRY_URI"
           echo "Image tag: $IMAGE_TAG"
-          echo "Deployment targets configured."
+          echo "Target instance: ${{ matrix.instance_id }}"
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Verify ECR images before deployment
+      - name: Execute Production Deploy via AWS SSM
+        env:
+          INSTANCE_ID: ${{ matrix.instance_id }}
         run: |
           set -euo pipefail
 
-          aws ecr describe-images \
-            --repository-name mrtuxcoder/guidra-backend \
-            --image-ids imageTag="$IMAGE_TAG"
-
-          aws ecr describe-images \
-            --repository-name mrtuxcoder/guidra-frontend \
-            --image-ids imageTag="$IMAGE_TAG"
-
-      - name: Deploy to EC2 instances using SSM
-        run: |
-          set -euo pipefail
-
-          BACKEND_IMAGE="${REGISTRY}/mrtuxcoder/guidra-backend:${IMAGE_TAG}"
-          FRONTEND_IMAGE="${REGISTRY}/mrtuxcoder/guidra-frontend:${IMAGE_TAG}"
+          BACKEND_IMAGE="${REGISTRY_URI}/mrtuxcoder/guidra-backend:${IMAGE_TAG}"
+          FRONTEND_IMAGE="${REGISTRY_URI}/mrtuxcoder/guidra-frontend:${IMAGE_TAG}"
 
           REMOTE_SCRIPT=$(cat <<EOF
           set -euo pipefail
@@ -304,132 +251,122 @@ jobs:
             "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${IMAGE_TAG}/docker-compose.prod.yml" \
             -o docker-compose.prod.yml
 
-          echo "Logging in to Amazon ECR"
+          echo "Logging in to ECR"
 
           aws ecr get-login-password --region ${AWS_REGION} | \
-            docker login --username AWS --password-stdin ${REGISTRY}
+            sudo docker login \
+              --username AWS \
+              --password-stdin ${REGISTRY_URI}
 
           echo "Updating production image references"
 
-          sed -i \
+          sudo sed -i \
             '/^BACKEND_IMAGE=/d; /^FRONTEND_IMAGE=/d' \
             .env.production
 
-          printf 'BACKEND_IMAGE=%s\n' '${BACKEND_IMAGE}' >> .env.production
-          printf 'FRONTEND_IMAGE=%s\n' '${FRONTEND_IMAGE}' >> .env.production
+          printf 'BACKEND_IMAGE=%s\n' '${BACKEND_IMAGE}' | \
+            sudo tee -a .env.production > /dev/null
+
+          printf 'FRONTEND_IMAGE=%s\n' '${FRONTEND_IMAGE}' | \
+            sudo tee -a .env.production > /dev/null
 
           echo "Pulling release images"
 
-          docker compose \
+          sudo docker compose \
+            --env-file .env.production \
             -f docker-compose.yml \
             -f docker-compose.prod.yml \
             pull
 
-          echo "Starting release"
+          echo "Starting application"
 
-          docker compose \
+          sudo docker compose \
+            --env-file .env.production \
             -f docker-compose.yml \
             -f docker-compose.prod.yml \
             up -d --remove-orphans
 
-          echo "Checking container status"
+          echo "Verifying application containers"
 
-          docker inspect \
-            --format='{{.State.Running}}' \
-            guidra-prod-server
-
-          docker inspect \
-            --format='{{.State.Running}}' \
-            guidra-prod-client
-
-          BACKEND_RUNNING=$(docker inspect \
+          BACKEND_RUNNING=$(sudo docker inspect \
             --format='{{.State.Running}}' guidra-prod-server)
 
-          FRONTEND_RUNNING=$(docker inspect \
+          FRONTEND_RUNNING=$(sudo docker inspect \
             --format='{{.State.Running}}' guidra-prod-client)
 
-          if [[ "$BACKEND_RUNNING" != "true" || "$FRONTEND_RUNNING" != "true" ]]; then
+          if [[ "\$BACKEND_RUNNING" != "true" || "\$FRONTEND_RUNNING" != "true" ]]; then
             echo "Deployment verification failed."
             exit 1
           fi
 
-          echo "Deployment completed successfully."
+          echo "Guidra deployment successful."
           EOF
           )
 
+          # Encode the multiline remote script as valid JSON.
           COMMANDS=$(jq -n --arg script "$REMOTE_SCRIPT" \
             '{commands: [$script]}')
 
-          echo "Sending deployment command through SSM"
+          echo "Sending SSM command to $INSTANCE_ID"
 
           COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --instance-ids "$INSTANCE_ID_1" "$INSTANCE_ID_2" \
-            --parameters "$COMMANDS" \
             --comment "Guidra deployment ${IMAGE_TAG}" \
+            --parameters "$COMMANDS" \
             --query "Command.CommandId" \
             --output text)
 
           echo "SSM Command ID: $COMMAND_ID"
 
-          # Wait for each instance to complete the deployment.
-          for INSTANCE_ID in "$INSTANCE_ID_1" "$INSTANCE_ID_2"; do
+          # Wait for this instance's deployment.
+          STATUS="Pending"
 
-            echo "Waiting for instance: $INSTANCE_ID"
+          for ATTEMPT in $(seq 1 60); do
+            sleep 10
 
-            STATUS="Pending"
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || echo "Pending")
 
-            for ATTEMPT in $(seq 1 60); do
+            echo "Attempt $ATTEMPT: $STATUS"
 
-              sleep 10
+            case "$STATUS" in
+              Success)
+                break
+                ;;
+              Failed|Cancelled|TimedOut)
+                echo "::error::Deployment failed on $INSTANCE_ID"
 
-              STATUS=$(aws ssm get-command-invocation \
-                --command-id "$COMMAND_ID" \
-                --instance-id "$INSTANCE_ID" \
-                --query "Status" \
-                --output text 2>/dev/null || echo "Pending")
+                aws ssm get-command-invocation \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$INSTANCE_ID" \
+                  --query "{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}" \
+                  --output json || true
 
-              echo "Attempt $ATTEMPT: $STATUS"
+                exit 1
+                ;;
+            esac
+          done
 
-              case "$STATUS" in
-                Success)
-                  break
-                  ;;
-                Failed|Cancelled|TimedOut)
-                  echo "::error::Deployment failed on $INSTANCE_ID"
-
-                  aws ssm get-command-invocation \
-                    --command-id "$COMMAND_ID" \
-                    --instance-id "$INSTANCE_ID" \
-                    --query "{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}" \
-                    --output json || true
-
-                  exit 1
-                  ;;
-              esac
-
-            done
-
-            if [[ "$STATUS" != "Success" ]]; then
-              echo "::error::Deployment timed out on $INSTANCE_ID"
-
-              aws ssm get-command-invocation \
-                --command-id "$COMMAND_ID" \
-                --instance-id "$INSTANCE_ID" \
-                --query "{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}" \
-                --output json || true
-
-              exit 1
-            fi
-
-            echo "Deployment successful on $INSTANCE_ID"
+          if [[ "$STATUS" != "Success" ]]; then
+            echo "::error::Deployment timed out on $INSTANCE_ID"
 
             aws ssm get-command-invocation \
               --command-id "$COMMAND_ID" \
               --instance-id "$INSTANCE_ID" \
-              --query "StandardOutputContent" \
-              --output text
+              --query "{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}" \
+              --output json || true
 
-          done
+            exit 1
+          fi
 
-          echo "Both production instances deployed successfully."
+          echo "Deployment succeeded on $INSTANCE_ID"
+
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" \
+            --output text
