@@ -198,34 +198,42 @@ jobs:
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      REGISTRY_URI: ${{ needs['publish-AWS-ECR'].outputs.ecr_registry }}
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
-      - name: Validate deployment configuration
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${REGISTRY_URI:-}" ]]; then
-            echo "::error::ECR registry output is empty."
-            exit 1
-          fi
-
-          if [[ -z "${AWS_REGION:-}" ]]; then
-            echo "::error::AWS region is missing."
-            exit 1
-          fi
-
-          echo "Registry: $REGISTRY_URI"
-          echo "Image tag: $IMAGE_TAG"
-          echo "Target instance: ${{ matrix.instance_id }}"
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Resolve ECR registry
+        run: |
+          set -euo pipefail
+
+          ACCOUNT_ID=$(aws sts get-caller-identity \
+            --query Account \
+            --output text)
+
+          REGISTRY_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+          echo "REGISTRY_URI=${REGISTRY_URI}" >> "$GITHUB_ENV"
+
+          echo "Resolved ECR registry: ${REGISTRY_URI}"
+
+      - name: Validate deployment configuration
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${REGISTRY_URI:-}" ]]; then
+            echo "::error::Unable to resolve ECR registry."
+            exit 1
+          fi
+
+          echo "Registry: $REGISTRY_URI"
+          echo "Image tag: $IMAGE_TAG"
+          echo "Target instance: ${{ matrix.instance_id }}"
 
       - name: Execute Production Deploy via AWS SSM
         env:
