@@ -52,6 +52,11 @@ jobs:
   # 2. TEST
   # -----------------------------------------------
   test:
+    env:
+          PORT: ${{ secrets.PORT }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
     name: Backend Tests
     runs-on: ubuntu-latest
     needs:
