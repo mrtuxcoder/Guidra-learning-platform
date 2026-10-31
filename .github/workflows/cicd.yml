@@ -241,79 +241,44 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "Checking SSM availability for instance $INSTANCE_ID..."
+          ONLINE_STATUS=$(aws ssm describe-instance-information \
+            --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+            --query "InstanceInformationList[0].PingStatus" \
+            --output text 2>/dev/null || echo "NotFound")
+
+          if [[ "$ONLINE_STATUS" != "Online" ]]; then
+            echo "::warning::Instance $INSTANCE_ID is reporting status '${ONLINE_STATUS}' in AWS SSM."
+            echo "::warning::Ensure the EC2 instance is in 'Running' state and has the AmazonSSMManagedInstanceCore IAM role attached."
+          fi
+
           BACKEND_IMAGE="${REGISTRY_URI}/mrtuxcoder/guidra-backend:${IMAGE_TAG}"
           FRONTEND_IMAGE="${REGISTRY_URI}/mrtuxcoder/guidra-frontend:${IMAGE_TAG}"
 
-          REMOTE_SCRIPT=$(cat <<EOF
-          set -euo pipefail
-
-          cd /opt/guidra
-
-          echo "Downloading Compose files for release ${IMAGE_TAG}"
-
-          curl -fsSL \
-            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${IMAGE_TAG}/docker-compose.yml" \
-            -o docker-compose.yml
-
-          curl -fsSL \
-            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${IMAGE_TAG}/docker-compose.prod.yml" \
-            -o docker-compose.prod.yml
-
-          echo "Logging in to ECR"
-
-          aws ecr get-login-password --region ${AWS_REGION} | \
-            sudo docker login \
-              --username AWS \
-              --password-stdin ${REGISTRY_URI}
-
-          echo "Updating production image references"
-
-          sudo sed -i \
-            '/^BACKEND_IMAGE=/d; /^FRONTEND_IMAGE=/d' \
-            .env.production
-
-          printf 'BACKEND_IMAGE=%s\n' '${BACKEND_IMAGE}' | \
-            sudo tee -a .env.production > /dev/null
-
-          printf 'FRONTEND_IMAGE=%s\n' '${FRONTEND_IMAGE}' | \
-            sudo tee -a .env.production > /dev/null
-
-          echo "Pulling release images"
-
-          sudo docker compose \
-            --env-file .env.production \
-            -f docker-compose.yml \
-            -f docker-compose.prod.yml \
-            pull
-
-          echo "Starting application"
-
-          sudo docker compose \
-            --env-file .env.production \
-            -f docker-compose.yml \
-            -f docker-compose.prod.yml \
-            up -d --remove-orphans
-
-          echo "Verifying application containers"
-
-          BACKEND_RUNNING=$(sudo docker inspect \
-            --format='{{.State.Running}}' guidra-prod-server)
-
-          FRONTEND_RUNNING=$(sudo docker inspect \
-            --format='{{.State.Running}}' guidra-prod-client)
-
-          if [[ "\$BACKEND_RUNNING" != "true" || "\$FRONTEND_RUNNING" != "true" ]]; then
-            echo "Deployment verification failed."
-            exit 1
-          fi
-
-          echo "Guidra deployment successful."
-          EOF
-          )
-
-          # Encode the multiline remote script as valid JSON.
-          COMMANDS=$(jq -n --arg script "$REMOTE_SCRIPT" \
-            '{commands: [$script]}')
+          COMMANDS=$(jq -n \
+            --arg region "$AWS_REGION" \
+            --arg registry "$REGISTRY_URI" \
+            --arg backend "$BACKEND_IMAGE" \
+            --arg frontend "$FRONTEND_IMAGE" \
+            --arg commit "$IMAGE_TAG" \
+            --arg repo "$GITHUB_REPOSITORY" \
+            '{
+              commands: [
+                "set -e",
+                "cd /opt/guidra",
+                ("curl -f -sSL https://raw.githubusercontent.com/" + $repo + "/" + $commit + "/docker-compose.yml -o docker-compose.yml"),
+                ("curl -f -sSL https://raw.githubusercontent.com/" + $repo + "/" + $commit + "/docker-compose.prod.yml -o docker-compose.prod.yml"),
+                ("aws ecr get-login-password --region " + $region + " | sudo docker login --username AWS --password-stdin " + $registry),
+                ("sudo sed -i \"/^BACKEND_IMAGE=/d; /^FRONTEND_IMAGE=/d\" .env.production 2>/dev/null || true"),
+                ("printf \"BACKEND_IMAGE=%s\\n\" \"" + $backend + "\" | sudo tee -a .env.production > /dev/null"),
+                ("printf \"FRONTEND_IMAGE=%s\\n\" \"" + $frontend + "\" | sudo tee -a .env.production > /dev/null"),
+                "sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull",
+                "sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans",
+                "sudo docker inspect -f \"{{.State.Running}}\" guidra-prod-server | grep -qx true",
+                "sudo docker inspect -f \"{{.State.Running}}\" guidra-prod-client | grep -qx true",
+                "sudo docker system prune -af"
+              ]
+            }')
 
           echo "Sending SSM command to $INSTANCE_ID"
 
