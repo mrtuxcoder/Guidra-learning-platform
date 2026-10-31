@@ -1,9 +1,17 @@
-name: Guidra CI
+
+name: Guidra CI/CD
 
 on:
   push:
     branches:
       - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guidra-production-deployment
+  cancel-in-progress: false
 
 jobs:
   lint:
@@ -11,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -40,34 +48,40 @@ jobs:
         run: npm run lint
 
   test:
-    name: Test Backend via Docker Compose
+    name: Test Backend
     runs-on: ubuntu-latest
     needs: lint
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run tests inside Docker Compose
+      - name: Run backend tests
         env:
           PORT: ${{ secrets.PORT }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
         run: |
-          docker compose -f docker-compose.test.yml up --build --exit-code-from server-test
+          docker compose -f docker-compose.test.yml up \
+            --build \
+            --exit-code-from server-test
 
-  publish-AWS-ECR:
-    name: Build and publish Docker images
-    needs: test
+      - name: Clean up test containers
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
+
+  publish-ecr:
+    name: Build and Publish Images to AWS ECR
     runs-on: ubuntu-latest
+    needs: test
 
     permissions:
       contents: read
       id-token: write
 
     outputs:
-      ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+      registry: ${{ steps.login-ecr.outputs.registry }}
 
     steps:
       - name: Checkout repository
@@ -102,20 +116,21 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/mrtuxcoder/guidra-frontend:${{ github.sha }}
 
-  publish-GHCR:
-    name: Build and publish Docker images to GitHub Container Registry
-    needs: test
+  publish-ghcr:
+    name: Build and Publish Images to GHCR
     runs-on: ubuntu-latest
+    needs: test
+
     permissions:
       contents: read
       packages: write
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -124,7 +139,7 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push backend image to GHCR
+      - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
           context: ./server
@@ -133,7 +148,7 @@ jobs:
             ghcr.io/mrtuxcoder/guidra-backend:${{ github.sha }}
             ghcr.io/mrtuxcoder/guidra-backend:latest
 
-      - name: Build and push frontend image to GHCR
+      - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
           context: ./client
@@ -142,40 +157,117 @@ jobs:
             ghcr.io/mrtuxcoder/guidra-frontend:${{ github.sha }}
             ghcr.io/mrtuxcoder/guidra-frontend:latest
 
-  deploy-to-ec2:
-    name: Deploy via Direct AWS SSM Run Command
-    needs: publish-AWS-ECR
+  deploy:
+    name: Deploy Release to EC2
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        instance_id:
-          - ${{ vars.EC2_INSTANCE_ID_1 }}
-          - ${{ vars.EC2_INSTANCE_ID_2 }}
+    needs: publish-ecr
 
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Execute Production Deploy via AWS SSM API
+      - name: Validate ECR images
+        env:
+          REGISTRY: ${{ needs.publish-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          REGISTRY_URI="${{ needs.publish-AWS-ECR.outputs.ecr_registry }}"
-          AWS_REGION="${{ secrets.AWS_REGION }}"
+          aws ecr describe-images \
+            --repository-name mrtuxcoder/guidra-backend \
+            --image-ids imageTag="$IMAGE_TAG"
 
-          aws ssm send-command \
-            --instance-ids "${{ matrix.instance_id }}" \
+          aws ecr describe-images \
+            --repository-name mrtuxcoder/guidra-frontend \
+            --image-ids imageTag="$IMAGE_TAG"
+
+      - name: Deploy to both EC2 instances through SSM
+        env:
+          REGISTRY: ${{ needs.publish-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          INSTANCE_1: ${{ vars.EC2_INSTANCE_ID_1 }}
+          INSTANCE_2: ${{ vars.EC2_INSTANCE_ID_2 }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$INSTANCE_1" || -z "$INSTANCE_2" ]]; then
+            echo "EC2 instance IDs are missing."
+            exit 1
+          fi
+
+          BACKEND_IMAGE="$REGISTRY/mrtuxcoder/guidra-backend:$IMAGE_TAG"
+          FRONTEND_IMAGE="$REGISTRY/mrtuxcoder/guidra-frontend:$IMAGE_TAG"
+
+          COMMANDS=$(jq -n \
+            --arg region "$AWS_REGION" \
+            --arg registry "$REGISTRY" \
+            --arg backend "$BACKEND_IMAGE" \
+            --arg frontend "$FRONTEND_IMAGE" \
+            --arg commit "$IMAGE_TAG" \
+            '{
+              commands: [
+                "set -e",
+                "cd /opt/guidra",
+
+                ("curl -f -sSL https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/" + $commit + "/docker-compose.yml -o docker-compose.yml"),
+                ("curl -f -sSL https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/" + $commit + "/docker-compose.prod.yml -o docker-compose.prod.yml"),
+
+                ("aws ecr get-login-password --region " + $region + " | docker login --username AWS --password-stdin " + $registry),
+
+                ("grep -q \"^BACKEND_IMAGE=\" .env.production && sed -i \"s|^BACKEND_IMAGE=.*|BACKEND_IMAGE=" + $backend + "|\" .env.production || echo \"BACKEND_IMAGE=" + $backend + "\" >> .env.production"),
+
+                ("grep -q \"^FRONTEND_IMAGE=\" .env.production && sed -i \"s|^FRONTEND_IMAGE=.*|FRONTEND_IMAGE=" + $frontend + "|\" .env.production || echo \"FRONTEND_IMAGE=" + $frontend + "\" >> .env.production"),
+
+                "docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull",
+
+                "docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans",
+
+                "docker inspect -f \"{{.State.Running}}\" guidra-prod-server | grep -qx true",
+                "docker inspect -f \"{{.State.Running}}\" guidra-prod-client | grep -qx true",
+
+                "echo 'Deployment completed. Both containers are running.'"
+              ]
+            }')
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_1" "$INSTANCE_2" \
             --document-name "AWS-RunShellScript" \
-            --comment "Deploying Guidra Production Stack via ECR" \
-            --parameters commands="[
-              \"cd /opt/guidra\",
-              \"curl -f -sSL https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/refs/heads/main/docker-compose.yml -o docker-compose.yml || echo 'Download failed, keeping old file'\",
-              \"curl -f -sSL https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/refs/heads/main/docker-compose.prod.yml -o docker-compose.prod.yml || echo 'Download failed, keeping old file'\",
-              \"aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $REGISTRY_URI\",
-              \"sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull\",
-              \"sudo docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d\",
-              \"sudo docker system prune -af\"
-            ]" \
-            --query "Command.CommandId"
+            --comment "Deploy Guidra release $IMAGE_TAG" \
+            --parameters "$COMMANDS" \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "SSM Command ID: $COMMAND_ID"
+
+          for INSTANCE_ID in "$INSTANCE_1" "$INSTANCE_2"; do
+            echo "Waiting for $INSTANCE_ID..."
+
+            while true; do
+              STATUS=$(aws ssm get-command-invocation \
+                --command-id "$COMMAND_ID" \
+                --instance-id "$INSTANCE_ID" \
+                --query "Status" \
+                --output text 2>/dev/null || echo "Pending")
+
+              case "$STATUS" in
+                Success)
+                  echo "$INSTANCE_ID deployment successful."
+                  break
+                  ;;
+                Failed|Cancelled|TimedOut|Undeliverable|Terminated)
+                  echo "$INSTANCE_ID deployment failed: $STATUS"
+                  aws ssm get-command-invocation \
+                    --command-id "$COMMAND_ID" \
+                    --instance-id "$INSTANCE_ID"
+                  exit 1
+                  ;;
+                *)
+                  echo "Current status: $STATUS"
+                  sleep 5
+                  ;;
+              esac
+            done
+          done
