@@ -128,7 +128,7 @@ Guidra tracks and surfaces:
 - Google-authenticated users can add or update an email-login password from **Settings**
 - Password setup is presented inside Settings instead of a blocking popup
 - Protected API routes require authentication
-
+ 
 ### 🔹 Explore + Custom Topic Pipeline
 - Curated topic library for fast onboarding
 - Custom topic validation and generated subtopic roadmap
