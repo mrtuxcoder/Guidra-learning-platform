@@ -34,7 +34,6 @@ export const updateLearningPreferences = async (preferencesData) => {
 // Content routes
 export const teachSubtopic = async (data) => {
   const response = await API.post("/api/v1/content/teach", data);
-  console.log(response)
   return response;
 };
 
@@ -50,7 +49,6 @@ export const updateSubtopicProgress = async (data) => {
 
 export const generateTeachingContent = async (data) => {
   const response = await API.post("/api/v1/content/teach", data);
-  console.log(response)
   return response;
 };
 

@@ -321,9 +321,6 @@ const LearningContent = ({
     }
 
     try {
-      console.log(
-        `[UI] Toggle version: ${componentName} -> v${versionNumber} (${selectedTopic} / ${selectedSubtopic.name})`
-      );
       setSelectedVersions((prev) => ({
         ...prev,
         [componentName]: versionNumber,

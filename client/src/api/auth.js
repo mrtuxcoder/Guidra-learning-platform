@@ -164,16 +164,10 @@ export const debugAuth = async () => {
       validateStatus: (status) => status < 500,
     });
 
-    if (response.status !== 200) {
-      console.log("Not authenticated");
-    } else {
-      console.log("Authenticated:", response.data.user);
-    }
+    return response.status === 200;
   } catch (error) {
-    console.log("🔧 Error Details:", {
-      status: error.response?.status,
-      data: error.response?.data,
-    });
+    console.error("Authentication check failed:", error);
+    return false;
   }
 };
 

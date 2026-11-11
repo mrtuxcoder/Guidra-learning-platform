@@ -78,6 +78,15 @@ const authLimiter = rateLimit({
 const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 60,
+  skip: (req) =>
+    ![
+      "POST /learning/topics",
+      "POST /content/teach",
+      "POST /content/regenerate",
+      "POST /content/component",
+      "POST /content/component/regenerate",
+      "POST /progress/quizzes/analyze",
+    ].includes(`${req.method} ${req.path}`),
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "Too many AI requests. Try again later." },
@@ -137,10 +146,11 @@ if (process.env.NODE_ENV !== "production") {
 
 // API v1 Routes
 app.use("/api/v1/auth", authLimiter, authRoutes);
+app.use("/api/v1", aiLimiter);
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/learning", aiLimiter, learningRoutes);
+app.use("/api/v1/learning", learningRoutes);
 app.use("/api/v1/progress", progressRoutes);
-app.use("/api/v1/content", aiLimiter, contentRoutes);
+app.use("/api/v1/content", contentRoutes);
 
 app.get("/", (req, res) => {
   res.json({ status: "OK", message: "Guidra API is running!" });
