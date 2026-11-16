@@ -259,6 +259,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [ -z "${REGISTRY_URI:-}" ]; then
+            AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+            REGISTRY_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          fi
+
           BACKEND_IMAGE="${REGISTRY_URI}/mrtuxcoder/guidra-backend:${IMAGE_TAG}"
           FRONTEND_IMAGE="${REGISTRY_URI}/mrtuxcoder/guidra-frontend:${IMAGE_TAG}"
 
