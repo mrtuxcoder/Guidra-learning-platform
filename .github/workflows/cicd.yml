@@ -145,7 +145,7 @@ jobs:
         working-directory: terraform
         run: |
           set -e
-          if terraform output -json > /dev/null 2>&1; then
+          if [ -f terraform.tfstate ] && terraform output -json > /dev/null 2>&1; then
             INSTANCES=$(terraform output -json instance_ids 2>/dev/null | jq -c . || echo '[]')
             ALB_DNS=$(terraform output -raw load_balancer_dns_name 2>/dev/null || echo '')
             ALB_URL=$(terraform output -raw load_balancer_url 2>/dev/null || echo '')
