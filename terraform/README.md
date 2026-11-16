@@ -1,0 +1,1 @@
+<!-- Document the project purpose, AWS architecture, prerequisites, and Terraform workflow here. -->

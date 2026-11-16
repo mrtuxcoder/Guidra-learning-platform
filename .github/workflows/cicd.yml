@@ -1,5 +1,5 @@
 
-name: Guidra CI
+name: Guidra CI/CD
 
 on:
   push:

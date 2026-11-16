@@ -1,0 +1,97 @@
+#!/bin/bash
+set -euo pipefail
+
+# Log all user-data output to /var/log/user-data.log
+exec > >(tee -a /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+echo "========================================="
+echo " Starting Guidra EC2 Instance Provisioning "
+echo "========================================="
+
+# 1. Update OS packages and install essentials
+echo "[1/6] Updating system and installing packages..."
+dnf update -y
+dnf install -y docker make git jq curl
+
+# 2. Configure and start system services
+echo "[2/6] Enabling and starting Docker & SSM Agent..."
+systemctl enable --now docker
+systemctl enable --now amazon-ssm-agent
+usermod -aG docker ec2-user
+
+# 3. Install Docker Compose plugin and standalone binary
+echo "[3/6] Installing Docker Compose..."
+DOCKER_CLI_PLUGINS_DIR="/usr/local/lib/docker/cli-plugins"
+mkdir -p "$DOCKER_CLI_PLUGINS_DIR"
+ARCH="$(uname -m)"
+curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$ARCH" -o "$DOCKER_CLI_PLUGINS_DIR/docker-compose"
+chmod +x "$DOCKER_CLI_PLUGINS_DIR/docker-compose"
+ln -sf "$DOCKER_CLI_PLUGINS_DIR/docker-compose" /usr/local/bin/docker-compose
+
+# 4. Set up application directory and permissions
+echo "[4/6] Setting up /opt/guidra folder and permissions..."
+mkdir -p /opt/guidra
+chown -R ec2-user:ec2-user /opt/guidra
+chmod 755 /opt/guidra
+
+cat >/etc/guidra-application-port <<EOF
+${application_port}
+EOF
+
+# 5. Fetch application secrets from AWS Secrets Manager
+%{ if secret_name != null ~}
+echo "[5/6] Generating secrets sync script..."
+cat >/opt/guidra/sync-secrets.sh <<'EOF'
+#!/bin/bash
+set -euo pipefail
+echo "Fetching secrets from AWS Secrets Manager (${secret_name})..."
+aws secretsmanager get-secret-value \
+  --secret-id "${secret_name}" \
+  --region "${aws_region}" \
+  --query SecretString \
+  --output text > /opt/guidra/.env.production
+chmod 600 /opt/guidra/.env.production
+chown ec2-user:ec2-user /opt/guidra/.env.production
+echo "Successfully synchronized /opt/guidra/.env.production from Secrets Manager."
+EOF
+
+chmod +x /opt/guidra/sync-secrets.sh
+chown ec2-user:ec2-user /opt/guidra/sync-secrets.sh
+
+echo "Executing initial secrets sync..."
+/opt/guidra/sync-secrets.sh || echo "Warning: initial secret sync deferred (NAT/network may be initializing)."
+%{ else ~}
+echo "[5/6] Skipping secrets sync (no secret_name configured)..."
+%{ endif ~}
+
+# 6. Fetch docker compose definitions and run application
+echo "[6/6] Setting up Docker Compose and starting containers..."
+cd /opt/guidra
+
+# Download compose specifications if not present
+if [ ! -f /opt/guidra/docker-compose.yml ]; then
+  curl -fsSL "https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/main/docker-compose.yml" -o /opt/guidra/docker-compose.yml || true
+fi
+
+if [ ! -f /opt/guidra/docker-compose.prod.yml ]; then
+  curl -fsSL "https://raw.githubusercontent.com/mrtuxcoder/Guidra-learning-platform/main/docker-compose.prod.yml" -o /opt/guidra/docker-compose.prod.yml || true
+fi
+
+chown -R ec2-user:ec2-user /opt/guidra
+
+# If secrets and images exist, log into ECR and run the containers
+if [ -f /opt/guidra/.env.production ] && grep -q "BACKEND_IMAGE=" /opt/guidra/.env.production; then
+  REGISTRY_HOST=$(grep "^BACKEND_IMAGE=" /opt/guidra/.env.production | head -n 1 | cut -d '=' -f 2 | cut -d '/' -f 1)
+  if [ -n "$REGISTRY_HOST" ]; then
+    echo "Logging into ECR: $REGISTRY_HOST"
+    aws ecr get-login-password --region "${aws_region}" | docker login --username AWS --password-stdin "$REGISTRY_HOST" || true
+  fi
+
+  echo "Starting Guidra Docker containers..."
+  docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml pull || true
+  docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.prod.yml up -d || true
+fi
+
+echo "========================================="
+echo " Guidra EC2 Setup Completed Successfully "
+echo "========================================="
