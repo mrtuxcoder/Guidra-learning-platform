@@ -9,3 +9,6 @@
 terraform.tfvars
 crash.log
 crash.*.log
+
+# Documentation (stored locally in Documents)
+**/docs/
